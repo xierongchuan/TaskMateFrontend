@@ -22,13 +22,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'login',
-        'full_name',
-        'telegram_id',
-        'phone',
-        'role',
-        'company_id',
-        'dealership_id',
     ];
 
     /**
@@ -63,62 +56,5 @@ class User extends Authenticatable
             ->explode(' ')
             ->map(fn (string $name) => Str::of($name)->substr(0, 1))
             ->implode('');
-    }
-
-    /**
-     * Get the company that owns the user.
-     */
-    public function company(): \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(Company::class);
-    }
-
-    /**
-     * Get the dealership that owns the user.
-     */
-    public function dealership(): \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(Dealership::class);
-    }
-
-    /**
-     * Get the tasks created by the user.
-     */
-    public function createdTasks(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(Task::class, 'creator_id');
-    }
-
-    /**
-     * Get the tasks assigned to the user.
-     */
-    public function assignedTasks(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
-    {
-        return $this->belongsToMany(Task::class, 'task_assignments')
-            ->withTimestamps();
-    }
-
-    /**
-     * Get the task responses for the user.
-     */
-    public function taskResponses(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(TaskResponse::class);
-    }
-
-    /**
-     * Get the shifts for the user.
-     */
-    public function shifts(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(Shift::class);
-    }
-
-    /**
-     * Get the links created by the user.
-     */
-    public function createdLinks(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(Link::class, 'creator_id');
     }
 }
