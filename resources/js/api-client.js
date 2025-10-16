@@ -200,6 +200,13 @@ class ApiClient {
         return this.put(`/dealerships/${id}`, data);
     }
 
+    /**
+     * Delete dealership
+     */
+    async deleteDealership(id) {
+        return this.delete(`/dealerships/${id}`);
+    }
+
     // ============================================
     // Shifts Endpoints
     // ============================================
