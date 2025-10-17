@@ -20,12 +20,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('tasks/create', function () {
         return view('tasks.create');
     })->name('tasks.create');
-    Route::get('tasks/{id}', function ($id) {
-        return view('tasks.show', ['id' => $id]);
-    })->name('tasks.show');
     Route::get('tasks/{id}/edit', function ($id) {
         return view('tasks.edit', ['id' => $id]);
     })->name('tasks.edit');
+    Route::get('tasks/{id}', function ($id) {
+        return view('tasks.show', ['id' => $id]);
+    })->name('tasks.show');
 
     // Dealerships
     Route::get('dealerships', function () {
@@ -34,12 +34,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dealerships/create', function () {
         return view('dealerships.create');
     })->name('dealerships.create');
-    Route::get('dealerships/{id}', function ($id) {
-        return view('dealerships.show', ['id' => $id]);
-    })->name('dealerships.show');
     Route::get('dealerships/{id}/edit', function ($id) {
         return view('dealerships.edit', ['id' => $id]);
     })->name('dealerships.edit');
+    Route::get('dealerships/{id}', function ($id) {
+        return view('dealerships.show', ['id' => $id]);
+    })->name('dealerships.show');
 
     // Users Management
     Route::get('users', function () {
@@ -48,12 +48,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('users/create', function () {
         return view('users.create');
     })->name('users.create');
-    Route::get('users/{id}', function ($id) {
-        return view('users.show', ['id' => $id]);
-    })->name('users.show');
     Route::get('users/{id}/edit', function ($id) {
         return view('users.edit', ['id' => $id]);
     })->name('users.edit');
+    Route::get('users/{id}', function ($id) {
+        return view('users.show', ['id' => $id]);
+    })->name('users.show');
 
     // Links
     Route::get('links', function () {

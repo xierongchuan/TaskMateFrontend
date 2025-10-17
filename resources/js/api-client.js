@@ -168,6 +168,15 @@ class ApiClient {
         return this.get(`/users/${id}/status`);
     }
 
+    /**
+     * Update user
+     * Note: This endpoint may not be available in the Telegram Bot API
+     * as users are managed through the Telegram bot registration process
+     */
+    async updateUser(id, data) {
+        return this.put(`/users/${id}`, data);
+    }
+
     // ============================================
     // Dealerships Endpoints
     // ============================================

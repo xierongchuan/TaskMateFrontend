@@ -234,18 +234,12 @@
                             dealership_id: this.formData.dealership_id || null,
                         };
 
-                        // Note: updateUser API endpoint needs to be implemented
-                        // For now, we'll show a placeholder message
-                        // await window.apiClient.updateUser(this.userId, submitData);
+                        await window.apiClient.updateUser(this.userId, submitData);
 
-                        // Temporary: Show message that API endpoint is not yet available
-                        this.errorMessage = '{{ __('User update API endpoint is not yet implemented. This feature will be available once the API is ready.') }}';
-
-                        // Once API is ready, uncomment this:
-                        // this.successMessage = '{{ __('Employee updated successfully!') }}';
-                        // setTimeout(() => {
-                        //     window.location.href = `/users/${this.userId}`;
-                        // }, 1000);
+                        this.successMessage = '{{ __('Employee updated successfully!') }}';
+                        setTimeout(() => {
+                            window.location.href = `/users/${this.userId}`;
+                        }, 1000);
                     } catch (error) {
                         console.error('Error updating user:', error);
                         this.errorMessage = error.message || '{{ __('Failed to update employee. Please try again.') }}';
