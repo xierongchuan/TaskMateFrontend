@@ -25,7 +25,7 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {{ __('Phone') }}
                     </label>
-                    <input type="text" x-model="filters.phone" @input.debounce.300ms="loadUsers"
+                    <input type="text" x-model="filters.phone_number" @input.debounce.300ms="loadUsers"
                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
                         placeholder="{{ __('Filter by phone...') }}">
                 </div>
@@ -102,7 +102,7 @@
                                     <span x-text="user.login"></span>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                                    <span x-text="user.phone || '-'"></span>
+                                    <span x-text="(user.phone_number && user.phone_number.trim()) ? user.phone_number : '-'"></span>
                                 </td>
                                 <td class="px-6 py-4">
                                     <span :class="getRoleClass(user.role)" class="px-2 py-1 text-xs rounded-full font-medium" x-text="getRoleText(user.role)"></span>
@@ -169,7 +169,7 @@
                 error: null,
                 filters: {
                     search: '',
-                    phone: '',
+                    phone_number: '',
                     role: '',
                     dealership_id: '',
                 },
@@ -200,7 +200,9 @@
                         const params = {
                             page: this.pagination.current_page,
                             per_page: this.pagination.per_page,
-                            ...this.filters,
+                            phone_number: this.filters.phone_number, // Map phone_number filter
+                            role: this.filters.role,
+                            dealership_id: this.filters.dealership_id,
                         };
                         // Remove empty filters
                         Object.keys(params).forEach(key => {
