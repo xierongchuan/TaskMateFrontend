@@ -12,13 +12,13 @@
 
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
         <!-- Loading State -->
-        <div x-show="loading" class="text-center py-12">
+        <div x-show="loading === true" class="text-center py-12">
             <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-gray-100"></div>
             <p class="mt-4 text-gray-600 dark:text-gray-400">{{ __('Loading employee data...') }}</p>
         </div>
 
         <!-- Error State -->
-        <div x-show="!loading && error" class="text-center py-12 text-red-600 dark:text-red-400 p-6">
+        <div x-show="loading === false && error" class="text-center py-12 text-red-600 dark:text-red-400 p-6">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3" fill="none"
                 viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -31,7 +31,7 @@
         </div>
 
         <!-- Edit Form -->
-        <form x-show="!loading && !error" @submit.prevent="submitForm" class="p-6 space-y-6">
+        <form x-show="loading === false && !error" @submit.prevent="submitForm" class="p-6 space-y-6">
             <!-- Success Message -->
             <div x-show="successMessage" x-transition class="bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-200 px-4 py-3 rounded relative" role="alert">
                 <span x-text="successMessage"></span>
@@ -85,7 +85,7 @@
                 <input type="text" id="full_name" x-model="formData.full_name" required
                     class="w-full px-4 py-2 rounded-lg text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="{{ __('Enter full name') }}">
-                <p x-show="errors.full_name" class="mt-1 text-sm text-red-600 dark:text-red-400" x-text="errors.full_name"></p>
+                <p x-show="errors && errors.full_name" class="mt-1 text-sm text-red-600 dark:text-red-400" x-text="errors.full_name"></p>
             </div>
 
             <div>
@@ -95,7 +95,7 @@
                 <input type="tel" id="phone" x-model="formData.phone"
                     class="w-full px-4 py-2 rounded-lg text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="{{ __('+1234567890') }}">
-                <p x-show="errors.phone" class="mt-1 text-sm text-red-600 dark:text-red-400" x-text="errors.phone"></p>
+                <p x-show="errors && errors.phone" class="mt-1 text-sm text-red-600 dark:text-red-400" x-text="errors.phone"></p>
             </div>
 
             <div>
@@ -110,7 +110,7 @@
                     <option value="observer">{{ __('Observer') }}</option>
                     <option value="owner">{{ __('Owner') }}</option>
                 </select>
-                <p x-show="errors.role" class="mt-1 text-sm text-red-600 dark:text-red-400" x-text="errors.role"></p>
+                <p x-show="errors && errors.role" class="mt-1 text-sm text-red-600 dark:text-red-400" x-text="errors.role"></p>
             </div>
 
             <div>
@@ -124,7 +124,7 @@
                         <option :value="dealership.id" x-text="dealership.name"></option>
                     </template>
                 </select>
-                <p x-show="errors.dealership_id" class="mt-1 text-sm text-red-600 dark:text-red-400" x-text="errors.dealership_id"></p>
+                <p x-show="errors && errors.dealership_id" class="mt-1 text-sm text-red-600 dark:text-red-400" x-text="errors.dealership_id"></p>
             </div>
 
             <!-- Form Actions -->
@@ -211,7 +211,7 @@
                             login: data.login || '',
                             full_name: data.full_name || '',
                             telegram_id: data.telegram_id || '',
-                            phone: data.phone || '',
+                            phone: data.phone_number || '', // Map phone_number to phone
                             role: data.role || '',
                             dealership_id: data.dealership_id || '',
                         };
@@ -257,7 +257,7 @@
                         // Prepare data for submission (only editable fields)
                         const submitData = {
                             full_name: this.formData.full_name,
-                            phone: this.formData.phone,
+                            phone_number: this.formData.phone, // Map phone to phone_number
                             role: this.formData.role,
                             dealership_id: this.formData.dealership_id || null,
                         };
