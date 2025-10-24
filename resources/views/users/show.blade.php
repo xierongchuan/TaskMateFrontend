@@ -206,20 +206,42 @@
                     this.loading = true;
                     this.error = null;
                     try {
+                        // Check if apiClient is ready
+                        if (!window.apiClientReady || !window.apiClient || !window.apiClient.getUser) {
+                            console.error('API client not ready, retrying...');
+                            setTimeout(() => this.loadUser(), 100);
+                            return;
+                        }
+
                         this.user = await window.apiClient.getUser(this.userId);
                     } catch (error) {
                         console.error('Error loading user:', error);
                         this.error = '{{ __('Failed to load employee data. Please try again.') }}';
+                        // Retry once if it's a network error
+                        if (error.message && error.message.includes('API client')) {
+                            setTimeout(() => this.loadUser(), 1000);
+                        }
                     } finally {
                         this.loading = false;
                     }
                 },
                 async loadUserStatus() {
                     try {
+                        // Check if apiClient is ready
+                        if (!window.apiClientReady || !window.apiClient || !window.apiClient.getUserStatus) {
+                            console.error('API client not ready for status, retrying...');
+                            setTimeout(() => this.loadUserStatus(), 100);
+                            return;
+                        }
+
                         this.status = await window.apiClient.getUserStatus(this.userId);
                     } catch (error) {
                         console.error('Error loading user status:', error);
                         // Don't show error for status, it's optional
+                        // Retry once if it's a network error
+                        if (error.message && error.message.includes('API client')) {
+                            setTimeout(() => this.loadUserStatus(), 1000);
+                        }
                     }
                 },
                 getInitials(name) {

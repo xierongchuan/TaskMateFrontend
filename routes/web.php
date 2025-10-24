@@ -8,6 +8,13 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    // CSRF Token refresh endpoint
+    Route::get('/csrf-token', function () {
+        return response()->json([
+            'csrf_token' => csrf_token()
+        ]);
+    });
+
     // Dashboard
     Route::get('dashboard', function () {
         return view('dashboard');
@@ -70,6 +77,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('settings/system', function () {
         return view('settings.system');
     })->name('settings.system.edit');
+    Route::get('settings/bot-api', [Settings\BotApiController::class, 'edit'])->name('settings.bot-api.edit');
+
+    // API Routes for Settings
+    Route::prefix('api/settings')->group(function () {
+        Route::get('/', [Settings\BotApiController::class, 'index']);
+        Route::get('/{key}', [Settings\BotApiController::class, 'show']);
+        Route::put('/{key}', [Settings\BotApiController::class, 'update']);
+        Route::delete('/{key}', [Settings\BotApiController::class, 'destroy']);
+        Route::post('/bulk', [Settings\BotApiController::class, 'bulkUpdate']);
+    });
+
+    // API Proxy Routes
+    Route::prefix('api/proxy')->group(function () {
+        Route::any('{endpoint}', [App\Http\Controllers\ApiProxyController::class, 'proxy'])
+            ->where('endpoint', '.*');
+        Route::post('upload/{endpoint}', [App\Http\Controllers\ApiProxyController::class, 'proxyUpload'])
+            ->where('endpoint', '.*');
+    });
 });
 
 require __DIR__.'/auth.php';

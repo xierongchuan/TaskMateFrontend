@@ -177,16 +177,35 @@
                 },
                 async loadDealerships() {
                     try {
+                        // Check if apiClient is ready
+                        if (!window.apiClientReady || !window.apiClient || !window.apiClient.getDealerships) {
+                            console.error('API client not ready, retrying...');
+                            // Retry after a short delay
+                            setTimeout(() => this.loadDealerships(), 100);
+                            return;
+                        }
+
                         const data = await window.apiClient.getDealerships({ per_page: 100, is_active: true });
                         this.dealerships = data.data || [];
                     } catch (error) {
                         console.error('Error loading dealerships:', error);
+                        // Retry once if it's a network error
+                        if (error.message && error.message.includes('API client')) {
+                            setTimeout(() => this.loadDealerships(), 1000);
+                        }
                     }
                 },
                 async loadUser() {
                     this.loading = true;
                     this.error = null;
                     try {
+                        // Check if apiClient is ready
+                        if (!window.apiClientReady || !window.apiClient || !window.apiClient.getUser) {
+                            console.error('API client not ready, retrying...');
+                            setTimeout(() => this.loadUser(), 100);
+                            return;
+                        }
+
                         const data = await window.apiClient.getUser(this.userId);
                         this.formData = {
                             login: data.login || '',
@@ -199,6 +218,10 @@
                     } catch (error) {
                         console.error('Error loading user:', error);
                         this.error = '{{ __('Failed to load employee data. Please try again.') }}';
+                        // Retry once if it's a network error
+                        if (error.message && error.message.includes('API client')) {
+                            setTimeout(() => this.loadUser(), 1000);
+                        }
                     } finally {
                         this.loading = false;
                     }
@@ -226,6 +249,11 @@
                     this.submitting = true;
 
                     try {
+                        // Check if apiClient is ready
+                        if (!window.apiClientReady || !window.apiClient || !window.apiClient.updateUser) {
+                            throw new Error('API client not ready');
+                        }
+
                         // Prepare data for submission (only editable fields)
                         const submitData = {
                             full_name: this.formData.full_name,

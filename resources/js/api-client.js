@@ -2,33 +2,53 @@
  * API Client for TaskMate Telegram Bot API
  *
  * This module provides a client for communicating with the TaskMate Telegram Bot API.
- * All data is fetched via AJAX requests from the external API.
+ * All data is fetched via AJAX requests through a local proxy that forwards requests
+ * to the external API configured in user settings.
  */
 
 class ApiClient {
     constructor() {
-        // API base URL - can be configured via environment or settings
-        this.baseUrl = window.API_BASE_URL || 'http://localhost:8000/api/v1';
-        this.token = this.getStoredToken();
+        // API base URL - now uses local proxy endpoint
+        this.baseUrl = window.API_BASE_URL || '/api/proxy';
+        // Token is now handled server-side in the proxy
+        this.token = null;
     }
 
     /**
-     * Get stored authentication token
+     * Refresh CSRF token
      */
-    getStoredToken() {
-        return localStorage.getItem('api_token');
-    }
+    async refreshCsrfToken() {
+        try {
+            const response = await fetch('/csrf-token', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                },
+                credentials: 'same-origin'
+            });
 
-    /**
-     * Set authentication token
-     */
-    setToken(token) {
-        this.token = token;
-        if (token) {
-            localStorage.setItem('api_token', token);
-        } else {
-            localStorage.removeItem('api_token');
+            if (response.ok) {
+                const data = await response.json();
+                if (data.csrf_token) {
+                    // Update meta tag
+                    const metaTag = document.querySelector('meta[name="csrf-token"]');
+                    if (metaTag) {
+                        metaTag.setAttribute('content', data.csrf_token);
+                    }
+                    return data.csrf_token;
+                }
+            }
+        } catch (error) {
+            console.error('Failed to refresh CSRF token:', error);
         }
+        return null;
+    }
+
+    /**
+     * Get current CSRF token
+     */
+    getCsrfToken() {
+        return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
     }
 
     /**
@@ -42,13 +62,19 @@ class ApiClient {
             ...options.headers,
         };
 
-        if (this.token) {
-            headers['Authorization'] = `Bearer ${this.token}`;
+        // Add CSRF token for web routes
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        if (csrfToken) {
+            headers['X-CSRF-TOKEN'] = csrfToken;
         }
+
+        // Token is now handled server-side in the proxy
+        // No need to send Authorization header from frontend
 
         const config = {
             ...options,
             headers,
+            credentials: 'same-origin', // Important for CSRF cookies
         };
 
         try {
@@ -56,12 +82,55 @@ class ApiClient {
             const data = await response.json();
 
             if (!response.ok) {
+                // Handle CSRF errors
+                if (response.status === 419) {
+                    throw new Error('CSRF token expired. Please refresh the page and try again.');
+                }
+
+                // Handle validation errors (including CSRF)
+                if (response.status === 422 && data.errors) {
+                    const errorMessage = data.errors?.['X-CSRF-TOKEN']?.[0] ||
+                                       data.errors?.['csrf_token']?.[0] ||
+                                       Object.values(data.errors).flat().join(', ') ||
+                                       data.message;
+                    throw new Error(errorMessage || 'Validation failed');
+                }
+
                 throw new Error(data.message || 'API request failed');
             }
 
             return data;
         } catch (error) {
             console.error('API request error:', error);
+
+            // If CSRF token is missing or expired, try to refresh it
+            if (error.message.includes('CSRF') || error.message.includes('419')) {
+                console.warn('CSRF token issue detected, attempting to refresh...');
+
+                // Try to refresh the token and retry the request once
+                try {
+                    const newToken = await this.refreshCsrfToken();
+                    if (newToken) {
+                        console.log('CSRF token refreshed, retrying request...');
+                        // Update headers with new token
+                        config.headers['X-CSRF-TOKEN'] = newToken;
+
+                        // Retry the request
+                        const retryResponse = await fetch(url, config);
+                        const retryData = await retryResponse.json();
+
+                        if (retryResponse.ok) {
+                            return retryData;
+                        } else {
+                            throw new Error(retryData.message || 'API request failed after token refresh');
+                        }
+                    }
+                } catch (retryError) {
+                    console.error('Failed to retry request after CSRF refresh:', retryError);
+                    error.message = 'CSRF validation failed. Please refresh the page and try again.';
+                }
+            }
+
             throw error;
         }
     }
@@ -111,9 +180,7 @@ class ApiClient {
      */
     async login(login, password) {
         const data = await this.post('/session', { login, password });
-        if (data.token) {
-            this.setToken(data.token);
-        }
+        // Token is now handled server-side
         return data;
     }
 
@@ -122,7 +189,7 @@ class ApiClient {
      */
     async logout() {
         await this.delete('/session');
-        this.setToken(null);
+        // Token is now handled server-side
     }
 
     /**
@@ -130,9 +197,7 @@ class ApiClient {
      */
     async register(login, password) {
         const data = await this.post('/register', { login, password });
-        if (data.token) {
-            this.setToken(data.token);
-        }
+        // Token is now handled server-side
         return data;
     }
 
@@ -166,6 +231,14 @@ class ApiClient {
      */
     async getUserStatus(id) {
         return this.get(`/users/${id}/status`);
+    }
+
+    /**
+     * Create new user (public endpoint)
+     * Uses the public endpoint for creating users without authentication
+     */
+    async createUser(data) {
+        return this.post('/users/create', data);
     }
 
     /**
@@ -367,5 +440,8 @@ class ApiClient {
 // Create and export a singleton instance
 const apiClient = new ApiClient();
 window.apiClient = apiClient;
+
+// Mark API client as ready
+window.apiClientReady = true;
 
 export default apiClient;

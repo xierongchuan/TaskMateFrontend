@@ -1,15 +1,18 @@
-# TaskMateFrontend - Документация проекта
+# CLAUDE.md
 
-## Обзор проекта
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**TaskMateFrontend** - это веб-приложение на базе Laravel с современным стеком технологий для управления задачами. Проект использует Laravel 12, Tailwind CSS, Vite и Alpine.js для создания отзывчивого и интуитивного интерфейса.
+## Project Overview
+
+**TaskMateFrontend** is a Laravel-based web application with a modern tech stack for task management. The project uses Laravel 12, Tailwind CSS, Vite, and Alpine.js to create a responsive and intuitive interface.
 
 ## Архитектура и технологии
 
 ### Бэкенд стек
 - **Laravel 12** - PHP фреймворк
 - **PHP 8.2+** - Серверный язык программирования
-- **SQLite** - База данных по умолчанию
+- **PostgreSQL** - Основная база данных (в продакшене)
+- **SQLite** - База данных для разработки и тестирования
 - **Pest** - Фреймворк для тестирования
 
 ### Фронтенд стек
@@ -122,35 +125,70 @@ routes/
 - [`checkbox.blade.php`](resources/views/components/forms/checkbox.blade.php) - Чекбокс
 - [`button.blade.php`](resources/views/components/button.blade.php) - Кнопка
 
-## Конфигурация
+## Development Commands
 
-### Сборка фронтенда
-- **Vite** настроен для обработки CSS и JavaScript
-- **Tailwind CSS** интегрирован через плагин Vite
-- **Alpine.js** добавлен как зависимость
-
-### Запуск разработки
+### Start Development Environment
 ```bash
-# Запуск всех сервисов разработки
+# Start all development services (PHP server, queue, logs, Vite)
 composer dev
 
-# Или по отдельности
-php artisan serve
-npm run dev
+# Start individual services
+php artisan serve          # Laravel development server
+npm run dev               # Vite frontend build server
+php artisan queue:listen  # Queue worker
+php artisan pail          # Real-time logs
 ```
 
-### Продакшен сборка
+### Build and Deployment
 ```bash
-npm run build
+npm run build             # Production build
+composer install --no-dev # Production dependencies
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
 ```
 
-## Тестирование
+### Testing
+```bash
+composer test             # Run all tests
+php artisan test          # Alternative test command
+./vendor/bin/pest         # Direct Pest execution
+```
 
-Проект использует Pest для тестирования с готовыми тестами для:
-- Аутентификации
-- Регистрации
-- Сброса пароля
-- Обновления профиля и пароля
+### Code Quality
+```bash
+php artisan pint          # PHP code formatting (Laravel Pint)
+./vendor/bin/phpstan      # Static analysis (PHPStan)
+npx prettier --write .    # Format frontend files
+```
+
+### Database
+```bash
+php artisan migrate       # Run migrations
+php artisan migrate:fresh # Fresh migration with rollback
+php artisan db:seed       # Seed database
+php artisan tinker        # Interactive REPL
+```
+
+## Architecture
+
+### Frontend Build System
+- **Vite** processes CSS and JavaScript with hot reload
+- **Tailwind CSS** integrated via Vite plugin v4.1.7
+- **Alpine.js** imported as dependency for reactive components
+- **Blade Icons** and **FontAwesome** for iconography
+
+### Authentication Flow
+- Uses Laravel's built-in authentication with custom controllers
+- Email verification required for dashboard access
+- Password confirmation for sensitive actions
+- Session-based authentication with database driver
+
+### Settings Architecture
+- Modular settings system in `app/Http/Controllers/Settings/`
+- Each setting area has dedicated controller (Profile, Password, Appearance, BotApi)
+- Uses form requests for validation
+- Flash notifications for user feedback
 
 ## Особенности реализации
 

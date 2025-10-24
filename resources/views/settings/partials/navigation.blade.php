@@ -41,6 +41,16 @@
                     {{ __('System') }}
                 </a>
             </li>
+            <li>
+                <a href="{{ route('settings.bot-api.edit') }}" @class([
+                    'bg-gray-100 dark:bg-gray-700 block px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-600' => !request()->routeIs(
+                        'settings.bot-api.*'),
+                    'bg-white dark:bg-gray-600 block px-4 py-3  text-gray-900 dark:text-gray-100 font-medium' => request()->routeIs(
+                        'settings.bot-api.*'),
+                ])>
+                    {{ __('Connect with Bot API') }}
+                </a>
+            </li>
         </ul>
     </nav>
 </div>

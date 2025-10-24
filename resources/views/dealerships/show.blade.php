@@ -242,6 +242,19 @@
                 loadingTasks: false,
                 activeTab: 'users',
                 async init() {
+                    // Wait for apiClient to be available
+                    let retries = 0;
+                    while (!window.apiClient && retries < 50) {
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        retries++;
+                    }
+
+                    if (!window.apiClient) {
+                        console.error('API client not loaded');
+                        this.loading = false;
+                        return;
+                    }
+
                     // Get dealership ID from URL
                     const pathParts = window.location.pathname.split('/');
                     this.dealershipId = pathParts[pathParts.length - 1];
