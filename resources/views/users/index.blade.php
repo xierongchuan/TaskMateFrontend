@@ -108,7 +108,14 @@
                                     <span :class="getRoleClass(user.role)" class="px-2 py-1 text-xs rounded-full font-medium" x-text="getRoleText(user.role)"></span>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                                    <span x-text="user.dealership?.name || '-'"></span>
+                                    <template x-if="getDealershipById(user.dealership_id)">
+                                        <a :href="`/dealerships/${user.dealership_id}`"
+                                           class="text-blue-600 hover:text-blue-800 dark:text-blue-400 hover:underline"
+                                           x-text="getDealershipName(user.dealership_id)"></a>
+                                    </template>
+                                    <template x-if="!getDealershipById(user.dealership_id)">
+                                        <span x-text="getDealershipName(user.dealership_id)"></span>
+                                    </template>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                                     <span x-text="user.telegram_id || '-'"></span>
@@ -251,6 +258,20 @@
                         owner: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
                     };
                     return classes[role] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+                },
+                getDealershipName(dealershipId) {
+                    if (!dealershipId) return '-';
+
+                    const dealership = this.dealerships.find(d => d.id === dealershipId);
+                    if (dealership) {
+                        return dealership.name;
+                    }
+
+                    return `Dealership ID: ${dealershipId}`;
+                },
+                getDealershipById(dealershipId) {
+                    if (!dealershipId) return null;
+                    return this.dealerships.find(d => d.id === dealershipId) || null;
                 }
             }));
         });
