@@ -85,11 +85,16 @@
                     <div>
                         <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">{{ __('Dealership') }}</div>
                         <div class="text-gray-800 dark:text-gray-100 font-medium">
-                            <template x-if="user.dealership_id">
-                                <span>Dealership ID: <span x-text="user.dealership_id"></span></span>
+                            <template x-if="dealership && dealership.name">
+                                <a :href="`/dealerships/${dealership.id}`" class="text-blue-600 hover:underline" x-text="dealership.name"></a>
                             </template>
-                            <template x-if="!user.dealership_id">
-                                <span>-</span>
+                            <template x-if="!dealership || !dealership.name">
+                                <template x-if="user.dealership_id">
+                                    <span class="text-gray-500">Dealership ID: <span x-text="user.dealership_id"></span></span>
+                                </template>
+                                <template x-if="!user.dealership_id">
+                                    <span>-</span>
+                                </template>
                             </template>
                         </div>
                     </div>
@@ -206,6 +211,7 @@
             Alpine.data('userShow', () => ({
                 user: {},
                 status: null,
+                dealership: null,
                 loading: true,
                 error: null,
                 userId: null,
@@ -218,6 +224,7 @@
 
                     await this.loadUser();
                     await this.loadUserStatus();
+                    await this.loadDealership();
                 },
                 async loadUser() {
                     this.loading = true;
@@ -313,6 +320,50 @@
                     } catch (error) {
                         console.error('Error loading user status:', error);
                         // Don't show error for status, it's optional
+                    }
+                },
+                async loadDealership() {
+                    if (!this.user.dealership_id) {
+                        console.log('No dealership_id, skipping dealership load');
+                        return;
+                    }
+
+                    try {
+                        console.log('Loading dealership for ID:', this.user.dealership_id);
+
+                        // Wait for API client to be ready
+                        let attempts = 0;
+                        while ((!window.apiClientReady || !window.apiClient || !window.apiClient.getDealership) && attempts < 5) {
+                            console.log('API client not ready for dealership, waiting... (attempt:', attempts + 1, ')');
+                            await new Promise(resolve => setTimeout(resolve, 500));
+                            attempts++;
+                        }
+
+                        if (!window.apiClientReady || !window.apiClient || !window.apiClient.getDealership) {
+                            console.warn('API client not available for dealership, skipping...');
+                            return;
+                        }
+
+                        console.log('API client ready, calling getDealership(', this.user.dealership_id, ')');
+                        const dealershipResponse = await window.apiClient.getDealership(this.user.dealership_id);
+                        console.log('Raw dealership API response:', dealershipResponse);
+
+                        // Handle different response formats
+                        if (dealershipResponse && dealershipResponse.data) {
+                            // API returns { data: { dealership_info } }
+                            this.dealership = dealershipResponse.data;
+                        } else if (dealershipResponse && dealershipResponse.id) {
+                            // API returns dealership data directly
+                            this.dealership = dealershipResponse;
+                        } else {
+                            console.warn('Unexpected dealership response format:', dealershipResponse);
+                        }
+
+                        console.log('Processed dealership data:', this.dealership);
+
+                    } catch (error) {
+                        console.error('Error loading dealership:', error);
+                        // Don't show error for dealership, it's optional
                     }
                 },
                 getInitials(name) {
