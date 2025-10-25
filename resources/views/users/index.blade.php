@@ -200,6 +200,7 @@
                         const params = {
                             page: this.pagination.current_page,
                             per_page: this.pagination.per_page,
+                            search: this.filters.search,
                             phone_number: this.filters.phone_number, // Map phone_number filter
                             role: this.filters.role,
                             dealership_id: this.filters.dealership_id,
