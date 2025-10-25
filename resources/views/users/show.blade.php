@@ -28,10 +28,16 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <p x-text="error"></p>
-                <a href="{{ route('users.index') }}" class="mt-4 text-blue-600 hover:underline inline-block">
-                    {{ __('Back to employees') }}
-                </a>
+                <p class="mb-2" x-text="error"></p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('Please check your connection and try again.') }}</p>
+                <div class="space-x-4">
+                    <button @click="loadUser()" class="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                        {{ __('Try Again') }}
+                    </button>
+                    <a href="{{ route('users.index') }}" class="mt-2 text-blue-600 hover:underline inline-block">
+                        {{ __('Back to employees') }}
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -70,7 +76,7 @@
                 <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                     <div>
                         <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">{{ __('Phone') }}</div>
-                        <div class="text-gray-800 dark:text-gray-100 font-medium" x-text="user.phone || '-'"></div>
+                        <div class="text-gray-800 dark:text-gray-100 font-medium" x-text="user.phone_number || '-'"></div>
                     </div>
                     <div>
                         <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">{{ __('Telegram ID') }}</div>
@@ -79,10 +85,10 @@
                     <div>
                         <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">{{ __('Dealership') }}</div>
                         <div class="text-gray-800 dark:text-gray-100 font-medium">
-                            <template x-if="user.dealership">
-                                <a :href="`/dealerships/${user.dealership.id}`" class="text-blue-600 hover:underline" x-text="user.dealership.name"></a>
+                            <template x-if="user.dealership_id">
+                                <span>Dealership ID: <span x-text="user.dealership_id"></span></span>
                             </template>
-                            <template x-if="!user.dealership">
+                            <template x-if="!user.dealership_id">
                                 <span>-</span>
                             </template>
                         </div>
@@ -171,9 +177,18 @@
 
             <!-- Actions -->
             <div class="mt-6 flex justify-between items-center">
-                <a href="{{ route('users.index') }}" class="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200">
-                    {{ __('Back to Employees') }}
-                </a>
+                <div class="flex space-x-4">
+                    <a href="{{ route('users.index') }}" class="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200">
+                        {{ __('Back to Employees') }}
+                    </a>
+                    <button @click="loadUser()" :disabled="loading"
+                            class="text-blue-600 hover:text-blue-800 dark:text-blue-400 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" :class="{'animate-spin': loading}">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        {{ __('Refresh') }}
+                    </button>
+                </div>
                 <div class="flex space-x-4">
                     <a href="#" @click.prevent="viewTasks" class="text-blue-600 hover:text-blue-800 dark:text-blue-400">
                         {{ __('View Tasks') }}
@@ -199,49 +214,105 @@
                     const pathParts = window.location.pathname.split('/');
                     this.userId = pathParts[pathParts.length - 1];
 
+                    console.log('User show page initialized, userId:', this.userId);
+
                     await this.loadUser();
                     await this.loadUserStatus();
                 },
                 async loadUser() {
                     this.loading = true;
                     this.error = null;
+
+                    // Check if userId is valid
+                    if (!this.userId || this.userId === 'show') {
+                        console.error('Invalid userId:', this.userId);
+                        this.error = 'Invalid user ID';
+                        this.loading = false;
+                        return;
+                    }
+
                     try {
-                        // Check if apiClient is ready
-                        if (!window.apiClientReady || !window.apiClient || !window.apiClient.getUser) {
-                            console.error('API client not ready, retrying...');
-                            setTimeout(() => this.loadUser(), 100);
-                            return;
+                        console.log('Loading user data for ID:', this.userId);
+
+                        // Wait for API client to be ready
+                        let attempts = 0;
+                        while ((!window.apiClientReady || !window.apiClient || !window.apiClient.getUser) && attempts < 10) {
+                            console.log('API client not ready, waiting... (attempt:', attempts + 1, ')');
+                            await new Promise(resolve => setTimeout(resolve, 500));
+                            attempts++;
                         }
 
-                        this.user = await window.apiClient.getUser(this.userId);
+                        if (!window.apiClientReady || !window.apiClient || !window.apiClient.getUser) {
+                            throw new Error('API client not available after waiting');
+                        }
+
+                        console.log('API client ready, calling getUser(', this.userId, ')');
+                        const response = await window.apiClient.getUser(this.userId);
+                        console.log('Raw API response:', response);
+
+                        // Handle different response formats
+                        if (response && response.data) {
+                            // API returns { data: { user_info } }
+                            this.user = response.data;
+                        } else if (response && response.id) {
+                            // API returns user data directly
+                            this.user = response;
+                        } else {
+                            // Unexpected format
+                            console.error('Unexpected API response format:', response);
+                            throw new Error(`Invalid user data format received from API. Response: ${JSON.stringify(response)}`);
+                        }
+
+                        console.log('Processed user data:', this.user);
+
+                        // Check if user data is valid
+                        if (!this.user || !this.user.id) {
+                            console.error('Invalid user data after processing:', this.user);
+                            throw new Error('Invalid user data received from API');
+                        }
+
                     } catch (error) {
                         console.error('Error loading user:', error);
-                        this.error = '{{ __('Failed to load employee data. Please try again.') }}';
-                        // Retry once if it's a network error
-                        if (error.message && error.message.includes('API client')) {
-                            setTimeout(() => this.loadUser(), 1000);
-                        }
+                        this.error = `Failed to load employee data: ${error.message}`;
                     } finally {
                         this.loading = false;
                     }
                 },
                 async loadUserStatus() {
                     try {
-                        // Check if apiClient is ready
+                        console.log('Loading user status for ID:', this.userId);
+
+                        // Wait for API client to be ready
+                        let attempts = 0;
+                        while ((!window.apiClientReady || !window.apiClient || !window.apiClient.getUserStatus) && attempts < 5) {
+                            console.log('API client not ready for status, waiting... (attempt:', attempts + 1, ')');
+                            await new Promise(resolve => setTimeout(resolve, 500));
+                            attempts++;
+                        }
+
                         if (!window.apiClientReady || !window.apiClient || !window.apiClient.getUserStatus) {
-                            console.error('API client not ready for status, retrying...');
-                            setTimeout(() => this.loadUserStatus(), 100);
+                            console.warn('API client not available for status, skipping...');
                             return;
                         }
 
-                        this.status = await window.apiClient.getUserStatus(this.userId);
+                        console.log('API client ready, calling getUserStatus(', this.userId, ')');
+                        const statusResponse = await window.apiClient.getUserStatus(this.userId);
+                        console.log('Raw status API response:', statusResponse);
+
+                        // Handle different response formats for status
+                        if (statusResponse && statusResponse.data) {
+                            // API returns { data: { status_info } }
+                            this.status = statusResponse.data;
+                        } else {
+                            // API returns status data directly or no status available
+                            this.status = statusResponse;
+                        }
+
+                        console.log('Processed user status:', this.status);
+
                     } catch (error) {
                         console.error('Error loading user status:', error);
                         // Don't show error for status, it's optional
-                        // Retry once if it's a network error
-                        if (error.message && error.message.includes('API client')) {
-                            setTimeout(() => this.loadUserStatus(), 1000);
-                        }
                     }
                 },
                 getInitials(name) {
