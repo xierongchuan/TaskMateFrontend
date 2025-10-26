@@ -88,7 +88,7 @@
                         <label for="dealership_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             {{ __('Dealership') }}
                         </label>
-                        <select id="dealership_id" x-model="formData.dealership_id"
+                        <select id="dealership_id" x-model="formData.dealership_id" @change="onDealershipChange"
                             class="w-full px-4 py-2 rounded-lg text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                             <option value="">{{ __('Select dealership') }}</option>
                             <template x-for="dealership in dealerships" :key="dealership.id">
@@ -181,12 +181,22 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {{ __('Assign to Users') }}
+                        <span x-show="loadingUsers" class="text-xs text-blue-500 ml-2">
+                            <svg class="animate-spin -ml-1 mr-1 h-3 w-3 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            {{ __('Loading users...') }}
+                        </span>
                     </label>
                     <div class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-4 max-h-60 overflow-y-auto">
-                        <template x-if="users.length === 0">
-                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('No users available') }}</p>
+                        <template x-if="!formData.dealership_id">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Please select a dealership first') }}</p>
                         </template>
-                        <div class="space-y-2">
+                        <template x-if="formData.dealership_id && users.length === 0 && !loadingUsers">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('No users available for this dealership') }}</p>
+                        </template>
+                        <div x-show="formData.dealership_id && users.length > 0" class="space-y-2">
                             <template x-for="user in users" :key="user.id">
                                 <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 p-2 rounded">
                                     <input type="checkbox" :value="user.id" x-model="formData.assignments"
@@ -239,8 +249,10 @@
                 tagsInput: '',
                 dealerships: [],
                 users: [],
+                allUsers: [],
                 errors: {},
                 loadingData: true,
+                loadingUsers: false,
                 submitting: false,
                 successMessage: '',
                 errorMessage: '',
@@ -257,12 +269,36 @@
                         ]);
 
                         this.dealerships = dealershipsData.data || [];
-                        this.users = usersData.data || [];
+                        this.allUsers = usersData.data || [];
+                        this.users = []; // Start with empty users list
                     } catch (error) {
                         console.error('Error loading form data:', error);
                         this.errorMessage = '{{ __('Failed to load form data. Please refresh the page.') }}';
                     } finally {
                         this.loadingData = false;
+                    }
+                },
+                async onDealershipChange() {
+                    // Clear selected assignments when dealership changes
+                    this.formData.assignments = [];
+
+                    if (!this.formData.dealership_id) {
+                        this.users = [];
+                        return;
+                    }
+
+                    this.loadingUsers = true;
+                    try {
+                        // Filter users by dealership_id
+                        this.users = this.allUsers.filter(user =>
+                            user.dealership_id && user.dealership_id == this.formData.dealership_id
+                        );
+                    } catch (error) {
+                        console.error('Error filtering users:', error);
+                        this.errorMessage = '{{ __('Failed to load users. Please try again.') }}';
+                        this.users = [];
+                    } finally {
+                        this.loadingUsers = false;
                     }
                 },
                 async submitForm() {
