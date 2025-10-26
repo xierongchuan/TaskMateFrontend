@@ -250,6 +250,13 @@ class ApiClient {
         return this.put(`/users/${id}`, data);
     }
 
+    /**
+     * Delete user
+     */
+    async deleteUser(id) {
+        return this.delete(`/users/${id}`);
+    }
+
     // ============================================
     // Dealerships Endpoints
     // ============================================

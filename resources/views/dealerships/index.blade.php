@@ -277,14 +277,48 @@
                 async confirmDelete(dealershipId) {
                     if (confirm('{{ __('Are you sure you want to delete this dealership?') }}')) {
                         try {
-                            await window.apiClient.deleteDealership(dealershipId);
+                            console.log('Deleting dealership:', dealershipId);
+                            const response = await window.apiClient.deleteDealership(dealershipId);
+                            console.log('Delete response:', response);
+
                             await this.loadDealerships();
-                            alert('{{ __('Dealership deleted successfully') }}');
+
+                            // Handle different response formats
+                            if (response && (response.success || response.message)) {
+                                const message = response.message || '{{ __('Dealership deleted successfully') }}';
+                                alert(message);
+                            } else {
+                                alert('{{ __('Dealership deleted successfully') }}');
+                            }
                         } catch (error) {
                             console.error('Error deleting dealership:', error);
-                            this.apiError = error.message ||
-                                '{{ __('Failed to delete dealership. Please try again.') }}';
-                            alert(this.apiError);
+
+                            // Handle different error formats
+                            let errorMessage = '{{ __('Failed to delete dealership. Please try again.') }}';
+                            if (error.message) {
+                                errorMessage = error.message;
+                            } else if (error.response && error.response.data && error.response.data.message) {
+                                errorMessage = error.response.data.message;
+                            }
+
+                            // Handle 422 errors with detailed information
+                            if (error.response && error.response.status === 422 && error.response.data) {
+                                const errorData = error.response.data;
+                                if (errorData.related_data) {
+                                    const relatedData = errorData.related_data;
+                                    let relatedInfo = [];
+                                    if (relatedData.users) relatedInfo.push(`${relatedData.users} users`);
+                                    if (relatedData.shifts) relatedInfo.push(`${relatedData.shifts} shifts`);
+                                    if (relatedData.tasks) relatedInfo.push(`${relatedData.tasks} tasks`);
+
+                                    if (relatedInfo.length > 0) {
+                                        errorMessage = `Cannot delete dealership with related data: ${relatedInfo.join(', ')}. Please reassign or delete related records first.`;
+                                    }
+                                }
+                            }
+
+                            this.apiError = errorMessage;
+                            alert(errorMessage);
                         }
                     }
                 }

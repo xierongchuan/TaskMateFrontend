@@ -128,6 +128,10 @@
                                         <a :href="`/users/${user.id}/edit`" class="text-gray-600 hover:text-gray-800 dark:text-gray-400">
                                             {{ __('Edit') }}
                                         </a>
+                                        <button @click="confirmDelete(user.id)"
+                                            class="text-red-600 hover:text-red-800 dark:text-red-400">
+                                            {{ __('Delete') }}
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -272,6 +276,61 @@
                 getDealershipById(dealershipId) {
                     if (!dealershipId) return null;
                     return this.dealerships.find(d => d.id === dealershipId) || null;
+                },
+                async confirmDelete(userId) {
+                    const user = this.users.find(u => u.id === userId);
+                    const userName = user ? user.full_name || user.login : `User ID: ${userId}`;
+
+                    if (confirm(`{{ __('Are you sure you want to delete this user?') }}\n${userName}`)) {
+                        try {
+                            console.log('Deleting user:', userId, userName);
+                            const response = await window.apiClient.deleteUser(userId);
+                            console.log('Delete response:', response);
+
+                            await this.loadUsers();
+
+                            // Handle different response formats
+                            if (response && (response.success || response.message)) {
+                                const message = response.message || '{{ __('User deleted successfully') }}';
+                                alert(message);
+                            } else {
+                                alert('{{ __('User deleted successfully') }}');
+                            }
+                        } catch (error) {
+                            console.error('Error deleting user:', error);
+
+                            // Handle different error formats
+                            let errorMessage = '{{ __('Failed to delete user. Please try again.') }}';
+                            if (error.message) {
+                                errorMessage = error.message;
+                            } else if (error.response && error.response.data && error.response.data.message) {
+                                errorMessage = error.response.data.message;
+                            }
+
+                            // Handle 422 errors with detailed information
+                            if (error.response && error.response.status === 422 && error.response.data) {
+                                const errorData = error.response.data;
+                                if (errorData.related_data) {
+                                    const relatedData = errorData.related_data;
+                                    let relatedInfo = [];
+                                    if (relatedData.shifts) relatedInfo.push(`${relatedData.shifts} shifts`);
+                                    if (relatedData.task_assignments) relatedInfo.push(`${relatedData.task_assignments} task assignments`);
+                                    if (relatedData.task_responses) relatedInfo.push(`${relatedData.task_responses} task responses`);
+                                    if (relatedData.created_tasks) relatedInfo.push(`${relatedData.created_tasks} created tasks`);
+                                    if (relatedData.created_links) relatedInfo.push(`${relatedData.created_links} created links`);
+                                    if (relatedData.replacements_as_replacing) relatedInfo.push(`${relatedData.replacements_as_replacing} replacements as replacing`);
+                                    if (relatedData.replacements_as_replaced) relatedInfo.push(`${relatedData.replacements_as_replaced} replacements as replaced`);
+
+                                    if (relatedInfo.length > 0) {
+                                        errorMessage = `Cannot delete user with related data: ${relatedInfo.join(', ')}. Please reassign or delete related records first.`;
+                                    }
+                                }
+                            }
+
+                            this.apiError = errorMessage;
+                            alert(errorMessage);
+                        }
+                    }
                 }
             }));
         });
