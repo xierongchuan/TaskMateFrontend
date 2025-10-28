@@ -36,7 +36,7 @@
             </form>
 
             <script>
-                document.getElementById('login-form').addEventListener('submit', async function(e) {
+                async function handleLogin(e) {
                     e.preventDefault();
 
                     // Clear previous errors
@@ -50,7 +50,8 @@
                     button.disabled = true;
                     button.textContent = '{{ __('Signing In...') }}';
 
-                    const formData = new FormData(this);
+                    const form = document.getElementById('login-form');
+                    const formData = new FormData(form);
                     const email = formData.get('email');
                     const password = formData.get('password');
                     const remember = formData.get('remember') ? true : false;
@@ -128,7 +129,11 @@
                         button.disabled = false;
                         button.textContent = originalText;
                     }
-                });
+                }
+
+                // Add event listeners for both form submit and button click
+                document.getElementById('login-form').addEventListener('submit', handleLogin);
+                document.getElementById('login-button').addEventListener('click', handleLogin);
             </script>
 
             @if (Route::has('register'))

@@ -45,7 +45,7 @@
             </form>
 
             <script>
-                document.getElementById('register-form').addEventListener('submit', async function(e) {
+                async function handleRegistration(e) {
                     e.preventDefault();
 
                     // Clear previous errors
@@ -59,7 +59,8 @@
                     button.disabled = true;
                     button.textContent = '{{ __('Creating Account...') }}';
 
-                    const formData = new FormData(this);
+                    const form = document.getElementById('register-form');
+                    const formData = new FormData(form);
                     const login = formData.get('login');
                     const password = formData.get('password');
                     const password_confirmation = formData.get('password_confirmation');
@@ -137,7 +138,11 @@
                         button.disabled = false;
                         button.textContent = originalText;
                     }
-                });
+                }
+
+                // Add event listeners for both form submit and button click
+                document.getElementById('register-form').addEventListener('submit', handleRegistration);
+                document.getElementById('register-button').addEventListener('click', handleRegistration);
             </script>
 
             <!-- Login Link -->
