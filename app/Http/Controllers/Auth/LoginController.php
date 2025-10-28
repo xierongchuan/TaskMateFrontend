@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -22,33 +22,73 @@ class LoginController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'email' => ['required', 'string', 'email'],
+            'email' => ['required', 'string'],
             'password' => ['required', 'string'],
         ]);
 
         $this->ensureIsNotRateLimited($request);
 
-        if (! Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
+        try {
+            // Call external API for authentication
+            $apiUrl = config('api.url');
+            $response = Http::timeout(config('api.timeout'))
+                ->post("{$apiUrl}/session", [
+                    'login' => $request->input('email'),
+                    'password' => $request->input('password'),
+                ]);
+
+            if (!$response->successful()) {
+                RateLimiter::hit($this->throttleKey($request));
+
+                $errorMessage = $response->json('message') ?? trans('auth.failed');
+                throw ValidationException::withMessages([
+                    'email' => $errorMessage,
+                ]);
+            }
+
+            $data = $response->json();
+
+            // Store authentication data in session
+            $request->session()->regenerate();
+            $request->session()->put('api_token', $data['token'] ?? null);
+            $request->session()->put('user', $data['user'] ?? null);
+            $request->session()->put('authenticated', true);
+
+            RateLimiter::clear($this->throttleKey($request));
+
+            return redirect()->intended(route('dashboard', absolute: false));
+
+        } catch (\Exception $e) {
+            if ($e instanceof ValidationException) {
+                throw $e;
+            }
+
             RateLimiter::hit($this->throttleKey($request));
 
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'email' => 'Unable to connect to authentication service. Please try again later.',
             ]);
         }
-
-        RateLimiter::clear($this->throttleKey($request));
-
-        $request->session()->regenerate();
-
-        return redirect()->intended(route('dashboard', absolute: false));
     }
 
     public function destroy(Request $request): RedirectResponse
     {
-        Auth::guard('web')->logout();
+        try {
+            // Call API logout if we have a token
+            $token = $request->session()->get('api_token');
+            if ($token) {
+                $apiUrl = config('api.url');
+                Http::timeout(config('api.timeout'))
+                    ->withToken($token)
+                    ->delete("{$apiUrl}/session");
+            }
+        } catch (\Exception $e) {
+            // Log error but continue with local logout
+            \Log::warning('API logout failed: ' . $e->getMessage());
+        }
 
+        // Clear session
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
         return redirect('/');

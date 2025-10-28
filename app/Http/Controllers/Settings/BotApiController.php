@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class BotApiController extends Controller
@@ -20,11 +19,13 @@ class BotApiController extends Controller
     }
 
     /**
-     * Get all settings for the authenticated user.
+     * Get all settings for the authenticated user (session-based).
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $settings = Setting::where('user_id', Auth::id())->get();
+        // Use session ID as user_id for settings
+        $sessionId = $request->session()->getId();
+        $settings = Setting::where('user_id', $sessionId)->get();
 
         return response()->json([
             'data' => $settings
@@ -34,9 +35,11 @@ class BotApiController extends Controller
     /**
      * Get specific setting by key.
      */
-    public function show(string $key): JsonResponse
+    public function show(Request $request, string $key): JsonResponse
     {
-        $setting = Setting::where('user_id', Auth::id())
+        // Use session ID as user_id for settings
+        $sessionId = $request->session()->getId();
+        $setting = Setting::where('user_id', $sessionId)
             ->where('key', $key)
             ->first();
 
@@ -61,10 +64,13 @@ class BotApiController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
+        // Use session ID as user_id for settings
+        $sessionId = $request->session()->getId();
         $setting = Setting::setValue(
             $key,
             $request->input('value'),
-            $request->input('type', 'string')
+            $request->input('type', 'string'),
+            $sessionId
         );
 
         return response()->json(['data' => $setting]);
@@ -94,7 +100,9 @@ class BotApiController extends Controller
             ];
         }
 
-        $results = Setting::setBulk($settingsData);
+        // Use session ID as user_id for settings
+        $sessionId = $request->session()->getId();
+        $results = Setting::setBulk($settingsData, $sessionId);
 
         return response()->json(['data' => array_values($results)]);
     }
@@ -102,9 +110,11 @@ class BotApiController extends Controller
     /**
      * Delete a setting.
      */
-    public function destroy(string $key): JsonResponse
+    public function destroy(Request $request, string $key): JsonResponse
     {
-        $setting = Setting::where('user_id', Auth::id())
+        // Use session ID as user_id for settings
+        $sessionId = $request->session()->getId();
+        $setting = Setting::where('user_id', $sessionId)
             ->where('key', $key)
             ->first();
 

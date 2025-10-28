@@ -3,13 +3,10 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class RegistrationController extends Controller
@@ -21,18 +18,49 @@ class RegistrationController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        $request->validate([
+            'login' => ['required', 'string', 'max:255'],
+            'password' => ['required', 'confirmed', 'min:12'],
         ]);
 
-        $validated['password'] = Hash::make($validated['password']);
+        try {
+            // Call external API for registration
+            $apiUrl = config('api.url');
+            $response = Http::timeout(config('api.timeout'))
+                ->post("{$apiUrl}/register", [
+                    'login' => $request->input('login'),
+                    'password' => $request->input('password'),
+                ]);
 
-        event(new Registered(($user = User::create($validated))));
+            if (!$response->successful()) {
+                $errors = $response->json('errors') ?? [];
+                $message = $response->json('message') ?? 'Registration failed';
 
-        Auth::login($user);
+                if (empty($errors)) {
+                    $errors = ['login' => [$message]];
+                }
 
-        return redirect(route('dashboard', absolute: false));
+                throw ValidationException::withMessages($errors);
+            }
+
+            $data = $response->json();
+
+            // Store authentication data in session
+            $request->session()->regenerate();
+            $request->session()->put('api_token', $data['token'] ?? null);
+            $request->session()->put('user', $data['user'] ?? null);
+            $request->session()->put('authenticated', true);
+
+            return redirect(route('dashboard', absolute: false));
+
+        } catch (\Exception $e) {
+            if ($e instanceof ValidationException) {
+                throw $e;
+            }
+
+            throw ValidationException::withMessages([
+                'login' => 'Unable to connect to registration service. Please try again later.',
+            ]);
+        }
     }
 }

@@ -17,14 +17,19 @@
         <div class="flex items-center space-x-4">
             <!-- Profile -->
             <div x-data="{ open: false }" class="relative">
+                @php
+                    $user = session('user', []);
+                    $userName = $user['login'] ?? $user['name'] ?? 'User';
+                    $userInitials = collect(explode(' ', $userName))->map(fn($n) => substr($n, 0, 1))->take(2)->join('');
+                @endphp
                 <button @click="open = !open" class="flex items-center focus:outline-none">
                     <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg">
                         <span
                             class="flex h-full w-full items-center justify-center rounded-lg bg-gray-200 text-black dark:bg-gray-700 dark:text-white">
-                            {{ Auth::user()->initials() }}
+                            {{ $userInitials }}
                         </span>
                     </span>
-                    <span class="ml-2 hidden md:block">{{ Auth::user()->name }}</span>
+                    <span class="ml-2 hidden md:block">{{ $userName }}</span>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -33,7 +38,7 @@
 
                 <div x-show="open" @click.away="open = false" :class="{ 'block': open, 'hidden': !open }"
                     class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 border border-gray-200 dark:border-gray-700">
-                    <a href="{{ route('settings.profile.edit') }}"
+                    <a href="{{ route('settings.bot-api.edit') }}"
                         class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                         <div class="flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"

@@ -7,7 +7,7 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['api.auth'])->group(function () {
     // CSRF Token refresh endpoint
     Route::get('/csrf-token', function () {
         return response()->json([
@@ -68,15 +68,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('links.index');
 
     // Settings
-    Route::get('settings/profile', [Settings\ProfileController::class, 'edit'])->name('settings.profile.edit');
-    Route::put('settings/profile', [Settings\ProfileController::class, 'update'])->name('settings.profile.update');
-    Route::delete('settings/profile', [Settings\ProfileController::class, 'destroy'])->name('settings.profile.destroy');
-    Route::get('settings/password', [Settings\PasswordController::class, 'edit'])->name('settings.password.edit');
-    Route::put('settings/password', [Settings\PasswordController::class, 'update'])->name('settings.password.update');
-    Route::get('settings/appearance', [Settings\AppearanceController::class, 'edit'])->name('settings.appearance.edit');
-    Route::get('settings/system', function () {
-        return view('settings.system');
-    })->name('settings.system.edit');
     Route::get('settings/bot-api', [Settings\BotApiController::class, 'edit'])->name('settings.bot-api.edit');
 
     // API Routes for Settings

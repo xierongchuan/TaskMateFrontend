@@ -12,16 +12,12 @@
                 @csrf
                 <!-- Email Input -->
                 <div class="mb-4">
-                    <x-forms.input label="Email" name="email" type="email" placeholder="your@email.com" />
+                    <x-forms.input label="Login" name="email" type="text" placeholder="your-login" />
                 </div>
 
                 <!-- Password Input -->
                 <div class="mb-4">
                     <x-forms.input label="Password" name="password" type="password" placeholder="••••••••" />
-                    @if (Route::has('password.request'))
-                        <a href="{{ route('password.request') }}"
-                            class="text-xs text-blue-600 dark:text-blue-400 hover:underline">{{ __('Forgot password?') }}</a>
-                    @endif
                 </div>
 
                 <!-- Remember Me -->

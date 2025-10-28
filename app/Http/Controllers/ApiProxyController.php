@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
-use App\Models\Setting;
 
 class ApiProxyController extends Controller
 {
@@ -15,19 +14,18 @@ class ApiProxyController extends Controller
     public function proxy(Request $request, string $endpoint): JsonResponse
     {
         try {
-            // Get user's API settings
-            $apiUrl = Setting::getValue('api_url', 'http://host.docker.internal:8007/api/v1');
-            $apiToken = Setting::getValue('auth_token');
+            // Get API URL from configuration
+            $apiUrl = config('api.url');
+
+            // Get token from session
+            $apiToken = $request->session()->get('api_token');
 
             if (!$apiToken) {
                 return response()->json([
-                    'error' => 'API token not configured',
-                    'message' => 'Please configure your Telegram Bot API token in settings'
+                    'error' => 'Authentication required',
+                    'message' => 'Please login to access this resource'
                 ], 401);
             }
-
-            // Replace localhost with host.docker.internal for Docker environment
-            $apiUrl = str_replace('http://localhost:', 'http://host.docker.internal:', $apiUrl);
 
             // Build the external URL
             $externalUrl = rtrim($apiUrl, '/') . '/' . ltrim($endpoint, '/');
@@ -46,7 +44,7 @@ class ApiProxyController extends Controller
 
             // Make the external request
             $response = Http::withHeaders($headers)
-                ->timeout(30)
+                ->timeout(config('api.timeout'))
                 ->send(
                     $request->method(),
                     $externalUrl,
@@ -67,7 +65,6 @@ class ApiProxyController extends Controller
             \Log::error('API Proxy Error: ' . $e->getMessage(), [
                 'endpoint' => $endpoint,
                 'method' => $request->method(),
-                'user_id' => auth()->id(),
             ]);
 
             return response()->json([
@@ -84,18 +81,17 @@ class ApiProxyController extends Controller
     public function proxyUpload(Request $request, string $endpoint): JsonResponse
     {
         try {
-            // Get user's API settings
-            $apiUrl = Setting::getValue('api_url', 'http://host.docker.internal:8007/api/v1');
-            $apiToken = Setting::getValue('auth_token');
+            // Get API URL from configuration
+            $apiUrl = config('api.url');
+
+            // Get token from session
+            $apiToken = $request->session()->get('api_token');
 
             if (!$apiToken) {
                 return response()->json([
-                    'error' => 'API token not configured'
+                    'error' => 'Authentication required'
                 ], 401);
             }
-
-            // Replace localhost with host.docker.internal for Docker environment
-            $apiUrl = str_replace('http://localhost:', 'http://host.docker.internal:', $apiUrl);
 
             $externalUrl = rtrim($apiUrl, '/') . '/' . ltrim($endpoint, '/');
 
@@ -142,7 +138,6 @@ class ApiProxyController extends Controller
         } catch (\Exception $e) {
             \Log::error('API Proxy Upload Error: ' . $e->getMessage(), [
                 'endpoint' => $endpoint,
-                'user_id' => auth()->id(),
             ]);
 
             return response()->json([

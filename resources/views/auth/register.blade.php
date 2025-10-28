@@ -11,19 +11,20 @@
 
             <form method="POST" action="{{ route('register') }}">
                 @csrf
-                <!-- Full Name Input -->
+                <!-- Login Input -->
                 <div class="mb-4">
-                    <x-forms.input label="Full Name" name="name" type="text" placeholder="{{ __('Full Name') }}" />
-                </div>
-
-                <!-- Email Input -->
-                <div class="mb-4">
-                    <x-forms.input label="Email" name="email" type="email" placeholder="your@email.com" />
+                    <x-forms.input label="Login" name="login" type="text" placeholder="{{ __('Your login') }}" />
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {{ __('This will be your username for logging in') }}
+                    </p>
                 </div>
 
                 <!-- Password Input -->
                 <div class="mb-4">
                     <x-forms.input label="Password" name="password" type="password" placeholder="••••••••" />
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {{ __('Minimum 12 characters with uppercase, lowercase, digits, and special characters') }}
+                    </p>
                 </div>
 
                 <!-- Confirm Password Input -->

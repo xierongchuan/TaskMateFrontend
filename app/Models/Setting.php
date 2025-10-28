@@ -27,9 +27,9 @@ class Setting extends Model
         return $this->belongsTo(User::class);
     }
 
-    public static function getValue(string $key, mixed $default = null, ?int $userId = null)
+    public static function getValue(string $key, mixed $default = null, ?string $userId = null)
     {
-        $userId = $userId ?? auth()->id();
+        $userId = $userId ?? session()->getId();
 
         $setting = static::where('user_id', $userId)
             ->where('key', $key)
@@ -48,9 +48,9 @@ class Setting extends Model
         };
     }
 
-    public static function setValue(string $key, mixed $value, string $type = 'string', ?int $userId = null)
+    public static function setValue(string $key, mixed $value, string $type = 'string', ?string $userId = null)
     {
-        $userId = $userId ?? auth()->id();
+        $userId = $userId ?? session()->getId();
 
         $processedValue = match ($type) {
             'boolean' => $value ? 'true' : 'false',
@@ -64,9 +64,9 @@ class Setting extends Model
         );
     }
 
-    public static function getBulk(array $keys, ?int $userId = null)
+    public static function getBulk(array $keys, ?string $userId = null)
     {
-        $userId = $userId ?? auth()->id();
+        $userId = $userId ?? session()->getId();
 
         return static::where('user_id', $userId)
             ->whereIn('key', $keys)
@@ -77,9 +77,9 @@ class Setting extends Model
             ->toArray();
     }
 
-    public static function setBulk(array $settings, ?int $userId = null)
+    public static function setBulk(array $settings, ?string $userId = null)
     {
-        $userId = $userId ?? auth()->id();
+        $userId = $userId ?? session()->getId();
         $results = [];
 
         foreach ($settings as $key => $data) {
