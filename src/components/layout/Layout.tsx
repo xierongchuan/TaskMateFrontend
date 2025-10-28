@@ -16,51 +16,51 @@ export const Layout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex">
+      <nav className="bg-white shadow-sm overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-8">
+          <div className="flex justify-between h-16 min-w-0">
+            <div className="flex items-center min-w-0 flex-1">
               <div className="flex-shrink-0 flex items-center">
-                <h1 className="text-xl font-bold text-indigo-600">TaskMate</h1>
+                <h1 className="text-lg md:text-xl font-bold text-indigo-600">TaskMate</h1>
               </div>
               {/* Desktop Navigation */}
-              <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+              <div className="hidden md:ml-2 md:flex md:items-center md:min-w-0 md:flex-1 md:space-x-1 lg:ml-6 lg:space-x-4 xl:space-x-6">
                 <Link
                   to="/dashboard"
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 md:px-2 pt-1 border-b-2 text-xs md:text-sm font-medium truncate max-w-[80px] md:max-w-[100px] lg:max-w-none"
                 >
                   Dashboard
                 </Link>
                 <Link
                   to="/tasks"
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 md:px-2 pt-1 border-b-2 text-xs md:text-sm font-medium truncate max-w-[80px] md:max-w-[100px] lg:max-w-none"
                 >
                   Задачи
                 </Link>
                 <Link
                   to="/shifts"
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 md:px-2 pt-1 border-b-2 text-xs md:text-sm font-medium truncate max-w-[80px] md:max-w-[100px] lg:max-w-none"
                 >
                   Смены
                 </Link>
                 {(permissions.canCreateUsers || permissions.isObserver) && (
                   <Link
                     to="/users"
-                    className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                    className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 md:px-2 pt-1 border-b-2 text-xs md:text-sm font-medium truncate max-w-[80px] md:max-w-[100px] lg:max-w-none"
                   >
                     Пользователи
                   </Link>
                 )}
                 <Link
                   to="/links"
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 md:px-2 pt-1 border-b-2 text-xs md:text-sm font-medium truncate max-w-[80px] md:max-w-[100px] lg:max-w-none"
                 >
                   Ссылки
                 </Link>
                 {permissions.canManageTasks && (
                   <Link
                     to="/dealerships"
-                    className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                    className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 md:px-2 pt-1 border-b-2 text-xs md:text-sm font-medium truncate max-w-[80px] md:max-w-[100px] lg:max-w-none"
                   >
                     Автосалоны
                   </Link>
@@ -68,7 +68,7 @@ export const Layout: React.FC = () => {
                 {permissions.canManageTasks && (
                   <Link
                     to="/reports"
-                    className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                    className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 md:px-2 pt-1 border-b-2 text-xs md:text-sm font-medium truncate max-w-[80px] md:max-w-[100px] lg:max-w-none"
                   >
                     Отчеты
                   </Link>
@@ -76,7 +76,7 @@ export const Layout: React.FC = () => {
                 {permissions.canManageTasks && (
                   <Link
                     to="/settings"
-                    className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                    className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 md:px-2 pt-1 border-b-2 text-xs md:text-sm font-medium truncate max-w-[80px] md:max-w-[100px] lg:max-w-none"
                   >
                     Настройки
                   </Link>
@@ -85,20 +85,20 @@ export const Layout: React.FC = () => {
             </div>
 
             {/* Desktop User Info */}
-            <div className="hidden sm:flex sm:items-center">
-              <span className="text-sm text-gray-700 mr-4 truncate max-w-xs">
+            <div className="hidden md:flex md:items-center">
+              <span className="text-xs md:text-sm text-gray-700 mr-1 md:mr-3 truncate max-w-[100px] md:max-w-[140px] lg:max-w-[180px] xl:max-w-xs">
                 {user?.full_name} ({user?.role})
               </span>
               <button
                 onClick={handleLogout}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                className="inline-flex items-center px-2 md:px-3 lg:px-4 py-2 border border-transparent text-xs md:text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 whitespace-nowrap"
               >
                 Выйти
               </button>
             </div>
 
             {/* Mobile menu button */}
-            <div className="flex items-center sm:hidden">
+            <div className="flex items-center md:hidden">
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
@@ -140,7 +140,7 @@ export const Layout: React.FC = () => {
         </div>
 
         {/* Mobile menu panel */}
-        <div className={`${mobileMenuOpen ? 'block' : 'hidden'} sm:hidden`}>
+        <div className={`${mobileMenuOpen ? 'block' : 'hidden'} md:hidden`}>
           <div className="pt-2 pb-3 space-y-1 bg-white border-t border-gray-200">
             <Link
               to="/dashboard"
