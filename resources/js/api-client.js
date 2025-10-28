@@ -2,446 +2,480 @@
  * API Client for TaskMate Telegram Bot API
  *
  * This module provides a client for communicating with the TaskMate Telegram Bot API.
- * All data is fetched via AJAX requests through a local proxy that forwards requests
- * to the external API configured in user settings.
+ * All data is fetched via direct AJAX requests to the external API configured via environment variables.
+ * Authentication is handled via Bearer tokens stored in localStorage.
  */
 
 class ApiClient {
-    constructor() {
-        // API base URL - now uses local proxy endpoint
-        this.baseUrl = window.API_BASE_URL || '/api/proxy';
-        // Token is now handled server-side in the proxy
-        this.token = null;
+  constructor() {
+    // API base URL from environment variables
+    this.baseUrl =
+      import.meta.env.VITE_API_URL || "http://localhost:8007/api/v1";
+    // Token storage key
+    this.tokenKey = "taskmate_auth_token";
+    this.userKey = "taskmate_user";
+  }
+
+  /**
+   * Get current auth token from localStorage
+   */
+  getToken() {
+    return localStorage.getItem(this.tokenKey);
+  }
+
+  /**
+   * Set auth token in localStorage
+   */
+  setToken(token) {
+    if (token) {
+      localStorage.setItem(this.tokenKey, token);
+    } else {
+      localStorage.removeItem(this.tokenKey);
+    }
+  }
+
+  /**
+   * Get current user from localStorage
+   */
+  getUser() {
+    const user = localStorage.getItem(this.userKey);
+    return user ? JSON.parse(user) : null;
+  }
+
+  /**
+   * Set current user in localStorage
+   */
+  setUser(user) {
+    if (user) {
+      localStorage.setItem(this.userKey, JSON.stringify(user));
+    } else {
+      localStorage.removeItem(this.userKey);
+    }
+  }
+
+  /**
+   * Clear authentication data
+   */
+  clearAuth() {
+    this.setToken(null);
+    this.setUser(null);
+  }
+
+  /**
+   * Check if user is authenticated
+   */
+  isAuthenticated() {
+    return !!this.getToken();
+  }
+
+  /**
+   * Make an API request
+   */
+  async request(endpoint, options = {}) {
+    const url = `${this.baseUrl}${endpoint}`;
+    const headers = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      ...options.headers,
+    };
+
+    // Add Authorization header if token exists
+    const token = this.getToken();
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
     }
 
-    /**
-     * Refresh CSRF token
-     */
-    async refreshCsrfToken() {
-        try {
-            const response = await fetch('/csrf-token', {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                },
-                credentials: 'same-origin'
-            });
+    const config = {
+      ...options,
+      headers,
+    };
 
-            if (response.ok) {
-                const data = await response.json();
-                if (data.csrf_token) {
-                    // Update meta tag
-                    const metaTag = document.querySelector('meta[name="csrf-token"]');
-                    if (metaTag) {
-                        metaTag.setAttribute('content', data.csrf_token);
-                    }
-                    return data.csrf_token;
-                }
-            }
-        } catch (error) {
-            console.error('Failed to refresh CSRF token:', error);
+    try {
+      const response = await fetch(url, config);
+
+      // Handle 401 Unauthorized - clear auth and redirect to login
+      if (response.status === 401) {
+        this.clearAuth();
+        if (window.location.pathname !== "/login") {
+          window.location.href = "/login?expired=1";
         }
-        return null;
-    }
+        throw new Error("Authentication required. Please login again.");
+      }
 
-    /**
-     * Get current CSRF token
-     */
-    getCsrfToken() {
-        return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-    }
+      const data = await response.json();
 
-    /**
-     * Make an API request
-     */
-    async request(endpoint, options = {}) {
-        const url = `${this.baseUrl}${endpoint}`;
-        const headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            ...options.headers,
-        };
-
-        // Add CSRF token for web routes
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-        if (csrfToken) {
-            headers['X-CSRF-TOKEN'] = csrfToken;
+      if (!response.ok) {
+        // Handle validation errors
+        if (response.status === 422 && data.errors) {
+          const errorMessage =
+            Object.values(data.errors).flat().join(", ") || data.message;
+          throw new Error(errorMessage || "Validation failed");
         }
 
-        // Token is now handled server-side in the proxy
-        // No need to send Authorization header from frontend
+        throw new Error(
+          data.message || `API request failed with status ${response.status}`,
+        );
+      }
 
-        const config = {
-            ...options,
-            headers,
-            credentials: 'same-origin', // Important for CSRF cookies
-        };
+      return data;
+    } catch (error) {
+      console.error("API request error:", error);
+      throw error;
+    }
+  }
 
-        try {
-            const response = await fetch(url, config);
-            const data = await response.json();
+  /**
+   * GET request
+   */
+  async get(endpoint, params = {}) {
+    const query = new URLSearchParams(params).toString();
+    const url = query ? `${endpoint}?${query}` : endpoint;
+    return this.request(url, { method: "GET" });
+  }
 
-            if (!response.ok) {
-                // Handle CSRF errors
-                if (response.status === 419) {
-                    throw new Error('CSRF token expired. Please refresh the page and try again.');
-                }
+  /**
+   * POST request
+   */
+  async post(endpoint, data = {}) {
+    return this.request(endpoint, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
 
-                // Handle validation errors (including CSRF)
-                if (response.status === 422 && data.errors) {
-                    const errorMessage = data.errors?.['X-CSRF-TOKEN']?.[0] ||
-                                       data.errors?.['csrf_token']?.[0] ||
-                                       Object.values(data.errors).flat().join(', ') ||
-                                       data.message;
-                    throw new Error(errorMessage || 'Validation failed');
-                }
+  /**
+   * PUT request
+   */
+  async put(endpoint, data = {}) {
+    return this.request(endpoint, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
 
-                throw new Error(data.message || 'API request failed');
-            }
+  /**
+   * DELETE request
+   */
+  async delete(endpoint) {
+    return this.request(endpoint, { method: "DELETE" });
+  }
 
-            return data;
-        } catch (error) {
-            console.error('API request error:', error);
+  // ============================================
+  // Authentication Endpoints
+  // ============================================
 
-            // If CSRF token is missing or expired, try to refresh it
-            if (error.message.includes('CSRF') || error.message.includes('419')) {
-                console.warn('CSRF token issue detected, attempting to refresh...');
+  /**
+   * Login user
+   * @param {string} login - Username or phone
+   * @param {string} password - User password
+   * @returns {Promise<{token: string, user: object}>}
+   */
+  async login(login, password) {
+    const data = await this.post("/session", { login, password });
 
-                // Try to refresh the token and retry the request once
-                try {
-                    const newToken = await this.refreshCsrfToken();
-                    if (newToken) {
-                        console.log('CSRF token refreshed, retrying request...');
-                        // Update headers with new token
-                        config.headers['X-CSRF-TOKEN'] = newToken;
-
-                        // Retry the request
-                        const retryResponse = await fetch(url, config);
-                        const retryData = await retryResponse.json();
-
-                        if (retryResponse.ok) {
-                            return retryData;
-                        } else {
-                            throw new Error(retryData.message || 'API request failed after token refresh');
-                        }
-                    }
-                } catch (retryError) {
-                    console.error('Failed to retry request after CSRF refresh:', retryError);
-                    error.message = 'CSRF validation failed. Please refresh the page and try again.';
-                }
-            }
-
-            throw error;
-        }
+    // Store token and user data
+    if (data.token) {
+      this.setToken(data.token);
+    }
+    if (data.user) {
+      this.setUser(data.user);
     }
 
-    /**
-     * GET request
-     */
-    async get(endpoint, params = {}) {
-        const query = new URLSearchParams(params).toString();
-        const url = query ? `${endpoint}?${query}` : endpoint;
-        return this.request(url, { method: 'GET' });
+    return data;
+  }
+
+  /**
+   * Logout user
+   */
+  async logout() {
+    try {
+      // Call API logout endpoint if authenticated
+      if (this.isAuthenticated()) {
+        await this.delete("/session");
+      }
+    } catch (error) {
+      console.error("Logout API call failed:", error);
+      // Continue with local logout even if API call fails
+    } finally {
+      // Always clear local auth data
+      this.clearAuth();
+    }
+  }
+
+  /**
+   * Register new user
+   * @param {string} login - Username or phone
+   * @param {string} password - User password
+   * @returns {Promise<{token: string, user: object}>}
+   */
+  async register(login, password) {
+    const data = await this.post("/register", { login, password });
+
+    // Store token and user data if registration returns them
+    if (data.token) {
+      this.setToken(data.token);
+    }
+    if (data.user) {
+      this.setUser(data.user);
     }
 
-    /**
-     * POST request
-     */
-    async post(endpoint, data = {}) {
-        return this.request(endpoint, {
-            method: 'POST',
-            body: JSON.stringify(data),
-        });
+    return data;
+  }
+
+  /**
+   * Health check
+   */
+  async healthCheck() {
+    return this.get("/up");
+  }
+
+  /**
+   * Get current user data from API
+   */
+  async getCurrentUser() {
+    const user = this.getUser();
+    if (!user || !user.id) {
+      throw new Error("No user data available");
     }
 
-    /**
-     * PUT request
-     */
-    async put(endpoint, data = {}) {
-        return this.request(endpoint, {
-            method: 'PUT',
-            body: JSON.stringify(data),
-        });
+    // Fetch fresh user data from API
+    const data = await this.getUser(user.id);
+
+    // Update stored user data
+    if (data.user || data.data) {
+      this.setUser(data.user || data.data);
     }
 
-    /**
-     * DELETE request
-     */
-    async delete(endpoint) {
-        return this.request(endpoint, { method: 'DELETE' });
-    }
+    return data;
+  }
 
-    // ============================================
-    // Authentication Endpoints
-    // ============================================
+  // ============================================
+  // Users Endpoints
+  // ============================================
 
-    /**
-     * Login user
-     */
-    async login(login, password) {
-        const data = await this.post('/session', { login, password });
-        // Token is now handled server-side
-        return data;
-    }
+  /**
+   * Get list of users
+   */
+  async getUsers(params = {}) {
+    return this.get("/users", params);
+  }
 
-    /**
-     * Logout user
-     */
-    async logout() {
-        await this.delete('/session');
-        // Token is now handled server-side
-    }
+  /**
+   * Get user by ID
+   */
+  async getUser(id) {
+    return this.get(`/users/${id}`);
+  }
 
-    /**
-     * Register new user
-     */
-    async register(login, password) {
-        const data = await this.post('/register', { login, password });
-        // Token is now handled server-side
-        return data;
-    }
+  /**
+   * Get user status
+   */
+  async getUserStatus(id) {
+    return this.get(`/users/${id}/status`);
+  }
 
-    /**
-     * Health check
-     */
-    async healthCheck() {
-        return this.get('/up');
-    }
+  /**
+   * Create new user (public endpoint)
+   */
+  async createUser(data) {
+    return this.post("/users/create", data);
+  }
 
-    // ============================================
-    // Users Endpoints
-    // ============================================
+  /**
+   * Update user
+   */
+  async updateUser(id, data) {
+    return this.put(`/users/${id}`, data);
+  }
 
-    /**
-     * Get list of users
-     */
-    async getUsers(params = {}) {
-        return this.get('/users', params);
-    }
+  /**
+   * Delete user
+   */
+  async deleteUser(id) {
+    return this.delete(`/users/${id}`);
+  }
 
-    /**
-     * Get user by ID
-     */
-    async getUser(id) {
-        return this.get(`/users/${id}`);
-    }
+  // ============================================
+  // Dealerships Endpoints
+  // ============================================
 
-    /**
-     * Get user status
-     */
-    async getUserStatus(id) {
-        return this.get(`/users/${id}/status`);
-    }
+  /**
+   * Get list of dealerships
+   */
+  async getDealerships(params = {}) {
+    return this.get("/dealerships", params);
+  }
 
-    /**
-     * Create new user (public endpoint)
-     * Uses the public endpoint for creating users without authentication
-     */
-    async createUser(data) {
-        return this.post('/users/create', data);
-    }
+  /**
+   * Get dealership by ID
+   */
+  async getDealership(id) {
+    return this.get(`/dealerships/${id}`);
+  }
 
-    /**
-     * Update user
-     * Note: This endpoint may not be available in the Telegram Bot API
-     * as users are managed through the Telegram bot registration process
-     */
-    async updateUser(id, data) {
-        return this.put(`/users/${id}`, data);
-    }
+  /**
+   * Create new dealership
+   */
+  async createDealership(data) {
+    return this.post("/dealerships", data);
+  }
 
-    /**
-     * Delete user
-     */
-    async deleteUser(id) {
-        return this.delete(`/users/${id}`);
-    }
+  /**
+   * Update dealership
+   */
+  async updateDealership(id, data) {
+    return this.put(`/dealerships/${id}`, data);
+  }
 
-    // ============================================
-    // Dealerships Endpoints
-    // ============================================
+  /**
+   * Delete dealership
+   */
+  async deleteDealership(id) {
+    return this.delete(`/dealerships/${id}`);
+  }
 
-    /**
-     * Get list of dealerships
-     */
-    async getDealerships(params = {}) {
-        return this.get('/dealerships', params);
-    }
+  // ============================================
+  // Shifts Endpoints
+  // ============================================
 
-    /**
-     * Get dealership by ID
-     */
-    async getDealership(id) {
-        return this.get(`/dealerships/${id}`);
-    }
+  /**
+   * Get list of shifts
+   */
+  async getShifts(params = {}) {
+    return this.get("/shifts", params);
+  }
 
-    /**
-     * Create new dealership
-     */
-    async createDealership(data) {
-        return this.post('/dealerships', data);
-    }
+  /**
+   * Get shift by ID
+   */
+  async getShift(id) {
+    return this.get(`/shifts/${id}`);
+  }
 
-    /**
-     * Update dealership
-     */
-    async updateDealership(id, data) {
-        return this.put(`/dealerships/${id}`, data);
-    }
+  /**
+   * Get current open shifts
+   */
+  async getCurrentShifts(dealershipId = null) {
+    const params = dealershipId ? { dealership_id: dealershipId } : {};
+    return this.get("/shifts/current", params);
+  }
 
-    /**
-     * Delete dealership
-     */
-    async deleteDealership(id) {
-        return this.delete(`/dealerships/${id}`);
-    }
+  /**
+   * Get shift statistics
+   */
+  async getShiftStatistics(params = {}) {
+    return this.get("/shifts/statistics", params);
+  }
 
-    // ============================================
-    // Shifts Endpoints
-    // ============================================
+  // ============================================
+  // Tasks Endpoints
+  // ============================================
 
-    /**
-     * Get list of shifts
-     */
-    async getShifts(params = {}) {
-        return this.get('/shifts', params);
-    }
+  /**
+   * Get list of tasks
+   */
+  async getTasks(params = {}) {
+    return this.get("/tasks", params);
+  }
 
-    /**
-     * Get shift by ID
-     */
-    async getShift(id) {
-        return this.get(`/shifts/${id}`);
-    }
+  /**
+   * Get task by ID
+   */
+  async getTask(id) {
+    return this.get(`/tasks/${id}`);
+  }
 
-    /**
-     * Get current open shifts
-     */
-    async getCurrentShifts(dealershipId = null) {
-        const params = dealershipId ? { dealership_id: dealershipId } : {};
-        return this.get('/shifts/current', params);
-    }
+  /**
+   * Create new task
+   */
+  async createTask(data) {
+    return this.post("/tasks", data);
+  }
 
-    /**
-     * Get shift statistics
-     */
-    async getShiftStatistics(params = {}) {
-        return this.get('/shifts/statistics', params);
-    }
+  /**
+   * Update task
+   */
+  async updateTask(id, data) {
+    return this.put(`/tasks/${id}`, data);
+  }
 
-    // ============================================
-    // Tasks Endpoints
-    // ============================================
+  /**
+   * Delete task
+   */
+  async deleteTask(id) {
+    return this.delete(`/tasks/${id}`);
+  }
 
-    /**
-     * Get list of tasks
-     */
-    async getTasks(params = {}) {
-        return this.get('/tasks', params);
-    }
+  /**
+   * Get postponed tasks
+   */
+  async getPostponedTasks(params = {}) {
+    return this.get("/tasks/postponed", params);
+  }
 
-    /**
-     * Get task by ID
-     */
-    async getTask(id) {
-        return this.get(`/tasks/${id}`);
-    }
+  // ============================================
+  // Dashboard Endpoints
+  // ============================================
 
-    /**
-     * Create new task
-     */
-    async createTask(data) {
-        return this.post('/tasks', data);
-    }
+  /**
+   * Get dashboard data
+   */
+  async getDashboard(params = {}) {
+    return this.get("/dashboard", params);
+  }
 
-    /**
-     * Update task
-     */
-    async updateTask(id, data) {
-        return this.put(`/tasks/${id}`, data);
-    }
+  // ============================================
+  // Settings Endpoints
+  // ============================================
 
-    /**
-     * Delete task
-     */
-    async deleteTask(id) {
-        return this.delete(`/tasks/${id}`);
-    }
+  /**
+   * Get settings
+   */
+  async getSettings(params = {}) {
+    return this.get("/settings", params);
+  }
 
-    /**
-     * Get task statistics
-     */
-    async getTaskStatistics(params = {}) {
-        return this.get('/tasks/statistics', params);
-    }
+  /**
+   * Get setting by key
+   */
+  async getSetting(key) {
+    return this.get(`/settings/${key}`);
+  }
 
-    /**
-     * Get overdue tasks
-     */
-    async getOverdueTasks(params = {}) {
-        return this.get('/tasks/overdue', params);
-    }
+  /**
+   * Create or update settings
+   */
+  async createOrUpdateSettings(data) {
+    return this.post("/settings", data);
+  }
 
-    /**
-     * Get postponed tasks
-     */
-    async getPostponedTasks(params = {}) {
-        return this.get('/tasks/postponed', params);
-    }
+  /**
+   * Update setting by ID
+   */
+  async updateSetting(id, data) {
+    return this.put(`/settings/${id}`, data);
+  }
 
-    // ============================================
-    // Task Responses Endpoints
-    // ============================================
+  /**
+   * Delete setting
+   */
+  async deleteSetting(id) {
+    return this.delete(`/settings/${id}`);
+  }
 
-    /**
-     * Update task response
-     */
-    async updateTaskResponse(taskId, data) {
-        return this.put(`/tasks/${taskId}/responses`, data);
-    }
+  /**
+   * Get shift configuration settings
+   */
+  async getShiftConfig() {
+    return this.get("/settings/shift-config");
+  }
 
-    // ============================================
-    // Dashboard Endpoints
-    // ============================================
-
-    /**
-     * Get dashboard data
-     */
-    async getDashboard(params = {}) {
-        return this.get('/dashboard', params);
-    }
-
-    // ============================================
-    // Settings Endpoints
-    // ============================================
-
-    /**
-     * Get settings
-     */
-    async getSettings(params = {}) {
-        return this.get('/settings', params);
-    }
-
-    /**
-     * Get setting by key
-     */
-    async getSetting(key) {
-        return this.get(`/settings/${key}`);
-    }
-
-    /**
-     * Update setting
-     */
-    async updateSetting(key, value) {
-        return this.put(`/settings/${key}`, { value });
-    }
-
-    /**
-     * Bulk update settings
-     */
-    async bulkUpdateSettings(settings) {
-        return this.post('/settings/bulk', { settings });
-    }
+  /**
+   * Update shift configuration settings
+   */
+  async updateShiftConfig(data) {
+    return this.post("/settings/shift-config", data);
+  }
 }
 
 // Create and export a singleton instance
@@ -450,5 +484,13 @@ window.apiClient = apiClient;
 
 // Mark API client as ready
 window.apiClientReady = true;
+
+// Expose for debugging
+if (import.meta.env.DEV) {
+  console.log("API Client initialized", {
+    baseUrl: apiClient.baseUrl,
+    isAuthenticated: apiClient.isAuthenticated(),
+  });
+}
 
 export default apiClient;

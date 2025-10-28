@@ -1,5 +1,5 @@
 <!-- Header -->
-<header class="bg-white dark:bg-gray-800 shadow-sm z-20 border-b border-gray-200 dark:border-gray-700">
+<header class="bg-white dark:bg-gray-800 shadow-sm z-20 border-b border-gray-200 dark:border-gray-700" x-data="headerData()">
     <div class="flex items-center justify-between h-16 px-4">
         <!-- Left side: Logo and toggle -->
         <div class="flex items-center">
@@ -20,11 +20,11 @@
                 <button @click="open = !open" class="flex items-center focus:outline-none">
                     <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg">
                         <span
-                            class="flex h-full w-full items-center justify-center rounded-lg bg-gray-200 text-black dark:bg-gray-700 dark:text-white">
-                            {{ Auth::user()->initials() }}
+                            class="flex h-full w-full items-center justify-center rounded-lg bg-gray-200 text-black dark:bg-gray-700 dark:text-white"
+                            x-text="userInitials">
                         </span>
                     </span>
-                    <span class="ml-2 hidden md:block">{{ Auth::user()->name }}</span>
+                    <span class="ml-2 hidden md:block" x-text="userName">Loading...</span>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -47,22 +47,60 @@
                         </div>
                     </a>
                     <div class="border-t border-gray-200 dark:border-gray-700"></div>
-                    <form method="POST" action="{{ route('logout') }}" class="w-full">
-                        @csrf
-                        <button type="submit"
-                            class="block w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                            <div class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                </svg>
-                                Logout
-                            </div>
-                        </button>
-                    </form>
+                    <button type="button" @click="logout"
+                        class="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            Logout
+                        </div>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        function headerData() {
+            return {
+                userName: 'Loading...',
+                userInitials: '??',
+
+                init() {
+                    this.loadUser();
+                },
+
+                loadUser() {
+                    const user = window.apiClient.getUser();
+                    if (user) {
+                        this.userName = user.full_name || user.login || 'User';
+                        this.userInitials = this.getInitials(this.userName);
+                    }
+                },
+
+                getInitials(name) {
+                    if (!name) return '??';
+                    const parts = name.trim().split(' ');
+                    if (parts.length >= 2) {
+                        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+                    }
+                    return name.substring(0, 2).toUpperCase();
+                },
+
+                async logout() {
+                    try {
+                        await window.apiClient.logout();
+                        window.location.href = '/login';
+                    } catch (error) {
+                        console.error('Logout error:', error);
+                        // Redirect to login even if API call fails
+                        window.location.href = '/login';
+                    }
+                }
+            }
+        }
+    </script>
 </header>

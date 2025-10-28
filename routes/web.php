@@ -1,100 +1,109 @@
 <?php
 
-use App\Http\Controllers\Settings;
 use Illuminate\Support\Facades\Route;
+
+// Public routes (no authentication required on backend)
+// Authentication is handled on frontend via JavaScript
 
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    // CSRF Token refresh endpoint
-    Route::get('/csrf-token', function () {
-        return response()->json([
-            'csrf_token' => csrf_token()
-        ]);
-    });
+// Auth pages (login, register, etc.)
+Route::get('/login', function () {
+    return view('auth.login');
+})->name('login');
 
-    // Dashboard
-    Route::get('dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+Route::get('/register', function () {
+    return view('auth.register');
+})->name('register');
 
-    // Tasks
-    Route::get('tasks', function () {
-        return view('tasks.index');
-    })->name('tasks.index');
-    Route::get('tasks/create', function () {
-        return view('tasks.create');
-    })->name('tasks.create');
-    Route::get('tasks/{id}/edit', function ($id) {
-        return view('tasks.edit', ['id' => $id]);
-    })->name('tasks.edit');
-    Route::get('tasks/{id}', function ($id) {
-        return view('tasks.show', ['id' => $id]);
-    })->name('tasks.show');
+Route::get('/forgot-password', function () {
+    return view('auth.forgot-password');
+})->name('password.request');
 
-    // Dealerships
-    Route::get('dealerships', function () {
-        return view('dealerships.index');
-    })->name('dealerships.index');
-    Route::get('dealerships/create', function () {
-        return view('dealerships.create');
-    })->name('dealerships.create');
-    Route::get('dealerships/{id}/edit', function ($id) {
-        return view('dealerships.edit', ['id' => $id]);
-    })->name('dealerships.edit');
-    Route::get('dealerships/{id}', function ($id) {
-        return view('dealerships.show', ['id' => $id]);
-    })->name('dealerships.show');
+Route::get('/reset-password/{token}', function ($token) {
+    return view('auth.reset-password', ['token' => $token]);
+})->name('password.reset');
 
-    // Users Management
-    Route::get('users', function () {
-        return view('users.index');
-    })->name('users.index');
-    Route::get('users/create', function () {
-        return view('users.create');
-    })->name('users.create');
-    Route::get('users/{id}/edit', function ($id) {
-        return view('users.edit', ['id' => $id]);
-    })->name('users.edit');
-    Route::get('users/{id}', function ($id) {
-        return view('users.show', ['id' => $id]);
-    })->name('users.show');
+// Dashboard
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->name('dashboard');
 
-    // Links
-    Route::get('links', function () {
-        return view('links.index');
-    })->name('links.index');
+// Tasks
+Route::get('/tasks', function () {
+    return view('tasks.index');
+})->name('tasks.index');
 
-    // Settings
-    Route::get('settings/profile', [Settings\ProfileController::class, 'edit'])->name('settings.profile.edit');
-    Route::put('settings/profile', [Settings\ProfileController::class, 'update'])->name('settings.profile.update');
-    Route::delete('settings/profile', [Settings\ProfileController::class, 'destroy'])->name('settings.profile.destroy');
-    Route::get('settings/password', [Settings\PasswordController::class, 'edit'])->name('settings.password.edit');
-    Route::put('settings/password', [Settings\PasswordController::class, 'update'])->name('settings.password.update');
-    Route::get('settings/appearance', [Settings\AppearanceController::class, 'edit'])->name('settings.appearance.edit');
-    Route::get('settings/system', function () {
-        return view('settings.system');
-    })->name('settings.system.edit');
-    Route::get('settings/bot-api', [Settings\BotApiController::class, 'edit'])->name('settings.bot-api.edit');
+Route::get('/tasks/create', function () {
+    return view('tasks.create');
+})->name('tasks.create');
 
-    // API Routes for Settings
-    Route::prefix('api/settings')->group(function () {
-        Route::get('/', [Settings\BotApiController::class, 'index']);
-        Route::get('/{key}', [Settings\BotApiController::class, 'show']);
-        Route::put('/{key}', [Settings\BotApiController::class, 'update']);
-        Route::delete('/{key}', [Settings\BotApiController::class, 'destroy']);
-        Route::post('/bulk', [Settings\BotApiController::class, 'bulkUpdate']);
-    });
+Route::get('/tasks/{id}/edit', function ($id) {
+    return view('tasks.edit', ['id' => $id]);
+})->name('tasks.edit');
 
-    // API Proxy Routes
-    Route::prefix('api/proxy')->group(function () {
-        Route::any('{endpoint}', [App\Http\Controllers\ApiProxyController::class, 'proxy'])
-            ->where('endpoint', '.*');
-        Route::post('upload/{endpoint}', [App\Http\Controllers\ApiProxyController::class, 'proxyUpload'])
-            ->where('endpoint', '.*');
-    });
-});
+Route::get('/tasks/{id}', function ($id) {
+    return view('tasks.show', ['id' => $id]);
+})->name('tasks.show');
 
-require __DIR__.'/auth.php';
+// Dealerships
+Route::get('/dealerships', function () {
+    return view('dealerships.index');
+})->name('dealerships.index');
+
+Route::get('/dealerships/create', function () {
+    return view('dealerships.create');
+})->name('dealerships.create');
+
+Route::get('/dealerships/{id}/edit', function ($id) {
+    return view('dealerships.edit', ['id' => $id]);
+})->name('dealerships.edit');
+
+Route::get('/dealerships/{id}', function ($id) {
+    return view('dealerships.show', ['id' => $id]);
+})->name('dealerships.show');
+
+// Users Management
+Route::get('/users', function () {
+    return view('users.index');
+})->name('users.index');
+
+Route::get('/users/create', function () {
+    return view('users.create');
+})->name('users.create');
+
+Route::get('/users/{id}/edit', function ($id) {
+    return view('users.edit', ['id' => $id]);
+})->name('users.edit');
+
+Route::get('/users/{id}', function ($id) {
+    return view('users.show', ['id' => $id]);
+})->name('users.show');
+
+// Links
+Route::get('/links', function () {
+    return view('links.index');
+})->name('links.index');
+
+// Settings
+Route::get('/settings/profile', function () {
+    return view('settings.profile');
+})->name('settings.profile.edit');
+
+Route::get('/settings/password', function () {
+    return view('settings.password');
+})->name('settings.password.edit');
+
+Route::get('/settings/appearance', function () {
+    return view('settings.appearance');
+})->name('settings.appearance.edit');
+
+Route::get('/settings/system', function () {
+    return view('settings.system');
+})->name('settings.system.edit');
+
+Route::get('/settings/bot-api', function () {
+    return view('settings.bot-api');
+})->name('settings.bot-api.edit');
