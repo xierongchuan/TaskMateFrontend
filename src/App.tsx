@@ -8,6 +8,9 @@ import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { TasksPage } from './pages/TasksPage';
 import { UsersPage } from './pages/UsersPage';
+import { ShiftsPage } from './pages/ShiftsPage';
+import { LinksPage } from './pages/LinksPage';
+import { SettingsPage } from './pages/SettingsPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,7 +34,16 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/login"
+            element={
+              isAuthenticated ? (
+                <Navigate to="/dashboard" replace />
+              ) : (
+                <LoginPage />
+              )
+            }
+          />
 
           <Route
             path="/"
@@ -49,6 +61,16 @@ function App() {
               element={
                 <ProtectedRoute requiredRoles={['manager', 'owner', 'observer']}>
                   <UsersPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="shifts" element={<ShiftsPage />} />
+            <Route path="links" element={<LinksPage />} />
+            <Route
+              path="settings"
+              element={
+                <ProtectedRoute requiredRoles={['manager', 'owner']}>
+                  <SettingsPage />
                 </ProtectedRoute>
               }
             />
