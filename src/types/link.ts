@@ -4,9 +4,14 @@ export interface Link {
   url: string;
   description?: string;
   category?: string;
-  created_by: number;
+  creator_id: number;
+  dealership_id?: number;
   created_at: string;
   updated_at: string;
+  creator?: {
+    id: number;
+    full_name: string;
+  };
 }
 
 export interface CreateLinkRequest {

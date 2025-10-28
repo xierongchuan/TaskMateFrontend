@@ -34,7 +34,7 @@ export const LinksPage: React.FC = () => {
     category: 'general',
   });
 
-  const { data: links, isLoading, error } = useQuery({
+  const { data: linksData, isLoading, error } = useQuery({
     queryKey: ['links'],
     queryFn: () => linksApi.getLinks(),
   });
@@ -100,7 +100,7 @@ export const LinksPage: React.FC = () => {
     }
   };
 
-  const filteredLinks = links?.filter(link =>
+  const filteredLinks = linksData?.filter(link =>
     link.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     link.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     link.url.toLowerCase().includes(searchTerm.toLowerCase())

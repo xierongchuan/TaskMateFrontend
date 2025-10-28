@@ -1,10 +1,11 @@
 import apiClient from './client';
 import type { Link, CreateLinkRequest, UpdateLinkRequest } from '../types/link';
+import type { PaginatedResponse } from '../types/api';
 
 export const linksApi = {
   getLinks: async (): Promise<Link[]> => {
-    const response = await apiClient.get<Link[]>('/links');
-    return response.data;
+    const response = await apiClient.get<PaginatedResponse<Link>>('/links');
+    return response.data.data;
   },
 
   createLink: async (data: CreateLinkRequest): Promise<{ data: Link }> => {
