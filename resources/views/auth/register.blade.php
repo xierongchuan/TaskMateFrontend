@@ -9,8 +9,7 @@
                 </p>
             </div>
 
-            <form method="POST" action="{{ route('register') }}" id="register-form">
-                @csrf
+            <form id="register-form">
                 <!-- Login Input -->
                 <div class="mb-4">
                     <x-forms.input label="Login" name="login" type="text" placeholder="{{ __('Your login') }}" />
@@ -65,13 +64,26 @@
                     const password = formData.get('password');
                     const password_confirmation = formData.get('password_confirmation');
 
+                    // Get API URL from meta tag (set by Laravel config)
+                    const apiUrlMeta = document.querySelector('meta[name="api-url"]');
+                    const apiUrl = apiUrlMeta ? apiUrlMeta.getAttribute('content') : null;
+
+                    if (!apiUrl) {
+                        const generalError = document.getElementById('general-error');
+                        generalError.querySelector('p').textContent = '{{ __('API configuration missing. Please contact administrator.') }}';
+                        generalError.classList.remove('hidden');
+                        button.disabled = false;
+                        button.textContent = originalText;
+                        return;
+                    }
+
                     try {
-                        const response = await fetch('{{ route('register') }}', {
+                        // Call external API directly
+                        const response = await fetch(`${apiUrl}/register`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'Accept': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                'Accept': 'application/json'
                             },
                             body: JSON.stringify({ login, password, password_confirmation })
                         });
@@ -79,14 +91,33 @@
                         const data = await response.json();
 
                         if (response.ok) {
-                            window.location.href = data.redirect || '{{ route('dashboard') }}';
+                            // Store token and user data in Laravel session via our backend
+                            const sessionResponse = await fetch('{{ route('register') }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    token: data.token,
+                                    user: data.user
+                                })
+                            });
+
+                            if (sessionResponse.ok) {
+                                window.location.href = '{{ route('dashboard') }}';
+                            } else {
+                                const generalError = document.getElementById('general-error');
+                                generalError.querySelector('p').textContent = '{{ __('Session creation failed. Please try logging in.') }}';
+                                generalError.classList.remove('hidden');
+                            }
                         } else {
                             // Show validation errors
                             if (data.errors) {
                                 for (const [field, messages] of Object.entries(data.errors)) {
                                     const errorEl = document.getElementById(field + '-error');
                                     if (errorEl) {
-                                        errorEl.textContent = messages[0];
+                                        errorEl.textContent = Array.isArray(messages) ? messages[0] : messages;
                                         errorEl.classList.remove('hidden');
                                     }
                                 }

@@ -21,53 +21,23 @@ class LoginController extends Controller
 
     public function store(Request $request): RedirectResponse|\Illuminate\Http\JsonResponse
     {
+        // Frontend has already called the API and is just storing token/user in session
         $request->validate([
-            'email' => ['required', 'string'],
-            'password' => ['required', 'string'],
+            'token' => ['required', 'string'],
+            'user' => ['required', 'array'],
         ]);
 
-        $this->ensureIsNotRateLimited($request);
-
         try {
-            // Call external API for authentication
-            $apiUrl = config('api.url');
-            $response = Http::timeout(config('api.timeout'))
-                ->post("{$apiUrl}/session", [
-                    'login' => $request->input('email'),
-                    'password' => $request->input('password'),
-                ]);
-
-            if (!$response->successful()) {
-                RateLimiter::hit($this->throttleKey($request));
-
-                $errorMessage = $response->json('message') ?? trans('auth.failed');
-
-                if ($request->expectsJson()) {
-                    return response()->json([
-                        'message' => $errorMessage,
-                        'errors' => ['email' => [$errorMessage]]
-                    ], $response->status());
-                }
-
-                throw ValidationException::withMessages([
-                    'email' => $errorMessage,
-                ]);
-            }
-
-            $data = $response->json();
-
             // Store authentication data in session
             $request->session()->regenerate();
-            $request->session()->put('api_token', $data['token'] ?? null);
-            $request->session()->put('user', $data['user'] ?? null);
+            $request->session()->put('api_token', $request->input('token'));
+            $request->session()->put('user', $request->input('user'));
             $request->session()->put('authenticated', true);
-
-            RateLimiter::clear($this->throttleKey($request));
 
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Login successful',
+                    'message' => 'Session created successfully',
                     'redirect' => route('dashboard', absolute: false)
                 ]);
             }
@@ -75,21 +45,15 @@ class LoginController extends Controller
             return redirect()->intended(route('dashboard', absolute: false));
 
         } catch (\Exception $e) {
-            if ($e instanceof ValidationException) {
-                throw $e;
-            }
-
-            RateLimiter::hit($this->throttleKey($request));
-
             if ($request->expectsJson()) {
                 return response()->json([
-                    'message' => 'Unable to connect to authentication service. Please try again later.',
-                    'errors' => ['email' => ['Unable to connect to authentication service. Please try again later.']]
+                    'message' => 'Session creation failed',
+                    'errors' => ['token' => ['Session creation failed']]
                 ], 500);
             }
 
             throw ValidationException::withMessages([
-                'email' => 'Unable to connect to authentication service. Please try again later.',
+                'token' => 'Session creation failed',
             ]);
         }
     }

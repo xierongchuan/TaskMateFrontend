@@ -15,6 +15,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'api.auth' => \App\Http\Middleware\ApiAuthenticate::class,
             'api.guest' => \App\Http\Middleware\ApiGuest::class,
         ]);
+
+        // Exclude auth routes from CSRF verification since they communicate directly with external API
+        $middleware->validateCsrfTokens(except: [
+            '/login',
+            '/register',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
