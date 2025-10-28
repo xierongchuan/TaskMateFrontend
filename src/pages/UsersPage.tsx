@@ -458,6 +458,10 @@ export const UsersPage: React.FC = () => {
                         {user.telegram_id ? 'Подключен' : 'Не подключен'}
                       </span>
                     </div>
+                    <div className="flex items-center">
+                      <ClockIcon className="w-4 h-4 mr-2" />
+                      Создан: {new Date(user.created_at).toLocaleDateString('ru-RU')}
+                    </div>
                   </div>
                 </div>
               ))}
