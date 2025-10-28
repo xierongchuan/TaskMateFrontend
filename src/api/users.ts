@@ -15,10 +15,27 @@ export interface UsersFilters {
 
 export const usersApi = {
   getUsers: async (filters?: UsersFilters): Promise<PaginatedResponse<User>> => {
-    const response = await apiClient.get<PaginatedResponse<User>>('/users', {
+    const response = await apiClient.get<{
+      data: User[];
+      links: any;
+      meta: {
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+      };
+    }>('/users', {
       params: filters,
     });
-    return response.data;
+
+    // Convert API response to PaginatedResponse format
+    return {
+      data: response.data.data,
+      current_page: response.data.meta.current_page,
+      last_page: response.data.meta.last_page,
+      per_page: response.data.meta.per_page,
+      total: response.data.meta.total,
+    };
   },
 
   getUser: async (id: number): Promise<User> => {

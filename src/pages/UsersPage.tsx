@@ -18,8 +18,7 @@ import {
   TrashIcon,
   ShieldCheckIcon,
   EyeIcon,
-  UserGroupIcon,
-  ClockIcon
+  UserGroupIcon
 } from '@heroicons/react/24/outline';
 
 export const UsersPage: React.FC = () => {
@@ -29,7 +28,6 @@ export const UsersPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'cards'>('list');
-  const [showOnlyActive, setShowOnlyActive] = useState(false);
   const [filters, setFilters] = useState({
     search: '',
     role: '',
@@ -259,19 +257,7 @@ export const UsersPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="mt-4 flex items-center">
-            <input
-              type="checkbox"
-              id="showOnlyActive"
-              checked={showOnlyActive}
-              onChange={(e) => setShowOnlyActive(e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="showOnlyActive" className="ml-2 text-sm text-gray-700">
-              Показать только активных сотрудников
-            </label>
           </div>
-        </div>
       </div>
 
       {isLoading ? (
@@ -335,7 +321,8 @@ export const UsersPage: React.FC = () => {
                         <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
                           <div className="flex items-center text-gray-500">
                             <PhoneIcon className="w-4 h-4 mr-2" />
-                            {user.phone || 'Нет телефона'}
+                            {(user.phone_number && user.phone_number.trim()) ? user.phone_number :
+                             (user.phone && user.phone.trim()) ? user.phone : 'Не указан'}
                           </div>
                           <div className="flex items-center text-gray-500">
                             <BuildingOfficeIcon className="w-4 h-4 mr-2" />
@@ -345,11 +332,7 @@ export const UsersPage: React.FC = () => {
                             <ChatBubbleLeftRightIcon className="w-4 h-4 mr-2" />
                             {user.telegram_id ? 'Подключен' : 'Не подключен'}
                           </div>
-                          <div className="flex items-center text-gray-500">
-                            <ClockIcon className="w-4 h-4 mr-2" />
-                            Создан: {new Date(user.created_at).toLocaleDateString('ru-RU')}
-                          </div>
-                        </div>
+                            </div>
                       </div>
 
                       {permissions.canCreateUsers && (
@@ -446,7 +429,8 @@ export const UsersPage: React.FC = () => {
                   <div className="space-y-2 text-sm text-gray-600">
                     <div className="flex items-center">
                       <PhoneIcon className="w-4 h-4 mr-2" />
-                      {user.phone || 'Нет телефона'}
+                      {(user.phone_number && user.phone_number.trim()) ? user.phone_number :
+                       (user.phone && user.phone.trim()) ? user.phone : 'Не указан'}
                     </div>
                     <div className="flex items-center">
                       <BuildingOfficeIcon className="w-4 h-4 mr-2" />

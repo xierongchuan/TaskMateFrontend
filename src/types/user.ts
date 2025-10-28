@@ -8,8 +8,7 @@ export interface User {
   dealership_id: number | null;
   telegram_id: number | null;
   phone: string | null;
-  created_at: string;
-  updated_at: string;
+  phone_number: string | null;
 }
 
 export interface LoginRequest {
