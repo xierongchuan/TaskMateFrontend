@@ -13,14 +13,27 @@ class ApiClient {
         this.baseUrl = '/api/proxy';
 
         // Store the external API URL for direct access when needed (e.g., health checks)
-        // This comes from VITE_API_URL in .env via Vite's define config
-        this.externalApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8007/api/v1';
+        // This is read from the meta tag set by PHP (Laravel config)
+        this.externalApiUrl = this.getApiUrlFromMeta();
 
         // Make API URL available globally for views
         window.API_URL = this.externalApiUrl;
 
         // Token is now handled server-side in the proxy
         this.token = null;
+    }
+
+    /**
+     * Get API URL from meta tag
+     */
+    getApiUrlFromMeta() {
+        const metaTag = document.querySelector('meta[name="api-url"]');
+        if (metaTag) {
+            return metaTag.getAttribute('content');
+        }
+        // Fallback for development if meta tag is missing
+        console.warn('API URL meta tag not found, using fallback');
+        return 'http://localhost:8007/api/v1';
     }
 
     /**

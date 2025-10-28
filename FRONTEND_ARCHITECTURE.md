@@ -70,31 +70,30 @@ const shifts = await window.apiClient.getCurrentShifts();
 
 ### 2. Configuration
 
-The API URL is configured via environment variables in `.env`:
+The API URL is configured via environment variable in `.env`:
 
 ```env
-# Backend API URL (used by Laravel proxy)
+# External API URL (used by Laravel and exposed to frontend)
 API_URL=http://localhost:8007/api/v1
 API_TIMEOUT=30
-
-# Frontend API URL (used by JavaScript, defaults to API_URL)
-VITE_API_URL="${API_URL}"
 ```
 
-The Vite build system automatically injects the `VITE_API_URL` into the compiled JavaScript as `import.meta.env.VITE_API_URL`. This is configured in `vite.config.js`:
+The API URL is passed from Laravel to JavaScript via a meta tag in the HTML head:
+
+```html
+<meta name="api-url" content="{{ config('api.url') }}">
+```
+
+The API client reads this meta tag on initialization:
 
 ```javascript
-export default defineConfig(({ mode }) => {
-    const env = loadEnv(mode, process.cwd(), '');
-
-    return {
-        define: {
-            'import.meta.env.VITE_API_URL': JSON.stringify(
-                env.VITE_API_URL || env.API_URL || 'http://localhost:8007/api/v1'
-            ),
-        },
-    };
-});
+getApiUrlFromMeta() {
+    const metaTag = document.querySelector('meta[name="api-url"]');
+    if (metaTag) {
+        return metaTag.getAttribute('content');
+    }
+    return 'http://localhost:8007/api/v1'; // Fallback
+}
 ```
 
 The API client automatically exposes this URL as `window.API_URL` for use in views and inline scripts.
@@ -228,7 +227,7 @@ npm run dev
 Set the Telegram Bot API URL in your environment:
 
 ```env
-VITE_API_BASE_URL=https://your-telegram-bot-api.com/api/v1
+API_URL=https://your-telegram-bot-api.com/api/v1
 ```
 
 ### 3. Test API Connectivity

@@ -56,22 +56,27 @@ The `api-client.js` is automatically configured to use the proxy for all API req
 // All requests go through the local proxy
 this.baseUrl = '/api/proxy';
 
-// The external API URL is configured via .env and exposed as window.API_URL
+// The external API URL is read from meta tag set by PHP
 // This is used for direct health checks and testing connections
-this.externalApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8007/api/v1';
+this.externalApiUrl = this.getApiUrlFromMeta();
 window.API_URL = this.externalApiUrl;
 ```
 
 ### Configuration in .env
 
 ```env
-# Backend API URL (used by Laravel proxy)
+# External API URL (used by Laravel and exposed to frontend via meta tag)
 API_URL=http://localhost:8007/api/v1
 API_TIMEOUT=30
-
-# Frontend API URL (exposed to JavaScript)
-VITE_API_URL="${API_URL}"
 ```
+
+The API URL is injected into the HTML head as a meta tag by Laravel:
+
+```html
+<meta name="api-url" content="{{ config('api.url') }}">
+```
+
+This ensures the API endpoint is configured in one place (`.env`) and properly propagated to both backend (Laravel) and frontend (JavaScript).
 
 ## Security Features
 

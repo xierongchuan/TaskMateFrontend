@@ -1,0 +1,13 @@
+
+> build
+> vite build
+
+vite v6.3.6 building for production...
+transforming...
+✓ 55 modules transformed.
+rendering chunks...
+computing gzip size...
+public/build/manifest.json             0.27 kB │ gzip:  0.15 kB
+public/build/assets/app-Dni5MQcH.css  52.28 kB │ gzip: 11.16 kB
+public/build/assets/app-Y5v3OA_z.js   86.10 kB │ gzip: 31.78 kB
+✓ built in 2.38s
