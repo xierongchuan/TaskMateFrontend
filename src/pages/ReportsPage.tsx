@@ -196,26 +196,28 @@ export const ReportsPage: React.FC = () => {
       </div>
 
       {/* Period Selector */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center bg-gray-100 rounded-lg">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-6">
+        <div className="space-y-4 sm:space-y-0 sm:flex sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          {/* Period Buttons */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+            <span className="text-sm font-medium text-gray-700 hidden sm:block">Период:</span>
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               <button
                 onClick={() => handlePeriodChange('week')}
-                className={`px-4 py-2 text-sm font-medium rounded-l-lg ${
+                className={`flex-1 sm:flex-initial px-4 py-3 text-sm font-medium rounded-lg min-h-[44px] transition-colors ${
                   selectedPeriod === 'week'
                     ? 'bg-blue-600 text-white'
-                    : 'text-gray-700 hover:bg-gray-200'
+                    : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
                 }`}
               >
                 Эта неделя
               </button>
               <button
                 onClick={() => handlePeriodChange('month')}
-                className={`px-4 py-2 text-sm font-medium rounded-r-lg ${
+                className={`flex-1 sm:flex-initial px-4 py-3 text-sm font-medium rounded-lg min-h-[44px] transition-colors ${
                   selectedPeriod === 'month'
                     ? 'bg-blue-600 text-white'
-                    : 'text-gray-700 hover:bg-gray-200'
+                    : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
                 }`}
               >
                 Этот месяц
@@ -223,21 +225,28 @@ export const ReportsPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
-            <label className="text-sm font-medium text-gray-700">Период:</label>
-            <input
-              type="date"
-              value={dateRange.from}
-              onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-            <span className="text-gray-500">—</span>
-            <input
-              type="date"
-              value={dateRange.to}
-              onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
+          {/* Date Range */}
+          <div className="flex flex-col gap-2 sm:gap-3">
+            <span className="text-sm font-medium text-gray-700 hidden sm:block">Диапазон дат:</span>
+            <label className="text-sm font-medium text-gray-700 block sm:hidden">Диапазон дат:</label>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+              <input
+                type="date"
+                value={dateRange.from}
+                onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
+                inputMode="date"
+                className="w-full sm:w-auto px-3 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[44px]"
+              />
+              <span className="text-gray-500 text-center sm:text-left hidden sm:block">—</span>
+              <div className="text-center sm:hidden text-gray-500 text-sm mb-1">до</div>
+              <input
+                type="date"
+                value={dateRange.to}
+                onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
+                inputMode="date"
+                className="w-full sm:w-auto px-3 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[44px]"
+              />
+            </div>
           </div>
         </div>
       </div>

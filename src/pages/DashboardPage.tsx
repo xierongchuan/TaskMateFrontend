@@ -117,21 +117,21 @@ export const DashboardPage: React.FC = () => {
     <div className="px-4 py-6 sm:px-0 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
               Панель управления
             </h1>
             <p className="mt-1 text-sm text-gray-600">
               Добро пожаловать, {user?.full_name}! • Роль: <span className="font-medium">{user?.role}</span>
             </p>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex flex-col sm:flex-row items-center gap-2">
             <div className="flex items-center space-x-2 px-3 py-1 bg-green-100 rounded-full">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-sm text-green-800">Live обновления</span>
+              <span className="text-sm text-green-800 whitespace-nowrap">Live обновления</span>
             </div>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-gray-500 whitespace-nowrap">
               {format(new Date(), 'HH:mm:ss', { locale: ru })}
             </span>
           </div>
@@ -139,22 +139,22 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
         {stats.map((stat) => (
           <div
             key={stat.name}
             className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200"
           >
-            <div className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">{stat.name}</p>
-                  <p className={`text-3xl font-bold mt-2 ${stat.textColor}`}>
+            <div className="p-4 sm:p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">{stat.name}</p>
+                  <p className={`text-2xl sm:text-3xl font-bold mt-1 sm:mt-2 ${stat.textColor}`}>
                     {stat.value}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">{stat.description}</p>
+                  <p className="text-xs text-gray-500 mt-1 hidden sm:block">{stat.description}</p>
                 </div>
-                <div className={`${stat.color} rounded-lg p-3 text-white`}>
+                <div className={`${stat.color} rounded-lg p-2 sm:p-3 text-white flex-shrink-0`}>
                   {stat.icon}
                 </div>
               </div>
@@ -163,12 +163,12 @@ export const DashboardPage: React.FC = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Live Tablo - Active Shifts */}
-        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+        <div className="xl:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200">
+          <div className="p-4 sm:p-6 border-b border-gray-200">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
                 <UserIcon className="w-5 h-5 mr-2" />
                 Live-табло: активные смены
               </h2>
@@ -177,34 +177,34 @@ export const DashboardPage: React.FC = () => {
               </span>
             </div>
           </div>
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {dashboardData?.active_shifts && dashboardData.active_shifts.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {dashboardData.active_shifts.map((shift: any) => (
-                  <div key={shift.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="flex items-center space-x-4">
-                      <div className={`w-3 h-3 rounded-full ${
+                  <div key={shift.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-3 h-3 rounded-full flex-shrink-0 ${
                         shift.status === 'open' ? 'bg-green-500' : 'bg-gray-400'
                       }`}></div>
-                      <div>
-                        <p className="font-medium text-gray-900">{shift.user?.full_name}</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-gray-900 truncate">{shift.user?.full_name}</p>
                         <p className="text-sm text-gray-500">
                           Открыта: {format(new Date(shift.opened_at), 'HH:mm', { locale: ru })}
                           {shift.replacement && (
-                            <span className="ml-2 text-orange-600">
+                            <span className="ml-2 text-orange-600 block sm:inline">
                               Заменяет: {shift.replacement.full_name}
                             </span>
                           )}
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                       {shift.is_late && (
-                        <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full border border-red-200">
+                        <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full border border-red-200 text-center sm:text-left">
                           Опоздание {shift.late_minutes} мин
                         </span>
                       )}
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getShiftStatusColor(shift.status, shift.is_late)}`}>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium border text-center sm:text-left ${getShiftStatusColor(shift.status, shift.is_late)}`}>
                         {shift.status === 'open' ? 'На смене' : 'Закрыта'}
                       </span>
                     </div>
@@ -222,22 +222,22 @@ export const DashboardPage: React.FC = () => {
 
         {/* Quick Actions */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+          <div className="p-4 sm:p-6 border-b border-gray-200">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
               <ChartBarIcon className="w-5 h-5 mr-2" />
               Быстрые действия
             </h2>
           </div>
-          <div className="p-6 space-y-3">
-            <button className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center">
+          <div className="p-4 sm:p-6 space-y-3">
+            <button className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center min-h-[44px]">
               <CalendarIcon className="w-4 h-4 mr-2" />
               Создать задачу
             </button>
-            <button className="w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center">
+            <button className="w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center min-h-[44px]">
               <LinkIcon className="w-4 h-4 mr-2" />
               Добавить ссылку
             </button>
-            <button className="w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center">
+            <button className="w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center min-h-[44px]">
               <ChartBarIcon className="w-4 h-4 mr-2" />
               Отчеты
             </button>
@@ -246,27 +246,27 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       {/* Recent Tasks and Issues */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
         {/* Recent Tasks */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+          <div className="p-4 sm:p-6 border-b border-gray-200">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
               <CalendarIcon className="w-5 h-5 mr-2" />
               Последние задачи
             </h2>
           </div>
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {dashboardData?.recent_tasks && dashboardData.recent_tasks.length > 0 ? (
               <div className="space-y-3">
                 {dashboardData.recent_tasks.slice(0, 5).map((task) => (
-                  <div key={task.id} className="flex items-start justify-between p-3 bg-gray-50 rounded-lg">
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-900 text-sm">{task.title}</p>
+                  <div key={task.id} className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 p-3 bg-gray-50 rounded-lg">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-gray-900 text-sm truncate">{task.title}</p>
                       <p className="text-xs text-gray-500 mt-1">
                         {format(new Date(task.created_at), 'HH:mm', { locale: ru })}
                       </p>
                     </div>
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(task.status)}`}>
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border whitespace-nowrap ${getStatusColor(task.status)}`}>
                       {getStatusIcon(task.status)}
                       <span className="ml-1">
                         {task.status === 'completed' && 'Выполнено'}
@@ -290,13 +290,13 @@ export const DashboardPage: React.FC = () => {
 
         {/* Issues Alert */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+          <div className="p-4 sm:p-6 border-b border-gray-200">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
               <ExclamationTriangleIcon className="w-5 h-5 mr-2 text-orange-500" />
               Требует внимания
             </h2>
           </div>
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {((dashboardData?.overdue_tasks || 0) > 0 || (dashboardData?.late_shifts_today || 0) > 0) ? (
               <div className="space-y-3">
                 {dashboardData?.overdue_tasks && dashboardData.overdue_tasks > 0 && (

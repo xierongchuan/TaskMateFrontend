@@ -76,12 +76,12 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
 
   return (
     <div className="fixed inset-0 z-10 overflow-y-auto">
-      <div className="flex min-h-screen items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <div className="flex min-h-full items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={onClose}></div>
 
-        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full w-full">
           <form onSubmit={handleSubmit}>
-            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 max-h-[70vh] overflow-y-auto">
               <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
                 {user ? 'Редактировать пользователя' : 'Создать пользователя'}
               </h3>
@@ -94,7 +94,7 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
                     required
                     value={formData.login}
                     onChange={(e) => setFormData({ ...formData, login: e.target.value })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px]"
                   />
                 </div>
 
@@ -106,7 +106,7 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
                       required
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px]"
                     />
                   </div>
                 )}
@@ -118,7 +118,7 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
                       type="password"
                       value={formData.password || ''}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px]"
                     />
                   </div>
                 )}
@@ -130,7 +130,7 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
                     required
                     value={formData.full_name}
                     onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px]"
                   />
                 </div>
 
@@ -142,7 +142,7 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="+7 XXX XXX XX XX"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px]"
                   />
                 </div>
 
@@ -151,7 +151,7 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
                   <select
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value as Role })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px]"
                   >
                     <option value="employee">Сотрудник</option>
                     <option value="observer">Наблюдатель</option>
@@ -175,7 +175,7 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
                     type="number"
                     value={formData.telegram_id || ''}
                     onChange={(e) => setFormData({ ...formData, telegram_id: e.target.value ? parseInt(e.target.value) : undefined })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px]"
                   />
                 </div>
               </div>

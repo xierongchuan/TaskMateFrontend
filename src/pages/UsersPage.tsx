@@ -143,18 +143,18 @@ export const UsersPage: React.FC = () => {
     <div className="px-4 py-6 sm:px-0 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Сотрудники</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Сотрудники</h1>
             <p className="mt-2 text-sm text-gray-600">
               Управление сотрудниками, ролями и доступом к салонам
             </p>
           </div>
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center bg-white rounded-lg border border-gray-200">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-center bg-white rounded-lg border border-gray-200 w-full sm:w-auto">
               <button
                 onClick={() => setViewMode('list')}
-                className={`px-3 py-2 text-sm font-medium rounded-l-lg ${
+                className={`flex-1 sm:flex-initial px-3 py-2 text-sm font-medium rounded-l-lg ${
                   viewMode === 'list'
                     ? 'bg-blue-100 text-blue-700'
                     : 'text-gray-500 hover:text-gray-700'
@@ -164,7 +164,7 @@ export const UsersPage: React.FC = () => {
               </button>
               <button
                 onClick={() => setViewMode('cards')}
-                className={`px-3 py-2 text-sm font-medium rounded-r-lg ${
+                className={`flex-1 sm:flex-initial px-3 py-2 text-sm font-medium rounded-r-lg ${
                   viewMode === 'cards'
                     ? 'bg-blue-100 text-blue-700'
                     : 'text-gray-500 hover:text-gray-700'
@@ -176,7 +176,7 @@ export const UsersPage: React.FC = () => {
             {permissions.canCreateUsers && (
               <button
                 onClick={handleCreate}
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors min-h-[44px]"
               >
                 <PlusIcon className="w-4 h-4 mr-2" />
                 Добавить сотрудника
@@ -188,8 +188,8 @@ export const UsersPage: React.FC = () => {
 
       {/* Advanced Filters */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="p-4 sm:p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <MagnifyingGlassIcon className="w-4 h-4 inline mr-1" />
@@ -293,12 +293,12 @@ export const UsersPage: React.FC = () => {
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               <div className="divide-y divide-gray-200">
                 {usersData?.data.map((user) => (
-                  <div key={user.id} className={`p-6 hover:bg-gray-50 transition-colors ${getUserCardClass(user)}`}>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 min-w-0 pr-4">
+                  <div key={user.id} className={`p-4 sm:p-6 hover:bg-gray-50 transition-colors ${getUserCardClass(user)}`}>
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                      <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-3 mb-3">
                           <div className="flex items-center">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold ${
+                            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white font-semibold ${
                               user.role === 'owner' ? 'bg-red-500' :
                               user.role === 'manager' ? 'bg-green-500' :
                               user.role === 'observer' ? 'bg-purple-500' : 'bg-blue-500'
@@ -309,48 +309,51 @@ export const UsersPage: React.FC = () => {
                               <div className="ml-2 w-2 h-2 bg-orange-500 rounded-full" title="Нет Telegram"></div>
                             )}
                           </div>
-                          <div>
-                            <h3 className="text-lg font-semibold text-gray-900">
+                          <div className="min-w-0 flex-1">
+                            <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
                               {user.full_name}
                             </h3>
-                            <p className="text-sm text-gray-500">@{user.login}</p>
+                            <p className="text-sm text-gray-500 truncate">@{user.login}</p>
                           </div>
                         </div>
 
                         {getRoleBadge(user.role)}
 
-                        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+                        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
                           <div className="flex items-center text-gray-500">
-                            <PhoneIcon className="w-4 h-4 mr-2" />
-                            {formatPhoneNumber(user.phone_number || user.phone)}
+                            <PhoneIcon className="w-4 h-4 mr-2 flex-shrink-0" />
+                            <span className="truncate">{formatPhoneNumber(user.phone_number || user.phone)}</span>
                           </div>
                           <div className="flex items-center text-gray-500">
-                            <BuildingOfficeIcon className="w-4 h-4 mr-2" />
-                            {user.dealership_id ? `Салон #${user.dealership_id}` : 'Не привязан'}
+                            <BuildingOfficeIcon className="w-4 h-4 mr-2 flex-shrink-0" />
+                            <span className="truncate">{user.dealership_id ? `Салон #${user.dealership_id}` : 'Не привязан'}</span>
                           </div>
                           <div className="flex items-center text-gray-500">
-                            <ChatBubbleLeftRightIcon className="w-4 h-4 mr-2" />
-                            {user.telegram_id ? 'Подключен' : 'Не подключен'}
+                            <ChatBubbleLeftRightIcon className="w-4 h-4 mr-2 flex-shrink-0" />
+                            <span className={user.telegram_id ? 'text-green-600' : 'text-orange-600'}>
+                              {user.telegram_id ? 'Подключен' : 'Не подключен'}
+                            </span>
                           </div>
-                            </div>
+                        </div>
                       </div>
 
                       {permissions.canCreateUsers && (
-                        <div className="flex flex-col space-y-2">
-                          <div className="flex space-x-2">
+                        <div className="flex flex-col gap-2">
+                          <div className="flex flex-row sm:flex-col gap-2">
                             <button
                               onClick={() => handleEdit(user)}
-                              className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                              className="inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors min-h-[44px] min-w-[44px]"
                             >
-                              <PencilIcon className="w-4 h-4 mr-1" />
-                              Изменить
+                              <PencilIcon className="w-4 h-4 mr-1 sm:mr-0" />
+                              <span className="hidden sm:inline">Изменить</span>
                             </button>
                             <button
                               onClick={() => handleDelete(user)}
                               disabled={deleteMutation.isPending}
-                              className="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded-lg text-red-700 bg-white hover:bg-red-50 transition-colors disabled:opacity-50"
+                              className="inline-flex items-center justify-center px-3 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-lg text-red-700 bg-white hover:bg-red-50 transition-colors disabled:opacity-50 min-h-[44px] min-w-[44px]"
                             >
-                              <TrashIcon className="w-4 h-4 mr-1" />
+                              <TrashIcon className="w-4 h-4 mr-1 sm:mr-0" />
+                              <span className="hidden sm:inline">Удалить</span>
                             </button>
                           </div>
 
@@ -359,7 +362,7 @@ export const UsersPage: React.FC = () => {
                             <select
                               value={user.role}
                               onChange={(e) => handleRoleChange(user, e.target.value)}
-                              className="text-xs px-2 py-1 border border-gray-300 rounded focus:border-blue-500 focus:ring-blue-500"
+                              className="w-full sm:w-auto text-sm px-2 py-2 border border-gray-300 rounded focus:border-blue-500 focus:ring-blue-500 min-h-[44px]"
                             >
                               <option value="employee">Сотрудник</option>
                               <option value="observer">Наблюдатель</option>
@@ -378,9 +381,9 @@ export const UsersPage: React.FC = () => {
 
           {/* Cards View */}
           {viewMode === 'cards' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {usersData?.data.map((user) => (
-                <div key={user.id} className={`p-6 ${getUserCardClass(user)}`}>
+                <div key={user.id} className={`p-4 sm:p-6 ${getUserCardClass(user)}`}>
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center">
                       <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-lg ${
@@ -399,14 +402,14 @@ export const UsersPage: React.FC = () => {
                         <>
                           <button
                             onClick={() => handleEdit(user)}
-                            className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"
+                            className="p-2 text-gray-400 hover:text-gray-600 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                           >
                             <PencilIcon className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(user)}
                             disabled={deleteMutation.isPending}
-                            className="p-1.5 text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
+                            className="p-2 text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50 min-h-[44px] min-w-[44px] flex items-center justify-center"
                           >
                             <TrashIcon className="w-4 h-4" />
                           </button>
@@ -419,7 +422,7 @@ export const UsersPage: React.FC = () => {
                     <h3 className="text-lg font-semibold text-gray-900 truncate">
                       {user.full_name}
                     </h3>
-                    <p className="text-sm text-gray-500">@{user.login}</p>
+                    <p className="text-sm text-gray-500 truncate">@{user.login}</p>
                   </div>
 
                   <div className="mb-4">
@@ -428,15 +431,15 @@ export const UsersPage: React.FC = () => {
 
                   <div className="space-y-2 text-sm text-gray-600">
                     <div className="flex items-center">
-                      <PhoneIcon className="w-4 h-4 mr-2" />
-                      {formatPhoneNumber(user.phone_number || user.phone)}
+                      <PhoneIcon className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <span className="truncate">{formatPhoneNumber(user.phone_number || user.phone)}</span>
                     </div>
                     <div className="flex items-center">
-                      <BuildingOfficeIcon className="w-4 h-4 mr-2" />
-                      {user.dealership_id ? `Салон #${user.dealership_id}` : 'Не привязан'}
+                      <BuildingOfficeIcon className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <span className="truncate">{user.dealership_id ? `Салон #${user.dealership_id}` : 'Не привязан'}</span>
                     </div>
                     <div className="flex items-center">
-                      <ChatBubbleLeftRightIcon className="w-4 h-4 mr-2" />
+                      <ChatBubbleLeftRightIcon className="w-4 h-4 mr-2 flex-shrink-0" />
                       <span className={user.telegram_id ? 'text-green-600' : 'text-orange-600'}>
                         {user.telegram_id ? 'Подключен' : 'Не подключен'}
                       </span>

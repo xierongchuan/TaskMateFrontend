@@ -112,7 +112,7 @@ export const SettingsPage: React.FC = () => {
     <div className="px-4 py-6 sm:px-0 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Настройки</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Настройки</h1>
         <p className="mt-2 text-sm text-gray-600">
           Управление конфигурацией системы и настройками бота
         </p>
@@ -130,7 +130,23 @@ export const SettingsPage: React.FC = () => {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200">
           {/* Tabs */}
           <div className="border-b border-gray-200">
-            <nav className="flex -mb-px">
+            {/* Mobile Dropdown */}
+            <div className="sm:hidden">
+              <select
+                value={activeTab}
+                onChange={(e) => setActiveTab(e.target.value as any)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[44px] bg-white"
+              >
+                {tabs.map((tab) => (
+                  <option key={tab.id} value={tab.id}>
+                    {tab.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Desktop Tabs */}
+            <nav className="hidden sm:flex -mb-px overflow-x-auto">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
@@ -139,7 +155,7 @@ export const SettingsPage: React.FC = () => {
                     activeTab === tab.id
                       ? 'border-blue-500 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  } whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm flex items-center`}
+                  } whitespace-nowrap py-4 px-6 sm:px-8 border-b-2 font-medium text-sm flex items-center min-w-[120px] justify-center transition-colors`}
                 >
                   <tab.icon className="w-4 h-4 mr-2" />
                   {tab.name}
@@ -149,7 +165,7 @@ export const SettingsPage: React.FC = () => {
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               {/* Shift Settings Tab */}
               {activeTab === 'shifts' && (
                 <div className="space-y-6">
@@ -157,7 +173,7 @@ export const SettingsPage: React.FC = () => {
                     <ClockIcon className="w-6 h-6 text-blue-500 mr-3" />
                     <h3 className="text-lg font-semibold text-gray-900">Настройки смен</h3>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Время начала смены
@@ -168,7 +184,7 @@ export const SettingsPage: React.FC = () => {
                         onChange={(e) =>
                           setBotConfig({ ...botConfig, shift_start_time: e.target.value })
                         }
-                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-3 border min-h-[44px]"
                       />
                       <p className="mt-1 text-xs text-gray-500">
                         Стандартное время начала рабочих смен
@@ -185,7 +201,7 @@ export const SettingsPage: React.FC = () => {
                         onChange={(e) =>
                           setBotConfig({ ...botConfig, shift_end_time: e.target.value })
                         }
-                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-3 border min-h-[44px]"
                       />
                       <p className="mt-1 text-xs text-gray-500">
                         Стандартное время окончания рабочих смен
@@ -206,7 +222,7 @@ export const SettingsPage: React.FC = () => {
                             late_tolerance_minutes: parseInt(e.target.value) || 0,
                           })
                         }
-                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-3 border min-h-[44px]"
                       />
                       <p className="mt-1 text-xs text-gray-500">
                         Количество минут, после которого фиксируется опоздание
@@ -239,7 +255,7 @@ export const SettingsPage: React.FC = () => {
                             rows_per_page: parseInt(e.target.value) || 10,
                           })
                         }
-                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-3 border min-h-[44px]"
                       />
                       <p className="mt-1 text-xs text-gray-500">
                         Количество записей в таблицах по умолчанию
@@ -260,7 +276,7 @@ export const SettingsPage: React.FC = () => {
                             auto_archive_days: parseInt(e.target.value) || 30,
                           })
                         }
-                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-3 border min-h-[44px]"
                       />
                       <p className="mt-1 text-xs text-gray-500">
                         Автоматическая архивация задач через указанное количество дней
