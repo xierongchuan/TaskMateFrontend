@@ -4,6 +4,7 @@ import { usersApi } from '../api/users';
 import { usePermissions } from '../hooks/usePermissions';
 import { useAuth } from '../hooks/useAuth';
 import { UserModal } from '../components/users/UserModal';
+import { formatPhoneNumber } from '../utils/phoneFormatter';
 import type { User } from '../types/user';
 import type { Dealership } from '../types/dealership';
 import { XCircleIcon } from '@heroicons/react/24/outline';
@@ -321,8 +322,7 @@ export const UsersPage: React.FC = () => {
                         <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
                           <div className="flex items-center text-gray-500">
                             <PhoneIcon className="w-4 h-4 mr-2" />
-                            {(user.phone_number && user.phone_number.trim()) ? user.phone_number :
-                             (user.phone && user.phone.trim()) ? user.phone : 'Не указан'}
+                            {formatPhoneNumber(user.phone_number || user.phone)}
                           </div>
                           <div className="flex items-center text-gray-500">
                             <BuildingOfficeIcon className="w-4 h-4 mr-2" />
@@ -429,8 +429,7 @@ export const UsersPage: React.FC = () => {
                   <div className="space-y-2 text-sm text-gray-600">
                     <div className="flex items-center">
                       <PhoneIcon className="w-4 h-4 mr-2" />
-                      {(user.phone_number && user.phone_number.trim()) ? user.phone_number :
-                       (user.phone && user.phone.trim()) ? user.phone : 'Не указан'}
+                      {formatPhoneNumber(user.phone_number || user.phone)}
                     </div>
                     <div className="flex items-center">
                       <BuildingOfficeIcon className="w-4 h-4 mr-2" />
