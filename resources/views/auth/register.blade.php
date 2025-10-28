@@ -41,7 +41,7 @@
                 </div>
 
                 <!-- Register Button -->
-                <x-button type="primary" class="w-full" id="register-button">{{ __('Create Account') }}</x-button>
+                <x-button type="primary" buttonType="button" class="w-full" id="register-button">{{ __('Create Account') }}</x-button>
             </form>
 
             <script>

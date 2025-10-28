@@ -14,6 +14,6 @@
     ]);
 @endphp
 
-<{{ $tag }} {{ $attributes->merge(['class' => $styleClasses]) }}>
+<{{ $tag }} type="{{ $buttonType }}" {{ $attributes->merge(['class' => $styleClasses]) }}>
     {{ $slot }}
     </{{ $tag }}>

@@ -32,7 +32,7 @@
                 </div>
 
                 <!-- Login Button -->
-                <x-button type="primary" class="w-full" id="login-button">{{ __('Sign In') }}</x-button>
+                <x-button type="primary" buttonType="button" class="w-full" id="login-button">{{ __('Sign In') }}</x-button>
             </form>
 
             <script>
