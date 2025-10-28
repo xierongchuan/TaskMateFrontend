@@ -140,25 +140,16 @@
                 async loadSettings() {
                     this.loading = true;
                     try {
-                        const response = await fetch('/api/settings', {
-                            headers: {
-                                'Accept': 'application/json',
-                            }
-                        });
+                        // Use apiClient's getSettings method
+                        const data = await window.apiClient.getSettings();
+                        console.log('Loaded settings:', data);
 
-                        if (response.ok) {
-                            const data = await response.json();
-                            console.log('Loaded settings:', data);
-
-                            if (data.data) {
-                                data.data.forEach(setting => {
-                                    if (this.settings.hasOwnProperty(setting.key)) {
-                                        this.settings[setting.key] = setting.value || '';
-                                    }
-                                });
-                            }
-                        } else {
-                            console.error('Failed to load settings:', response.status);
+                        if (data.data) {
+                            data.data.forEach(setting => {
+                                if (this.settings.hasOwnProperty(setting.key)) {
+                                    this.settings[setting.key] = setting.value || '';
+                                }
+                            });
                         }
                     } catch (error) {
                         console.error('Error loading settings:', error);
@@ -195,39 +186,25 @@
 
                         console.log('Saving settings:', settingsArray);
 
-                        const response = await fetch('/api/settings/bulk', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                            },
-                            body: JSON.stringify({ settings: settingsArray })
-                        });
+                        // Use apiClient's bulkUpdateSettings method
+                        await window.apiClient.bulkUpdateSettings(settingsArray);
 
-                        const responseData = await response.json();
+                        this.successMessage = '{{ __('Settings saved successfully!') }}';
+                        setTimeout(() => {
+                            this.successMessage = '';
+                        }, 3000);
 
-                        if (response.ok) {
-                            this.successMessage = '{{ __('Settings saved successfully!') }}';
-                            setTimeout(() => {
-                                this.successMessage = '';
-                            }, 3000);
-
-                            // Reload settings to confirm they were saved
-                            await this.loadSettings();
-                        } else {
-                            console.error('Server error response:', responseData);
-                            if (responseData.errors) {
-                                this.errorMessage = Array.isArray(responseData.errors)
-                                    ? responseData.errors.join(', ')
-                                    : Object.values(responseData.errors).flat().join(', ');
-                            } else {
-                                this.errorMessage = responseData.message || '{{ __('Failed to save settings. Please try again.') }}';
-                            }
-                        }
+                        // Reload settings to confirm they were saved
+                        await this.loadSettings();
                     } catch (error) {
                         console.error('Error saving settings:', error);
-                        this.errorMessage = '{{ __('Network error. Please check your connection and try again.') }}';
+
+                        // Extract error message
+                        if (error.message) {
+                            this.errorMessage = error.message;
+                        } else {
+                            this.errorMessage = '{{ __('Failed to save settings. Please try again.') }}';
+                        }
                     } finally {
                         this.submitting = false;
                     }
@@ -238,11 +215,26 @@
                     this.connectionStatus = '';
 
                     try {
-                        // Use the current API URL from settings or the default
-                        const apiUrl = this.settings.api_url || window.API_BASE_URL || 'http://telegram.localhost:8009/api/v1';
+                        // Get API URL from settings (if testing a new URL) or use the configured default
+                        const apiUrlToTest = this.settings.api_url?.trim() || window.API_URL;
 
-                        // Test the health endpoint
-                        const response = await fetch(`${apiUrl}/up`, {
+                        if (!apiUrlToTest) {
+                            this.connectionStatus = 'error';
+                            this.connectionMessage = '{{ __('Please enter an API URL first.') }}';
+                            return;
+                        }
+
+                        // Validate URL format
+                        try {
+                            new URL(apiUrlToTest);
+                        } catch (e) {
+                            this.connectionStatus = 'error';
+                            this.connectionMessage = '{{ __('Invalid URL format.') }}';
+                            return;
+                        }
+
+                        // Test the health endpoint directly (not through proxy)
+                        const response = await fetch(`${apiUrlToTest}/up`, {
                             method: 'GET',
                             headers: {
                                 'Accept': 'application/json',

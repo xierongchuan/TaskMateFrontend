@@ -50,14 +50,27 @@ Special endpoint for handling file uploads with multipart form data.
 
 ## Frontend Usage
 
-The `api-client.js` is automatically configured to use the proxy:
+The `api-client.js` is automatically configured to use the proxy for all API requests:
 
 ```javascript
-// Before: Direct external API calls
-this.baseUrl = 'http://telegram.localhost:8009/api/v1';
-
-// After: Local proxy calls
+// All requests go through the local proxy
 this.baseUrl = '/api/proxy';
+
+// The external API URL is configured via .env and exposed as window.API_URL
+// This is used for direct health checks and testing connections
+this.externalApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8007/api/v1';
+window.API_URL = this.externalApiUrl;
+```
+
+### Configuration in .env
+
+```env
+# Backend API URL (used by Laravel proxy)
+API_URL=http://localhost:8007/api/v1
+API_TIMEOUT=30
+
+# Frontend API URL (exposed to JavaScript)
+VITE_API_URL="${API_URL}"
 ```
 
 ## Security Features

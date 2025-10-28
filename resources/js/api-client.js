@@ -9,7 +9,16 @@
 class ApiClient {
     constructor() {
         // API base URL - now uses local proxy endpoint
-        this.baseUrl = window.API_BASE_URL || '/api/proxy';
+        // The proxy forwards requests to the external API configured in .env (API_URL)
+        this.baseUrl = '/api/proxy';
+
+        // Store the external API URL for direct access when needed (e.g., health checks)
+        // This comes from VITE_API_URL in .env via Vite's define config
+        this.externalApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8007/api/v1';
+
+        // Make API URL available globally for views
+        window.API_URL = this.externalApiUrl;
+
         // Token is now handled server-side in the proxy
         this.token = null;
     }
@@ -202,10 +211,34 @@ class ApiClient {
     }
 
     /**
-     * Health check
+     * Health check (via proxy)
      */
     async healthCheck() {
         return this.get('/up');
+    }
+
+    /**
+     * Health check for external API (direct connection, bypasses proxy)
+     * Used for testing API connectivity in settings
+     */
+    async healthCheckDirect() {
+        try {
+            const response = await fetch(`${this.externalApiUrl}/up`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('API health check failed');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Direct health check error:', error);
+            throw error;
+        }
     }
 
     // ============================================

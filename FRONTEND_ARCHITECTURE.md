@@ -70,30 +70,34 @@ const shifts = await window.apiClient.getCurrentShifts();
 
 ### 2. Configuration
 
-Set the API base URL by defining `window.API_BASE_URL` before loading the API client:
-
-```html
-<script>
-    window.API_BASE_URL = 'https://your-api-server.com/api/v1';
-</script>
-<script src="{{ asset('js/app.js') }}"></script>
-```
-
-Or configure it in your `.env`:
+The API URL is configured via environment variables in `.env`:
 
 ```env
-VITE_API_BASE_URL=https://your-api-server.com/api/v1
+# Backend API URL (used by Laravel proxy)
+API_URL=http://localhost:8007/api/v1
+API_TIMEOUT=30
+
+# Frontend API URL (used by JavaScript, defaults to API_URL)
+VITE_API_URL="${API_URL}"
 ```
 
-Then in your `vite.config.js`:
+The Vite build system automatically injects the `VITE_API_URL` into the compiled JavaScript as `import.meta.env.VITE_API_URL`. This is configured in `vite.config.js`:
 
 ```javascript
-export default defineConfig({
-    define: {
-        'window.API_BASE_URL': JSON.stringify(env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1')
-    }
+export default defineConfig(({ mode }) => {
+    const env = loadEnv(mode, process.cwd(), '');
+
+    return {
+        define: {
+            'import.meta.env.VITE_API_URL': JSON.stringify(
+                env.VITE_API_URL || env.API_URL || 'http://localhost:8007/api/v1'
+            ),
+        },
+    };
 });
 ```
+
+The API client automatically exposes this URL as `window.API_URL` for use in views and inline scripts.
 
 ### 3. View Implementation Pattern
 
