@@ -8,16 +8,18 @@
                 <p class="text-gray-600 dark:text-gray-400 mt-1">Sign in to your account</p>
             </div>
 
-            <form method="POST" action="{{ route('login') }}">
+            <form method="POST" action="{{ route('login') }}" id="login-form">
                 @csrf
                 <!-- Email Input -->
                 <div class="mb-4">
                     <x-forms.input label="Login" name="email" type="text" placeholder="your-login" />
+                    <p class="text-xs text-red-600 dark:text-red-400 mt-1 hidden" id="email-error"></p>
                 </div>
 
                 <!-- Password Input -->
                 <div class="mb-4">
                     <x-forms.input label="Password" name="password" type="password" placeholder="••••••••" />
+                    <p class="text-xs text-red-600 dark:text-red-400 mt-1 hidden" id="password-error"></p>
                 </div>
 
                 <!-- Remember Me -->
@@ -25,9 +27,78 @@
                     <x-forms.checkbox label="Remember me" name="remember" />
                 </div>
 
+                <!-- General Error -->
+                <div class="mb-4 hidden" id="general-error">
+                    <p class="text-sm text-red-600 dark:text-red-400"></p>
+                </div>
+
                 <!-- Login Button -->
-                <x-button type="primary" class="w-full">{{ __('Sign In') }}</x-button>
+                <x-button type="primary" class="w-full" id="login-button">{{ __('Sign In') }}</x-button>
             </form>
+
+            <script>
+                document.getElementById('login-form').addEventListener('submit', async function(e) {
+                    e.preventDefault();
+
+                    // Clear previous errors
+                    document.querySelectorAll('.text-red-600').forEach(el => {
+                        el.classList.add('hidden');
+                        el.textContent = '';
+                    });
+
+                    const button = document.getElementById('login-button');
+                    const originalText = button.textContent;
+                    button.disabled = true;
+                    button.textContent = '{{ __('Signing In...') }}';
+
+                    const formData = new FormData(this);
+                    const email = formData.get('email');
+                    const password = formData.get('password');
+                    const remember = formData.get('remember') ? true : false;
+
+                    try {
+                        const response = await fetch('{{ route('login') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            },
+                            body: JSON.stringify({ email, password, remember })
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok) {
+                            window.location.href = data.redirect || '{{ route('dashboard') }}';
+                        } else {
+                            // Show validation errors
+                            if (data.errors) {
+                                for (const [field, messages] of Object.entries(data.errors)) {
+                                    const errorEl = document.getElementById(field + '-error');
+                                    if (errorEl) {
+                                        errorEl.textContent = messages[0];
+                                        errorEl.classList.remove('hidden');
+                                    }
+                                }
+                            }
+                            if (data.message && !data.errors) {
+                                const generalError = document.getElementById('general-error');
+                                generalError.querySelector('p').textContent = data.message;
+                                generalError.classList.remove('hidden');
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Login error:', error);
+                        const generalError = document.getElementById('general-error');
+                        generalError.querySelector('p').textContent = '{{ __('Unable to connect to authentication service. Please try again later.') }}';
+                        generalError.classList.remove('hidden');
+                    } finally {
+                        button.disabled = false;
+                        button.textContent = originalText;
+                    }
+                });
+            </script>
 
             @if (Route::has('register'))
                 <!-- Register Link -->

@@ -19,7 +19,7 @@ class LoginController extends Controller
         return view('auth.login');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $request->validate([
             'email' => ['required', 'string'],
@@ -41,6 +41,14 @@ class LoginController extends Controller
                 RateLimiter::hit($this->throttleKey($request));
 
                 $errorMessage = $response->json('message') ?? trans('auth.failed');
+
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'message' => $errorMessage,
+                        'errors' => ['email' => [$errorMessage]]
+                    ], $response->status());
+                }
+
                 throw ValidationException::withMessages([
                     'email' => $errorMessage,
                 ]);
@@ -56,6 +64,14 @@ class LoginController extends Controller
 
             RateLimiter::clear($this->throttleKey($request));
 
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Login successful',
+                    'redirect' => route('dashboard', absolute: false)
+                ]);
+            }
+
             return redirect()->intended(route('dashboard', absolute: false));
 
         } catch (\Exception $e) {
@@ -64,6 +80,13 @@ class LoginController extends Controller
             }
 
             RateLimiter::hit($this->throttleKey($request));
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Unable to connect to authentication service. Please try again later.',
+                    'errors' => ['email' => ['Unable to connect to authentication service. Please try again later.']]
+                ], 500);
+            }
 
             throw ValidationException::withMessages([
                 'email' => 'Unable to connect to authentication service. Please try again later.',

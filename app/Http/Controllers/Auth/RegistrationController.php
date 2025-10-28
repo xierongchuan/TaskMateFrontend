@@ -16,7 +16,7 @@ class RegistrationController extends Controller
         return view('auth.register');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $request->validate([
             'login' => ['required', 'string', 'max:255'],
@@ -40,6 +40,13 @@ class RegistrationController extends Controller
                     $errors = ['login' => [$message]];
                 }
 
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'message' => $message,
+                        'errors' => $errors
+                    ], $response->status());
+                }
+
                 throw ValidationException::withMessages($errors);
             }
 
@@ -51,11 +58,26 @@ class RegistrationController extends Controller
             $request->session()->put('user', $data['user'] ?? null);
             $request->session()->put('authenticated', true);
 
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Registration successful',
+                    'redirect' => route('dashboard', absolute: false)
+                ]);
+            }
+
             return redirect(route('dashboard', absolute: false));
 
         } catch (\Exception $e) {
             if ($e instanceof ValidationException) {
                 throw $e;
+            }
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Unable to connect to registration service. Please try again later.',
+                    'errors' => ['login' => ['Unable to connect to registration service. Please try again later.']]
+                ], 500);
             }
 
             throw ValidationException::withMessages([

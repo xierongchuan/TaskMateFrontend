@@ -7,14 +7,22 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-Route::middleware(['api.auth'])->group(function () {
-    // CSRF Token refresh endpoint
-    Route::get('/csrf-token', function () {
-        return response()->json([
-            'csrf_token' => csrf_token()
-        ]);
-    });
+// API Proxy Routes (accessible to all, auth handled in controller)
+Route::prefix('api/proxy')->group(function () {
+    Route::any('{endpoint}', [App\Http\Controllers\ApiProxyController::class, 'proxy'])
+        ->where('endpoint', '.*');
+    Route::post('upload/{endpoint}', [App\Http\Controllers\ApiProxyController::class, 'proxyUpload'])
+        ->where('endpoint', '.*');
+});
 
+// CSRF Token refresh endpoint (accessible to authenticated users)
+Route::middleware(['api.auth'])->get('/csrf-token', function () {
+    return response()->json([
+        'csrf_token' => csrf_token()
+    ]);
+});
+
+Route::middleware(['api.auth'])->group(function () {
     // Dashboard
     Route::get('dashboard', function () {
         return view('dashboard');
@@ -77,14 +85,6 @@ Route::middleware(['api.auth'])->group(function () {
         Route::put('/{key}', [Settings\BotApiController::class, 'update']);
         Route::delete('/{key}', [Settings\BotApiController::class, 'destroy']);
         Route::post('/bulk', [Settings\BotApiController::class, 'bulkUpdate']);
-    });
-
-    // API Proxy Routes
-    Route::prefix('api/proxy')->group(function () {
-        Route::any('{endpoint}', [App\Http\Controllers\ApiProxyController::class, 'proxy'])
-            ->where('endpoint', '.*');
-        Route::post('upload/{endpoint}', [App\Http\Controllers\ApiProxyController::class, 'proxyUpload'])
-            ->where('endpoint', '.*');
     });
 });
 

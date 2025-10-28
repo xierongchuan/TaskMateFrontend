@@ -9,7 +9,7 @@
                 </p>
             </div>
 
-            <form method="POST" action="{{ route('register') }}">
+            <form method="POST" action="{{ route('register') }}" id="register-form">
                 @csrf
                 <!-- Login Input -->
                 <div class="mb-4">
@@ -17,6 +17,7 @@
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {{ __('This will be your username for logging in') }}
                     </p>
+                    <p class="text-xs text-red-600 dark:text-red-400 mt-1 hidden" id="login-error"></p>
                 </div>
 
                 <!-- Password Input -->
@@ -25,17 +26,88 @@
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {{ __('Minimum 12 characters with uppercase, lowercase, digits, and special characters') }}
                     </p>
+                    <p class="text-xs text-red-600 dark:text-red-400 mt-1 hidden" id="password-error"></p>
                 </div>
 
                 <!-- Confirm Password Input -->
                 <div class="mb-4">
                     <x-forms.input label="Confirm Password" name="password_confirmation" type="password"
                         placeholder="••••••••" />
+                    <p class="text-xs text-red-600 dark:text-red-400 mt-1 hidden" id="password_confirmation-error"></p>
+                </div>
+
+                <!-- General Error -->
+                <div class="mb-4 hidden" id="general-error">
+                    <p class="text-sm text-red-600 dark:text-red-400"></p>
                 </div>
 
                 <!-- Register Button -->
-                <x-button type="primary" class="w-full">{{ __('Create Account') }}</x-button>
+                <x-button type="primary" class="w-full" id="register-button">{{ __('Create Account') }}</x-button>
             </form>
+
+            <script>
+                document.getElementById('register-form').addEventListener('submit', async function(e) {
+                    e.preventDefault();
+
+                    // Clear previous errors
+                    document.querySelectorAll('.text-red-600').forEach(el => {
+                        el.classList.add('hidden');
+                        el.textContent = '';
+                    });
+
+                    const button = document.getElementById('register-button');
+                    const originalText = button.textContent;
+                    button.disabled = true;
+                    button.textContent = '{{ __('Creating Account...') }}';
+
+                    const formData = new FormData(this);
+                    const login = formData.get('login');
+                    const password = formData.get('password');
+                    const password_confirmation = formData.get('password_confirmation');
+
+                    try {
+                        const response = await fetch('{{ route('register') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            },
+                            body: JSON.stringify({ login, password, password_confirmation })
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok) {
+                            window.location.href = data.redirect || '{{ route('dashboard') }}';
+                        } else {
+                            // Show validation errors
+                            if (data.errors) {
+                                for (const [field, messages] of Object.entries(data.errors)) {
+                                    const errorEl = document.getElementById(field + '-error');
+                                    if (errorEl) {
+                                        errorEl.textContent = messages[0];
+                                        errorEl.classList.remove('hidden');
+                                    }
+                                }
+                            }
+                            if (data.message && !data.errors) {
+                                const generalError = document.getElementById('general-error');
+                                generalError.querySelector('p').textContent = data.message;
+                                generalError.classList.remove('hidden');
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Registration error:', error);
+                        const generalError = document.getElementById('general-error');
+                        generalError.querySelector('p').textContent = '{{ __('Unable to connect to registration service. Please try again later.') }}';
+                        generalError.classList.remove('hidden');
+                    } finally {
+                        button.disabled = false;
+                        button.textContent = originalText;
+                    }
+                });
+            </script>
 
             <!-- Login Link -->
             <div class="text-center mt-6">

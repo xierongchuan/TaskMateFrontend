@@ -20,7 +20,12 @@ class ApiProxyController extends Controller
             // Get token from session
             $apiToken = $request->session()->get('api_token');
 
-            if (!$apiToken) {
+            // Define endpoints that don't require authentication
+            $publicEndpoints = ['register', 'session'];
+            $isPublicEndpoint = in_array(trim($endpoint, '/'), $publicEndpoints);
+
+            // Check authentication for protected endpoints
+            if (!$isPublicEndpoint && !$apiToken) {
                 return response()->json([
                     'error' => 'Authentication required',
                     'message' => 'Please login to access this resource'
@@ -34,8 +39,12 @@ class ApiProxyController extends Controller
             $headers = [
                 'Accept' => 'application/json',
                 'Content-Type' => 'application/json',
-                'Authorization' => "Bearer {$apiToken}",
             ];
+
+            // Add authorization header only if we have a token
+            if ($apiToken) {
+                $headers['Authorization'] = "Bearer {$apiToken}";
+            }
 
             // Add any custom headers from the original request
             if ($request->header('X-Requested-With')) {
