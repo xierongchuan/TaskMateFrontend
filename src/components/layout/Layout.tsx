@@ -35,12 +35,32 @@ export const Layout: React.FC = () => {
                 >
                   Задачи
                 </Link>
+                <Link
+                  to="/shifts"
+                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                >
+                  Смены
+                </Link>
                 {(permissions.canCreateUsers || permissions.isObserver) && (
                   <Link
                     to="/users"
                     className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                   >
                     Пользователи
+                  </Link>
+                )}
+                <Link
+                  to="/links"
+                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                >
+                  Ссылки
+                </Link>
+                {permissions.canManageTasks && (
+                  <Link
+                    to="/settings"
+                    className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                  >
+                    Настройки
                   </Link>
                 )}
               </div>
