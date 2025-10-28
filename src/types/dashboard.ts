@@ -7,6 +7,24 @@ export interface DashboardData {
   overdue_tasks: number;
   open_shifts: number;
   late_shifts_today: number;
+  active_shifts?: Array<{
+    id: number;
+    user?: {
+      id: number;
+      full_name: string;
+    };
+    replacement?: {
+      id: number;
+      full_name: string;
+    };
+    status: string;
+    opened_at: string;
+    closed_at: string | null;
+    scheduled_start: string | null;
+    scheduled_end: string | null;
+    is_late: boolean;
+    late_minutes: number | null;
+  }>;
   recent_tasks: Array<{
     id: number;
     title: string;

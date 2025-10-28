@@ -39,4 +39,39 @@ export const usersApi = {
   deleteUser: async (id: number): Promise<void> => {
     await apiClient.delete(`/users/${id}`);
   },
+
+  getDealerships: async (): Promise<PaginatedResponse<any>> => {
+    const response = await apiClient.get<PaginatedResponse<any>>('/dealerships');
+    return response.data;
+  },
+
+  getUserStats: async (filters?: UsersFilters): Promise<{
+    total: number;
+    by_role: Record<string, number>;
+    active_today: number;
+    with_telegram: number;
+    without_telegram: number;
+  }> => {
+    const response = await apiClient.get('/users/stats', { params: filters });
+    return response.data;
+  },
+
+  getUserReplacementHistory: async (userId?: number, filters?: {
+    date_from?: string;
+    date_to?: string;
+  }): Promise<any[]> => {
+    const response = await apiClient.get('/users/replacement-history', {
+      params: { user_id: userId, ...filters }
+    });
+    return response.data;
+  },
+
+  bulkUpdateRole: async (userIds: number[], role: string): Promise<void> => {
+    await apiClient.post('/users/bulk-update-role', { user_ids: userIds, role });
+  },
+
+  toggleTelegramAccess: async (userId: number): Promise<{ data: User }> => {
+    const response = await apiClient.post(`/users/${userId}/toggle-telegram`);
+    return response.data;
+  },
 };

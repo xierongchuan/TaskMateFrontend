@@ -13,4 +13,12 @@ export interface BotConfig {
   late_tolerance_minutes?: number;
   rows_per_page?: number;
   auto_archive_days?: number;
+  notification_types?: {
+    task_overdue?: boolean;
+    shift_late?: boolean;
+    task_completed?: boolean;
+    system_errors?: boolean;
+  };
+  bot_token?: string;
+  maintenance_mode?: boolean;
 }

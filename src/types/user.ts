@@ -37,6 +37,8 @@ export interface UpdateUserRequest {
   password?: string;
   full_name?: string;
   phone_number?: string;
+  phone?: string;
   role?: string;
   dealership_id?: number;
+  telegram_id?: number;
 }

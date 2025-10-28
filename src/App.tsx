@@ -11,6 +11,8 @@ import { UsersPage } from './pages/UsersPage';
 import { ShiftsPage } from './pages/ShiftsPage';
 import { LinksPage } from './pages/LinksPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { ReportsPage } from './pages/ReportsPage';
+import './index.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -71,6 +73,14 @@ function App() {
               element={
                 <ProtectedRoute requiredRoles={['manager', 'owner']}>
                   <SettingsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="reports"
+              element={
+                <ProtectedRoute requiredRoles={['manager', 'owner']}>
+                  <ReportsPage />
                 </ProtectedRoute>
               }
             />

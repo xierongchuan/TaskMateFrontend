@@ -3,16 +3,35 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { linksApi } from '../api/links';
 import { usePermissions } from '../hooks/usePermissions';
 import type { Link, CreateLinkRequest } from '../types/link';
+import {
+  PlusIcon,
+  LinkIcon,
+  PencilIcon,
+  TrashIcon,
+  Squares2X2Icon,
+  ListBulletIcon,
+  MagnifyingGlassIcon,
+  EyeIcon,
+  ArrowTopRightOnSquareIcon,
+  GlobeAltIcon,
+  DocumentTextIcon,
+  ChartBarIcon,
+  UserGroupIcon,
+  XCircleIcon
+} from '@heroicons/react/24/outline';
 
 export const LinksPage: React.FC = () => {
   const permissions = usePermissions();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLink, setSelectedLink] = useState<Link | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState<CreateLinkRequest>({
     title: '',
     url: '',
     description: '',
+    category: 'general',
   });
 
   const { data: links, isLoading, error } = useQuery({
@@ -47,9 +66,52 @@ export const LinksPage: React.FC = () => {
   });
 
   const resetForm = () => {
-    setFormData({ title: '', url: '', description: '' });
+    setFormData({ title: '', url: '', description: '', category: 'general' });
     setSelectedLink(null);
   };
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'crm': return <UserGroupIcon className="w-6 h-6" />;
+      case 'documents': return <DocumentTextIcon className="w-6 h-6" />;
+      case 'analytics': return <ChartBarIcon className="w-6 h-6" />;
+      case 'tools': return <Squares2X2Icon className="w-6 h-6" />;
+      default: return <GlobeAltIcon className="w-6 h-6" />;
+    }
+  };
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'crm': return 'bg-blue-500';
+      case 'documents': return 'bg-green-500';
+      case 'analytics': return 'bg-purple-500';
+      case 'tools': return 'bg-orange-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const getCategoryLabel = (category: string) => {
+    switch (category) {
+      case 'crm': return 'CRM';
+      case 'documents': return 'Документы';
+      case 'analytics': return 'Аналитика';
+      case 'tools': return 'Инструменты';
+      default: return 'Общее';
+    }
+  };
+
+  const filteredLinks = links?.filter(link =>
+    link.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    link.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    link.url.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
+
+  const groupedLinks = filteredLinks.reduce((acc, link) => {
+    const category = link.category || 'general';
+    if (!acc[category]) acc[category] = [];
+    acc[category].push(link);
+    return acc;
+  }, {} as Record<string, Link[]>);
 
   const handleCreate = () => {
     resetForm();
@@ -62,6 +124,7 @@ export const LinksPage: React.FC = () => {
       title: link.title,
       url: link.url,
       description: link.description || '',
+      category: (link as any).category || 'general',
     });
     setIsModalOpen(true);
   };
@@ -86,105 +149,230 @@ export const LinksPage: React.FC = () => {
   };
 
   return (
-    <div className="px-4 py-6 sm:px-0">
-      <div className="sm:flex sm:items-center sm:justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Ссылки</h1>
-          <p className="mt-2 text-sm text-gray-700">
-            Важные ссылки для быстрого доступа (CRM, таблицы и т.д.)
-          </p>
-        </div>
-        {permissions.canManageTasks && (
-          <div className="mt-4 sm:mt-0">
-            <button
-              type="button"
-              onClick={handleCreate}
-              className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-            >
-              Добавить ссылку
-            </button>
+    <div className="px-4 py-6 sm:px-0 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Ссылки</h1>
+            <p className="mt-2 text-sm text-gray-600">
+              Важные ссылки для быстрого доступа к рабочим инструментам
+            </p>
           </div>
-        )}
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center bg-white rounded-lg border border-gray-200">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`px-3 py-2 text-sm font-medium rounded-l-lg ${
+                  viewMode === 'grid'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <Squares2X2Icon className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`px-3 py-2 text-sm font-medium rounded-r-lg ${
+                  viewMode === 'list'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <ListBulletIcon className="w-4 h-4" />
+              </button>
+            </div>
+            {permissions.canManageTasks && (
+              <button
+                onClick={handleCreate}
+                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <PlusIcon className="w-4 h-4 mr-2" />
+                Добавить ссылку
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Search */}
+      <div className="mb-6">
+        <div className="relative">
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <input
+            type="text"
+            placeholder="Поиск ссылок..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="block w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
       </div>
 
       {isLoading ? (
-        <div className="bg-white shadow rounded-lg p-8">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
           <div className="animate-pulse space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded"></div>
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
             ))}
           </div>
         </div>
       ) : error ? (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">Ошибка загрузки ссылок</p>
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+          <div className="flex items-center">
+            <XCircleIcon className="w-5 h-5 text-red-500 mr-2" />
+            <p className="text-red-800">Ошибка загрузки ссылок</p>
+          </div>
         </div>
-      ) : links && links.length === 0 ? (
-        <div className="bg-white shadow rounded-lg p-8 text-center">
-          <p className="text-gray-500">Ссылки не найдены</p>
+      ) : filteredLinks.length === 0 ? (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+          <LinkIcon className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            {searchTerm ? 'Ссылки не найдены' : 'Нет ссылок'}
+          </h3>
+          <p className="text-gray-500">
+            {searchTerm ? 'Попробуйте изменить поисковый запрос' : 'Добавьте первые ссылки для быстрого доступа'}
+          </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {links?.map((link) => (
-            <div
-              key={link.id}
-              className="bg-white shadow rounded-lg p-5 hover:shadow-md transition-shadow"
-            >
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="text-lg font-medium text-gray-900">{link.title}</h3>
-                {permissions.canManageTasks && (
-                  <div className="flex gap-1">
-                    <button
-                      onClick={() => handleEdit(link)}
-                      className="text-gray-400 hover:text-gray-600"
-                      title="Редактировать"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                        />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => handleDelete(link)}
-                      className="text-gray-400 hover:text-red-600"
-                      title="Удалить"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                        />
-                      </svg>
-                    </button>
+        <>
+          {/* Grid View with Categories */}
+          {viewMode === 'grid' && (
+            <div className="space-y-8">
+              {Object.entries(groupedLinks).map(([category, categoryLinks]) => (
+                <div key={category}>
+                  <div className="flex items-center mb-4">
+                    <div className={`${getCategoryColor(category)} rounded-lg p-2 mr-3 text-white`}>
+                      {getCategoryIcon(category)}
+                    </div>
+                    <h2 className="text-xl font-semibold text-gray-900">
+                      {getCategoryLabel(category)}
+                    </h2>
+                    <span className="ml-3 text-sm text-gray-500">
+                      {categoryLinks.length} ссылок
+                    </span>
                   </div>
-                )}
-              </div>
-              {link.description && (
-                <p className="text-sm text-gray-600 mb-3">{link.description}</p>
-              )}
-              <button
-                onClick={() => openLink(link.url)}
-                className="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-500"
-              >
-                Открыть ссылку
-                <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                  />
-                </svg>
-              </button>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {categoryLinks.map((link) => (
+                      <div
+                        key={link.id}
+                        className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-200 hover:border-blue-300 group"
+                      >
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex items-center">
+                            <div className={`${getCategoryColor((link as any).category || 'general')} rounded-lg p-2 mr-3 text-white`}>
+                              {getCategoryIcon((link as any).category || 'general')}
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                                {link.title}
+                              </h3>
+                              <p className="text-xs text-gray-500 truncate max-w-[150px]">
+                                {new URL(link.url).hostname}
+                              </p>
+                            </div>
+                          </div>
+                          {permissions.canManageTasks && (
+                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                onClick={() => handleEdit(link)}
+                                className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                                title="Редактировать"
+                              >
+                                <PencilIcon className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(link)}
+                                className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                                title="Удалить"
+                              >
+                                <TrashIcon className="w-4 h-4" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                        {link.description && (
+                          <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                            {link.description}
+                          </p>
+                        )}
+                        <button
+                          onClick={() => openLink(link.url)}
+                          className="w-full inline-flex items-center justify-center px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium"
+                        >
+                          <ArrowTopRightOnSquareIcon className="w-4 h-4 mr-2" />
+                          Открыть
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          )}
+
+          {/* List View */}
+          {viewMode === 'list' && (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="divide-y divide-gray-200">
+                {filteredLinks.map((link) => (
+                  <div key={link.id} className="p-6 hover:bg-gray-50 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center flex-1 min-w-0 pr-4">
+                        <div className={`${getCategoryColor((link as any).category || 'general')} rounded-lg p-3 mr-4 text-white flex-shrink-0`}>
+                          {getCategoryIcon((link as any).category || 'general')}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-3 mb-1">
+                            <h3 className="text-lg font-semibold text-gray-900 truncate">
+                              {link.title}
+                            </h3>
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                              {getCategoryLabel((link as any).category || 'general')}
+                            </span>
+                          </div>
+                          {link.description && (
+                            <p className="text-sm text-gray-600 mb-2">{link.description}</p>
+                          )}
+                          <p className="text-sm text-gray-500">
+                            {new URL(link.url).hostname}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <button
+                          onClick={() => openLink(link.url)}
+                          className="inline-flex items-center px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium"
+                        >
+                          <EyeIcon className="w-4 h-4 mr-2" />
+                          Открыть
+                        </button>
+                        {permissions.canManageTasks && (
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => handleEdit(link)}
+                              className="p-2 text-gray-400 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50"
+                              title="Редактировать"
+                            >
+                              <PencilIcon className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(link)}
+                              className="p-2 text-gray-400 hover:text-red-600 transition-colors rounded-lg hover:bg-red-50"
+                              title="Удалить"
+                            >
+                              <TrashIcon className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Modal */}
@@ -213,7 +401,7 @@ export const LinksPage: React.FC = () => {
                         required
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                        className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
                       />
                     </div>
 
@@ -225,8 +413,25 @@ export const LinksPage: React.FC = () => {
                         value={formData.url}
                         onChange={(e) => setFormData({ ...formData, url: e.target.value })}
                         placeholder="https://example.com"
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                        className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
                       />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Категория
+                      </label>
+                      <select
+                        value={formData.category}
+                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                        className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                      >
+                        <option value="general">Общее</option>
+                        <option value="crm">CRM</option>
+                        <option value="documents">Документы</option>
+                        <option value="analytics">Аналитика</option>
+                        <option value="tools">Инструменты</option>
+                      </select>
                     </div>
 
                     <div>
@@ -234,12 +439,13 @@ export const LinksPage: React.FC = () => {
                         Описание
                       </label>
                       <textarea
-                        rows={2}
+                        rows={3}
                         value={formData.description}
                         onChange={(e) =>
                           setFormData({ ...formData, description: e.target.value })
                         }
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                        className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                        placeholder="Краткое описание ссылки..."
                       />
                     </div>
                   </div>

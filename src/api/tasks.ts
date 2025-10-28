@@ -37,7 +37,33 @@ export const tasksApi = {
     return response.data;
   },
 
+  updateTaskStatus: async (id: number, status: string): Promise<{ data: Task }> => {
+    const response = await apiClient.patch<{ data: Task }>(`/tasks/${id}/status`, { status });
+    return response.data;
+  },
+
+  duplicateTask: async (id: number): Promise<{ data: Task }> => {
+    const response = await apiClient.post<{ data: Task }>(`/tasks/${id}/duplicate`);
+    return response.data;
+  },
+
   deleteTask: async (id: number): Promise<void> => {
     await apiClient.delete(`/tasks/${id}`);
+  },
+
+  bulkUpdateStatus: async (taskIds: number[], status: string): Promise<void> => {
+    await apiClient.post('/tasks/bulk-update-status', { task_ids: taskIds, status });
+  },
+
+  getTaskStats: async (filters?: TasksFilters): Promise<{
+    total: number;
+    pending: number;
+    completed: number;
+    overdue: number;
+    acknowledged: number;
+    postponed: number;
+  }> => {
+    const response = await apiClient.get('/tasks/stats', { params: filters });
+    return response.data;
   },
 };
