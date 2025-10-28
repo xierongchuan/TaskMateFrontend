@@ -236,13 +236,3 @@ composer test
 ## Дальнейшее развитие
 
 Проект готов к расширению функциональности управления задачами. Текущая база включает полную систему аутентификации и базовые настройки пользователя, что обеспечивает прочную основу для добавления модуля задач.
-
----
-
-Issue to solve: undefined
-Your prepared branch: issue-28-59188d4d
-Your prepared working directory: /tmp/gh-issue-solver-1761648298326
-Your forked repository: konard/TaskMateFrontend
-Original repository (upstream): xierongchuan/TaskMateFrontend
-
-Proceed.
