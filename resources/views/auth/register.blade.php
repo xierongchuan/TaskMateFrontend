@@ -67,9 +67,8 @@
 
                     // Get API URL from meta tag (set by Laravel config)
                     const apiUrlMeta = document.querySelector('meta[name="api-url"]');
-                    const apiUrl = apiUrlMeta ? apiUrlMeta.getAttribute('content') : null;
-
-                    if (!apiUrl) {
+                    if (!apiUrlMeta) {
+                        console.error('API URL meta tag not found');
                         const generalError = document.getElementById('general-error');
                         generalError.querySelector('p').textContent = '{{ __('API configuration missing. Please contact administrator.') }}';
                         generalError.classList.remove('hidden');
@@ -78,8 +77,22 @@
                         return;
                     }
 
+                    const apiUrl = apiUrlMeta.getAttribute('content');
+                    if (!apiUrl) {
+                        console.error('API URL is empty');
+                        const generalError = document.getElementById('general-error');
+                        generalError.querySelector('p').textContent = '{{ __('API configuration missing. Please contact administrator.') }}';
+                        generalError.classList.remove('hidden');
+                        button.disabled = false;
+                        button.textContent = originalText;
+                        return;
+                    }
+
+                    console.log('Using API URL:', apiUrl);
+
                     try {
-                        // Call external API directly
+                        // Step 1: Call external API directly to register user
+                        console.log('Calling external API:', `${apiUrl}/register`);
                         const response = await fetch(`${apiUrl}/register`, {
                             method: 'POST',
                             headers: {
@@ -90,9 +103,11 @@
                         });
 
                         const data = await response.json();
+                        console.log('API response:', response.status, data);
 
                         if (response.ok) {
-                            // Store token and user data in Laravel session via our backend
+                            // Step 2: Store token and user data in Laravel session (no CSRF needed - exception added)
+                            console.log('Storing session data in Laravel');
                             const sessionResponse = await fetch('{{ route('register') }}', {
                                 method: 'POST',
                                 headers: {
@@ -106,14 +121,18 @@
                             });
 
                             if (sessionResponse.ok) {
+                                console.log('Session created, redirecting to dashboard');
                                 window.location.href = '{{ route('dashboard') }}';
                             } else {
+                                const sessionData = await sessionResponse.json();
+                                console.error('Session creation failed:', sessionResponse.status, sessionData);
                                 const generalError = document.getElementById('general-error');
-                                generalError.querySelector('p').textContent = '{{ __('Session creation failed. Please try logging in.') }}';
+                                generalError.querySelector('p').textContent = sessionData.message || '{{ __('Session creation failed. Please try logging in.') }}';
                                 generalError.classList.remove('hidden');
                             }
                         } else {
-                            // Show validation errors
+                            // Show validation errors from API
+                            console.log('Validation errors:', data.errors);
                             if (data.errors) {
                                 for (const [field, messages] of Object.entries(data.errors)) {
                                     const errorEl = document.getElementById(field + '-error');
