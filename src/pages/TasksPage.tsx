@@ -4,6 +4,7 @@ import { tasksApi } from '../api/tasks';
 import { usePermissions } from '../hooks/usePermissions';
 import { useAuth } from '../hooks/useAuth';
 import { TaskModal } from '../components/tasks/TaskModal';
+import { DealershipSelector } from '../components/common/DealershipSelector';
 import type { Task } from '../types/task';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -348,6 +349,17 @@ export const TasksPage: React.FC = () => {
                   <option value="weekly">Еженедельно</option>
                   <option value="monthly">Ежемесячно</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Автосалон</label>
+                <DealershipSelector
+                  value={filters.dealership_id}
+                  onChange={(dealershipId) => setFilters({ ...filters, dealership_id: dealershipId || undefined })}
+                  placeholder="Все автосалоны"
+                  showAllOption={true}
+                  allOptionLabel="Все автосалоны"
+                />
               </div>
 
               <div className="flex items-end">

@@ -12,6 +12,7 @@ import { ShiftsPage } from './pages/ShiftsPage';
 import { LinksPage } from './pages/LinksPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { ReportsPage } from './pages/ReportsPage';
+import { DealershipsPage } from './pages/DealershipsPage';
 import './index.css';
 
 const queryClient = new QueryClient({
@@ -68,6 +69,14 @@ function App() {
             />
             <Route path="shifts" element={<ShiftsPage />} />
             <Route path="links" element={<LinksPage />} />
+            <Route
+              path="dealerships"
+              element={
+                <ProtectedRoute requiredRoles={['manager', 'owner']}>
+                  <DealershipsPage />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="settings"
               element={

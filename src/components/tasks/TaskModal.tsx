@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { tasksApi } from '../../api/tasks';
 import { usersApi } from '../../api/users';
+import { DealershipSelector } from '../common/DealershipSelector';
 import type { Task, CreateTaskRequest, TaskRecurrence, TaskType, ResponseType } from '../../types/task';
 
 interface TaskModalProps {
@@ -19,7 +20,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
     task_type: 'individual',
     response_type: 'acknowledge',
     recurrence: 'none',
-    dealership_id: 1,
+    dealership_id: undefined,
     assignments: [],
   });
 
@@ -54,7 +55,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
         task_type: 'individual',
         response_type: 'acknowledge',
         recurrence: 'none',
-        dealership_id: 1,
+        dealership_id: undefined,
         assignments: [],
       });
     }
@@ -166,6 +167,16 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
                       <option value="complete">Выполнение</option>
                     </select>
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Автосалон *</label>
+                  <DealershipSelector
+                    value={formData.dealership_id}
+                    onChange={(dealershipId) => setFormData({ ...formData, dealership_id: dealershipId || undefined })}
+                    placeholder="Выберите автосалон"
+                    required={true}
+                  />
                 </div>
 
                 <div>
