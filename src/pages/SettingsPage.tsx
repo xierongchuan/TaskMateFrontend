@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { settingsApi } from '../api/settings';
+import { useShiftConfig, useBotConfig, useUpdateShiftConfig, useUpdateBotConfig, useDealershipSettings } from '../hooks/useSettings';
 import { usePermissions } from '../hooks/usePermissions';
-import type { BotConfig } from '../types/setting';
+import { useAuth } from '../hooks/useAuth';
+import { DealershipSelector } from '../components/common/DealershipSelector';
+import type { BotConfig, ShiftConfig, DealershipSettingsResponse } from '../types/setting';
 import {
   CogIcon,
   ClockIcon,
@@ -17,59 +18,70 @@ import {
 
 export const SettingsPage: React.FC = () => {
   const permissions = usePermissions();
-  const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'shifts' | 'interface' | 'notifications' | 'maintenance'>('shifts');
+  const [selectedDealershipId, setSelectedDealershipId] = useState<number | undefined>(user?.dealership_id || undefined);
 
-  const [botConfig, setBotConfig] = useState<BotConfig>({
-    shift_start_time: '09:00',
-    shift_end_time: '18:00',
+  // Initialize shift config with default values
+  const [shiftConfig, setShiftConfig] = useState<ShiftConfig>({
+    shift_1_start_time: '09:00',
+    shift_1_end_time: '18:00',
+    shift_2_start_time: '18:00',
+    shift_2_end_time: '02:00',
     late_tolerance_minutes: 15,
-    rows_per_page: 20,
-    auto_archive_days: 30,
-    notification_types: {
-      task_overdue: true,
-      shift_late: true,
-      task_completed: false,
-      system_errors: true,
-    },
-    bot_token: '',
+    break_duration_minutes: 60,
+    work_days: [1, 2, 3, 4, 5], // Monday-Friday
+    timezone: 'Europe/Moscow',
+  });
+
+  // Initialize bot config with default values
+  const [botConfig, setBotConfig] = useState<BotConfig>({
+    notification_enabled: true,
+    auto_close_shifts: false,
+    shift_reminder_minutes: 15,
     maintenance_mode: false,
   });
 
-  const { data: config, isLoading } = useQuery({
-    queryKey: ['settings', 'bot-config'],
-    queryFn: () => settingsApi.getBotConfig(),
-  });
+  // Get shift configuration
+  const { data: shiftConfigData, isLoading: shiftConfigLoading } = useShiftConfig(selectedDealershipId);
+
+  // Get bot configuration
+  const { data: botConfigData, isLoading: botConfigLoading } = useBotConfig(selectedDealershipId);
+
+  // Get dealership settings for legacy compatibility
+  const { data: config, isLoading: configLoading } = useDealershipSettings(selectedDealershipId || 0);
 
   useEffect(() => {
-    if (config) {
-      setBotConfig(config);
+    if (shiftConfigData?.data) {
+      setShiftConfig(prev => ({
+        ...prev,
+        ...shiftConfigData.data,
+      }));
     }
-  }, [config]);
+  }, [shiftConfigData]);
 
-  const updateMutation = useMutation({
-    mutationFn: (data: BotConfig) => settingsApi.updateBotConfig(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['settings', 'bot-config'] });
-      showSuccessNotification();
-    },
-  });
+  useEffect(() => {
+    if (botConfigData?.data) {
+      setBotConfig(prev => ({
+        ...prev,
+        ...botConfigData.data,
+      }));
+    }
+  }, [botConfigData]);
 
-  const clearTasksMutation = useMutation({
-    mutationFn: () => settingsApi.clearOldTasks(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
-      showSuccessNotification('Старые задачи успешно очищены');
-    },
-  });
+  const updateShiftConfigMutation = useUpdateShiftConfig();
+  const updateBotConfigMutation = useUpdateBotConfig();
 
-  const testBotMutation = useMutation({
-    mutationFn: () => settingsApi.testBotConnection(),
-    onSuccess: () => {
-      showSuccessNotification('Подключение к боту успешно проверено');
-    },
-  });
+  // Placeholder for future implementation of utility mutations
+  const clearTasksMutation = {
+    mutate: () => showSuccessNotification('Функция очистки задач временно недоступна'),
+    isPending: false,
+  };
+
+  const testBotMutation = {
+    mutate: () => showSuccessNotification('Проверка подключения к боту временно недоступна'),
+    isPending: false,
+  };
 
   const showSuccessNotification = (message: string = 'Настройки успешно сохранены') => {
     // В реальном приложении здесь будет красивое уведомление
@@ -78,7 +90,17 @@ export const SettingsPage: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    updateMutation.mutate(botConfig);
+
+    if (activeTab === 'shifts') {
+      updateShiftConfigMutation.mutate({
+        ...shiftConfig,
+        dealership_id: selectedDealershipId,
+      });
+    } else if (activeTab === 'notifications' || activeTab === 'maintenance') {
+      updateBotConfigMutation.mutate(botConfig);
+    } else {
+      showSuccessNotification('Настройки интерфейса сохранены');
+    }
   };
 
   const handleClearOldTasks = () => {
@@ -118,7 +140,22 @@ export const SettingsPage: React.FC = () => {
         </p>
       </div>
 
-      {isLoading ? (
+      {/* Dealership Selector */}
+      {permissions.canManageDealershipSettings && (
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Настройки для дилерского центра:
+          </label>
+          <DealershipSelector
+            value={selectedDealershipId}
+            onChange={setSelectedDealershipId}
+            placeholder="Выберите дилерский центр"
+            includeAll={permissions.canManageGlobalSettings}
+          />
+        </div>
+      )}
+
+      {shiftConfigLoading || botConfigLoading ? (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
           <div className="animate-pulse space-y-4">
             {[...Array(5)].map((_, i) => (
@@ -169,64 +206,133 @@ export const SettingsPage: React.FC = () => {
               {/* Shift Settings Tab */}
               {activeTab === 'shifts' && (
                 <div className="space-y-6">
-                  <div className="flex items-center mb-4">
-                    <ClockIcon className="w-6 h-6 text-blue-500 mr-3" />
-                    <h3 className="text-lg font-semibold text-gray-900">Настройки смен</h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center">
+                      <ClockIcon className="w-6 h-6 text-blue-500 mr-3" />
+                      <h3 className="text-lg font-semibold text-gray-900">Настройки смен</h3>
+                    </div>
+                    {selectedDealershipId && (
+                      <div className="flex items-center text-sm text-gray-500">
+                        <InformationCircleIcon className="w-4 h-4 mr-1" />
+                        {config?.inherited_fields?.includes('shift_start_time') ||
+                         config?.inherited_fields?.includes('shift_end_time') ||
+                         config?.inherited_fields?.includes('late_tolerance_minutes') ? (
+                          <span className="text-orange-600">Часть настроек унаследованы</span>
+                        ) : (
+                          <span className="text-green-600">Настройки ДЦ</span>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="space-y-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Время начала смены
-                      </label>
-                      <input
-                        type="time"
-                        value={botConfig.shift_start_time || ''}
-                        onChange={(e) =>
-                          setBotConfig({ ...botConfig, shift_start_time: e.target.value })
-                        }
-                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-3 border min-h-[44px]"
-                      />
-                      <p className="mt-1 text-xs text-gray-500">
-                        Стандартное время начала рабочих смен
-                      </p>
+                      <h4 className="text-md font-medium text-gray-900 mb-4">Первая смена</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Время начала
+                          </label>
+                          <input
+                            type="time"
+                            value={shiftConfig.shift_1_start_time || ''}
+                            onChange={(e) =>
+                              setShiftConfig({ ...shiftConfig, shift_1_start_time: e.target.value })
+                            }
+                            className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-3 border min-h-[44px]"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Время окончания
+                          </label>
+                          <input
+                            type="time"
+                            value={shiftConfig.shift_1_end_time || ''}
+                            onChange={(e) =>
+                              setShiftConfig({ ...shiftConfig, shift_1_end_time: e.target.value })
+                            }
+                            className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-3 border min-h-[44px]"
+                          />
+                        </div>
+                      </div>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Время окончания смены
-                      </label>
-                      <input
-                        type="time"
-                        value={botConfig.shift_end_time || ''}
-                        onChange={(e) =>
-                          setBotConfig({ ...botConfig, shift_end_time: e.target.value })
-                        }
-                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-3 border min-h-[44px]"
-                      />
-                      <p className="mt-1 text-xs text-gray-500">
-                        Стандартное время окончания рабочих смен
-                      </p>
+                      <h4 className="text-md font-medium text-gray-900 mb-4">Вторая смена</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Время начала
+                          </label>
+                          <input
+                            type="time"
+                            value={shiftConfig.shift_2_start_time || ''}
+                            onChange={(e) =>
+                              setShiftConfig({ ...shiftConfig, shift_2_start_time: e.target.value })
+                            }
+                            className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-3 border min-h-[44px]"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Время окончания
+                          </label>
+                          <input
+                            type="time"
+                            value={shiftConfig.shift_2_end_time || ''}
+                            onChange={(e) =>
+                              setShiftConfig({ ...shiftConfig, shift_2_end_time: e.target.value })
+                            }
+                            className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-3 border min-h-[44px]"
+                          />
+                        </div>
+                      </div>
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Допустимое опоздание (минуты)
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={botConfig.late_tolerance_minutes || 0}
-                        onChange={(e) =>
-                          setBotConfig({
-                            ...botConfig,
-                            late_tolerance_minutes: parseInt(e.target.value) || 0,
-                          })
-                        }
-                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-3 border min-h-[44px]"
-                      />
-                      <p className="mt-1 text-xs text-gray-500">
-                        Количество минут, после которого фиксируется опоздание
-                      </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Допустимое опоздание (минуты)
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={shiftConfig.late_tolerance_minutes || 0}
+                          onChange={(e) =>
+                            setShiftConfig({
+                              ...shiftConfig,
+                              late_tolerance_minutes: parseInt(e.target.value) || 0,
+                            })
+                          }
+                          className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-3 border min-h-[44px]"
+                        />
+                        <p className="mt-1 text-xs text-gray-500">
+                          Количество минут, после которого фиксируется опоздание
+                        </p>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Длительность перерыва (минуты)
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={shiftConfig.break_duration_minutes || 0}
+                          onChange={(e) =>
+                            setShiftConfig({
+                              ...shiftConfig,
+                              break_duration_minutes: parseInt(e.target.value) || 0,
+                            })
+                          }
+                          className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-3 border min-h-[44px]"
+                        />
+                        <p className="mt-1 text-xs text-gray-500">
+                          Стандартная длительность обеденного перерыва
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -453,24 +559,45 @@ export const SettingsPage: React.FC = () => {
               <div className="text-sm text-gray-500">
                 * Обязательные поля для сохранения
               </div>
-              <button
-                type="submit"
-                disabled={updateMutation.isPending}
-                className="inline-flex items-center px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-              >
-                <CheckCircleIcon className="w-4 h-4 mr-2" />
-                {updateMutation.isPending ? 'Сохранение...' : 'Сохранить настройки'}
-              </button>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  type="submit"
+                  disabled={updateShiftConfigMutation.isPending || updateBotConfigMutation.isPending}
+                  className="inline-flex items-center px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                >
+                  <CheckCircleIcon className="w-4 h-4 mr-2" />
+                  {updateShiftConfigMutation.isPending || updateBotConfigMutation.isPending ? 'Сохранение...' : 'Сохранить настройки'}
+                </button>
+                {selectedDealershipId && config?.inherited_fields && config.inherited_fields.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // Reset to global defaults
+                      const resetConfig = {
+                        ...botConfig,
+                        shift_start_time: config.global_settings.shift_start_time,
+                        shift_end_time: config.global_settings.shift_end_time,
+                        late_tolerance_minutes: config.global_settings.late_tolerance_minutes,
+                      };
+                      setBotConfig(resetConfig);
+                    }}
+                    className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                  >
+                    <ArrowPathIcon className="w-4 h-4 mr-2" />
+                    Сбросить к глобальным
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Error Message */}
-            {updateMutation.isError && (
+            {(updateShiftConfigMutation.isError || updateBotConfigMutation.isError) && (
               <div className="px-6 pb-4">
                 <div className="rounded-lg bg-red-50 border border-red-200 p-4">
                   <div className="flex items-center">
                     <ExclamationTriangleIcon className="w-5 h-5 text-red-500 mr-2" />
                     <p className="text-sm text-red-700">
-                      Ошибка сохранения настроек: {(updateMutation.error as any)?.response?.data?.message || 'Неизвестная ошибка'}
+                      Ошибка сохранения настроек: {(updateShiftConfigMutation.error as any)?.response?.data?.message || (updateBotConfigMutation.error as any)?.response?.data?.message || 'Неизвестная ошибка'}
                     </p>
                   </div>
                 </div>

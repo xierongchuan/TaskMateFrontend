@@ -1,27 +1,107 @@
 import apiClient from './client';
-import type { Setting, BotConfig } from '../types/setting';
+import type {
+  Setting,
+  BotConfig,
+  ShiftConfig,
+  DealershipSettingsResponse,
+  CreateSettingRequest,
+  UpdateSettingRequest,
+  UpdateShiftConfigRequest,
+  UpdateBotConfigRequest
+} from '../types/setting';
 
 export const settingsApi = {
-  getSettings: async (): Promise<Setting[]> => {
-    const response = await apiClient.get<Setting[]>('/settings');
+  // Basic settings operations
+  getSettings: async (dealershipId?: number): Promise<{ data: Setting[] }> => {
+    const response = await apiClient.get<{ data: Setting[] }>('/settings', {
+      params: dealershipId ? { dealership_id: dealershipId } : {},
+    });
     return response.data;
   },
 
-  createSetting: async (data: { key: string; value: string; description?: string }): Promise<{ data: Setting }> => {
+  getSettingByKey: async (key: string): Promise<{ data: Setting }> => {
+    const response = await apiClient.get<{ data: Setting }>(`/settings/${key}`);
+    return response.data;
+  },
+
+  createSetting: async (data: CreateSettingRequest): Promise<{ data: Setting }> => {
     const response = await apiClient.post<{ data: Setting }>('/settings', data);
     return response.data;
   },
 
-  getBotConfig: async (): Promise<BotConfig> => {
-    const response = await apiClient.get<BotConfig>('/settings/bot-config');
+  updateSettingById: async (id: number, data: UpdateSettingRequest): Promise<{ data: Setting }> => {
+    const response = await apiClient.put<{ data: Setting }>(`/settings/${id}`, data);
     return response.data;
   },
 
-  updateBotConfig: async (data: BotConfig): Promise<BotConfig> => {
-    const response = await apiClient.post<BotConfig>('/settings/bot-config', data);
+  deleteSetting: async (id: number): Promise<void> => {
+    await apiClient.delete(`/settings/${id}`);
+  },
+
+  // Shift Configuration
+  getShiftConfig: async (dealershipId?: number): Promise<{ data: ShiftConfig }> => {
+    const response = await apiClient.get<{ data: ShiftConfig }>('/settings/shift-config', {
+      params: dealershipId ? { dealership_id: dealershipId } : {},
+    });
     return response.data;
   },
 
+  updateShiftConfig: async (data: UpdateShiftConfigRequest): Promise<{ data: ShiftConfig }> => {
+    const response = await apiClient.post<{ data: ShiftConfig }>('/settings/shift-config', data);
+    return response.data;
+  },
+
+  // Bot Configuration
+  getBotConfig: async (dealershipId?: number): Promise<{ data: BotConfig }> => {
+    const response = await apiClient.get<{ data: BotConfig }>('/settings/bot-config', {
+      params: dealershipId ? { dealership_id: dealershipId } : {},
+    });
+    return response.data;
+  },
+
+  updateBotConfig: async (data: UpdateBotConfigRequest): Promise<{ data: BotConfig }> => {
+    const response = await apiClient.post<{ data: BotConfig }>('/settings/bot-config', data);
+    return response.data;
+  },
+
+  // Legacy methods for backward compatibility
+  // Dealership-specific settings (using new shift config endpoints)
+  getDealershipBotConfig: async (dealershipId: number): Promise<DealershipSettingsResponse> => {
+    const [dealershipConfig, globalConfig] = await Promise.all([
+      this.getShiftConfig(dealershipId),
+      this.getShiftConfig(),
+    ]);
+
+    // Determine which fields are inherited (not set for dealership)
+    const inheritedFields: (keyof any)[] = [];
+    if (!dealershipConfig.data.shift_1_start_time) inheritedFields.push('shift_1_start_time');
+    if (!dealershipConfig.data.shift_1_end_time) inheritedFields.push('shift_1_end_time');
+    if (!dealershipConfig.data.late_tolerance_minutes) inheritedFields.push('late_tolerance_minutes');
+
+    return {
+      dealership_id: dealershipId,
+      settings: dealershipConfig.data,
+      global_settings: globalConfig.data as BotConfig,
+      inherited_fields: inheritedFields,
+    };
+  },
+
+  updateDealershipBotConfig: async (data: UpdateShiftConfigRequest): Promise<any> => {
+    return this.updateShiftConfig(data);
+  },
+
+  resetDealershipToGlobal: async (dealershipId: number): Promise<void> => {
+    // This would need to be implemented on backend side
+    // For now, we can update with empty values to reset
+    await this.updateShiftConfig({
+      dealership_id: dealershipId,
+      shift_1_start_time: undefined,
+      shift_1_end_time: undefined,
+      late_tolerance_minutes: undefined,
+    });
+  },
+
+  // Utility operations (if they exist in backend)
   clearOldTasks: async (): Promise<void> => {
     await apiClient.post('/settings/clear-old-tasks');
   },

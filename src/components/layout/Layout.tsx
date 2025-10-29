@@ -2,12 +2,18 @@ import React, { useState } from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { usePermissions } from '../../hooks/usePermissions';
+import { useMyCurrentShift } from '../../hooks/useShifts';
+import { format } from 'date-fns';
+import { ru } from 'date-fns/locale';
+import { ClockIcon } from '@heroicons/react/24/outline';
 
 export const Layout: React.FC = () => {
   const { user, logout } = useAuth();
   const permissions = usePermissions();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { data: currentShiftData } = useMyCurrentShift();
+  const currentShift = currentShiftData?.data;
 
   const handleLogout = async () => {
     await logout();
@@ -85,8 +91,19 @@ export const Layout: React.FC = () => {
             </div>
 
             {/* Desktop User Info */}
-            <div className="hidden md:flex md:items-center">
-              <span className="text-xs md:text-sm text-gray-700 mr-1 md:mr-3 truncate max-w-[100px] md:max-w-[140px] lg:max-w-[180px] xl:max-w-xs">
+            <div className="hidden md:flex md:items-center md:space-x-3">
+              {currentShift && (
+                <div className="flex items-center space-x-2 px-3 py-2 bg-green-50 border border-green-200 rounded-lg">
+                  <ClockIcon className="w-4 h-4 text-green-600" />
+                  <div className="text-xs text-green-800">
+                    <div className="font-medium">Смена открыта</div>
+                    <div className="text-green-600">
+                      с {format(new Date(currentShift.shift_start), 'HH:mm', { locale: ru })}
+                    </div>
+                  </div>
+                </div>
+              )}
+              <span className="text-xs md:text-sm text-gray-700 truncate max-w-[100px] md:max-w-[140px] lg:max-w-[180px] xl:max-w-xs">
                 {user?.full_name} ({user?.role})
               </span>
               <button
@@ -209,6 +226,19 @@ export const Layout: React.FC = () => {
 
             {/* Mobile user info and logout */}
             <div className="border-t border-gray-200 pt-4 pb-3">
+              {currentShift && (
+                <div className="px-4 py-2">
+                  <div className="flex items-center space-x-2 px-3 py-2 bg-green-50 border border-green-200 rounded-lg">
+                    <ClockIcon className="w-4 h-4 text-green-600" />
+                    <div className="text-sm text-green-800">
+                      <div className="font-medium">Смена открыта</div>
+                      <div className="text-green-600">
+                        с {format(new Date(currentShift.shift_start), 'HH:mm', { locale: ru })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="px-4 py-2">
                 <div className="text-base font-medium text-gray-800 truncate">
                   {user?.full_name}

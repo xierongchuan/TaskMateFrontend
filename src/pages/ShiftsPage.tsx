@@ -1,26 +1,19 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { shiftsApi } from '../api/shifts';
+import { useShifts, useCurrentShifts } from '../hooks/useShifts';
+import { ShiftControl } from '../components/shifts/ShiftControl';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import type { ShiftsFilters } from '../types/shift';
 
 export const ShiftsPage: React.FC = () => {
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<ShiftsFilters>({
     status: '',
-    is_late: undefined as boolean | undefined,
+    is_late: undefined,
   });
 
-  const { data: shiftsData, isLoading, error } = useQuery({
-    queryKey: ['shifts', filters],
-    queryFn: () => shiftsApi.getShifts(filters),
-    refetchInterval: 15000, // Refetch every 15 seconds for live updates
-  });
-
-  const { data: currentShifts } = useQuery({
-    queryKey: ['shifts', 'current'],
-    queryFn: () => shiftsApi.getCurrentShifts(),
-    refetchInterval: 15000,
-  });
+  const { data: shiftsData, isLoading, error } = useShifts(filters);
+  const { data: currentShiftsData } = useCurrentShifts();
+  const currentShifts = currentShiftsData?.data || [];
 
   const getStatusBadge = (status: string) => {
     return (
@@ -34,6 +27,21 @@ export const ShiftsPage: React.FC = () => {
     );
   };
 
+  const getShiftTypeLabel = (type: string) => {
+    switch (type) {
+      case 'regular':
+        return 'Обычная';
+      case 'overtime':
+        return 'Сверхурочная';
+      case 'weekend':
+        return 'Выходная';
+      case 'holiday':
+        return 'Праздничная';
+      default:
+        return type;
+    }
+  };
+
   return (
     <div className="px-4 py-6 sm:px-0">
       <div className="mb-6">
@@ -42,6 +50,9 @@ export const ShiftsPage: React.FC = () => {
           Отслеживание смен сотрудников в реальном времени
         </p>
       </div>
+
+      {/* Shift Control Component */}
+      <ShiftControl />
 
       {/* Current Shifts Live Board */}
       {currentShifts && currentShifts.length > 0 && (
@@ -59,16 +70,19 @@ export const ShiftsPage: React.FC = () => {
                   {getStatusBadge(shift.status)}
                 </div>
                 <div className="text-sm text-gray-500 space-y-1">
-                  <div>Начало: {format(new Date(shift.opened_at), 'PPp', { locale: ru })}</div>
+                  <div>Начало: {format(new Date(shift.shift_start), 'PPp', { locale: ru })}</div>
+                  <div>Тип смены: {getShiftTypeLabel(shift.shift_type)}</div>
+                  {shift.break_duration && (
+                    <div>Перерыв: {shift.break_duration} мин</div>
+                  )}
                   {shift.is_late && (
                     <div className="text-red-600 font-medium">
                       Опоздание: {shift.late_minutes} мин
                     </div>
                   )}
-                  {shift.replacement && (
-                    <div className="text-blue-600">
-                      Замена: {shift.replacement.full_name}
-                      {shift.replacement_reason && ` (${shift.replacement_reason})`}
+                  {shift.dealership && (
+                    <div className="text-gray-600">
+                      Автосалон: {shift.dealership.name}
                     </div>
                   )}
                 </div>
@@ -80,7 +94,7 @@ export const ShiftsPage: React.FC = () => {
 
       {/* Filters */}
       <div className="bg-white shadow rounded-lg p-4 mb-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Статус</label>
             <select
@@ -91,6 +105,21 @@ export const ShiftsPage: React.FC = () => {
               <option value="">Все</option>
               <option value="open">Открыта</option>
               <option value="closed">Закрыта</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Тип смены</label>
+            <select
+              value={filters.shift_type || ''}
+              onChange={(e) => setFilters({ ...filters, shift_type: e.target.value || undefined })}
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+            >
+              <option value="">Все</option>
+              <option value="regular">Обычная</option>
+              <option value="overtime">Сверхурочная</option>
+              <option value="weekend">Выходная</option>
+              <option value="holiday">Праздничная</option>
             </select>
           </div>
 
@@ -153,21 +182,20 @@ export const ShiftsPage: React.FC = () => {
                       </div>
                       <div className="text-sm text-gray-500 space-y-1">
                         <div className="flex flex-wrap gap-x-4">
-                          <span>Открыта: {format(new Date(shift.opened_at), 'PPp', { locale: ru })}</span>
-                          {shift.closed_at && (
-                            <span>Закрыта: {format(new Date(shift.closed_at), 'PPp', { locale: ru })}</span>
+                          <span>Начало: {format(new Date(shift.shift_start), 'PPp', { locale: ru })}</span>
+                          {shift.shift_end && (
+                            <span>Конец: {format(new Date(shift.shift_end), 'PPp', { locale: ru })}</span>
                           )}
                         </div>
-                        {shift.scheduled_start && shift.scheduled_end && (
-                          <div>
-                            Запланировано: {format(new Date(shift.scheduled_start), 'PPp', { locale: ru })} -{' '}
-                            {format(new Date(shift.scheduled_end), 'PPp', { locale: ru })}
-                          </div>
-                        )}
-                        {shift.replacement && (
-                          <div className="text-blue-600">
-                            Замена: {shift.replacement.full_name}
-                            {shift.replacement_reason && ` - ${shift.replacement_reason}`}
+                        <div className="flex flex-wrap gap-x-4">
+                          <span>Тип смены: {getShiftTypeLabel(shift.shift_type)}</span>
+                          {shift.break_duration && (
+                            <span>Перерыв: {shift.break_duration} мин</span>
+                          )}
+                        </div>
+                        {shift.dealership && (
+                          <div className="text-gray-600">
+                            Автосалон: {shift.dealership.name}
                           </div>
                         )}
                       </div>

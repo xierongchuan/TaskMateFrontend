@@ -1,28 +1,43 @@
 export type ShiftStatus = 'open' | 'closed';
 
+export type ShiftType = 'regular' | 'overtime' | 'weekend' | 'holiday';
+
 export interface Shift {
   id: number;
   user_id: number;
   dealership_id: number;
+  shift_type: ShiftType;
   status: ShiftStatus;
-  opened_at: string;
-  closed_at: string | null;
-  scheduled_start: string | null;
-  scheduled_end: string | null;
+  shift_start: string;
+  shift_end: string | null;
+  opening_photo_path: string | null;
+  closing_photo_path: string | null;
+  break_duration?: number;
   is_late: boolean;
   late_minutes: number | null;
-  opened_photo: string | null;
-  closed_photo: string | null;
-  replacement_id: number | null;
-  replacement_reason: string | null;
   created_at: string;
   updated_at: string;
   user?: {
     id: number;
     full_name: string;
   };
-  replacement?: {
+  dealership?: {
     id: number;
-    full_name: string;
+    name: string;
   };
+}
+
+// Request types for API
+export interface CreateShiftRequest {
+  user_id: number;
+  dealership_id: number;
+  opening_photo: File;
+  replacement_user_id?: number;
+  replacement_reason?: string;
+}
+
+export interface UpdateShiftRequest {
+  closing_photo?: File;
+  status?: ShiftStatus;
+  break_duration?: number;
 }

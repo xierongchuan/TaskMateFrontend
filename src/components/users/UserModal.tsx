@@ -27,7 +27,7 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
       setFormData({
         login: user.login,
         full_name: user.full_name,
-        phone: user.phone || '',
+        phone: user.phone || user.phone_number || '',
         role: user.role,
         dealership_id: user.dealership_id || undefined,
         telegram_id: user.telegram_id || undefined,
