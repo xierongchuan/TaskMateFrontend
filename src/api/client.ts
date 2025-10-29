@@ -1,6 +1,6 @@
 import axios, { type AxiosInstance, type AxiosError } from 'axios';
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://src_telegram_bot_api:8007/api/v1';
 
 const apiClient: AxiosInstance = axios.create({
   baseURL: BASE_URL,
