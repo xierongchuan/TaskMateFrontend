@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDealerships, useDeleteDealership } from '../../hooks/useDealerships';
 import type { Dealership } from '../../types/dealership';
 import {
@@ -19,14 +19,43 @@ interface DealershipListProps {
 }
 
 export const DealershipList: React.FC<DealershipListProps> = ({ onEdit }) => {
+  const [searchInput, setSearchInput] = useState('');
   const [filters, setFilters] = useState({
     search: '',
     page: 1,
   });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [dealershipToDelete, setDealershipToDelete] = useState<Dealership | null>(null);
+  const [isSearchLoading, setIsSearchLoading] = useState(false);
 
   const { data, isLoading, error } = useDealerships(filters);
+
+  // Обработчик изменения ввода с useCallback для оптимизации
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchInput(e.target.value);
+  }, []);
+
+  // Debounce эффект с управлением состоянием загрузки
+  useEffect(() => {
+    // Устанавливаем состояние загрузки при начале поиска
+    if (searchInput !== filters.search) {
+      setIsSearchLoading(true);
+    }
+
+    const timer = setTimeout(() => {
+      if (searchInput !== filters.search) {
+        setFilters(prev => ({ ...prev, search: searchInput, page: 1 }));
+      }
+      // Сбрасываем состояние загрузки после выполнения запроса
+      setIsSearchLoading(false);
+    }, 500); // 500ms задержка
+
+    return () => {
+      clearTimeout(timer);
+      // Сбрасываем состояние загрузки при очистке таймера
+      setIsSearchLoading(false);
+    };
+  }, [searchInput, filters.search]);
   const deleteDealership = useDeleteDealership();
 
   const handleDelete = (dealership: Dealership) => {
@@ -47,7 +76,8 @@ export const DealershipList: React.FC<DealershipListProps> = ({ onEdit }) => {
   };
 
   const clearSearch = () => {
-    setFilters({ ...filters, search: '', page: 1 });
+    setSearchInput('');
+    setFilters(prev => ({ ...prev, search: '', page: 1 }));
   };
 
   if (isLoading) {
@@ -81,15 +111,21 @@ export const DealershipList: React.FC<DealershipListProps> = ({ onEdit }) => {
         <div className="flex flex-col sm:flex-row gap-4 items-center">
           <div className="relative flex-1">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+              <MagnifyingGlassIcon className={`h-5 w-5 ${isSearchLoading ? 'text-blue-500 animate-pulse' : 'text-gray-400'}`} />
             </div>
             <input
+              key="dealership-search-input"
               type="text"
               placeholder="Поиск по названию или адресу..."
-              value={filters.search}
-              onChange={(e) => setFilters({ ...filters, search: e.target.value, page: 1 })}
-              className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm pl-10 pr-3 py-2 border"
+              value={searchInput}
+              onChange={handleSearchChange}
+              className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm pl-10 pr-10 py-2 border"
             />
+            {isSearchLoading && (
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+              </div>
+            )}
           </div>
           {filters.search && (
             <button
