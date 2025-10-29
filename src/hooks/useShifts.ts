@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { shiftsApi } from '../api/shifts';
-import type { Shift, CreateShiftRequest, UpdateShiftRequest, ShiftsFilters } from '../types/shift';
+import type { CreateShiftRequest, UpdateShiftRequest, ShiftsFilters } from '../types/shift';
 
 // Hook for getting all shifts
 export const useShifts = (filters?: ShiftsFilters) => {
@@ -82,7 +82,7 @@ export const useUpdateShift = () => {
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdateShiftRequest }) =>
       shiftsApi.updateShift(id, data),
-    onSuccess: (data, variables) => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['shifts'] });
       queryClient.invalidateQueries({ queryKey: ['my-shifts'] });
       queryClient.invalidateQueries({ queryKey: ['shift', variables.id] });

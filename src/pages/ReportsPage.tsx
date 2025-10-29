@@ -234,7 +234,7 @@ export const ReportsPage: React.FC = () => {
                 type="date"
                 value={dateRange.from}
                 onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
-                inputMode="date"
+                inputMode="text"
                 className="w-full sm:w-auto px-3 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[44px]"
               />
               <span className="text-gray-500 text-center sm:text-left hidden sm:block">—</span>
@@ -243,7 +243,7 @@ export const ReportsPage: React.FC = () => {
                 type="date"
                 value={dateRange.to}
                 onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
-                inputMode="date"
+                inputMode="text"
                 className="w-full sm:w-auto px-3 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[44px]"
               />
             </div>

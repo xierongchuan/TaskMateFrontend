@@ -2,6 +2,18 @@ export type ShiftStatus = 'open' | 'closed';
 
 export type ShiftType = 'regular' | 'overtime' | 'weekend' | 'holiday';
 
+export interface ShiftsFilters {
+  user_id?: number;
+  dealership_id?: number;
+  status?: string;
+  shift_type?: string;
+  is_late?: boolean;
+  date_from?: string;
+  date_to?: string;
+  per_page?: number;
+  page?: number;
+}
+
 export interface Shift {
   id: number;
   user_id: number;

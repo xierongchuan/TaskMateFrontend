@@ -3,7 +3,7 @@ import { useShiftConfig, useBotConfig, useUpdateShiftConfig, useUpdateBotConfig,
 import { usePermissions } from '../hooks/usePermissions';
 import { useAuth } from '../hooks/useAuth';
 import { DealershipSelector } from '../components/common/DealershipSelector';
-import type { BotConfig, ShiftConfig, DealershipSettingsResponse } from '../types/setting';
+import type { BotConfig, ShiftConfig } from '../types/setting';
 import {
   CogIcon,
   ClockIcon,
@@ -49,7 +49,7 @@ export const SettingsPage: React.FC = () => {
   const { data: botConfigData, isLoading: botConfigLoading } = useBotConfig(selectedDealershipId);
 
   // Get dealership settings for legacy compatibility
-  const { data: config, isLoading: configLoading } = useDealershipSettings(selectedDealershipId || 0);
+  const { data: config } = useDealershipSettings(selectedDealershipId || 0);
 
   useEffect(() => {
     if (shiftConfigData?.data) {
@@ -148,9 +148,10 @@ export const SettingsPage: React.FC = () => {
           </label>
           <DealershipSelector
             value={selectedDealershipId}
-            onChange={setSelectedDealershipId}
+            onChange={(value) => setSelectedDealershipId(value || undefined)}
             placeholder="Выберите дилерский центр"
-            includeAll={permissions.canManageGlobalSettings}
+            showAllOption={permissions.canManageGlobalSettings}
+            allOptionLabel="Глобальные настройки"
           />
         </div>
       )}
@@ -214,9 +215,7 @@ export const SettingsPage: React.FC = () => {
                     {selectedDealershipId && (
                       <div className="flex items-center text-sm text-gray-500">
                         <InformationCircleIcon className="w-4 h-4 mr-1" />
-                        {config?.inherited_fields?.includes('shift_start_time') ||
-                         config?.inherited_fields?.includes('shift_end_time') ||
-                         config?.inherited_fields?.includes('late_tolerance_minutes') ? (
+                        {config?.inherited_fields && config.inherited_fields.length > 0 ? (
                           <span className="text-orange-600">Часть настроек унаследованы</span>
                         ) : (
                           <span className="text-green-600">Настройки ДЦ</span>
@@ -574,12 +573,12 @@ export const SettingsPage: React.FC = () => {
                     onClick={() => {
                       // Reset to global defaults
                       const resetConfig = {
-                        ...botConfig,
-                        shift_start_time: config.global_settings.shift_start_time,
-                        shift_end_time: config.global_settings.shift_end_time,
-                        late_tolerance_minutes: config.global_settings.late_tolerance_minutes,
+                        ...shiftConfig,
+                        shift_1_start_time: config.global_settings.shift_start_time || '09:00',
+                        shift_1_end_time: config.global_settings.shift_end_time || '18:00',
+                        late_tolerance_minutes: config.global_settings.late_tolerance_minutes || 15,
                       };
-                      setBotConfig(resetConfig);
+                      setShiftConfig(resetConfig);
                     }}
                     className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
                   >

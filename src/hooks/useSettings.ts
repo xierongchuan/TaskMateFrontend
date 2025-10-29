@@ -1,9 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { settingsApi } from '../api/settings';
 import type {
-  Setting,
-  BotConfig,
-  ShiftConfig,
   CreateSettingRequest,
   UpdateSettingRequest,
   UpdateShiftConfigRequest,

@@ -36,6 +36,19 @@ export interface BotConfig {
   auto_close_shifts?: boolean;
   shift_reminder_minutes?: number;
   maintenance_mode?: boolean;
+  // Legacy interface fields
+  shift_start_time?: string;
+  shift_end_time?: string;
+  late_tolerance_minutes?: number;
+  rows_per_page?: number;
+  auto_archive_days?: number;
+  notification_types?: {
+    task_overdue?: boolean;
+    shift_late?: boolean;
+    task_completed?: boolean;
+    system_errors?: boolean;
+  };
+  bot_token?: string;
 }
 
 // Dealership-specific settings
