@@ -57,10 +57,20 @@ npm run preview
 
 ## Docker
 
+### Важно: Переменные окружения при сборке
+
+Vite встраивает переменные окружения (начинающиеся с `VITE_`) в JavaScript **во время сборки**, а не во время запуска. Это означает, что переменные должны быть переданы как build arguments при сборке образа.
+
 ### Сборка образа
 
 ```bash
+# Сборка с дефолтным API URL (http://localhost:8007/api/v1)
 docker build -t taskmate-frontend .
+
+# Сборка с кастомным API URL
+docker build \
+  --build-arg VITE_API_BASE_URL=http://your-api-url:8007/api/v1 \
+  -t taskmate-frontend .
 ```
 
 ### Запуск контейнера
@@ -78,14 +88,19 @@ docker run -p 80:80 taskmate-frontend
 ```yaml
 services:
   frontend:
-    build: ./taskmate-frontend
+    build:
+      context: ./TaskMateFrontend
+      dockerfile: Dockerfile
+      args:
+        # Передаем build argument для Vite
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8007/api/v1}
     ports:
       - "80:80"
-    environment:
-      - VITE_API_BASE_URL=http://api:8000/api/v1
     depends_on:
       - api
 ```
+
+**Примечание:** Runtime переменные окружения (через `environment:`) НЕ работают для Vite приложений, так как код уже собран. Используйте только `build.args`.
 
 ## Структура проекта
 
@@ -145,7 +160,23 @@ src/
 
 ## Переменные окружения
 
-- `VITE_API_BASE_URL` - URL API сервера (по умолчанию: `http://localhost:8000/api/v1`)
+- `VITE_API_BASE_URL` - URL API сервера (по умолчанию: `http://localhost:8007/api/v1`)
+
+### Для локальной разработки
+
+Создайте `.env` файл:
+```bash
+cp .env.example .env
+```
+
+Отредактируйте `.env`:
+```
+VITE_API_BASE_URL=http://localhost:8007/api/v1
+```
+
+### Для Docker
+
+При использовании Docker переменные должны передаваться как **build arguments**, а не runtime environment variables. Смотрите раздел "Docker" выше для подробностей.
 
 ## Документация API
 
