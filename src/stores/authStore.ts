@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User } from '../types/user';
 import { authApi } from '../api/auth';
+import { setAuthHelpers } from '../api/client';
 
 interface AuthState {
   user: User | null;
@@ -28,17 +29,20 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, error: null });
         try {
           const response = await authApi.login({ login, password });
-          localStorage.setItem('auth_token', response.token);
 
+          // Set all auth state at once - Zustand persist will handle storage
           set({
             user: response.user,
             token: response.token,
             isAuthenticated: true,
             isLoading: false,
           });
-        } catch (error: any) {
+        } catch (error: unknown) {
+          const errorMessage = error && typeof error === 'object' && 'response' in error
+            ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Ошибка входа'
+            : 'Ошибка входа';
           set({
-            error: error.response?.data?.message || 'Ошибка входа',
+            error: errorMessage,
             isLoading: false,
           });
           throw error;
@@ -51,7 +55,7 @@ export const useAuthStore = create<AuthState>()(
         } catch (error) {
           console.error('Logout error:', error);
         } finally {
-          localStorage.removeItem('auth_token');
+          // Clear auth state - Zustand persist will handle storage cleanup
           set({
             user: null,
             token: null,
@@ -61,18 +65,21 @@ export const useAuthStore = create<AuthState>()(
       },
 
       refreshUser: async () => {
-        const token = localStorage.getItem('auth_token');
+        // Get current state to check for token
+        const currentState = useAuthStore.getState();
+        const token = currentState.token;
+
         if (!token) {
-          set({ isAuthenticated: false, user: null });
+          set({ isAuthenticated: false, user: null, token: null });
           return;
         }
 
         try {
           const user = await authApi.getCurrentUser();
-          set({ user, isAuthenticated: true });
+          set({ user, isAuthenticated: true, token });
         } catch (error) {
           console.error('Refresh user error:', error);
-          localStorage.removeItem('auth_token');
+          // Clear all auth state on error
           set({ isAuthenticated: false, user: null, token: null });
         }
       },
@@ -88,4 +95,16 @@ export const useAuthStore = create<AuthState>()(
       }),
     }
   )
+);
+
+// Register auth helpers with API client to avoid circular dependencies
+setAuthHelpers(
+  () => useAuthStore.getState().token,
+  () => {
+    useAuthStore.setState({
+      user: null,
+      token: null,
+      isAuthenticated: false,
+    });
+  }
 );

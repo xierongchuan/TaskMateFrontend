@@ -11,9 +11,22 @@ const apiClient: AxiosInstance = axios.create({
   timeout: 30000,
 });
 
+// Import useAuthStore dynamically to avoid circular dependencies
+let getAuthToken: (() => string | null) | null = null;
+let clearAuth: (() => void) | null = null;
+
+export const setAuthHelpers = (
+  tokenGetter: () => string | null,
+  authClearer: () => void
+) => {
+  getAuthToken = tokenGetter;
+  clearAuth = authClearer;
+};
+
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('auth_token');
+    // Get token from Zustand store via helper function
+    const token = getAuthToken?.();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -30,8 +43,8 @@ apiClient.interceptors.response.use(
   },
   (error: AxiosError) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('user');
+      // Clear auth state via Zustand store
+      clearAuth?.();
       window.location.href = '/login';
     }
 
