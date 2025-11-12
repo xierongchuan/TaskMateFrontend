@@ -1,4 +1,5 @@
 import axios, { type AxiosInstance, type AxiosError } from 'axios';
+import { debugAuth } from '../utils/debug';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8007/api/v1';
 
@@ -42,10 +43,21 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error: AxiosError) => {
+    // Only clear auth state on 401 errors for specific endpoints
+    // Don't clear on network errors or other server errors
     if (error.response?.status === 401) {
-      // Clear auth state via Zustand store
-      clearAuth?.();
-      window.location.href = '/login';
+      // Check if this is a session endpoint or other protected resource
+      const requestUrl = error.config?.url;
+      if (requestUrl?.includes('/session') ||
+        requestUrl?.includes('/protected') ||
+        !requestUrl) {
+        // Clear auth state only for session-related requests
+        debugAuth.log('401 error on session request, clearing auth state');
+        clearAuth?.();
+        window.location.href = '/login';
+      } else {
+        debugAuth.log('401 error on non-session request, not clearing auth');
+      }
     }
 
     if (error.response?.status === 403) {

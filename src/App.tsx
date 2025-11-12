@@ -26,23 +26,24 @@ const queryClient = new QueryClient({
 });
 
 function App() {
-  const { isAuthenticated, token, hasHydrated } = useAuthStore();
+  const { isAuthenticated, token, hasHydrated, user } = useAuthStore();
 
   useEffect(() => {
-    // After Zustand persist hydrates, check if we have a token and refresh user data
-    // The token will be restored from 'auth-storage' in localStorage automatically
+    // After Zustand persist hydrates, check if we have a token but no user data
+    // Only refresh if we have token but missing user data to avoid unnecessary API calls
     debugAuth.log('App useEffect triggered', {
       hasHydrated,
       hasToken: !!token,
       isAuthenticated,
+      hasUser: !!user,
     });
 
-    if (hasHydrated && token && isAuthenticated) {
-      debugAuth.log('Calling refreshUser to update user data');
+    if (hasHydrated && token && isAuthenticated && !user) {
+      debugAuth.log('Has token but no user data, calling refreshUser');
       // Get refreshUser directly from store to avoid dependency issues
       useAuthStore.getState().refreshUser();
     }
-  }, [hasHydrated, token, isAuthenticated]);
+  }, [hasHydrated, token, isAuthenticated, user]);
 
   // Show loading screen while Zustand persist is hydrating state from localStorage
   if (!hasHydrated) {

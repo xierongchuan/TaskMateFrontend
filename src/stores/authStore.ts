@@ -95,9 +95,23 @@ export const useAuthStore = create<AuthState>()(
           set({ user, isAuthenticated: true, token });
         } catch (error) {
           console.error('Refresh user error:', error);
-          debugAuth.error('Failed to refresh user, clearing auth state');
-          // Clear all auth state on error
-          set({ isAuthenticated: false, user: null, token: null });
+          debugAuth.error('Failed to refresh user');
+
+          // Only clear auth state on 401 errors (unauthorized)
+          // Don't clear on network errors or server errors
+          if (error && typeof error === 'object' && 'response' in error) {
+            const status = (error as { response?: { status?: number } }).response?.status;
+            if (status === 401) {
+              debugAuth.log('401 error, clearing auth state');
+              set({ isAuthenticated: false, user: null, token: null });
+            } else {
+              debugAuth.log('Non-401 error, keeping auth state');
+              // Keep auth state for other errors (network, 500, etc.)
+            }
+          } else {
+            debugAuth.log('Network or other error, keeping auth state');
+            // Keep auth state for network errors
+          }
         }
       },
 

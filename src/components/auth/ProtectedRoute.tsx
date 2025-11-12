@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { debugAuth } from '../../utils/debug';
@@ -13,15 +13,33 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   requiredRoles,
 }) => {
-  const { isAuthenticated, user, refreshUser } = useAuthStore();
+  const { isAuthenticated, user, refreshUser, token, hasHydrated } = useAuthStore();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated && !user) {
+    // Only attempt refresh if we have a token but no user data, and hydration is complete
+    if (hasHydrated && token && isAuthenticated && !user && !isRefreshing) {
       debugAuth.log('ProtectedRoute: user data missing, refreshing');
-      refreshUser();
+      setIsRefreshing(true);
+      refreshUser().finally(() => {
+        setIsRefreshing(false);
+      });
     }
-  }, [isAuthenticated, user, refreshUser]);
+  }, [hasHydrated, token, isAuthenticated, user, refreshUser, isRefreshing]);
 
+  // Show loading while hydrating or refreshing user data
+  if (!hasHydrated || isRefreshing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+          <p className="mt-2 text-gray-600">Загрузка...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Check authentication only after hydration is complete
   if (!isAuthenticated) {
     debugAuth.log('ProtectedRoute: not authenticated, redirecting to /login');
     return <Navigate to="/login" replace />;
