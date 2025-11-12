@@ -13,6 +13,7 @@ import { LinksPage } from './pages/LinksPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { DealershipsPage } from './pages/DealershipsPage';
+import { debugAuth } from './utils/debug';
 import './index.css';
 
 const queryClient = new QueryClient({
@@ -25,15 +26,35 @@ const queryClient = new QueryClient({
 });
 
 function App() {
-  const { isAuthenticated, token, refreshUser } = useAuthStore();
+  const { isAuthenticated, token, hasHydrated } = useAuthStore();
 
   useEffect(() => {
     // After Zustand persist hydrates, check if we have a token and refresh user data
     // The token will be restored from 'auth-storage' in localStorage automatically
-    if (token && isAuthenticated) {
-      refreshUser();
+    debugAuth.log('App useEffect triggered', {
+      hasHydrated,
+      hasToken: !!token,
+      isAuthenticated,
+    });
+
+    if (hasHydrated && token && isAuthenticated) {
+      debugAuth.log('Calling refreshUser to update user data');
+      // Get refreshUser directly from store to avoid dependency issues
+      useAuthStore.getState().refreshUser();
     }
-  }, [token, isAuthenticated, refreshUser]);
+  }, [hasHydrated, token, isAuthenticated]);
+
+  // Show loading screen while Zustand persist is hydrating state from localStorage
+  if (!hasHydrated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          <p className="mt-4 text-gray-600">Загрузка...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <QueryClientProvider client={queryClient}>

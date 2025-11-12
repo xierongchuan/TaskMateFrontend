@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
+import { debugAuth } from '../../utils/debug';
 import type { Role } from '../../types/user';
 
 interface ProtectedRouteProps {
@@ -16,11 +17,13 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   useEffect(() => {
     if (isAuthenticated && !user) {
+      debugAuth.log('ProtectedRoute: user data missing, refreshing');
       refreshUser();
     }
   }, [isAuthenticated, user, refreshUser]);
 
   if (!isAuthenticated) {
+    debugAuth.log('ProtectedRoute: not authenticated, redirecting to /login');
     return <Navigate to="/login" replace />;
   }
 
