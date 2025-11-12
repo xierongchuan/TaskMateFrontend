@@ -28,10 +28,14 @@ function App() {
   const { isAuthenticated, refreshUser } = useAuthStore();
 
   useEffect(() => {
-    if (isAuthenticated) {
+    // Check if we have a token in localStorage (from persisted state)
+    const storedToken = localStorage.getItem('auth_token');
+
+    // If we have a token, try to refresh user data
+    if (storedToken) {
       refreshUser();
     }
-  }, []);
+  }, [refreshUser]);
 
   return (
     <QueryClientProvider client={queryClient}>
