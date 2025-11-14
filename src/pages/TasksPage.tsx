@@ -50,7 +50,7 @@ export const TasksPage: React.FC = () => {
       recurrence: filters.recurrence || undefined,
       task_type: filters.task_type || undefined,
       response_type: filters.response_type || undefined,
-      dealership_id: filters.dealership_id || undefined,
+      dealership_id: filters.dealership_id ?? undefined,
     }),
     refetchInterval: 30000,
   });
