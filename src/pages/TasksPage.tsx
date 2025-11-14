@@ -355,7 +355,6 @@ export const TasksPage: React.FC = () => {
                 <DealershipSelector
                   value={filters.dealership_id}
                   onChange={(dealershipId) => setFilters({ ...filters, dealership_id: dealershipId })}
-                  placeholder="Все автосалоны"
                   showAllOption={true}
                   allOptionLabel="Все автосалоны"
                 />

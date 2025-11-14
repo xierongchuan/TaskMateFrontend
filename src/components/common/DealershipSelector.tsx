@@ -15,7 +15,7 @@ interface DealershipSelectorProps {
 export const DealershipSelector: React.FC<DealershipSelectorProps> = ({
   value,
   onChange,
-  placeholder = "Выберите автосалон",
+  placeholder = "Все автосалоны",
   className = "",
   disabled = false,
   required = false,
@@ -53,7 +53,7 @@ export const DealershipSelector: React.FC<DealershipSelectorProps> = ({
         <option value="">Загрузка...</option>
       ) : (
         <>
-          {!required && (
+          {!required && !showAllOption && (
             <option value="">
               {placeholder}
             </option>
