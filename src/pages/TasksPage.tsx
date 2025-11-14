@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { tasksApi } from '../api/tasks';
 import { usePermissions } from '../hooks/usePermissions';
-import { useAuth } from '../hooks/useAuth';
 import { TaskModal } from '../components/tasks/TaskModal';
 import { DealershipSelector } from '../components/common/DealershipSelector';
 import type { Task } from '../types/task';
@@ -27,7 +26,6 @@ import {
 
 export const TasksPage: React.FC = () => {
   const permissions = usePermissions();
-  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -40,13 +38,16 @@ export const TasksPage: React.FC = () => {
     task_type: '',
     response_type: '',
     date_range: 'all',
-    dealership_id: user?.dealership_id || undefined,
+    dealership_id: null as number | null,
     tags: [] as string[],
   });
 
   const { data: tasksData, isLoading, error } = useQuery({
     queryKey: ['tasks', filters],
-    queryFn: () => tasksApi.getTasks(filters),
+    queryFn: () => tasksApi.getTasks({
+      ...filters,
+      dealership_id: filters.dealership_id || undefined,
+    }),
     refetchInterval: 30000,
   });
 
@@ -103,7 +104,7 @@ export const TasksPage: React.FC = () => {
       task_type: '',
       response_type: '',
       date_range: 'all',
-      dealership_id: user?.dealership_id || undefined,
+      dealership_id: null,
       tags: [],
     });
   };
@@ -219,21 +220,19 @@ export const TasksPage: React.FC = () => {
             <div className="flex items-center bg-white rounded-lg border border-gray-200">
               <button
                 onClick={() => setViewMode('list')}
-                className={`px-3 py-2 text-sm font-medium rounded-l-lg ${
-                  viewMode === 'list'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
+                className={`px-3 py-2 text-sm font-medium rounded-l-lg ${viewMode === 'list'
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'text-gray-500 hover:text-gray-700'
+                  }`}
               >
                 Список
               </button>
               <button
                 onClick={() => setViewMode('grid')}
-                className={`px-3 py-2 text-sm font-medium rounded-r-lg ${
-                  viewMode === 'grid'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
+                className={`px-3 py-2 text-sm font-medium rounded-r-lg ${viewMode === 'grid'
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'text-gray-500 hover:text-gray-700'
+                  }`}
               >
                 Карточки
               </button>
@@ -355,7 +354,7 @@ export const TasksPage: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Автосалон</label>
                 <DealershipSelector
                   value={filters.dealership_id}
-                  onChange={(dealershipId) => setFilters({ ...filters, dealership_id: dealershipId || undefined })}
+                  onChange={(dealershipId) => setFilters({ ...filters, dealership_id: dealershipId })}
                   placeholder="Все автосалоны"
                   showAllOption={true}
                   allOptionLabel="Все автосалоны"
