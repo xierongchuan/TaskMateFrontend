@@ -45,7 +45,11 @@ export const TasksPage: React.FC = () => {
   const { data: tasksData, isLoading, error } = useQuery({
     queryKey: ['tasks', filters],
     queryFn: () => tasksApi.getTasks({
-      ...filters,
+      search: filters.search || undefined,
+      status: filters.status || undefined,
+      recurrence: filters.recurrence || undefined,
+      task_type: filters.task_type || undefined,
+      response_type: filters.response_type || undefined,
       dealership_id: filters.dealership_id || undefined,
     }),
     refetchInterval: 30000,
