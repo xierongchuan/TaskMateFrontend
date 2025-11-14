@@ -206,6 +206,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
                     <label className="block text-sm font-medium text-gray-700">Время повторения</label>
                     <input
                       type="time"
+                      step="60"
                       value={formData.recurrence_time || ''}
                       onChange={(e) => setFormData({ ...formData, recurrence_time: e.target.value })}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
