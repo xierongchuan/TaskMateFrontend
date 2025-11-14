@@ -84,9 +84,27 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
 
     // Format recurrence_time to HH:MM (remove seconds if present)
     const dataToSubmit = { ...formData };
-    if (dataToSubmit.recurrence_time) {
-      // Extract only HH:MM from HH:MM:SS format
-      dataToSubmit.recurrence_time = dataToSubmit.recurrence_time.substring(0, 5);
+
+    // Clean up recurrence-related fields when recurrence is 'none'
+    if (dataToSubmit.recurrence === 'none') {
+      delete dataToSubmit.recurrence_time;
+      delete dataToSubmit.recurrence_day_of_week;
+      delete dataToSubmit.recurrence_day_of_month;
+    } else {
+      if (dataToSubmit.recurrence_time) {
+        // Extract only HH:MM from HH:MM:SS format
+        dataToSubmit.recurrence_time = dataToSubmit.recurrence_time.substring(0, 5);
+      }
+
+      // Clean up day_of_week if not weekly
+      if (dataToSubmit.recurrence !== 'weekly') {
+        delete dataToSubmit.recurrence_day_of_week;
+      }
+
+      // Clean up day_of_month if not monthly
+      if (dataToSubmit.recurrence !== 'monthly') {
+        delete dataToSubmit.recurrence_day_of_month;
+      }
     }
 
     if (task) {
@@ -191,7 +209,27 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
                   <label className="block text-sm font-medium text-gray-700">Повторяемость</label>
                   <select
                     value={formData.recurrence}
-                    onChange={(e) => setFormData({ ...formData, recurrence: e.target.value as TaskRecurrence })}
+                    onChange={(e) => {
+                      const newRecurrence = e.target.value as TaskRecurrence;
+                      const updates: Partial<CreateTaskRequest> = { recurrence: newRecurrence };
+
+                      // Clear recurrence-specific fields when changing type
+                      if (newRecurrence === 'none') {
+                        updates.recurrence_time = undefined;
+                        updates.recurrence_day_of_week = undefined;
+                        updates.recurrence_day_of_month = undefined;
+                      } else {
+                        // Clear fields not applicable to the selected recurrence type
+                        if (newRecurrence !== 'weekly') {
+                          updates.recurrence_day_of_week = undefined;
+                        }
+                        if (newRecurrence !== 'monthly') {
+                          updates.recurrence_day_of_month = undefined;
+                        }
+                      }
+
+                      setFormData({ ...formData, ...updates });
+                    }}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
                   >
                     <option value="none">Не повторяется</option>
@@ -211,6 +249,42 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
                       onChange={(e) => setFormData({ ...formData, recurrence_time: e.target.value })}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
                     />
+                  </div>
+                )}
+
+                {formData.recurrence === 'weekly' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">День недели</label>
+                    <select
+                      value={formData.recurrence_day_of_week || ''}
+                      onChange={(e) => setFormData({ ...formData, recurrence_day_of_week: e.target.value ? parseInt(e.target.value) : undefined })}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                    >
+                      <option value="">Выберите день недели</option>
+                      <option value="1">Понедельник</option>
+                      <option value="2">Вторник</option>
+                      <option value="3">Среда</option>
+                      <option value="4">Четверг</option>
+                      <option value="5">Пятница</option>
+                      <option value="6">Суббота</option>
+                      <option value="0">Воскресенье</option>
+                    </select>
+                  </div>
+                )}
+
+                {formData.recurrence === 'monthly' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">День месяца</label>
+                    <select
+                      value={formData.recurrence_day_of_month || ''}
+                      onChange={(e) => setFormData({ ...formData, recurrence_day_of_month: e.target.value ? parseInt(e.target.value) : undefined })}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                    >
+                      <option value="">Выберите день месяца</option>
+                      {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
+                        <option key={day} value={day}>{day}</option>
+                      ))}
+                    </select>
                   </div>
                 )}
 
