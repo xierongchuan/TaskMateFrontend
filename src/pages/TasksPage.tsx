@@ -44,10 +44,33 @@ export const TasksPage: React.FC = () => {
 
   const { data: tasksData, isLoading, error } = useQuery({
     queryKey: ['tasks', filters],
-    queryFn: () => tasksApi.getTasks({
-      ...filters,
-      dealership_id: filters.dealership_id || undefined,
-    }),
+    queryFn: () => {
+      // Clean filters: remove empty strings, null values, and empty arrays
+      const cleanedFilters: {
+        search?: string;
+        status?: string;
+        recurrence?: string;
+        task_type?: string;
+        response_type?: string;
+        date_range?: string;
+        dealership_id?: number;
+        tags?: string[];
+      } = {};
+
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          if (Array.isArray(value)) {
+            if (value.length > 0) {
+              cleanedFilters[key as keyof typeof cleanedFilters] = value as never;
+            }
+          } else {
+            cleanedFilters[key as keyof typeof cleanedFilters] = value as never;
+          }
+        }
+      });
+
+      return tasksApi.getTasks(cleanedFilters);
+    },
     refetchInterval: 30000,
   });
 
