@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../hooks/useAuth';
 import { dashboardApi } from '../api/dashboard';
@@ -17,6 +18,7 @@ import {
 
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [selectedDealership] = useState<number | undefined>(user?.dealership_id || undefined);
 
   const { data: dashboardData, isLoading, error } = useQuery({
@@ -183,9 +185,8 @@ export const DashboardPage: React.FC = () => {
                 {dashboardData.active_shifts.map((shift: any) => (
                   <div key={shift.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200">
                     <div className="flex items-center space-x-3">
-                      <div className={`w-3 h-3 rounded-full flex-shrink-0 ${
-                        shift.status === 'open' ? 'bg-green-500' : 'bg-gray-400'
-                      }`}></div>
+                      <div className={`w-3 h-3 rounded-full flex-shrink-0 ${shift.status === 'open' ? 'bg-green-500' : 'bg-gray-400'
+                        }`}></div>
                       <div className="min-w-0 flex-1">
                         <p className="font-medium text-gray-900 truncate">{shift.user?.full_name}</p>
                         <p className="text-sm text-gray-500">
@@ -229,15 +230,31 @@ export const DashboardPage: React.FC = () => {
             </h2>
           </div>
           <div className="p-4 sm:p-6 space-y-3">
-            <button className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center min-h-[44px]">
+            <button
+              onClick={() => navigate('/shifts')}
+              className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center min-h-[44px]"
+            >
+              <ClockIcon className="w-4 h-4 mr-2" />
+              Создать смену
+            </button>
+            <button
+              onClick={() => navigate('/tasks')}
+              className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center min-h-[44px]"
+            >
               <CalendarIcon className="w-4 h-4 mr-2" />
               Создать задачу
             </button>
-            <button className="w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center min-h-[44px]">
+            <button
+              onClick={() => navigate('/links')}
+              className="w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center min-h-[44px]"
+            >
               <LinkIcon className="w-4 h-4 mr-2" />
               Добавить ссылку
             </button>
-            <button className="w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center min-h-[44px]">
+            <button
+              onClick={() => navigate('/reports')}
+              className="w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center min-h-[44px]"
+            >
               <ChartBarIcon className="w-4 h-4 mr-2" />
               Отчеты
             </button>

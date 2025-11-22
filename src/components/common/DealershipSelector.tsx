@@ -1,5 +1,6 @@
 import React from 'react';
 import { useDealerships } from '../../hooks/useDealerships';
+import { useAuth } from '../../hooks/useAuth';
 
 interface DealershipSelectorProps {
   value?: number | null;
@@ -22,7 +23,15 @@ export const DealershipSelector: React.FC<DealershipSelectorProps> = ({
   showAllOption = false,
   allOptionLabel = "Все салоны"
 }) => {
+  const { user } = useAuth();
   const { data: dealershipsData, isLoading, error } = useDealerships();
+
+  // If user has assigned dealerships, use them. Otherwise use all dealerships.
+  const availableDealerships = user?.dealerships && user.dealerships.length > 0
+    ? user.dealerships
+    : dealershipsData?.data || [];
+
+  const isDataLoading = !user?.dealerships && isLoading;
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newValue = e.target.value;
@@ -49,7 +58,7 @@ export const DealershipSelector: React.FC<DealershipSelectorProps> = ({
       required={required}
       className={`block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border disabled:bg-gray-100 disabled:cursor-not-allowed ${className}`}
     >
-      {isLoading ? (
+      {isDataLoading ? (
         <option value="">Загрузка...</option>
       ) : (
         <>
@@ -63,7 +72,7 @@ export const DealershipSelector: React.FC<DealershipSelectorProps> = ({
               {allOptionLabel}
             </option>
           )}
-          {dealershipsData?.data.map((dealership) => (
+          {availableDealerships.map((dealership) => (
             <option key={dealership.id} value={dealership.id}>
               {dealership.name}
               {dealership.address && ` (${dealership.address})`}

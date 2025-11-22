@@ -4,6 +4,13 @@ import { ShiftControl } from '../components/shifts/ShiftControl';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import type { ShiftsFilters } from '../types/shift';
+import {
+  BriefcaseIcon,
+  ClockIcon,
+  SunIcon,
+  StarIcon
+} from '@heroicons/react/24/outline';
+
 
 export const ShiftsPage: React.FC = () => {
   const [filters, setFilters] = useState<ShiftsFilters>({
@@ -18,27 +25,50 @@ export const ShiftsPage: React.FC = () => {
   const getStatusBadge = (status: string) => {
     return (
       <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-          status === 'open' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-        }`}
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${status === 'open' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+          }`}
       >
         {status === 'open' ? 'Открыта' : 'Закрыта'}
       </span>
     );
   };
 
-  const getShiftTypeLabel = (type: string) => {
+  const getShiftTypeBadge = (type: string) => {
     switch (type) {
       case 'regular':
-        return 'Обычная';
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            <BriefcaseIcon className="w-3 h-3 mr-1" />
+            Обычная
+          </span>
+        );
       case 'overtime':
-        return 'Сверхурочная';
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+            <ClockIcon className="w-3 h-3 mr-1" />
+            Сверхурочная
+          </span>
+        );
       case 'weekend':
-        return 'Выходная';
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+            <SunIcon className="w-3 h-3 mr-1" />
+            Выходная
+          </span>
+        );
       case 'holiday':
-        return 'Праздничная';
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+            <StarIcon className="w-3 h-3 mr-1" />
+            Праздничная
+          </span>
+        );
       default:
-        return type;
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+            {type}
+          </span>
+        );
     }
   };
 
@@ -71,7 +101,11 @@ export const ShiftsPage: React.FC = () => {
                 </div>
                 <div className="text-sm text-gray-500 space-y-1">
                   <div>Начало: {format(new Date(shift.shift_start), 'PPp', { locale: ru })}</div>
-                  <div>Тип смены: {getShiftTypeLabel(shift.shift_type)}</div>
+                  <div>Начало: {format(new Date(shift.shift_start), 'PPp', { locale: ru })}</div>
+                  <div className="flex items-center mt-1">
+                    <span className="mr-2">Тип:</span>
+                    {getShiftTypeBadge(shift.shift_type)}
+                  </div>
                   {shift.break_duration && (
                     <div>Перерыв: {shift.break_duration} мин</div>
                   )}
@@ -187,8 +221,11 @@ export const ShiftsPage: React.FC = () => {
                             <span>Конец: {format(new Date(shift.shift_end), 'PPp', { locale: ru })}</span>
                           )}
                         </div>
-                        <div className="flex flex-wrap gap-x-4">
-                          <span>Тип смены: {getShiftTypeLabel(shift.shift_type)}</span>
+                        <div className="flex flex-wrap gap-x-4 items-center">
+                          <div className="flex items-center">
+                            <span className="mr-2 text-sm text-gray-500">Тип:</span>
+                            {getShiftTypeBadge(shift.shift_type)}
+                          </div>
                           {shift.break_duration && (
                             <span>Перерыв: {shift.break_duration} мин</span>
                           )}

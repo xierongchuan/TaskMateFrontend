@@ -10,45 +10,9 @@ import {
   ArrowPathIcon,
   ArrowDownTrayIcon
 } from '@heroicons/react/24/outline';
+import { reportsApi } from '../api/reports';
 
-interface ReportData {
-  period: string;
-  date_from: string;
-  date_to: string;
-  summary: {
-    total_tasks: number;
-    completed_tasks: number;
-    overdue_tasks: number;
-    postponed_tasks: number;
-    total_shifts: number;
-    late_shifts: number;
-    total_replacements: number;
-  };
-  tasks_by_status: Array<{
-    status: string;
-    count: number;
-    percentage: number;
-  }>;
-  employees_performance: Array<{
-    employee_id: number;
-    employee_name: string;
-    completed_tasks: number;
-    overdue_tasks: number;
-    late_shifts: number;
-    performance_score: number;
-  }>;
-  daily_stats: Array<{
-    date: string;
-    completed: number;
-    overdue: number;
-    late_shifts: number;
-  }>;
-  top_issues: Array<{
-    issue_type: string;
-    count: number;
-    description: string;
-  }>;
-}
+
 
 export const ReportsPage: React.FC = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'custom'>('week');
@@ -60,47 +24,11 @@ export const ReportsPage: React.FC = () => {
 
   const { data: reportData, isLoading, refetch } = useQuery({
     queryKey: ['reports', dateRange.from, dateRange.to],
-    queryFn: () => fetchReportData(dateRange.from, dateRange.to),
+    queryFn: () => reportsApi.getReport(dateRange.from, dateRange.to),
     enabled: !!dateRange.from && !!dateRange.to,
   });
 
-  const fetchReportData = async (from: string, to: string): Promise<ReportData> => {
-    // Mock data - в реальном приложении здесь будет API вызов
-    return {
-      period: `${from} - ${to}`,
-      date_from: from,
-      date_to: to,
-      summary: {
-        total_tasks: 245,
-        completed_tasks: 198,
-        overdue_tasks: 12,
-        postponed_tasks: 35,
-        total_shifts: 84,
-        late_shifts: 8,
-        total_replacements: 6,
-      },
-      tasks_by_status: [
-        { status: 'completed', count: 198, percentage: 80.8 },
-        { status: 'overdue', count: 12, percentage: 4.9 },
-        { status: 'postponed', count: 35, percentage: 14.3 },
-      ],
-      employees_performance: [
-        { employee_id: 1, employee_name: 'Иванов Иван', completed_tasks: 45, overdue_tasks: 2, late_shifts: 1, performance_score: 95 },
-        { employee_id: 2, employee_name: 'Петров Петр', completed_tasks: 38, overdue_tasks: 3, late_shifts: 2, performance_score: 88 },
-        { employee_id: 3, employee_name: 'Сидоров Сидор', completed_tasks: 42, overdue_tasks: 1, late_shifts: 0, performance_score: 97 },
-      ],
-      daily_stats: [
-        { date: '2024-01-15', completed: 28, overdue: 2, late_shifts: 1 },
-        { date: '2024-01-16', completed: 32, overdue: 1, late_shifts: 0 },
-        { date: '2024-01-17', completed: 35, overdue: 0, late_shifts: 2 },
-      ],
-      top_issues: [
-        { issue_type: 'overdue_tasks', count: 12, description: 'Просроченные задачи' },
-        { issue_type: 'late_shifts', count: 8, description: 'Опоздания на смены' },
-        { issue_type: 'frequent_postponements', count: 15, description: 'Частые переносы задач' },
-      ],
-    };
-  };
+
 
   const handlePeriodChange = (period: 'week' | 'month' | 'custom') => {
     setSelectedPeriod(period);
@@ -132,7 +60,7 @@ export const ReportsPage: React.FC = () => {
     } else {
       // Экспорт в JSON
       const dataStr = JSON.stringify(reportData, null, 2);
-      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+      const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
       const exportFileDefaultName = `report-${dateRange.from}-${dateRange.to}.json`;
       const linkElement = document.createElement('a');
       linkElement.setAttribute('href', dataUri);
@@ -204,21 +132,19 @@ export const ReportsPage: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               <button
                 onClick={() => handlePeriodChange('week')}
-                className={`flex-1 sm:flex-initial px-4 py-3 text-sm font-medium rounded-lg min-h-[44px] transition-colors ${
-                  selectedPeriod === 'week'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
-                }`}
+                className={`flex-1 sm:flex-initial px-4 py-3 text-sm font-medium rounded-lg min-h-[44px] transition-colors ${selectedPeriod === 'week'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
+                  }`}
               >
                 Эта неделя
               </button>
               <button
                 onClick={() => handlePeriodChange('month')}
-                className={`flex-1 sm:flex-initial px-4 py-3 text-sm font-medium rounded-lg min-h-[44px] transition-colors ${
-                  selectedPeriod === 'month'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
-                }`}
+                className={`flex-1 sm:flex-initial px-4 py-3 text-sm font-medium rounded-lg min-h-[44px] transition-colors ${selectedPeriod === 'month'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
+                  }`}
               >
                 Этот месяц
               </button>
@@ -332,10 +258,9 @@ export const ReportsPage: React.FC = () => {
                   <div className="flex items-center space-x-3">
                     <div className="w-32 bg-gray-200 rounded-full h-2">
                       <div
-                        className={`h-2 rounded-full ${
-                          item.status === 'completed' ? 'bg-green-500' :
+                        className={`h-2 rounded-full ${item.status === 'completed' ? 'bg-green-500' :
                           item.status === 'overdue' ? 'bg-red-500' : 'bg-yellow-500'
-                        }`}
+                          }`}
                         style={{ width: `${item.percentage}%` }}
                       ></div>
                     </div>
@@ -394,9 +319,8 @@ export const ReportsPage: React.FC = () => {
               {reportData.top_issues.map((issue, index) => (
                 <div key={issue.issue_type} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center space-x-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold ${
-                      index === 0 ? 'bg-red-500' : index === 1 ? 'bg-yellow-500' : 'bg-orange-500'
-                    }`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold ${index === 0 ? 'bg-red-500' : index === 1 ? 'bg-yellow-500' : 'bg-orange-500'
+                      }`}>
                       {index + 1}
                     </div>
                     <div>

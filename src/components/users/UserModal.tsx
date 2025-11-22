@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { usersApi } from '../../api/users';
 import { DealershipSelector } from '../common/DealershipSelector';
+import { useDealerships } from '../../hooks/useDealerships';
 import type { User, CreateUserRequest, UpdateUserRequest, Role } from '../../types/user';
 
 interface UserModalProps {
@@ -12,6 +13,7 @@ interface UserModalProps {
 
 export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) => {
   const queryClient = useQueryClient();
+  const { data: dealershipsData } = useDealerships();
   const [formData, setFormData] = useState<Partial<CreateUserRequest & UpdateUserRequest>>({
     login: '',
     password: '',
@@ -19,6 +21,7 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
     phone: '',
     role: 'employee',
     dealership_id: undefined,
+    dealership_ids: [],
     telegram_id: undefined,
   });
 
@@ -30,6 +33,7 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
         phone: user.phone || user.phone_number || '',
         role: user.role,
         dealership_id: user.dealership_id || undefined,
+        dealership_ids: user.dealerships?.map(d => d.id) || [],
         telegram_id: user.telegram_id || undefined,
       });
     } else {
@@ -40,6 +44,7 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
         phone: '',
         role: 'employee',
         dealership_id: undefined,
+        dealership_ids: [],
         telegram_id: undefined,
       });
     }
@@ -161,12 +166,40 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Автосалон</label>
-                  <DealershipSelector
-                    value={formData.dealership_id}
-                    onChange={(dealershipId) => setFormData({ ...formData, dealership_id: dealershipId || undefined })}
-                    placeholder="Выберите автосалон"
-                  />
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Автосалон</label>
+                  {formData.role === 'manager' ? (
+                    <div className="mt-1 border rounded-md border-gray-300 p-3 max-h-48 overflow-y-auto">
+                      <p className="text-sm text-gray-500 mb-2">Выберите салоны для управления:</p>
+                      <div className="space-y-2">
+                        {dealershipsData?.data.map((dealership) => (
+                          <label key={dealership.id} className="flex items-center space-x-2">
+                            <input
+                              type="checkbox"
+                              checked={formData.dealership_ids?.includes(dealership.id)}
+                              onChange={(e) => {
+                                const currentIds = formData.dealership_ids || [];
+                                let newIds;
+                                if (e.target.checked) {
+                                  newIds = [...currentIds, dealership.id];
+                                } else {
+                                  newIds = currentIds.filter(id => id !== dealership.id);
+                                }
+                                setFormData({ ...formData, dealership_ids: newIds });
+                              }}
+                              className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                            />
+                            <span className="text-sm text-gray-700">{dealership.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <DealershipSelector
+                      value={formData.dealership_id}
+                      onChange={(dealershipId) => setFormData({ ...formData, dealership_id: dealershipId || undefined })}
+                      placeholder="Выберите автосалон"
+                    />
+                  )}
                 </div>
 
                 <div>

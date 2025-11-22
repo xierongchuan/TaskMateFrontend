@@ -7,7 +7,7 @@ import type { BotConfig, ShiftConfig } from '../types/setting';
 import {
   CogIcon,
   ClockIcon,
-  TrashIcon,
+  // TrashIcon,
   BellIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
@@ -73,10 +73,13 @@ export const SettingsPage: React.FC = () => {
   const updateBotConfigMutation = useUpdateBotConfig();
 
   // Placeholder for future implementation of utility mutations
+  // Placeholder for future implementation of utility mutations
+  /*
   const clearTasksMutation = {
     mutate: () => showSuccessNotification('Функция очистки задач временно недоступна'),
     isPending: false,
   };
+  */
 
   const testBotMutation = {
     mutate: () => showSuccessNotification('Проверка подключения к боту временно недоступна'),
@@ -103,11 +106,13 @@ export const SettingsPage: React.FC = () => {
     }
   };
 
+  /*
   const handleClearOldTasks = () => {
     if (window.confirm('Вы уверены, что хотите очистить старые задачи? Это действие нельзя отменить.')) {
       clearTasksMutation.mutate();
     }
   };
+  */
 
   const handleTestBot = () => {
     testBotMutation.mutate();
@@ -189,11 +194,10 @@ export const SettingsPage: React.FC = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`${
-                    activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  } whitespace-nowrap py-4 px-6 sm:px-8 border-b-2 font-medium text-sm flex items-center min-w-[120px] justify-center transition-colors`}
+                  className={`${activeTab === tab.id
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    } whitespace-nowrap py-4 px-6 sm:px-8 border-b-2 font-medium text-sm flex items-center min-w-[120px] justify-center transition-colors`}
                 >
                   <tab.icon className="w-4 h-4 mr-2" />
                   {tab.name}
@@ -367,6 +371,7 @@ export const SettingsPage: React.FC = () => {
                       </p>
                     </div>
 
+                    {/* Auto archive is currently disabled/hidden as per request
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Автоархивация (дни)
@@ -387,6 +392,7 @@ export const SettingsPage: React.FC = () => {
                         Автоматическая архивация задач через указанное количество дней
                       </p>
                     </div>
+                    */}
                   </div>
                 </div>
               )}
@@ -487,6 +493,7 @@ export const SettingsPage: React.FC = () => {
                   </div>
 
                   <div className="space-y-6">
+                    {/* Clear old tasks is currently disabled/hidden as per request
                     <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                       <div className="flex items-center mb-2">
                         <ExclamationTriangleIcon className="w-5 h-5 text-yellow-600 mr-2" />
@@ -505,6 +512,7 @@ export const SettingsPage: React.FC = () => {
                         {clearTasksMutation.isPending ? 'Очистка...' : 'Очистить старые задачи'}
                       </button>
                     </div>
+                    */}
 
                     <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                       <div className="flex items-center mb-2">

@@ -52,8 +52,6 @@ export const DealershipList: React.FC<DealershipListProps> = ({ onEdit }) => {
 
     return () => {
       clearTimeout(timer);
-      // Сбрасываем состояние загрузки при очистке таймера
-      setIsSearchLoading(false);
     };
   }, [searchInput, filters.search]);
   const deleteDealership = useDeleteDealership();

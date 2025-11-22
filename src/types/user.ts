@@ -9,6 +9,11 @@ export interface User {
   telegram_id: number | null;
   phone: string | null;
   phone_number: string | null;
+  dealerships?: {
+    id: number;
+    name: string;
+    address?: string;
+  }[];
 }
 
 export interface LoginRequest {
@@ -30,6 +35,7 @@ export interface CreateUserRequest {
   role: Role;
   telegram_id?: number;
   dealership_id?: number;
+  dealership_ids?: number[];
 }
 
 export interface UpdateUserRequest {
@@ -39,5 +45,6 @@ export interface UpdateUserRequest {
   phone?: string;
   role?: string;
   dealership_id?: number;
+  dealership_ids?: number[];
   telegram_id?: number;
 }

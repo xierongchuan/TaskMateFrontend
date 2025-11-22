@@ -51,10 +51,10 @@ export const Layout: React.FC = () => {
                 </Link>
                 {(permissions.canCreateUsers || permissions.isObserver) && (
                   <Link
-                    to="/users"
+                    to="/employees"
                     className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 md:px-2 pt-1 border-b-2 text-xs md:text-sm font-medium truncate max-w-[80px] md:max-w-[100px] lg:max-w-none"
                   >
-                    Пользователи
+                    Сотрудники
                   </Link>
                 )}
                 <Link
@@ -182,11 +182,11 @@ export const Layout: React.FC = () => {
             </Link>
             {(permissions.canCreateUsers || permissions.isObserver) && (
               <Link
-                to="/users"
+                to="/employees"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300"
               >
-                Пользователи
+                Сотрудники
               </Link>
             )}
             <Link

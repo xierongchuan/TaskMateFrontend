@@ -83,8 +83,9 @@ function App() {
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="tasks" element={<TasksPage />} />
+            <Route path="users" element={<Navigate to="/employees" replace />} />
             <Route
-              path="users"
+              path="employees"
               element={
                 <ProtectedRoute requiredRoles={['manager', 'owner', 'observer']}>
                   <UsersPage />

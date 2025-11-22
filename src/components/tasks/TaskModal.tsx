@@ -300,13 +300,40 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Дедлайн</label>
-                    <input
-                      type="datetime-local"
-                      value={formData.deadline || ''}
-                      onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
-                    />
+                    <label className="block text-sm font-medium text-gray-700">
+                      {formData.recurrence !== 'none' ? 'Дедлайн (время)' : 'Дедлайн'}
+                    </label>
+                    {formData.recurrence !== 'none' ? (
+                      <input
+                        type="time"
+                        value={formData.deadline ? new Date(formData.deadline).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : ''}
+                        onChange={(e) => {
+                          const time = e.target.value;
+                          if (time) {
+                            // Use appear_date as base if available, otherwise today
+                            const baseDate = formData.appear_date ? new Date(formData.appear_date) : new Date();
+                            const [hours, minutes] = time.split(':').map(Number);
+                            baseDate.setHours(hours, minutes, 0, 0);
+                            // Format to YYYY-MM-DDTHH:mm for datetime-local compatibility/backend
+                            const year = baseDate.getFullYear();
+                            const month = String(baseDate.getMonth() + 1).padStart(2, '0');
+                            const day = String(baseDate.getDate()).padStart(2, '0');
+                            const formattedDate = `${year}-${month}-${day}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+                            setFormData({ ...formData, deadline: formattedDate });
+                          } else {
+                            setFormData({ ...formData, deadline: undefined });
+                          }
+                        }}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                      />
+                    ) : (
+                      <input
+                        type="datetime-local"
+                        value={formData.deadline || ''}
+                        onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                      />
+                    )}
                   </div>
                 </div>
 
