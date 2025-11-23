@@ -400,10 +400,32 @@ export const SettingsPage: React.FC = () => {
               {/* Notifications Settings Tab */}
               {activeTab === 'notifications' && (
                 <div className="space-y-6">
-                  <div className="flex items-center mb-4">
-                    <BellIcon className="w-6 h-6 text-purple-500 mr-3" />
-                    <h3 className="text-lg font-semibold text-gray-900">Настройки уведомлений</h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center">
+                      <BellIcon className="w-6 h-6 text-purple-500 mr-3" />
+                      <h3 className="text-lg font-semibold text-gray-900">Настройки уведомлений</h3>
+                    </div>
+                    <a
+                      href="/notification-settings"
+                      className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
+                    >
+                      <CogIcon className="w-4 h-4 mr-2" />
+                      Расширенные настройки
+                    </a>
                   </div>
+
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-4">
+                    <div className="flex">
+                      <InformationCircleIcon className="w-5 h-5 text-blue-600 mr-2 flex-shrink-0" />
+                      <div>
+                        <h4 className="text-sm font-medium text-blue-800 mb-1">Расширенные настройки доступны</h4>
+                        <p className="text-sm text-blue-700">
+                          Для настройки времени уведомлений (например, за 49 минут до дедлайна), включения/отключения каналов и времени отчётов перейдите в <strong>Расширенные настройки</strong>.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                       <div>

@@ -13,6 +13,7 @@ import { LinksPage } from './pages/LinksPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { DealershipsPage } from './pages/DealershipsPage';
+import { NotificationSettingsPage } from './pages/NotificationSettingsPage';
 import { debugAuth } from './utils/debug';
 import './index.css';
 
@@ -115,6 +116,14 @@ function App() {
               element={
                 <ProtectedRoute requiredRoles={['manager', 'owner']}>
                   <ReportsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="notification-settings"
+              element={
+                <ProtectedRoute requiredRoles={['manager', 'owner']}>
+                  <NotificationSettingsPage />
                 </ProtectedRoute>
               }
             />
