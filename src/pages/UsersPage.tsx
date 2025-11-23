@@ -32,7 +32,7 @@ export const UsersPage: React.FC = () => {
   const [filters, setFilters] = useState({
     search: '',
     role: '',
-    dealership_id: currentUser?.dealership_id || undefined,
+    dealership_id: undefined,
     has_telegram: '',
   });
 
@@ -82,7 +82,7 @@ export const UsersPage: React.FC = () => {
     setFilters({
       search: '',
       role: '',
-      dealership_id: currentUser?.dealership_id || undefined,
+      dealership_id: undefined,
       has_telegram: '',
     });
   };
@@ -227,9 +227,9 @@ export const UsersPage: React.FC = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Автосалон</label>
               <select
-                value={filters.dealership_id}
+                value={filters.dealership_id || ''}
                 onChange={(e) => setFilters({ ...filters, dealership_id: e.target.value ? Number(e.target.value) : undefined })}
-                className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
               >
                 <option value="">Все салоны</option>
                 {dealershipsData?.data.map((dealership: Dealership) => (

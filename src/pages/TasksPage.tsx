@@ -360,18 +360,21 @@ export const TasksPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Повторяемость</label>
-                <select
-                  value={filters.recurrence}
-                  onChange={(e) => setFilters({ ...filters, recurrence: e.target.value })}
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
-                >
-                  <option value="">Все</option>
-                  <option value="none">Без повторения</option>
-                  <option value="daily">Ежедневно</option>
-                  <option value="weekly">Еженедельно</option>
-                  <option value="monthly">Ежемесячно</option>
-                </select>
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={filters.recurrence === 'recurring'}
+                    onChange={(e) => setFilters({ ...filters, recurrence: e.target.checked ? 'recurring' : '' })}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    <ArrowPathIcon className="w-4 h-4 inline mr-1" />
+                    Только повторяемые
+                  </span>
+                </label>
+                <p className="text-xs text-gray-500 mt-1 ml-6">
+                  Задачи с расписанием (ежедневные, еженедельные, ежемесячные)
+                </p>
               </div>
 
               <div>
