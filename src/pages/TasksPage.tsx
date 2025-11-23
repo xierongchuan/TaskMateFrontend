@@ -21,7 +21,8 @@ import {
   PencilIcon,
   TrashIcon,
   DocumentDuplicateIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  BuildingOfficeIcon
 } from '@heroicons/react/24/outline';
 
 export const TasksPage: React.FC = () => {
@@ -468,6 +469,10 @@ export const TasksPage: React.FC = () => {
                               {task.creator.full_name}
                             </span>
                           )}
+                          <span className="flex items-center">
+                            <BuildingOfficeIcon className="w-4 h-4 mr-1" />
+                            {task.dealership?.name || 'Все салоны'}
+                          </span>
                         </div>
 
                         {task.tags && task.tags.length > 0 && (
@@ -559,6 +564,10 @@ export const TasksPage: React.FC = () => {
                     <div className="flex items-center">
                       <UserIcon className="w-4 h-4 mr-2" />
                       {task.task_type === 'individual' ? 'Индивидуальная' : 'Групповая'}
+                    </div>
+                    <div className="flex items-center">
+                      <BuildingOfficeIcon className="w-4 h-4 mr-2" />
+                      {task.dealership?.name || 'Все салоны'}
                     </div>
                   </div>
 

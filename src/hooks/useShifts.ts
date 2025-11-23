@@ -52,11 +52,12 @@ export const useMyShifts = (filters?: ShiftsFilters) => {
 };
 
 // Hook for getting current user's current shift
-export const useMyCurrentShift = () => {
+export const useMyCurrentShift = (dealershipId?: number) => {
   return useQuery({
-    queryKey: ['my-shift', 'current'],
-    queryFn: () => shiftsApi.getMyCurrentShift(),
+    queryKey: ['my-shift', 'current', dealershipId],
+    queryFn: () => shiftsApi.getMyCurrentShift(dealershipId),
     refetchInterval: 10000, // Refetch every 10 seconds
+    enabled: !!dealershipId, // Only fetch if dealershipId is provided
   });
 };
 

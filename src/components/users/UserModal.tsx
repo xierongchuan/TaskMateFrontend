@@ -184,7 +184,13 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
                                 } else {
                                   newIds = currentIds.filter(id => id !== dealership.id);
                                 }
-                                setFormData({ ...formData, dealership_ids: newIds });
+                                // Also update primary dealership_id to the first selected one if not set
+                                const newPrimaryId = newIds.length > 0 ? newIds[0] : undefined;
+                                setFormData({
+                                  ...formData,
+                                  dealership_ids: newIds,
+                                  dealership_id: newPrimaryId
+                                });
                               }}
                               className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                             />

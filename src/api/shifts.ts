@@ -44,8 +44,10 @@ export const shiftsApi = {
   },
 
   // Get current user's current shift
-  getMyCurrentShift: async (): Promise<{ data: Shift }> => {
-    const response = await apiClient.get<{ data: Shift }>('/shifts/my/current');
+  getMyCurrentShift: async (dealershipId?: number): Promise<{ data: Shift }> => {
+    const response = await apiClient.get<{ data: Shift }>('/shifts/my/current', {
+      params: { dealership_id: dealershipId },
+    });
     return response.data;
   },
 

@@ -23,14 +23,32 @@ export const ShiftsPage: React.FC = () => {
   const currentShifts = currentShiftsData?.data || [];
 
   const getStatusBadge = (status: string) => {
-    return (
-      <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${status === 'open' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-          }`}
-      >
-        {status === 'open' ? 'Открыта' : 'Закрыта'}
-      </span>
-    );
+    switch (status) {
+      case 'open':
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+            Открыта
+          </span>
+        );
+      case 'late':
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+            Открыта (Опоздание)
+          </span>
+        );
+      case 'replaced':
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+            Заменена
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+            Закрыта
+          </span>
+        );
+    }
   };
 
   const getShiftTypeBadge = (type: string) => {
@@ -100,7 +118,6 @@ export const ShiftsPage: React.FC = () => {
                   {getStatusBadge(shift.status)}
                 </div>
                 <div className="text-sm text-gray-500 space-y-1">
-                  <div>Начало: {format(new Date(shift.shift_start), 'PPp', { locale: ru })}</div>
                   <div>Начало: {format(new Date(shift.shift_start), 'PPp', { locale: ru })}</div>
                   <div className="flex items-center mt-1">
                     <span className="mr-2">Тип:</span>

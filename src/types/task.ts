@@ -26,11 +26,17 @@ export interface Task {
     id: number;
     full_name: string;
   };
-  assignments?: Array<{
+  dealership?: {
     id: number;
-    user_id: number;
-    status: string;
-  }>;
+    name: string;
+  };
+  assignments?: {
+    id: number;
+    user: {
+      id: number;
+      full_name: string;
+    };
+  }[];
 }
 
 export interface CreateTaskRequest {

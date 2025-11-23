@@ -14,6 +14,10 @@ export interface User {
     name: string;
     address?: string;
   }[];
+  dealership?: {
+    id: number;
+    name: string;
+  };
 }
 
 export interface LoginRequest {

@@ -24,9 +24,13 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
     assignments: [],
   });
 
-  const { data: usersData } = useQuery({
-    queryKey: ['users'],
-    queryFn: () => usersApi.getUsers({ per_page: 100 }),
+  const { data: usersData, isLoading: isLoadingUsers } = useQuery({
+    queryKey: ['users', formData.dealership_id],
+    queryFn: () => usersApi.getUsers({
+      per_page: 100,
+      dealership_id: formData.dealership_id
+    }),
+    enabled: !!formData.dealership_id,
   });
 
   useEffect(() => {
@@ -199,7 +203,13 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
                   <label className="block text-sm font-medium text-gray-700">Автосалон *</label>
                   <DealershipSelector
                     value={formData.dealership_id}
-                    onChange={(dealershipId) => setFormData({ ...formData, dealership_id: dealershipId || undefined })}
+                    onChange={(dealershipId) => {
+                      setFormData({
+                        ...formData,
+                        dealership_id: dealershipId || undefined,
+                        assignments: [] // Clear assignments when dealership changes
+                      });
+                    }}
                     placeholder="Выберите автосалон"
                     required={true}
                   />
@@ -340,20 +350,34 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Получатели</label>
                   <div className="border border-gray-300 rounded-md p-3 max-h-48 overflow-y-auto">
-                    {usersData?.data.map((user) => (
-                      <div key={user.id} className="flex items-center mb-2">
-                        <input
-                          type="checkbox"
-                          id={`user-${user.id}`}
-                          checked={formData.assignments?.includes(user.id)}
-                          onChange={(e) => handleUserSelection(user.id, e.target.checked)}
-                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                        />
-                        <label htmlFor={`user-${user.id}`} className="ml-2 text-sm text-gray-700">
-                          {user.full_name} ({user.role})
-                        </label>
-                      </div>
-                    ))}
+                    {!formData.dealership_id ? (
+                      <p className="text-sm text-gray-500 text-center py-2">
+                        Сначала выберите автосалон
+                      </p>
+                    ) : isLoadingUsers ? (
+                      <p className="text-sm text-gray-500 text-center py-2">
+                        Загрузка сотрудников...
+                      </p>
+                    ) : usersData?.data.length === 0 ? (
+                      <p className="text-sm text-gray-500 text-center py-2">
+                        В этом салоне нет сотрудников
+                      </p>
+                    ) : (
+                      usersData?.data.map((user) => (
+                        <div key={user.id} className="flex items-center mb-2">
+                          <input
+                            type="checkbox"
+                            id={`user-${user.id}`}
+                            checked={formData.assignments?.includes(user.id)}
+                            onChange={(e) => handleUserSelection(user.id, e.target.checked)}
+                            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                          />
+                          <label htmlFor={`user-${user.id}`} className="ml-2 text-sm text-gray-700">
+                            {user.full_name} ({user.role})
+                          </label>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               </div>

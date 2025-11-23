@@ -77,7 +77,7 @@ export const UsersPage: React.FC = () => {
     });
   };
 
-  
+
   const clearFilters = () => {
     setFilters({
       search: '',
@@ -139,6 +139,13 @@ export const UsersPage: React.FC = () => {
     return `${baseClasses} border-gray-200`;
   };
 
+  const getDealershipsDisplay = (user: User) => {
+    if (user.dealerships && user.dealerships.length > 0) {
+      return user.dealerships.map(d => d.name).join(', ');
+    }
+    return user.dealership?.name || 'Не привязан';
+  };
+
   return (
     <div className="px-4 py-6 sm:px-0 max-w-7xl mx-auto">
       {/* Header */}
@@ -154,21 +161,19 @@ export const UsersPage: React.FC = () => {
             <div className="flex items-center bg-white rounded-lg border border-gray-200 w-full sm:w-auto">
               <button
                 onClick={() => setViewMode('list')}
-                className={`flex-1 sm:flex-initial px-3 py-2 text-sm font-medium rounded-l-lg ${
-                  viewMode === 'list'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
+                className={`flex-1 sm:flex-initial px-3 py-2 text-sm font-medium rounded-l-lg ${viewMode === 'list'
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'text-gray-500 hover:text-gray-700'
+                  }`}
               >
                 Список
               </button>
               <button
                 onClick={() => setViewMode('cards')}
-                className={`flex-1 sm:flex-initial px-3 py-2 text-sm font-medium rounded-r-lg ${
-                  viewMode === 'cards'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
+                className={`flex-1 sm:flex-initial px-3 py-2 text-sm font-medium rounded-r-lg ${viewMode === 'cards'
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'text-gray-500 hover:text-gray-700'
+                  }`}
               >
                 Карточки
               </button>
@@ -258,7 +263,7 @@ export const UsersPage: React.FC = () => {
             </div>
           </div>
 
-          </div>
+        </div>
       </div>
 
       {isLoading ? (
@@ -298,11 +303,10 @@ export const UsersPage: React.FC = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-3 mb-3">
                           <div className="flex items-center">
-                            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white font-semibold ${
-                              user.role === 'owner' ? 'bg-red-500' :
+                            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white font-semibold ${user.role === 'owner' ? 'bg-red-500' :
                               user.role === 'manager' ? 'bg-green-500' :
-                              user.role === 'observer' ? 'bg-purple-500' : 'bg-blue-500'
-                            }`}>
+                                user.role === 'observer' ? 'bg-purple-500' : 'bg-blue-500'
+                              }`}>
                               {user.full_name.charAt(0).toUpperCase()}
                             </div>
                             {!user.telegram_id && (
@@ -326,7 +330,9 @@ export const UsersPage: React.FC = () => {
                           </div>
                           <div className="flex items-center text-gray-500">
                             <BuildingOfficeIcon className="w-4 h-4 mr-2 flex-shrink-0" />
-                            <span className="truncate">{user.dealership_id ? `Салон #${user.dealership_id}` : 'Не привязан'}</span>
+                            <span className="truncate" title={getDealershipsDisplay(user)}>
+                              {getDealershipsDisplay(user)}
+                            </span>
                           </div>
                           <div className="flex items-center text-gray-500">
                             <ChatBubbleLeftRightIcon className="w-4 h-4 mr-2 flex-shrink-0" />
@@ -386,11 +392,10 @@ export const UsersPage: React.FC = () => {
                 <div key={user.id} className={`p-4 sm:p-6 ${getUserCardClass(user)}`}>
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-lg ${
-                        user.role === 'owner' ? 'bg-red-500' :
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-lg ${user.role === 'owner' ? 'bg-red-500' :
                         user.role === 'manager' ? 'bg-green-500' :
-                        user.role === 'observer' ? 'bg-purple-500' : 'bg-blue-500'
-                      }`}>
+                          user.role === 'observer' ? 'bg-purple-500' : 'bg-blue-500'
+                        }`}>
                         {user.full_name.charAt(0).toUpperCase()}
                       </div>
                       {!user.telegram_id && (
@@ -436,7 +441,9 @@ export const UsersPage: React.FC = () => {
                     </div>
                     <div className="flex items-center">
                       <BuildingOfficeIcon className="w-4 h-4 mr-2 flex-shrink-0" />
-                      <span className="truncate">{user.dealership_id ? `Салон #${user.dealership_id}` : 'Не привязан'}</span>
+                      <span className="truncate" title={getDealershipsDisplay(user)}>
+                        {getDealershipsDisplay(user)}
+                      </span>
                     </div>
                     <div className="flex items-center">
                       <ChatBubbleLeftRightIcon className="w-4 h-4 mr-2 flex-shrink-0" />
