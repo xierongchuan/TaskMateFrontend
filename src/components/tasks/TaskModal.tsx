@@ -49,7 +49,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
         deadline: task.deadline || undefined,
         dealership_id: task.dealership_id,
         tags: task.tags,
-        assignments: task.assignments?.map(a => a.user_id) || [],
+        assignments: task.assignments?.map(a => a.user.id) || [],
       });
     } else {
       setFormData({

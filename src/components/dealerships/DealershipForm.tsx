@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useCreateDealership, useUpdateDealership } from '../../hooks/useDealerships';
 import type { Dealership } from '../../types/dealership';
 import { BuildingOfficeIcon, PhoneIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { sanitizePhoneNumber } from '../../utils/phoneFormatter';
 
 interface DealershipFormProps {
   dealership?: Dealership;
@@ -34,8 +35,18 @@ export const DealershipForm: React.FC<DealershipFormProps> = ({
       newErrors.name = 'Название должно содержать минимум 2 символа';
     }
 
-    if (formData.phone && !/^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}$/.test(formData.phone)) {
-      newErrors.phone = 'Введите корректный номер телефона';
+    if (formData.phone && formData.phone.trim()) {
+      // More flexible validation: just check if it has + at the start and contains digits
+      const phonePattern = /^\+?[0-9\s()\-\.]+$/;
+      if (!phonePattern.test(formData.phone)) {
+        newErrors.phone = 'Введите корректный номер телефона';
+      } else {
+        // Check sanitized version has minimum length
+        const sanitized = sanitizePhoneNumber(formData.phone);
+        if (sanitized.length < 8 || sanitized.length > 20) {
+          newErrors.phone = 'Номер телефона должен содержать от 8 до 20 цифр';
+        }
+      }
     }
 
     setErrors(newErrors);
@@ -50,6 +61,11 @@ export const DealershipForm: React.FC<DealershipFormProps> = ({
     }
 
     try {
+      // Sanitize phone number before sending
+      const sanitizedPhone = formData.phone.trim()
+        ? sanitizePhoneNumber(formData.phone)
+        : undefined;
+
       if (dealership) {
         // Обновление существующего автосалона
         await updateDealership.mutateAsync({
@@ -57,7 +73,7 @@ export const DealershipForm: React.FC<DealershipFormProps> = ({
           data: {
             name: formData.name.trim(),
             address: formData.address.trim() || undefined,
-            phone: formData.phone.trim() || undefined,
+            phone: sanitizedPhone,
           },
         });
       } else {
@@ -65,7 +81,7 @@ export const DealershipForm: React.FC<DealershipFormProps> = ({
         await createDealership.mutateAsync({
           name: formData.name.trim(),
           address: formData.address.trim() || undefined,
-          phone: formData.phone.trim() || undefined,
+          phone: sanitizedPhone,
         });
       }
 
@@ -115,11 +131,9 @@ export const DealershipForm: React.FC<DealershipFormProps> = ({
               required
               minLength={2}
               placeholder="Например: Автомир Premium"
-              className={`block w-full rounded-lg border ${
-                errors.name ? 'border-red-300' : 'border-gray-300'
-              } shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm pl-10 pr-3 py-2 ${
-                errors.name ? 'focus:border-red-500 focus:ring-red-500' : ''
-              }`}
+              className={`block w-full rounded-lg border ${errors.name ? 'border-red-300' : 'border-gray-300'
+                } shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm pl-10 pr-3 py-2 ${errors.name ? 'focus:border-red-500 focus:ring-red-500' : ''
+                }`}
             />
           </div>
           {errors.name && (
@@ -162,12 +176,10 @@ export const DealershipForm: React.FC<DealershipFormProps> = ({
               type="tel"
               value={formData.phone}
               onChange={(e) => handleInputChange('phone', e.target.value)}
-              placeholder="+7 (495) 123-45-67"
-              className={`block w-full rounded-lg border ${
-                errors.phone ? 'border-red-300' : 'border-gray-300'
-              } shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm pl-10 pr-3 py-2 ${
-                errors.phone ? 'focus:border-red-500 focus:ring-red-500' : ''
-              }`}
+              placeholder="+998 99 495 85 14"
+              className={`block w-full rounded-lg border ${errors.phone ? 'border-red-300' : 'border-gray-300'
+                } shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm pl-10 pr-3 py-2 ${errors.phone ? 'focus:border-red-500 focus:ring-red-500' : ''
+                }`}
             />
           </div>
           {errors.phone && (

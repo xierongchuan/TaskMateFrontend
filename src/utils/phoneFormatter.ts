@@ -213,3 +213,25 @@ export const formatPhoneInput = (input: string): string => {
   // For now, return as-is (real-time formatting can be added later)
   return input;
 };
+
+/**
+ * Sanitize phone number to the format: + and digits only
+ * Example: "+1 (771) 227-1936" => "+17712271936"
+ * Example: "+998 99 495 85 14" => "+998994958514"
+ */
+export const sanitizePhoneNumber = (phone: string): string => {
+  if (!phone) return '';
+
+  // Remove all characters except digits and +
+  let sanitized = phone.replace(/[^\d+]/g, '');
+
+  // Ensure only one + at the beginning
+  if (sanitized.includes('+')) {
+    // Remove all + signs first
+    sanitized = sanitized.replace(/\+/g, '');
+    // Add single + at the beginning
+    sanitized = '+' + sanitized;
+  }
+
+  return sanitized;
+};

@@ -228,7 +228,7 @@ export const UsersPage: React.FC = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">Автосалон</label>
               <select
                 value={filters.dealership_id || ''}
-                onChange={(e) => setFilters({ ...filters, dealership_id: e.target.value ? Number(e.target.value) : undefined })}
+                onChange={(e) => setFilters({ ...filters, dealership_id: e.target.value ? Number(e.target.value) : undefined as any })}
                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
               >
                 <option value="">Все салоны</option>
