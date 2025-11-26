@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { tasksApi } from '../../api/tasks';
 import { usersApi } from '../../api/users';
 import { DealershipSelector } from '../common/DealershipSelector';
+import { TaskNotificationSettings } from './TaskNotificationSettings';
 import type { Task, CreateTaskRequest, TaskRecurrence, TaskType, ResponseType } from '../../types/task';
 
 interface TaskModalProps {
@@ -50,6 +51,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
         dealership_id: task.dealership_id,
         tags: task.tags,
         assignments: task.assignments?.map(a => a.user.id) || [],
+        notification_settings: task.notification_settings,
       });
     } else {
       setFormData({
@@ -61,6 +63,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
         recurrence: 'none',
         dealership_id: undefined,
         assignments: [],
+        notification_settings: undefined,
       });
     }
   }, [task]);
@@ -345,6 +348,14 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
                       />
                     )}
                   </div>
+                </div>
+
+                {/* Notification Settings */}
+                <div>
+                  <TaskNotificationSettings
+                    value={formData.notification_settings || {}}
+                    onChange={(settings) => setFormData({ ...formData, notification_settings: settings })}
+                  />
                 </div>
 
                 <div>

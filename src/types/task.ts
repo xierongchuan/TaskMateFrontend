@@ -37,6 +37,7 @@ export interface Task {
       full_name: string;
     };
   }[];
+  notification_settings?: Record<string, { enabled?: boolean; offset?: number }>;
 }
 
 export interface CreateTaskRequest {
@@ -54,4 +55,5 @@ export interface CreateTaskRequest {
   dealership_id: number;
   tags?: string[];
   assignments: number[];
+  notification_settings?: Record<string, { enabled?: boolean; offset?: number }>;
 }

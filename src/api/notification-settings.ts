@@ -8,6 +8,7 @@ export interface NotificationSetting {
   notification_time?: string;
   notification_day?: string;
   notification_offset?: number;
+  recipient_roles?: string[];
 }
 
 export interface UpdateNotificationSettingRequest {
@@ -15,6 +16,7 @@ export interface UpdateNotificationSettingRequest {
   notification_time?: string;
   notification_day?: string;
   notification_offset?: number;
+  recipient_roles?: string[];
   dealership_id?: number;
 }
 
