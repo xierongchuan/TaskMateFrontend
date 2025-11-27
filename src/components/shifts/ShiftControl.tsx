@@ -23,7 +23,6 @@ export const ShiftControl: React.FC = () => {
 
   const [openingPhoto, setOpeningPhoto] = useState<File | null>(null);
   const [closingPhoto, setClosingPhoto] = useState<File | null>(null);
-  const [breakDuration, setBreakDuration] = useState<number>(0);
 
   const handleOpenShift = async () => {
     if (!openingPhoto || !selectedDealershipId) {
@@ -58,16 +57,12 @@ export const ShiftControl: React.FC = () => {
     if (closingPhoto) {
       updateData.closing_photo = closingPhoto;
     }
-    if (breakDuration > 0) {
-      updateData.break_duration = breakDuration;
-    }
 
     updateShiftMutation.mutate(
       { id: currentShift.id, data: updateData },
       {
         onSuccess: () => {
           setClosingPhoto(null);
-          setBreakDuration(0);
           alert('Смена успешно закрыта!');
         },
         onError: (error: any) => {
@@ -121,15 +116,15 @@ export const ShiftControl: React.FC = () => {
                   <p>Автосалон: {currentShift.dealership?.name}</p>
                 </div>
 
-                <div className="pt-2">
-                  <h3 className="text-md font-medium text-gray-900 mb-3">Закрытие смены</h3>
+                <div className="pt-4 border-t border-gray-100">
+                  <h3 className="text-base font-medium text-gray-900 mb-4">Закрытие смены</h3>
 
-                  <div className="space-y-4">
-                    <div>
+                  <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+                    <div className="flex-1">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Фото закрытия смены (необязательно)
                       </label>
-                      <div className="flex items-center space-x-4">
+                      <div className="flex items-center gap-3">
                         <input
                           type="file"
                           accept="image/*"
@@ -139,16 +134,20 @@ export const ShiftControl: React.FC = () => {
                         />
                         <label
                           htmlFor="closing-photo"
-                          className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                          className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer transition-colors"
                         >
-                          <CameraIcon className="w-4 h-4 mr-2" />
-                          {closingPhoto ? closingPhoto.name : 'Выбрать фото'}
+                          <CameraIcon className="w-5 h-5 mr-2 text-gray-500" />
+                          {closingPhoto ? (
+                            <span className="truncate max-w-[150px]">{closingPhoto.name}</span>
+                          ) : (
+                            'Выбрать фото'
+                          )}
                         </label>
                         {closingPhoto && (
                           <button
                             type="button"
                             onClick={() => setClosingPhoto(null)}
-                            className="text-red-600 hover:text-red-800 text-sm"
+                            className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors"
                           >
                             Удалить
                           </button>
@@ -156,26 +155,13 @@ export const ShiftControl: React.FC = () => {
                       </div>
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Длительность перерыва (минуты)
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={breakDuration}
-                        onChange={(e) => setBreakDuration(parseInt(e.target.value) || 0)}
-                        className="block w-32 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
-                      />
-                    </div>
-
                     <button
                       type="button"
                       onClick={handleCloseShift}
                       disabled={updateShiftMutation.isPending}
-                      className="inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                      className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                     >
-                      <StopIcon className="w-4 h-4 mr-2" />
+                      <StopIcon className="w-5 h-5 mr-2" />
                       {updateShiftMutation.isPending ? 'Закрытие...' : 'Закрыть смену'}
                     </button>
                   </div>
