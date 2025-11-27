@@ -8,6 +8,7 @@ import { RoleSelector } from '../components/notifications/RoleSelector';
 export const NotificationSettingsPage: React.FC = () => {
   const queryClient = useQueryClient();
   const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const { data: settingsData, isLoading } = useQuery({
     queryKey: ['notification-settings'],
@@ -19,6 +20,11 @@ export const NotificationSettingsPage: React.FC = () => {
       notificationSettingsApi.updateSetting(channelType, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notification-settings'] });
+      setError(null); // Clear any previous errors
+    },
+    onError: (error: any) => {
+      setError(error?.response?.data?.message || 'Не удалось обновить настройки');
+      console.error('Failed to update notification setting:', error);
     },
   });
 
@@ -26,40 +32,54 @@ export const NotificationSettingsPage: React.FC = () => {
     mutationFn: () => notificationSettingsApi.resetToDefaults(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notification-settings'] });
+      setError(null);
+    },
+    onError: (error: any) => {
+      setError(error?.response?.data?.message || 'Не удалось сбросить настройки');
+      console.error('Failed to reset settings:', error);
     },
   });
 
   const handleToggle = async (setting: NotificationSetting) => {
+    if (isSaving) return; // Prevent double-clicks
     setIsSaving(true);
     try {
       await updateMutation.mutateAsync({
         channelType: setting.channel_type,
         data: { is_enabled: !setting.is_enabled },
       });
+    } catch (error) {
+      console.error('Error toggling notification:', error);
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleTimeChange = async (setting: NotificationSetting, time: string) => {
+    if (isSaving) return;
     setIsSaving(true);
     try {
       await updateMutation.mutateAsync({
         channelType: setting.channel_type,
         data: { notification_time: time },
       });
+    } catch (error) {
+      console.error('Error updating time:', error);
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleDayChange = async (setting: NotificationSetting, day: string) => {
+    if (isSaving) return;
     setIsSaving(true);
     try {
       await updateMutation.mutateAsync({
         channelType: setting.channel_type,
         data: { notification_day: day },
       });
+    } catch (error) {
+      console.error('Error updating day:', error);
     } finally {
       setIsSaving(false);
     }
@@ -67,6 +87,7 @@ export const NotificationSettingsPage: React.FC = () => {
 
   const handleOffsetChange = async (setting: NotificationSetting, offset: number) => {
     if (offset < 1 || offset > 1440) return; // Validate range
+    if (isSaving) return;
 
     setIsSaving(true);
     try {
@@ -74,18 +95,23 @@ export const NotificationSettingsPage: React.FC = () => {
         channelType: setting.channel_type,
         data: { notification_offset: offset },
       });
+    } catch (error) {
+      console.error('Error updating offset:', error);
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleRolesChange = async (setting: NotificationSetting, roles: string[]) => {
+    if (isSaving) return;
     setIsSaving(true);
     try {
       await updateMutation.mutateAsync({
         channelType: setting.channel_type,
         data: { recipient_roles: roles },
       });
+    } catch (error) {
+      console.error('Error updating roles:', error);
     } finally {
       setIsSaving(false);
     }
@@ -246,6 +272,32 @@ export const NotificationSettingsPage: React.FC = () => {
             </button>
           </div>
         </div>
+
+        {/* Error Banner */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <XCircleIcon className="h-5 w-5 text-red-400" />
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">Ошибка</h3>
+                <div className="mt-1 text-sm text-red-700">
+                  <p>{error}</p>
+                </div>
+              </div>
+              <div className="ml-auto pl-3">
+                <button
+                  onClick={() => setError(null)}
+                  className="inline-flex text-red-400 hover:text-red-500 focus:outline-none"
+                >
+                  <span className="sr-only">Закрыть</span>
+                  <XCircleIcon className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Task Notifications Section */}
         <div className="mb-8">
