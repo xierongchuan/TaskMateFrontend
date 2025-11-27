@@ -13,14 +13,18 @@ import {
   ExclamationTriangleIcon,
   InformationCircleIcon,
   ArrowPathIcon,
-  WrenchIcon
+  WrenchIcon,
+  ChevronDownIcon,
+  ChevronUpIcon
 } from '@heroicons/react/24/outline';
+import { NotificationSettingsContent } from '../components/notifications/NotificationSettingsContent';
 
 export const SettingsPage: React.FC = () => {
   const permissions = usePermissions();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'shifts' | 'interface' | 'notifications' | 'maintenance'>('shifts');
   const [selectedDealershipId, setSelectedDealershipId] = useState<number | undefined>(user?.dealership_id || undefined);
+  const [showDetailedNotifications, setShowDetailedNotifications] = useState(false);
 
   // Initialize shift config with default values
   const [shiftConfig, setShiftConfig] = useState<ShiftConfig>({
@@ -405,104 +409,124 @@ export const SettingsPage: React.FC = () => {
                       <BellIcon className="w-6 h-6 text-purple-500 mr-3" />
                       <h3 className="text-lg font-semibold text-gray-900">Настройки уведомлений</h3>
                     </div>
-                    <a
-                      href="/notification-settings"
+                    <button
+                      type="button"
+                      onClick={() => setShowDetailedNotifications(!showDetailedNotifications)}
                       className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
                     >
-                      <CogIcon className="w-4 h-4 mr-2" />
-                      Расширенные настройки
-                    </a>
+                      {showDetailedNotifications ? (
+                        <>
+                          <ChevronUpIcon className="w-4 h-4 mr-2" />
+                          Скрыть детальные настройки
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDownIcon className="w-4 h-4 mr-2" />
+                          Показать детальные настройки
+                        </>
+                      )}
+                    </button>
                   </div>
 
-                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-4">
-                    <div className="flex">
-                      <InformationCircleIcon className="w-5 h-5 text-blue-600 mr-2 flex-shrink-0" />
-                      <div>
-                        <h4 className="text-sm font-medium text-blue-800 mb-1">Расширенные настройки доступны</h4>
-                        <p className="text-sm text-blue-700">
-                          Для настройки времени уведомлений (например, за 49 минут до дедлайна), включения/отключения каналов и времени отчётов перейдите в <strong>Расширенные настройки</strong>.
-                        </p>
+                  {!showDetailedNotifications && (
+                    <>
+                      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-4">
+                        <div className="flex">
+                          <InformationCircleIcon className="w-5 h-5 text-blue-600 mr-2 flex-shrink-0" />
+                          <div>
+                            <h4 className="text-sm font-medium text-blue-800 mb-1">Детальные настройки доступны</h4>
+                            <p className="text-sm text-blue-700">
+                              Для настройки времени уведомлений (например, за 49 минут до дедлайна), включения/отключения каналов, выбора получателей и времени отчётов нажмите <strong>Показать детальные настройки</strong>.
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
 
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <div>
-                        <h4 className="font-medium text-gray-900">Просроченные задачи</h4>
-                        <p className="text-sm text-gray-500">Уведомлять о задачах с истекшим сроком выполнения</p>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={(botConfig as any).notification_types?.task_overdue}
-                        onChange={(e) => setBotConfig({
-                          ...botConfig,
-                          notification_types: {
-                            ...(botConfig as any).notification_types,
-                            task_overdue: e.target.checked
-                          }
-                        })}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                    </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                          <div>
+                            <h4 className="font-medium text-gray-900">Просроченные задачи</h4>
+                            <p className="text-sm text-gray-500">Уведомлять о задачах с истекшим сроком выполнения</p>
+                          </div>
+                          <input
+                            type="checkbox"
+                            checked={(botConfig as any).notification_types?.task_overdue}
+                            onChange={(e) => setBotConfig({
+                              ...botConfig,
+                              notification_types: {
+                                ...(botConfig as any).notification_types,
+                                task_overdue: e.target.checked
+                              }
+                            })}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                        </div>
 
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <div>
-                        <h4 className="font-medium text-gray-900">Опоздания на смены</h4>
-                        <p className="text-sm text-gray-500">Уведомлять об опозданиях сотрудников</p>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={(botConfig as any).notification_types?.shift_late}
-                        onChange={(e) => setBotConfig({
-                          ...botConfig,
-                          notification_types: {
-                            ...(botConfig as any).notification_types,
-                            shift_late: e.target.checked
-                          }
-                        })}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                    </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                          <div>
+                            <h4 className="font-medium text-gray-900">Опоздания на смены</h4>
+                            <p className="text-sm text-gray-500">Уведомлять об опозданиях сотрудников</p>
+                          </div>
+                          <input
+                            type="checkbox"
+                            checked={(botConfig as any).notification_types?.shift_late}
+                            onChange={(e) => setBotConfig({
+                              ...botConfig,
+                              notification_types: {
+                                ...(botConfig as any).notification_types,
+                                shift_late: e.target.checked
+                              }
+                            })}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                        </div>
 
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <div>
-                        <h4 className="font-medium text-gray-900">Выполненные задачи</h4>
-                        <p className="text-sm text-gray-500">Уведомлять о выполнении задач</p>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={(botConfig as any).notification_types?.task_completed}
-                        onChange={(e) => setBotConfig({
-                          ...botConfig,
-                          notification_types: {
-                            ...(botConfig as any).notification_types,
-                            task_completed: e.target.checked
-                          }
-                        })}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                    </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                          <div>
+                            <h4 className="font-medium text-gray-900">Выполненные задачи</h4>
+                            <p className="text-sm text-gray-500">Уведомлять о выполнении задач</p>
+                          </div>
+                          <input
+                            type="checkbox"
+                            checked={(botConfig as any).notification_types?.task_completed}
+                            onChange={(e) => setBotConfig({
+                              ...botConfig,
+                              notification_types: {
+                                ...(botConfig as any).notification_types,
+                                task_completed: e.target.checked
+                              }
+                            })}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                        </div>
 
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <div>
-                        <h4 className="font-medium text-gray-900">Ошибки системы</h4>
-                        <p className="text-sm text-gray-500">Уведомлять о системных ошибках</p>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                          <div>
+                            <h4 className="font-medium text-gray-900">Ошибки системы</h4>
+                            <p className="text-sm text-gray-500">Уведомлять о системных ошибках</p>
+                          </div>
+                          <input
+                            type="checkbox"
+                            checked={(botConfig as any).notification_types?.system_errors}
+                            onChange={(e) => setBotConfig({
+                              ...botConfig,
+                              notification_types: {
+                                ...(botConfig as any).notification_types,
+                                system_errors: e.target.checked
+                              }
+                            })}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                        </div>
                       </div>
-                      <input
-                        type="checkbox"
-                        checked={(botConfig as any).notification_types?.system_errors}
-                        onChange={(e) => setBotConfig({
-                          ...botConfig,
-                          notification_types: {
-                            ...(botConfig as any).notification_types,
-                            system_errors: e.target.checked
-                          }
-                        })}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
+                    </>
+                  )}
+
+                  {showDetailedNotifications && (
+                    <div className="border-t border-gray-200 pt-6">
+                      <NotificationSettingsContent dealershipId={selectedDealershipId} />
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
 
