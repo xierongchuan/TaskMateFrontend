@@ -316,13 +316,13 @@ export const DashboardPage: React.FC = () => {
           <div className="p-4 sm:p-6">
             {((dashboardData?.overdue_tasks || 0) > 0 || (dashboardData?.late_shifts_today || 0) > 0) ? (
               <div className="space-y-3">
-                {dashboardData?.overdue_tasks && dashboardData.overdue_tasks > 0 && (
+                {(dashboardData?.overdue_tasks || 0) > 0 && (
                   <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
                     <div className="flex items-center">
                       <XCircleIcon className="w-5 h-5 text-red-500 mr-2" />
                       <div>
                         <p className="font-medium text-red-900 text-sm">
-                          {dashboardData.overdue_tasks} просроченных задач
+                          {dashboardData?.overdue_tasks} просроченных задач
                         </p>
                         <p className="text-xs text-red-700">
                           Требуют немедленного внимания
@@ -331,13 +331,13 @@ export const DashboardPage: React.FC = () => {
                     </div>
                   </div>
                 )}
-                {dashboardData?.late_shifts_today && dashboardData.late_shifts_today > 0 && (
+                {(dashboardData?.late_shifts_today || 0) > 0 && (
                   <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
                     <div className="flex items-center">
                       <ClockIcon className="w-5 h-5 text-orange-500 mr-2" />
                       <div>
                         <p className="font-medium text-orange-900 text-sm">
-                          {dashboardData.late_shifts_today} опозданий сегодня
+                          {dashboardData?.late_shifts_today} опозданий сегодня
                         </p>
                         <p className="text-xs text-orange-700">
                           Необходимо проконтролировать
