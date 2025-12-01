@@ -151,7 +151,7 @@ export const TasksPage: React.FC = () => {
       acknowledged: 'bg-blue-100 text-blue-800 border-blue-200',
       completed: 'bg-green-100 text-green-800 border-green-200',
       overdue: 'bg-red-100 text-red-800 border-red-200',
-      postponed: 'bg-gray-100 text-gray-800 border-gray-200',
+
     };
 
     const icons = {
@@ -159,7 +159,7 @@ export const TasksPage: React.FC = () => {
       acknowledged: <CheckCircleIcon className="w-3 h-3" />,
       completed: <CheckCircleIcon className="w-3 h-3" />,
       overdue: <XCircleIcon className="w-3 h-3" />,
-      postponed: <ArrowPathIcon className="w-3 h-3" />,
+
     };
 
     const labels = {
@@ -167,7 +167,7 @@ export const TasksPage: React.FC = () => {
       acknowledged: 'Принято',
       completed: 'Выполнено',
       overdue: 'Просрочено',
-      postponed: 'Отложено',
+
     };
 
     return (
@@ -315,7 +315,7 @@ export const TasksPage: React.FC = () => {
                   <option value="acknowledged">Принято</option>
                   <option value="completed">Выполнено</option>
                   <option value="overdue">Просрочено</option>
-                  <option value="postponed">Отложено</option>
+
                 </select>
               </div>
 
@@ -525,7 +525,7 @@ export const TasksPage: React.FC = () => {
                             <option value="pending">Ожидает</option>
                             <option value="acknowledged">Принято</option>
                             <option value="completed">Выполнено</option>
-                            <option value="postponed">Отложено</option>
+
                           </select>
                         </div>
                       )}

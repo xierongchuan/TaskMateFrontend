@@ -73,7 +73,7 @@ export const ReportsPage: React.FC = () => {
     switch (status) {
       case 'completed': return 'bg-green-100 text-green-800';
       case 'overdue': return 'bg-red-100 text-red-800';
-      case 'postponed': return 'bg-yellow-100 text-yellow-800';
+
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -251,7 +251,7 @@ export const ReportsPage: React.FC = () => {
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(item.status)}`}>
                       {item.status === 'completed' && 'Выполнено'}
                       {item.status === 'overdue' && 'Просрочено'}
-                      {item.status === 'postponed' && 'Отложено'}
+
                     </span>
                     <span className="text-sm text-gray-600">{item.count} задач</span>
                   </div>

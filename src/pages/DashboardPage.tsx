@@ -33,7 +33,7 @@ export const DashboardPage: React.FC = () => {
       case 'overdue': return 'bg-red-100 text-red-800 border-red-200';
       case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'acknowledged': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'postponed': return 'bg-gray-100 text-gray-800 border-gray-200';
+
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
@@ -44,7 +44,7 @@ export const DashboardPage: React.FC = () => {
       case 'overdue': return <XCircleIcon className="w-4 h-4" />;
       case 'pending': return <ClockIcon className="w-4 h-4" />;
       case 'acknowledged': return <CheckCircleIcon className="w-4 h-4" />;
-      case 'postponed': return <ExclamationTriangleIcon className="w-4 h-4" />;
+
       default: return <ClockIcon className="w-4 h-4" />;
     }
   };
@@ -290,7 +290,7 @@ export const DashboardPage: React.FC = () => {
                         {task.status === 'overdue' && 'Просрочено'}
                         {task.status === 'pending' && 'Ожидает'}
                         {task.status === 'acknowledged' && 'Принято'}
-                        {task.status === 'postponed' && 'Отложено'}
+
                       </span>
                     </span>
                   </div>
