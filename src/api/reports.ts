@@ -8,7 +8,6 @@ export interface ReportData {
     total_tasks: number;
     completed_tasks: number;
     overdue_tasks: number;
-    postponed_tasks: number;
     total_shifts: number;
     late_shifts: number;
     total_replacements: number;

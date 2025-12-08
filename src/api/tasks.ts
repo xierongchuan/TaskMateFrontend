@@ -61,7 +61,6 @@ export const tasksApi = {
     completed: number;
     overdue: number;
     acknowledged: number;
-    postponed: number;
   }> => {
     const response = await apiClient.get('/tasks/stats', { params: filters });
     return response.data;
