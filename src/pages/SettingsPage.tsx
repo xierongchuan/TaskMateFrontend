@@ -129,7 +129,7 @@ export const SettingsPage: React.FC = () => {
     { id: 'maintenance', name: 'Обслуживание', icon: WrenchIcon },
   ];
 
-  if (!permissions.canManageTasks) {
+  if (!permissions.canManageSettings) {
     return (
       <div className="px-4 py-6 sm:px-0">
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">

@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useMyCurrentShift, useCreateShift, useUpdateShift } from '../../hooks/useShifts';
 import { useAuth } from '../../hooks/useAuth';
+import { usePermissions } from '../../hooks/usePermissions';
 import { CameraIcon, PlayIcon, StopIcon } from '@heroicons/react/24/outline';
 import { DealershipSelector } from '../common/DealershipSelector';
 import type { CreateShiftRequest, UpdateShiftRequest } from '../../types/shift';
 
 export const ShiftControl: React.FC = () => {
   const { user } = useAuth();
+  const { canWorkShifts } = usePermissions();
   const [selectedDealershipId, setSelectedDealershipId] = useState<number | undefined>(undefined);
 
   // Initialize selectedDealershipId with user's primary dealership
@@ -71,6 +73,10 @@ export const ShiftControl: React.FC = () => {
       }
     );
   };
+
+  if (!canWorkShifts) {
+    return null;
+  }
 
   return (
     <div className="bg-white shadow rounded-lg p-6 mb-6">

@@ -3,8 +3,10 @@ import type { Dealership } from '../types/dealership';
 import { DealershipForm } from '../components/dealerships/DealershipForm';
 import { DealershipList } from '../components/dealerships/DealershipList';
 import { PlusIcon, XMarkIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
+import { usePermissions } from '../hooks/usePermissions';
 
 export const DealershipsPage: React.FC = () => {
+  const { canManageDealerships } = usePermissions();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingDealership, setEditingDealership] = useState<Dealership | undefined>();
 
@@ -44,13 +46,15 @@ export const DealershipsPage: React.FC = () => {
               </div>
             </div>
           </div>
-          <button
-            onClick={handleCreateDealership}
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
-          >
-            <PlusIcon className="w-5 h-5 mr-2" />
-            Создать автосалон
-          </button>
+          {canManageDealerships && (
+            <button
+              onClick={handleCreateDealership}
+              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+            >
+              <PlusIcon className="w-5 h-5 mr-2" />
+              Создать автосалон
+            </button>
+          )}
         </div>
       </div>
 
