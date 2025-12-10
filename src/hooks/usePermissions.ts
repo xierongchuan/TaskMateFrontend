@@ -18,7 +18,7 @@ export const usePermissions = () => {
   const canManageGlobalSettings = user?.role === 'owner';
 
   // Check if user can manage settings for specific dealership
-  const canManageDealershipSettingsFor = (dealershipId: number) => {
+  const canManageDealershipSettingsFor = (_dealershipId: number) => {
     return user?.role === 'owner';
   };
 
