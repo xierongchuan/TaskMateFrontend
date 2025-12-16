@@ -161,7 +161,10 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
                     <option value="employee">Сотрудник</option>
                     <option value="observer">Наблюдатель</option>
                     <option value="manager">Управляющий</option>
-                    <option value="owner">Владелец</option>
+                    {/* Only Owner can create/assign Owner role */}
+                    {user?.role === 'owner' ? (
+                      <option value="owner">Владелец</option>
+                    ) : null}
                   </select>
                 </div>
 

@@ -346,21 +346,25 @@ export const UsersPage: React.FC = () => {
                       {permissions.canCreateUsers && (
                         <div className="flex flex-col gap-2">
                           <div className="flex flex-row sm:flex-col gap-2">
-                            <button
-                              onClick={() => handleEdit(user)}
-                              className="inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors min-h-[44px] min-w-[44px]"
-                            >
-                              <PencilIcon className="w-4 h-4 mr-1 sm:mr-0" />
-                              <span className="hidden sm:inline">Изменить</span>
-                            </button>
-                            <button
-                              onClick={() => handleDelete(user)}
-                              disabled={deleteMutation.isPending}
-                              className="inline-flex items-center justify-center px-3 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-lg text-red-700 bg-white hover:bg-red-50 transition-colors disabled:opacity-50 min-h-[44px] min-w-[44px]"
-                            >
-                              <TrashIcon className="w-4 h-4 mr-1 sm:mr-0" />
-                              <span className="hidden sm:inline">Удалить</span>
-                            </button>
+                            {(!permissions.isOwner && user.role === 'owner') ? null : (
+                              <>
+                                <button
+                                  onClick={() => handleEdit(user)}
+                                  className="inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors min-h-[44px] min-w-[44px]"
+                                >
+                                  <PencilIcon className="w-4 h-4 mr-1 sm:mr-0" />
+                                  <span className="hidden sm:inline">Изменить</span>
+                                </button>
+                                <button
+                                  onClick={() => handleDelete(user)}
+                                  disabled={deleteMutation.isPending}
+                                  className="inline-flex items-center justify-center px-3 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-lg text-red-700 bg-white hover:bg-red-50 transition-colors disabled:opacity-50 min-h-[44px] min-w-[44px]"
+                                >
+                                  <TrashIcon className="w-4 h-4 mr-1 sm:mr-0" />
+                                  <span className="hidden sm:inline">Удалить</span>
+                                </button>
+                              </>
+                            )}
                           </div>
 
                           {/* Quick Role Change */}
@@ -405,19 +409,23 @@ export const UsersPage: React.FC = () => {
                     <div className="flex space-x-1">
                       {permissions.canCreateUsers && (
                         <>
-                          <button
-                            onClick={() => handleEdit(user)}
-                            className="p-2 text-gray-400 hover:text-gray-600 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-                          >
-                            <PencilIcon className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(user)}
-                            disabled={deleteMutation.isPending}
-                            className="p-2 text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50 min-h-[44px] min-w-[44px] flex items-center justify-center"
-                          >
-                            <TrashIcon className="w-4 h-4" />
-                          </button>
+                          {(!permissions.isOwner && user.role === 'owner') ? null : (
+                            <>
+                              <button
+                                onClick={() => handleEdit(user)}
+                                className="p-2 text-gray-400 hover:text-gray-600 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                              >
+                                <PencilIcon className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(user)}
+                                disabled={deleteMutation.isPending}
+                                className="p-2 text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                              >
+                                <TrashIcon className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
                         </>
                       )}
                     </div>
@@ -457,13 +465,14 @@ export const UsersPage: React.FC = () => {
             </div>
           )}
         </>
-      )}
+      )
+      }
 
       <UserModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         user={selectedUser}
       />
-    </div>
+    </div >
   );
 };
