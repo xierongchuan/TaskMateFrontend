@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDealerships, useDeleteDealership } from '../../hooks/useDealerships';
+import { usePermissions } from '../../hooks/usePermissions';
 import type { Dealership } from '../../types/dealership';
 import {
   MagnifyingGlassIcon,
@@ -19,6 +20,7 @@ interface DealershipListProps {
 }
 
 export const DealershipList: React.FC<DealershipListProps> = ({ onEdit }) => {
+  const { canManageDealerships } = usePermissions();
   const [searchInput, setSearchInput] = useState('');
   const [filters, setFilters] = useState({
     search: '',
@@ -223,14 +225,16 @@ export const DealershipList: React.FC<DealershipListProps> = ({ onEdit }) => {
                     <PencilIcon className="w-4 h-4 mr-1.5" />
                     Изменить
                   </button>
-                  <button
-                    onClick={() => handleDelete(dealership)}
-                    disabled={deleteDealership.isPending}
-                    className="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded-lg text-red-700 bg-white hover:bg-red-50 transition-colors disabled:opacity-50"
-                  >
-                    <TrashIcon className="w-4 h-4 mr-1.5" />
-                    Удалить
-                  </button>
+                  {canManageDealerships && (
+                    <button
+                      onClick={() => handleDelete(dealership)}
+                      disabled={deleteDealership.isPending}
+                      className="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded-lg text-red-700 bg-white hover:bg-red-50 transition-colors disabled:opacity-50"
+                    >
+                      <TrashIcon className="w-4 h-4 mr-1.5" />
+                      Удалить
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
