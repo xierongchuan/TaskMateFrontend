@@ -243,9 +243,21 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
             {(createMutation.isError || updateMutation.isError) && (
               <div className="px-4 pb-4">
                 <div className="rounded-md bg-red-50 p-4">
-                  <p className="text-sm text-red-700">
-                    Ошибка: {(createMutation.error as any)?.response?.data?.message || (updateMutation.error as any)?.response?.data?.message || 'Неизвестная ошибка'}
-                  </p>
+                  <div className="text-sm text-red-700">
+                    <p className="font-medium">
+                      {(createMutation.error as any)?.response?.data?.message || (updateMutation.error as any)?.response?.data?.message || 'Произошла ошибка'}
+                    </p>
+                    {/* Display validation errors details if available */}
+                    {((createMutation.error as any)?.response?.data?.errors || (updateMutation.error as any)?.response?.data?.errors) && (
+                      <ul className="list-disc pl-5 mt-2 space-y-1">
+                        {Object.entries((createMutation.error as any)?.response?.data?.errors || (updateMutation.error as any)?.response?.data?.errors || {}).map(([field, messages]: [string, any]) => (
+                          <li key={field}>
+                            {Array.isArray(messages) ? messages.join(', ') : messages}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
