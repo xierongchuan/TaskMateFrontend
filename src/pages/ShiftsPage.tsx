@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useShifts, useCurrentShifts } from '../hooks/useShifts';
-import { ShiftControl } from '../components/shifts/ShiftControl';
+
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import type { ShiftsFilters } from '../types/shift';
@@ -21,6 +21,17 @@ export const ShiftsPage: React.FC = () => {
   const { data: shiftsData, isLoading, error } = useShifts(filters);
   const { data: currentShiftsData } = useCurrentShifts();
   const currentShifts = currentShiftsData?.data || [];
+
+  // Extract unique dealerships with active shifts
+  const activeShiftDealerships = React.useMemo(() => {
+    const unique = new Map();
+    currentShifts.forEach(shift => {
+      if (shift.dealership && !unique.has(shift.dealership.id)) {
+        unique.set(shift.dealership.id, shift.dealership);
+      }
+    });
+    return Array.from(unique.values());
+  }, [currentShifts]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -100,7 +111,35 @@ export const ShiftsPage: React.FC = () => {
       </div>
 
       {/* Shift Control Component */}
-      <ShiftControl />
+      {/* Active Dealerships Plaques */}
+      {activeShiftDealerships.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {activeShiftDealerships.map((dealership) => (
+            <div
+              key={dealership.id}
+              className="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200"
+            >
+              <div className="p-4 flex items-center space-x-3">
+                <div className="flex-shrink-0">
+                  <div className="h-10 w-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
+                    <BriefcaseIcon className="h-6 w-6" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900">{dealership.name}</h3>
+                  <div className="flex items-center mt-1">
+                    <span className="relative flex h-2 w-2 mr-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
+                    <p className="text-xs text-green-600 font-medium">Смена открыта</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Current Shifts Live Board */}
       {currentShifts && currentShifts.length > 0 && (

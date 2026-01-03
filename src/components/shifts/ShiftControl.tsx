@@ -80,8 +80,7 @@ export const ShiftControl: React.FC = () => {
 
   return (
     <div className="bg-white shadow rounded-lg p-6 mb-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-medium text-gray-900">Управление сменой</h2>
+      <div className="flex items-center justify-end mb-4">
         {currentShift?.status && currentShift.status !== 'closed' ? (
           <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
             Смена открыта
@@ -222,11 +221,7 @@ export const ShiftControl: React.FC = () => {
               </div>
             )}
           </>
-        ) : (
-          <div className="text-center py-4 text-gray-500">
-            Выберите автосалон для управления сменой
-          </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
