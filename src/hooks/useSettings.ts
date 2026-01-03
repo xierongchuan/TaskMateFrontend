@@ -106,8 +106,12 @@ export const useUpdateBotConfig = () => {
 
   return useMutation({
     mutationFn: (data: UpdateBotConfigRequest) => settingsApi.updateBotConfig(data),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      // Инвалидируем все запросы bot-config
       queryClient.invalidateQueries({ queryKey: ['settings', 'bot-config'] });
+      if (variables.dealership_id) {
+        queryClient.invalidateQueries({ queryKey: ['settings', 'bot-config', variables.dealership_id] });
+      }
     },
   });
 };

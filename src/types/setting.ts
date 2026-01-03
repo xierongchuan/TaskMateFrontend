@@ -103,4 +103,12 @@ export interface UpdateBotConfigRequest {
   auto_close_shifts?: boolean;
   shift_reminder_minutes?: number;
   maintenance_mode?: boolean;
+  rows_per_page?: number;
+  dealership_id?: number;
+  notification_types?: {
+    task_overdue?: boolean;
+    shift_late?: boolean;
+    task_completed?: boolean;
+    system_errors?: boolean;
+  };
 }

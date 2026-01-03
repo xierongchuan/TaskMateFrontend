@@ -61,7 +61,7 @@ export const settingsApi = {
   },
 
   updateBotConfig: async (data: UpdateBotConfigRequest): Promise<{ data: BotConfig }> => {
-    const response = await apiClient.post<{ data: BotConfig }>('/settings/bot-config', data);
+    const response = await apiClient.put<{ data: BotConfig }>('/settings/bot-config', data);
     return response.data;
   },
 

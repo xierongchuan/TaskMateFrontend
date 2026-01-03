@@ -102,11 +102,40 @@ export const SettingsPage: React.FC = () => {
       updateShiftConfigMutation.mutate({
         ...shiftConfig,
         dealership_id: selectedDealershipId,
+      }, {
+        onSuccess: () => showSuccessNotification('Настройки смен сохранены'),
+        onError: (error) => {
+          console.error('Error saving shift config:', error);
+          alert('Ошибка сохранения настроек смен');
+        },
       });
     } else if (activeTab === 'notifications' || activeTab === 'maintenance') {
-      updateBotConfigMutation.mutate(botConfig);
-    } else {
-      showSuccessNotification('Настройки интерфейса сохранены');
+      // Отправляем только валидные поля для UpdateBotConfigRequest
+      updateBotConfigMutation.mutate({
+        notification_enabled: botConfig.notification_enabled,
+        auto_close_shifts: botConfig.auto_close_shifts,
+        shift_reminder_minutes: botConfig.shift_reminder_minutes,
+        maintenance_mode: botConfig.maintenance_mode,
+        notification_types: botConfig.notification_types,
+        dealership_id: selectedDealershipId,
+      }, {
+        onSuccess: () => showSuccessNotification('Настройки сохранены'),
+        onError: (error) => {
+          console.error('Error saving settings:', error);
+          alert('Ошибка сохранения настроек');
+        },
+      });
+    } else if (activeTab === 'interface') {
+      updateBotConfigMutation.mutate({
+        rows_per_page: botConfig.rows_per_page,
+        dealership_id: selectedDealershipId,
+      }, {
+        onSuccess: () => showSuccessNotification('Настройки интерфейса сохранены'),
+        onError: (error) => {
+          console.error('Error saving settings:', error);
+          alert('Ошибка сохранения настроек');
+        },
+      });
     }
   };
 

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { notificationSettingsApi } from '../../api/notification-settings';
 import type { NotificationSetting } from '../../api/notification-settings';
-import { ClockIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { ClockIcon, CheckCircleIcon, XCircleIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import { RoleSelector } from './RoleSelector';
 
 interface NotificationSettingsContentProps {
@@ -110,10 +110,20 @@ export const NotificationSettingsContent: React.FC<NotificationSettingsContentPr
     }
   };
 
+  // Если не выбран дилерский центр, показываем сообщение
   if (!dealershipId) {
     return (
-      <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-        <p className="text-sm text-yellow-800">Выберите автосалон для настройки уведомлений</p>
+      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <div className="flex">
+          <InformationCircleIcon className="w-5 h-5 text-blue-600 mr-2 flex-shrink-0" />
+          <div>
+            <h4 className="text-sm font-medium text-blue-800 mb-1">Выберите дилерский центр</h4>
+            <p className="text-sm text-blue-700">
+              Для настройки уведомлений необходимо выбрать дилерский центр в выпадающем списке вверху страницы.
+              Настройки уведомлений применяются отдельно для каждого автосалона.
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -127,6 +137,24 @@ export const NotificationSettingsContent: React.FC<NotificationSettingsContentPr
   }
 
   const settings = settingsData?.data || [];
+
+  // Если настройки пусты, показываем информацию
+  if (settings.length === 0) {
+    return (
+      <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <div className="flex">
+          <InformationCircleIcon className="w-5 h-5 text-yellow-600 mr-2 flex-shrink-0" />
+          <div>
+            <h4 className="text-sm font-medium text-yellow-800 mb-1">Настройки уведомлений не найдены</h4>
+            <p className="text-sm text-yellow-700">
+              Для выбранного дилерского центра не настроены уведомления.
+              Попробуйте выбрать другой автосалон или обратитесь к администратору.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Group settings by category
   const taskNotifications = settings.filter(s =>
