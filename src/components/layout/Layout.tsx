@@ -27,7 +27,9 @@ export const Layout: React.FC = () => {
           <div className="flex justify-between h-16 min-w-0">
             <div className="flex items-center min-w-0 flex-1">
               <div className="flex-shrink-0 flex items-center">
-                <h1 className="text-lg md:text-xl font-bold text-indigo-600">TaskMate</h1>
+                <Link to="/">
+                  <h1 className="text-lg md:text-xl font-bold text-indigo-600">TaskMate</h1>
+                </Link>
               </div>
               {/* Desktop Navigation */}
               <div className="hidden md:ml-2 md:flex md:items-center md:min-w-0 md:flex-1 md:space-x-1 lg:ml-6 lg:space-x-4 xl:space-x-6">

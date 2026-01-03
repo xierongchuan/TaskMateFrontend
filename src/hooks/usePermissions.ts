@@ -22,8 +22,9 @@ export const usePermissions = () => {
     return user?.role === 'owner';
   };
 
-  // Shift work restricted to Employees and Owners
-  const canWorkShifts = user?.role === 'employee' || user?.role === 'owner';
+  // Shift work via admin panel restricted to Owner only
+  // Employees must use Telegram bot to open/close shifts
+  const canWorkShifts = user?.role === 'owner';
 
   const isOwner = user?.role === 'owner';
   const isManager = user?.role === 'manager';
