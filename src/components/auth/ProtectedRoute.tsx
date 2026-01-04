@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { debugAuth } from '../../utils/debug';
+import { getRoleLabel, translateRoles } from '../../utils/roleTranslations';
 import type { Role } from '../../types/user';
 
 interface ProtectedRouteProps {
@@ -55,9 +56,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
               У вас недостаточно прав для просмотра этой страницы.
             </p>
             <p className="mt-1 text-sm text-gray-500">
-              Требуемые роли: {requiredRoles.join(', ')}
+              Требуемые роли: {translateRoles(requiredRoles)}
             </p>
-            <p className="mt-1 text-sm text-gray-500">Ваша роль: {user.role}</p>
+            <p className="mt-1 text-sm text-gray-500">Ваша роль: {getRoleLabel(user.role)}</p>
           </div>
         </div>
       </div>

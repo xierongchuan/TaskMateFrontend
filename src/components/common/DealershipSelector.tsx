@@ -35,6 +35,7 @@ export const DealershipSelector: React.FC<DealershipSelectorProps> = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newValue = e.target.value;
+    console.log('[DealershipSelector] Selected value:', newValue, 'parsed:', newValue === "" ? null : parseInt(newValue));
     if (newValue === "") {
       onChange(null);
     } else {
@@ -62,8 +63,9 @@ export const DealershipSelector: React.FC<DealershipSelectorProps> = ({
         <option value="">Загрузка...</option>
       ) : (
         <>
-          {!required && !showAllOption && (
-            <option value="">
+          {/* Always show placeholder when no value is selected, even for required fields */}
+          {!showAllOption && (
+            <option value="" disabled={required}>
               {placeholder}
             </option>
           )}

@@ -4,6 +4,7 @@ import { tasksApi } from '../../api/tasks';
 import { usersApi } from '../../api/users';
 import { DealershipSelector } from '../common/DealershipSelector';
 import { TaskNotificationSettings } from './TaskNotificationSettings';
+import { getRoleLabel } from '../../utils/roleTranslations';
 import type { Task, CreateTaskRequest, TaskRecurrence, TaskType, ResponseType } from '../../types/task';
 
 interface TaskModalProps {
@@ -25,14 +26,26 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
     assignments: [],
   });
 
-  const { data: usersData, isLoading: isLoadingUsers } = useQuery({
-    queryKey: ['users', formData.dealership_id],
-    queryFn: () => usersApi.getUsers({
-      per_page: 100,
-      dealership_id: formData.dealership_id
-    }),
+  const { data: usersData, isLoading: isLoadingUsers, error: usersError } = useQuery({
+    queryKey: ['task-modal-users', formData.dealership_id],
+    queryFn: () => {
+      console.log('[TaskModal] Fetching users for dealership_id:', formData.dealership_id);
+      return usersApi.getUsers({
+        per_page: 100,
+        dealership_id: formData.dealership_id
+      });
+    },
     enabled: !!formData.dealership_id,
+    staleTime: 0,
   });
+
+  // Debug: Log when dealership changes
+  useEffect(() => {
+    console.log('[TaskModal] dealership_id changed:', formData.dealership_id, 'type:', typeof formData.dealership_id);
+    console.log('[TaskModal] usersData:', usersData);
+    console.log('[TaskModal] isLoadingUsers:', isLoadingUsers);
+    console.log('[TaskModal] usersError:', usersError);
+  }, [formData.dealership_id, usersData, isLoadingUsers, usersError]);
 
   useEffect(() => {
     if (task) {
@@ -207,6 +220,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
                   <DealershipSelector
                     value={formData.dealership_id}
                     onChange={(dealershipId) => {
+                      console.log('[TaskModal] DealershipSelector onChange:', dealershipId, 'converted to:', dealershipId || undefined);
                       setFormData({
                         ...formData,
                         dealership_id: dealershipId || undefined,
@@ -384,7 +398,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
                             className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                           />
                           <label htmlFor={`user-${user.id}`} className="ml-2 text-sm text-gray-700">
-                            {user.full_name} ({user.role})
+                            {user.full_name} ({getRoleLabel(user.role)})
                           </label>
                         </div>
                       ))

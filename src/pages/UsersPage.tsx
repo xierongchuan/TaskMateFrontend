@@ -8,6 +8,7 @@ import { formatPhoneNumber } from '../utils/phoneFormatter';
 import type { User } from '../types/user';
 import type { Dealership } from '../types/dealership';
 import { XCircleIcon } from '@heroicons/react/24/outline';
+import { roleLabels, roleDescriptions } from '../utils/roleTranslations';
 import {
   PlusIcon,
   MagnifyingGlassIcon,
@@ -102,19 +103,9 @@ export const UsersPage: React.FC = () => {
       owner: <ShieldCheckIcon className="w-3 h-3" />,
     };
 
-    const labels = {
-      employee: 'Сотрудник',
-      observer: 'Наблюдатель',
-      manager: 'Управляющий',
-      owner: 'Владелец',
-    };
+    const labels = roleLabels;
 
-    const descriptions = {
-      employee: 'Только доступ к боту',
-      observer: 'Только просмотр',
-      manager: 'Управление салонами',
-      owner: 'Полный доступ',
-    };
+    const descriptions = roleDescriptions;
 
     return (
       <div className="flex items-center space-x-2">
