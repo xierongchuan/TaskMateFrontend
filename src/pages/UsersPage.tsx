@@ -30,7 +30,12 @@ export const UsersPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'cards'>('list');
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<{
+    search: string;
+    role: string;
+    dealership_id: number | undefined;
+    has_telegram: string;
+  }>({
     search: '',
     role: '',
     dealership_id: undefined,
@@ -219,7 +224,7 @@ export const UsersPage: React.FC = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">Автосалон</label>
               <select
                 value={filters.dealership_id || ''}
-                onChange={(e) => setFilters({ ...filters, dealership_id: e.target.value ? Number(e.target.value) : undefined as any })}
+                onChange={(e) => setFilters({ ...filters, dealership_id: e.target.value ? Number(e.target.value) : undefined })}
                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
               >
                 <option value="">Все салоны</option>
