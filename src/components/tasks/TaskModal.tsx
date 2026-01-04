@@ -26,6 +26,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
     assignments: [],
   });
 
+  const [tagsInput, setTagsInput] = useState('');
+
   const { data: usersData, isLoading: isLoadingUsers, error: usersError } = useQuery({
     queryKey: ['task-modal-users', formData.dealership_id],
     queryFn: () => {
@@ -66,6 +68,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
         assignments: task.assignments?.map(a => a.user.id) || [],
         notification_settings: task.notification_settings,
       });
+      setTagsInput(task.tags && Array.isArray(task.tags) ? task.tags.join(', ') : '');
     } else {
       setFormData({
         title: '',
@@ -78,6 +81,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
         assignments: [],
         notification_settings: undefined,
       });
+      setTagsInput('');
     }
   }, [task]);
 
@@ -104,6 +108,13 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
 
     // Format recurrence_time to HH:MM (remove seconds if present)
     const dataToSubmit = { ...formData };
+
+    // Parse tags
+    if (tagsInput) {
+      dataToSubmit.tags = tagsInput.split(',').map(t => t.trim()).filter(Boolean);
+    } else {
+      dataToSubmit.tags = [];
+    }
 
     // Clean up recurrence-related fields when recurrence is 'none'
     if (dataToSubmit.recurrence === 'none') {
@@ -185,6 +196,17 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
                     rows={2}
                     value={formData.comment}
                     onChange={(e) => setFormData({ ...formData, comment: e.target.value })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Теги (через запятую)</label>
+                  <input
+                    type="text"
+                    value={tagsInput}
+                    onChange={(e) => setTagsInput(e.target.value)}
+                    placeholder="срочно, важно, backend"
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
                   />
                 </div>
