@@ -99,6 +99,9 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
                     required
                     value={formData.login}
                     onChange={(e) => setFormData({ ...formData, login: e.target.value })}
+                    title="Только латинские буквы, цифры и одна точка"
+                    maxLength={64}
+                    pattern="^[a-zA-Z0-9]*\.?[a-zA-Z0-9]*$"
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px]"
                   />
                 </div>

@@ -42,6 +42,7 @@ export const LoginForm: React.FC = () => {
                 placeholder="Логин"
                 value={login}
                 onChange={(e) => setLogin(e.target.value)}
+                maxLength={64}
                 disabled={isLoading}
               />
             </div>
