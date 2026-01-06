@@ -7,6 +7,46 @@ import { TaskNotificationSettings } from './TaskNotificationSettings';
 import { getRoleLabel } from '../../utils/roleTranslations';
 import type { Task, CreateTaskRequest, TaskRecurrence, TaskType, ResponseType } from '../../types/task';
 
+/**
+ * Convert ISO 8601 date string (with timezone) to datetime-local format (YYYY-MM-DDTHH:mm)
+ * datetime-local input requires format without seconds and timezone
+ */
+const toDateTimeLocalFormat = (isoString: string | null | undefined): string | undefined => {
+  if (!isoString) return undefined;
+  try {
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return undefined;
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  } catch {
+    return undefined;
+  }
+};
+
+/**
+ * Extract time (HH:mm) from ISO 8601 date string
+ */
+const toTimeFormat = (isoString: string | null | undefined): string => {
+  if (!isoString) return '';
+  try {
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return '';
+
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    return `${hours}:${minutes}`;
+  } catch {
+    return '';
+  }
+};
+
 interface TaskModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -61,8 +101,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
         recurrence_time: task.recurrence_time || undefined,
         recurrence_day_of_week: task.recurrence_day_of_week || undefined,
         recurrence_day_of_month: task.recurrence_day_of_month || undefined,
-        appear_date: task.appear_date || undefined,
-        deadline: task.deadline || undefined,
+        appear_date: toDateTimeLocalFormat(task.appear_date),
+        deadline: toDateTimeLocalFormat(task.deadline),
         dealership_id: task.dealership_id,
         tags: task.tags,
         assignments: task.assignments?.map(a => a.user.id) || [],
@@ -355,7 +395,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
                     {formData.recurrence !== 'none' ? (
                       <input
                         type="time"
-                        value={formData.deadline ? new Date(formData.deadline).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : ''}
+                        value={toTimeFormat(formData.deadline)}
                         onChange={(e) => {
                           const time = e.target.value;
                           if (time) {
