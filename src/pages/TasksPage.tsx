@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { tasksApi } from '../api/tasks';
 import { usePermissions } from '../hooks/usePermissions';
@@ -22,7 +22,9 @@ import {
   TrashIcon,
   DocumentDuplicateIcon,
   ArrowPathIcon,
-  BuildingOfficeIcon
+  BuildingOfficeIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon
 } from '@heroicons/react/24/outline';
 
 export const TasksPage: React.FC = () => {
@@ -32,6 +34,7 @@ export const TasksPage: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [page, setPage] = useState(1);
   const [filters, setFilters] = useState({
     search: '',
     status: '',
@@ -43,8 +46,13 @@ export const TasksPage: React.FC = () => {
     tags: [] as string[],
   });
 
+  // Reset page to 1 when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [filters]);
+
   const { data: tasksData, isLoading, error } = useQuery({
-    queryKey: ['tasks', filters],
+    queryKey: ['tasks', filters, page],
     queryFn: () => {
       // Clean filters: remove empty strings, null values, and empty arrays
       const cleanedFilters: {
@@ -56,7 +64,8 @@ export const TasksPage: React.FC = () => {
         date_range?: string;
         dealership_id?: number;
         tags?: string[];
-      } = {};
+        page?: number;
+      } = { page };
 
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== null && value !== undefined && value !== '') {
@@ -151,7 +160,6 @@ export const TasksPage: React.FC = () => {
       acknowledged: 'bg-blue-100 text-blue-800 border-blue-200',
       completed: 'bg-green-100 text-green-800 border-green-200',
       overdue: 'bg-red-100 text-red-800 border-red-200',
-
     };
 
     const icons = {
@@ -159,7 +167,6 @@ export const TasksPage: React.FC = () => {
       acknowledged: <CheckCircleIcon className="w-3 h-3" />,
       completed: <CheckCircleIcon className="w-3 h-3" />,
       overdue: <XCircleIcon className="w-3 h-3" />,
-
     };
 
     const labels = {
@@ -167,7 +174,6 @@ export const TasksPage: React.FC = () => {
       acknowledged: 'Принято',
       completed: 'Выполнено',
       overdue: 'Просрочено',
-
     };
 
     return (
@@ -315,7 +321,6 @@ export const TasksPage: React.FC = () => {
                   <option value="acknowledged">Принято</option>
                   <option value="completed">Выполнено</option>
                   <option value="overdue">Просрочено</option>
-
                 </select>
               </div>
 
@@ -525,7 +530,6 @@ export const TasksPage: React.FC = () => {
                             <option value="pending">Ожидает</option>
                             <option value="acknowledged">Принято</option>
                             <option value="completed">Выполнено</option>
-
                           </select>
                         </div>
                       )}
@@ -604,6 +608,88 @@ export const TasksPage: React.FC = () => {
                   )}
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Pagination */}
+          {tasksData && tasksData.last_page > 1 && (
+            <div className="mt-8 flex items-center justify-between border-t border-gray-200 pt-6">
+              <div className="flex flex-1 justify-between sm:hidden">
+                <button
+                  onClick={() => setPage(Math.max(1, page - 1))}
+                  disabled={page === 1}
+                  className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Назад
+                </button>
+                <button
+                  onClick={() => setPage(Math.min(tasksData.last_page, page + 1))}
+                  disabled={page === tasksData.last_page}
+                  className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Вперед
+                </button>
+              </div>
+              <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm text-gray-700">
+                    Показано с <span className="font-medium">{(page - 1) * tasksData.per_page + 1}</span> по <span className="font-medium">{Math.min(page * tasksData.per_page, tasksData.total)}</span> из <span className="font-medium">{tasksData.total}</span> результатов
+                  </p>
+                </div>
+                <div>
+                  <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                    <button
+                      onClick={() => setPage(Math.max(1, page - 1))}
+                      disabled={page === 1}
+                      className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
+                    >
+                      <span className="sr-only">Назад</span>
+                      <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
+                    </button>
+                    {/* Page Numbers */}
+                    {[...Array(tasksData.last_page)].map((_, idx) => {
+                      const pageNum = idx + 1;
+                      // Show first, last, current, and surrounding pages
+                      if (
+                        pageNum === 1 ||
+                        pageNum === tasksData.last_page ||
+                        (pageNum >= page - 1 && pageNum <= page + 1)
+                      ) {
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => setPage(pageNum)}
+                            className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${page === pageNum
+                                ? 'z-10 bg-blue-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600'
+                                : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0'
+                              }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      } else if (
+                        pageNum === page - 2 ||
+                        pageNum === page + 2
+                      ) {
+                        return (
+                          <span key={pageNum} className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 focus:outline-offset-0">
+                            ...
+                          </span>
+                        );
+                      }
+                      return null;
+                    })}
+                    <button
+                      onClick={() => setPage(Math.min(tasksData.last_page, page + 1))}
+                      disabled={page === tasksData.last_page}
+                      className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
+                    >
+                      <span className="sr-only">Вперед</span>
+                      <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
+                    </button>
+                  </nav>
+                </div>
+              </div>
             </div>
           )}
         </>

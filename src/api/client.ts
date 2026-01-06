@@ -43,20 +43,27 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error: AxiosError) => {
-    // Only clear auth state on 401 errors for specific endpoints
-    // Don't clear on network errors or other server errors
+    // Only clear auth state on 401 errors for session validation endpoints
+    // Don't clear on network errors, login failures, or other server errors
     if (error.response?.status === 401) {
-      // Check if this is a session endpoint or other protected resource
       const requestUrl = error.config?.url;
-      if (requestUrl?.includes('/session') ||
-        requestUrl?.includes('/protected') ||
-        !requestUrl) {
-        // Clear auth state only for session-related requests
-        debugAuth.log('401 error on session request, clearing auth state');
+      const requestMethod = error.config?.method?.toUpperCase();
+
+      // Only redirect on session validation failure (GET /session/current)
+      // or logout failure (DELETE /session)
+      // Do NOT redirect on login attempt failure (POST /session)
+      const isSessionValidation = requestUrl?.includes('/session/current') && requestMethod === 'GET';
+      const isLogoutAttempt = requestUrl?.includes('/session') && requestMethod === 'DELETE';
+
+      if (isSessionValidation || isLogoutAttempt) {
+        debugAuth.log('401 error on session validation/logout, clearing auth state');
         clearAuth?.();
-        window.location.href = '/login';
+        // Only redirect if not already on login page
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
       } else {
-        debugAuth.log('401 error on non-session request, not clearing auth');
+        debugAuth.log('401 error on other request (login or protected resource), not redirecting');
       }
     }
 
