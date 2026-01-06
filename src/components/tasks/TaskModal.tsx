@@ -98,7 +98,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
         comment: task.comment || '',
         task_type: task.task_type,
         response_type: task.response_type,
-        recurrence: task.recurrence,
+        recurrence: task.recurrence || 'none',
         recurrence_time: task.recurrence_time || undefined,
         recurrence_day_of_week: task.recurrence_day_of_week || undefined,
         recurrence_day_of_month: task.recurrence_day_of_month || undefined,

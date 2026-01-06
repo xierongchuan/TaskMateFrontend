@@ -217,7 +217,7 @@ export const TasksPage: React.FC = () => {
       weekly: 'Еженедельно',
       monthly: 'Ежемесячно',
     };
-    if (recurrence === 'none') return null;
+    if (!recurrence || recurrence === 'none') return null;
     return (
       <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200">
         <ArrowPathIcon className="w-3 h-3 mr-1" />
