@@ -145,15 +145,16 @@ export const TasksPage: React.FC = () => {
     });
   };
 
-  const getTaskPriority = (task: Task) => {
+  const getDeadlineStatus = (task: Task) => {
     if (!task.deadline) return 'normal';
+
     const now = new Date();
     const deadline = new Date(task.deadline);
     const hoursUntilDeadline = (deadline.getTime() - now.getTime()) / (1000 * 60 * 60);
 
     if (hoursUntilDeadline < 0) return 'overdue';
     if (hoursUntilDeadline < 2) return 'urgent';
-    if (hoursUntilDeadline < 24) return 'high';
+    if (hoursUntilDeadline < 24) return 'soon';
     return 'normal';
   };
 
@@ -187,25 +188,50 @@ export const TasksPage: React.FC = () => {
     );
   };
 
-  const getPriorityBadge = (priority: string) => {
+  const getPriorityBadge = (priority?: string) => {
+    const badges = {
+      high: 'bg-red-100 text-red-800 border-red-200',
+      medium: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      low: 'bg-green-100 text-green-800 border-green-200',
+    };
+
+    const labels = {
+      high: 'Высокий',
+      medium: 'Средний',
+      low: 'Низкий',
+    };
+
+    const p = (priority || 'medium') as keyof typeof badges;
+
+    return (
+      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${badges[p]}`}>
+        <ExclamationTriangleIcon className="w-3 h-3 mr-1" />
+        {labels[p]}
+      </span>
+    );
+  };
+
+  const getDeadlineBadge = (status: string) => {
+    if (status === 'normal') return null;
+
     const badges = {
       overdue: 'bg-red-100 text-red-800 border-red-200',
       urgent: 'bg-orange-100 text-orange-800 border-orange-200',
-      high: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      normal: 'bg-gray-100 text-gray-800 border-gray-200',
+      soon: 'bg-yellow-100 text-yellow-800 border-yellow-200',
     };
 
     const labels = {
       overdue: 'Просрочено',
       urgent: 'Срочно',
-      high: 'Важно',
-      normal: 'Обычно',
+      soon: 'Скоро',
     };
 
+    const s = status as keyof typeof badges;
+
     return (
-      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${badges[priority as keyof typeof badges]}`}>
-        <ExclamationTriangleIcon className="w-3 h-3 mr-1" />
-        {labels[priority as keyof typeof labels]}
+      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${badges[s]}`}>
+        <ClockIcon className="w-3 h-3 mr-1" />
+        {labels[s]}
       </span>
     );
   };
@@ -227,13 +253,13 @@ export const TasksPage: React.FC = () => {
   };
 
   const getTaskCardClass = (task: Task) => {
-    const priority = getTaskPriority(task);
+    const deadlineStatus = getDeadlineStatus(task);
     const baseClasses = 'bg-white rounded-lg shadow-sm border hover:shadow-md transition-all duration-200';
 
-    switch (priority) {
+    switch (deadlineStatus) {
       case 'overdue': return `${baseClasses} border-red-200 bg-red-50`;
       case 'urgent': return `${baseClasses} border-orange-200 bg-orange-50`;
-      case 'high': return `${baseClasses} border-yellow-200 bg-yellow-50`;
+      case 'soon': return `${baseClasses} border-yellow-200 bg-yellow-50`;
       default: return `${baseClasses} border-gray-200`;
     }
   };
@@ -461,7 +487,8 @@ export const TasksPage: React.FC = () => {
                           <h3 className="text-lg font-semibold text-gray-900 truncate">
                             {task.title}
                           </h3>
-                          {getPriorityBadge(getTaskPriority(task))}
+                          {getPriorityBadge(task.priority)}
+                          {getDeadlineBadge(getDeadlineStatus(task))}
                           {getStatusBadge(task.status)}
                           {getRecurrenceBadge(task.recurrence)}
                         </div>
@@ -566,7 +593,10 @@ export const TasksPage: React.FC = () => {
                     <h3 className="text-lg font-semibold text-gray-900 truncate pr-2">
                       {task.title}
                     </h3>
-                    {getPriorityBadge(getTaskPriority(task))}
+                    <div className="flex gap-1">
+                      {getPriorityBadge(task.priority)}
+                      {getDeadlineBadge(getDeadlineStatus(task))}
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-2 mb-3">
