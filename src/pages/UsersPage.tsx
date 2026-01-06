@@ -12,6 +12,7 @@ import { roleLabels, roleDescriptions } from '../utils/roleTranslations';
 import {
   PlusIcon,
   MagnifyingGlassIcon,
+  FunnelIcon,
   UserIcon,
   BuildingOfficeIcon,
   PhoneIcon,
@@ -30,6 +31,7 @@ export const UsersPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'cards'>('list');
+  const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<{
     search: string;
     role: string;
@@ -189,77 +191,88 @@ export const UsersPage: React.FC = () => {
 
       {/* Advanced Filters */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
-        <div className="p-4 sm:p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <MagnifyingGlassIcon className="w-4 h-4 inline mr-1" />
-                Поиск
-              </label>
-              <input
-                type="text"
-                placeholder="Имя, логин..."
-                value={filters.search}
-                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
-              />
-            </div>
+        <div className="p-4 border-b border-gray-200">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-900"
+          >
+            <FunnelIcon className="w-4 h-4 mr-2" />
+            Фильтры {showFilters ? 'Скрыть' : 'Показать'}
+          </button>
+        </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Роль</label>
-              <select
-                value={filters.role}
-                onChange={(e) => setFilters({ ...filters, role: e.target.value })}
-                className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
-              >
-                <option value="">Все роли</option>
-                <option value="employee">Сотрудник</option>
-                <option value="observer">Наблюдатель</option>
-                <option value="manager">Управляющий</option>
-                <option value="owner">Владелец</option>
-              </select>
-            </div>
+        {showFilters && (
+          <div className="p-4 sm:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <MagnifyingGlassIcon className="w-4 h-4 inline mr-1" />
+                  Поиск
+                </label>
+                <input
+                  type="text"
+                  placeholder="Имя, логин..."
+                  value={filters.search}
+                  onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Автосалон</label>
-              <select
-                value={filters.dealership_id || ''}
-                onChange={(e) => setFilters({ ...filters, dealership_id: e.target.value ? Number(e.target.value) : undefined })}
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
-              >
-                <option value="">Все салоны</option>
-                {dealershipsData?.data.map((dealership: Dealership) => (
-                  <option key={dealership.id} value={dealership.id}>
-                    {dealership.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Роль</label>
+                <select
+                  value={filters.role}
+                  onChange={(e) => setFilters({ ...filters, role: e.target.value })}
+                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                >
+                  <option value="">Все роли</option>
+                  <option value="employee">Сотрудник</option>
+                  <option value="observer">Наблюдатель</option>
+                  <option value="manager">Управляющий</option>
+                  <option value="owner">Владелец</option>
+                </select>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Telegram</label>
-              <select
-                value={filters.has_telegram}
-                onChange={(e) => setFilters({ ...filters, has_telegram: e.target.value })}
-                className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
-              >
-                <option value="">Все</option>
-                <option value="connected">Подключен</option>
-                <option value="not_connected">Не подключен</option>
-              </select>
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Автосалон</label>
+                <select
+                  value={filters.dealership_id || ''}
+                  onChange={(e) => setFilters({ ...filters, dealership_id: e.target.value ? Number(e.target.value) : undefined })}
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                >
+                  <option value="">Все салоны</option>
+                  {dealershipsData?.data.map((dealership: Dealership) => (
+                    <option key={dealership.id} value={dealership.id}>
+                      {dealership.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div className="flex items-end">
-              <button
-                onClick={clearFilters}
-                className="w-full px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                Сбросить
-              </button>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Telegram</label>
+                <select
+                  value={filters.has_telegram}
+                  onChange={(e) => setFilters({ ...filters, has_telegram: e.target.value })}
+                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                >
+                  <option value="">Все</option>
+                  <option value="connected">Подключен</option>
+                  <option value="not_connected">Не подключен</option>
+                </select>
+              </div>
+
+              <div className="flex items-end">
+                <button
+                  onClick={clearFilters}
+                  className="w-full px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  Сбросить
+                </button>
+              </div>
             </div>
           </div>
-
-        </div>
+        )}
       </div>
 
       {isLoading ? (
