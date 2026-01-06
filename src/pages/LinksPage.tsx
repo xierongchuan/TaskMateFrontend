@@ -163,21 +163,19 @@ export const LinksPage: React.FC = () => {
             <div className="flex items-center bg-white rounded-lg border border-gray-200">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`px-3 py-2 text-sm font-medium rounded-l-lg ${
-                  viewMode === 'grid'
+                className={`px-3 py-2 text-sm font-medium rounded-l-lg ${viewMode === 'grid'
                     ? 'bg-blue-100 text-blue-700'
                     : 'text-gray-500 hover:text-gray-700'
-                }`}
+                  }`}
               >
                 <Squares2X2Icon className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`px-3 py-2 text-sm font-medium rounded-r-lg ${
-                  viewMode === 'list'
+                className={`px-3 py-2 text-sm font-medium rounded-r-lg ${viewMode === 'list'
                     ? 'bg-blue-100 text-blue-700'
                     : 'text-gray-500 hover:text-gray-700'
-                }`}
+                  }`}
               >
                 <ListBulletIcon className="w-4 h-4" />
               </button>
@@ -313,10 +311,10 @@ export const LinksPage: React.FC = () => {
 
           {/* List View */}
           {viewMode === 'list' && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="divide-y divide-gray-200">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+              <div className="space-y-4">
                 {filteredLinks.map((link) => (
-                  <div key={link.id} className="p-6 hover:bg-gray-50 transition-colors">
+                  <div key={link.id} className="p-5 rounded-lg border border-gray-200 hover:shadow-sm hover:border-blue-200 transition-all">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center flex-1 min-w-0 pr-4">
                         <div className={`${getCategoryColor((link as any).category || 'general')} rounded-lg p-3 mr-4 text-white flex-shrink-0`}>

@@ -291,10 +291,10 @@ export const UsersPage: React.FC = () => {
         <>
           {/* List View */}
           {viewMode === 'list' && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="divide-y divide-gray-200">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+              <div className="space-y-4">
                 {usersData?.data.map((user) => (
-                  <div key={user.id} className={`p-4 sm:p-6 hover:bg-gray-50 transition-colors ${getUserCardClass(user)}`}>
+                  <div key={user.id} className={`p-4 sm:p-5 rounded-lg border hover:shadow-sm transition-all ${getUserCardClass(user)}`}>
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-3 mb-3">

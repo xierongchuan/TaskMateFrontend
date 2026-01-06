@@ -429,10 +429,10 @@ export const TasksPage: React.FC = () => {
         <>
           {/* List View */}
           {viewMode === 'list' && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="divide-y divide-gray-200">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+              <div className="space-y-4">
                 {tasksData?.data.map((task) => (
-                  <div key={task.id} className={`p-6 hover:bg-gray-50 transition-colors ${getTaskCardClass(task)}`}>
+                  <div key={task.id} className={`p-5 rounded-lg border hover:shadow-sm transition-all ${getTaskCardClass(task)}`}>
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0 pr-4">
                         <div className="flex items-center gap-3 mb-2">

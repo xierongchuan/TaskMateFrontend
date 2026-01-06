@@ -254,9 +254,9 @@ export const ShiftsPage: React.FC = () => {
         <div className="bg-white shadow overflow-hidden sm:rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <h2 className="text-lg font-medium text-gray-900 mb-4">История смен</h2>
-            <ul className="divide-y divide-gray-200">
+            <div className="space-y-4">
               {shiftsData?.data.map((shift) => (
-                <li key={shift.id} className="py-4">
+                <div key={shift.id} className="p-4 rounded-lg border border-gray-200 hover:shadow-sm transition-all">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
@@ -294,9 +294,9 @@ export const ShiftsPage: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         </div>
       )}
