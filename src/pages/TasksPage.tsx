@@ -28,9 +28,12 @@ import {
   ChevronRightIcon
 } from '@heroicons/react/24/outline';
 
+import { useSearchParams } from 'react-router-dom';
+
 export const TasksPage: React.FC = () => {
   const permissions = usePermissions();
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -38,15 +41,15 @@ export const TasksPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState({
-    search: '',
-    status: '',
-    recurrence: '',
-    task_type: '',
-    response_type: '',
-    date_range: 'all',
-    dealership_id: null as number | null,
-    tags: [] as string[],
-    priority: '',
+    search: searchParams.get('search') || '',
+    status: searchParams.get('status') || '',
+    recurrence: searchParams.get('recurrence') || '',
+    task_type: searchParams.get('task_type') || '',
+    response_type: searchParams.get('response_type') || '',
+    date_range: searchParams.get('date_range') || 'all',
+    dealership_id: searchParams.get('dealership_id') ? Number(searchParams.get('dealership_id')) : null,
+    tags: searchParams.getAll('tags') || [],
+    priority: searchParams.get('priority') || '',
   });
 
   // Reset page to 1 when filters change

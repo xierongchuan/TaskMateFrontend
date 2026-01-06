@@ -102,6 +102,7 @@ export const DashboardPage: React.FC = () => {
       color: 'bg-green-500',
       textColor: 'text-green-600',
       description: 'Сейчас на смене',
+      link: '/shifts?status=open'
     },
     {
       name: 'Просроченные задачи',
@@ -110,6 +111,7 @@ export const DashboardPage: React.FC = () => {
       color: 'bg-red-500',
       textColor: 'text-red-600',
       description: 'Требуют внимания',
+      link: '/tasks?status=overdue'
     },
     {
       name: 'Выполнено сегодня',
@@ -118,6 +120,7 @@ export const DashboardPage: React.FC = () => {
       color: 'bg-blue-500',
       textColor: 'text-blue-600',
       description: 'Успешно завершено',
+      link: '/tasks?status=completed&date_range=today'
     },
     {
       name: 'Опоздания',
@@ -126,6 +129,7 @@ export const DashboardPage: React.FC = () => {
       color: 'bg-orange-500',
       textColor: 'text-orange-600',
       description: 'За сегодня',
+      link: '/shifts?is_late=true'
     },
   ];
 
@@ -159,7 +163,8 @@ export const DashboardPage: React.FC = () => {
         {stats.map((stat) => (
           <div
             key={stat.name}
-            className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200"
+            onClick={() => navigate(stat.link)}
+            className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 cursor-pointer"
           >
             <div className="p-4 sm:p-6">
               <div className="flex items-start justify-between gap-4">
@@ -244,13 +249,7 @@ export const DashboardPage: React.FC = () => {
             </h2>
           </div>
           <div className="p-4 sm:p-6 space-y-3">
-            <button
-              onClick={() => navigate('/shifts')}
-              className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center min-h-[44px]"
-            >
-              <ClockIcon className="w-4 h-4 mr-2" />
-              Создать смену
-            </button>
+
             <button
               onClick={() => navigate('/tasks')}
               className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center min-h-[44px]"

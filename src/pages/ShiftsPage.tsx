@@ -12,10 +12,13 @@ import {
 } from '@heroicons/react/24/outline';
 
 
+import { useSearchParams } from 'react-router-dom';
+
 export const ShiftsPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
   const [filters, setFilters] = useState<ShiftsFilters>({
-    status: '',
-    is_late: undefined,
+    status: searchParams.get('status') || '',
+    is_late: searchParams.get('is_late') === 'true' ? true : searchParams.get('is_late') === 'false' ? false : undefined,
   });
 
   const { data: shiftsData, isLoading, error } = useShifts(filters);
