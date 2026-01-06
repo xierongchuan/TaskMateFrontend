@@ -1,3 +1,5 @@
+import type { Task } from './task';
+
 export interface DashboardData {
   total_users: number;
   active_users: number;
@@ -5,6 +7,7 @@ export interface DashboardData {
   active_tasks: number;
   completed_tasks: number;
   overdue_tasks: number;
+  overdue_tasks_list?: Task[];
   open_shifts: number;
   late_shifts_today: number;
   active_shifts?: Array<{

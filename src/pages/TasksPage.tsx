@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { tasksApi } from '../api/tasks';
 import { usePermissions } from '../hooks/usePermissions';
 import { TaskModal } from '../components/tasks/TaskModal';
+import { TaskDetailsModal } from '../components/tasks/TaskDetailsModal';
 import { DealershipSelector } from '../components/common/DealershipSelector';
 import type { Task } from '../types/task';
 import { format } from 'date-fns';
@@ -31,6 +32,7 @@ export const TasksPage: React.FC = () => {
   const permissions = usePermissions();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
@@ -110,6 +112,11 @@ export const TasksPage: React.FC = () => {
   const handleEdit = (task: Task) => {
     setSelectedTask(task);
     setIsModalOpen(true);
+  };
+
+  const handleView = (task: Task) => {
+    setSelectedTask(task);
+    setIsDetailsModalOpen(true);
   };
 
   const handleDelete = (task: Task) => {
@@ -484,7 +491,10 @@ export const TasksPage: React.FC = () => {
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0 pr-4">
                         <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-lg font-semibold text-gray-900 truncate">
+                          <h3
+                            className="text-lg font-semibold text-gray-900 truncate cursor-pointer hover:text-blue-600 transition-colors"
+                            onClick={() => handleView(task)}
+                          >
                             {task.title}
                           </h3>
                           {getPriorityBadge(task.priority)}
@@ -590,7 +600,10 @@ export const TasksPage: React.FC = () => {
               {tasksData?.data.map((task) => (
                 <div key={task.id} className={`p-6 ${getTaskCardClass(task)}`}>
                   <div className="flex items-start justify-between mb-3">
-                    <h3 className="text-lg font-semibold text-gray-900 truncate pr-2">
+                    <h3
+                      className="text-lg font-semibold text-gray-900 truncate pr-2 cursor-pointer hover:text-blue-600 transition-colors"
+                      onClick={() => handleView(task)}
+                    >
                       {task.title}
                     </h3>
                     <div className="flex gap-1">
@@ -741,6 +754,16 @@ export const TasksPage: React.FC = () => {
           )}
         </>
       )}
+
+      <TaskDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        task={selectedTask}
+        onEdit={(task) => {
+          setIsDetailsModalOpen(false);
+          handleEdit(task);
+        }}
+      />
 
       <TaskModal
         isOpen={isModalOpen}

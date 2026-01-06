@@ -16,10 +16,19 @@ import {
   ChartBarIcon
 } from '@heroicons/react/24/outline';
 
+import type { Task } from '../types/task';
+import { TaskModal } from '../components/tasks/TaskModal';
+import { TaskDetailsModal } from '../components/tasks/TaskDetailsModal';
+
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [selectedDealership] = useState<number | undefined>(user?.dealership_id || undefined);
+
+  // Modals state
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const { data: dashboardData, isLoading, error } = useQuery({
     queryKey: ['dashboard', selectedDealership],
@@ -53,6 +62,11 @@ export const DashboardPage: React.FC = () => {
     if (isLate) return 'bg-red-100 text-red-800 border-red-200';
     if (status === 'open') return 'bg-green-100 text-green-800 border-green-200';
     return 'bg-gray-100 text-gray-800 border-gray-200';
+  };
+
+  const handleOpenTask = (task: Task) => {
+    setSelectedTask(task);
+    setIsDetailsOpen(true);
   };
 
   if (isLoading) {
@@ -319,21 +333,48 @@ export const DashboardPage: React.FC = () => {
           <div className="p-4 sm:p-6">
             {((dashboardData?.overdue_tasks || 0) > 0 || (dashboardData?.late_shifts_today || 0) > 0) ? (
               <div className="space-y-3">
-                {(dashboardData?.overdue_tasks || 0) > 0 && (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                    <div className="flex items-center">
-                      <XCircleIcon className="w-5 h-5 text-red-500 mr-2" />
-                      <div>
-                        <p className="font-medium text-red-900 text-sm">
-                          {dashboardData?.overdue_tasks} просроченных задач
-                        </p>
-                        <p className="text-xs text-red-700">
-                          Требуют немедленного внимания
-                        </p>
+                {dashboardData?.overdue_tasks_list && dashboardData.overdue_tasks_list.length > 0 ? (
+                  <div className="space-y-3">
+                    {dashboardData.overdue_tasks_list.map(task => (
+                      <div
+                        key={task.id}
+                        onClick={() => handleOpenTask(task)}
+                        className="p-3 bg-red-50 border border-red-200 rounded-lg cursor-pointer hover:bg-red-100 transition-colors group"
+                      >
+                        <div className="flex items-start">
+                          <XCircleIcon className="w-5 h-5 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-red-900 text-sm group-hover:text-red-700 transition-colors">
+                              {task.title}
+                            </p>
+                            <div className="flex items-center text-xs text-red-700 mt-1">
+                              <span>Просрочено: {task.deadline ? format(new Date(task.deadline), 'PP p', { locale: ru }) : 'Без срока'}</span>
+                              <span className="mx-1">•</span>
+                              <span>{task.creator?.full_name}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  (dashboardData?.overdue_tasks || 0) > 0 && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <div className="flex items-center">
+                        <XCircleIcon className="w-5 h-5 text-red-500 mr-2" />
+                        <div>
+                          <p className="font-medium text-red-900 text-sm">
+                            {dashboardData?.overdue_tasks} просроченных задач
+                          </p>
+                          <p className="text-xs text-red-700">
+                            Требуют немедленного внимания
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )
                 )}
+
                 {(dashboardData?.late_shifts_today || 0) > 0 && (
                   <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
                     <div className="flex items-center">
@@ -360,6 +401,22 @@ export const DashboardPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <TaskDetailsModal
+        isOpen={isDetailsOpen}
+        onClose={() => setIsDetailsOpen(false)}
+        task={selectedTask}
+        onEdit={() => {
+          setIsDetailsOpen(false);
+          setIsEditModalOpen(true);
+        }}
+      />
+
+      <TaskModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        task={selectedTask}
+      />
     </div>
   );
 };
