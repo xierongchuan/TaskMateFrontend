@@ -5,7 +5,7 @@ import { usersApi } from '../../api/users';
 import { DealershipSelector } from '../common/DealershipSelector';
 import { TaskNotificationSettings } from './TaskNotificationSettings';
 import { getRoleLabel } from '../../utils/roleTranslations';
-import type { Task, CreateTaskRequest, TaskRecurrence, TaskType, ResponseType } from '../../types/task';
+import type { Task, CreateTaskRequest, TaskRecurrence, TaskType, ResponseType, TaskPriority } from '../../types/task';
 
 /**
  * Convert ISO 8601 date string (with timezone) to datetime-local format (YYYY-MM-DDTHH:mm)
@@ -64,6 +64,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
     recurrence: 'none',
     dealership_id: undefined,
     assignments: [],
+    priority: 'medium',
   });
 
   const [tagsInput, setTagsInput] = useState('');
@@ -107,6 +108,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
         tags: task.tags,
         assignments: task.assignments?.map(a => a.user.id) || [],
         notification_settings: task.notification_settings,
+        priority: task.priority,
       });
       setTagsInput(task.tags && Array.isArray(task.tags) ? task.tags.join(', ') : '');
     } else {
@@ -120,6 +122,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
         dealership_id: undefined,
         assignments: [],
         notification_settings: undefined,
+        priority: 'medium',
       });
       setTagsInput('');
     }
@@ -249,6 +252,19 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
                     placeholder="срочно, важно, backend"
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Приоритет</label>
+                  <select
+                    value={formData.priority || 'medium'}
+                    onChange={(e) => setFormData({ ...formData, priority: e.target.value as TaskPriority })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                  >
+                    <option value="low">Низкий</option>
+                    <option value="medium">Средний</option>
+                    <option value="high">Высокий</option>
+                  </select>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">

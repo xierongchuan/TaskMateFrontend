@@ -44,6 +44,7 @@ export const TasksPage: React.FC = () => {
     date_range: 'all',
     dealership_id: null as number | null,
     tags: [] as string[],
+    priority: '',
   });
 
   // Reset page to 1 when filters change
@@ -64,6 +65,7 @@ export const TasksPage: React.FC = () => {
         date_range?: string;
         dealership_id?: number;
         tags?: string[];
+        priority?: string;
         page?: number;
       } = { page };
 
@@ -139,6 +141,7 @@ export const TasksPage: React.FC = () => {
       date_range: 'all',
       dealership_id: null,
       tags: [],
+      priority: '',
     });
   };
 
@@ -321,6 +324,20 @@ export const TasksPage: React.FC = () => {
                   <option value="acknowledged">Принято</option>
                   <option value="completed">Выполнено</option>
                   <option value="overdue">Просрочено</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Приоритет</label>
+                <select
+                  value={filters.priority}
+                  onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
+                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                >
+                  <option value="">Все приоритеты</option>
+                  <option value="low">Низкий</option>
+                  <option value="medium">Средний</option>
+                  <option value="high">Высокий</option>
                 </select>
               </div>
 
@@ -660,8 +677,8 @@ export const TasksPage: React.FC = () => {
                             key={pageNum}
                             onClick={() => setPage(pageNum)}
                             className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${page === pageNum
-                                ? 'z-10 bg-blue-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600'
-                                : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0'
+                              ? 'z-10 bg-blue-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600'
+                              : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0'
                               }`}
                           >
                             {pageNum}

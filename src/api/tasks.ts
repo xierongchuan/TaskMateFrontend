@@ -12,6 +12,7 @@ export interface TasksFilters {
   created_by?: number;
   per_page?: number;
   page?: number;
+  priority?: string;
 }
 
 export const tasksApi = {

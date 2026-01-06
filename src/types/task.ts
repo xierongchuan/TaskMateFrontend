@@ -2,6 +2,7 @@ export type TaskRecurrence = 'none' | 'daily' | 'weekly' | 'monthly';
 export type TaskStatus = 'pending' | 'acknowledged' | 'completed' | 'overdue';
 export type TaskType = 'individual' | 'group';
 export type ResponseType = 'acknowledge' | 'complete';
+export type TaskPriority = 'low' | 'medium' | 'high';
 
 export interface Task {
   id: number;
@@ -17,6 +18,7 @@ export interface Task {
   appear_date: string | null;
   deadline: string | null;
   status: TaskStatus;
+  priority: TaskPriority;
   dealership_id: number;
   created_by: number;
   tags: string[];
@@ -56,4 +58,5 @@ export interface CreateTaskRequest {
   tags?: string[];
   assignments: number[];
   notification_settings?: Record<string, { enabled?: boolean; offset?: number }>;
+  priority?: TaskPriority;
 }
