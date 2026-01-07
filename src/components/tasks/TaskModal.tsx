@@ -47,6 +47,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
     assignments: [],
     priority: 'medium',
   });
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const [tagsInput, setTagsInput] = useState('');
 
@@ -111,6 +112,9 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       onClose();
     },
+    onError: (error: any) => {
+      setServerError(error.response?.data?.message || 'Ошибка при создании задачи');
+    },
   });
 
   const updateMutation = useMutation({
@@ -120,10 +124,14 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       onClose();
     },
+    onError: (error: any) => {
+      setServerError(error.response?.data?.message || 'Ошибка при обновлении задачи');
+    },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setServerError(null);
 
     const dataToSubmit = { ...formData };
 
@@ -134,7 +142,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
       dataToSubmit.tags = [];
     }
 
-    if (task) {
+    if (task?.id) {
       updateMutation.mutate(dataToSubmit as Partial<CreateTaskRequest>);
     } else {
       createMutation.mutate(dataToSubmit as CreateTaskRequest);
@@ -161,8 +169,14 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
           <form onSubmit={handleSubmit}>
             <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
               <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
-                {task ? 'Редактировать задачу' : 'Создать задачу'}
+                {task?.id ? 'Редактировать задачу' : 'Создать задачу'}
               </h3>
+
+              {serverError && (
+                <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+                  <span className="block sm:inline">{serverError}</span>
+                </div>
+              )}
 
               <div className="space-y-4 max-h-[70vh] overflow-y-auto">
                 <div>

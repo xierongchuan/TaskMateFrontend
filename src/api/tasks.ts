@@ -43,11 +43,6 @@ export const tasksApi = {
     return response.data;
   },
 
-  duplicateTask: async (id: number): Promise<{ data: Task }> => {
-    const response = await apiClient.post<{ data: Task }>(`/tasks/${id}/duplicate`);
-    return response.data;
-  },
-
   deleteTask: async (id: number): Promise<void> => {
     await apiClient.delete(`/tasks/${id}`);
   },

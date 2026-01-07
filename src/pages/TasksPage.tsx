@@ -102,14 +102,6 @@ export const TasksPage: React.FC = () => {
     },
   });
 
-  const duplicateMutation = useMutation({
-    mutationFn: (id: number) => tasksApi.duplicateTask(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
-    },
-  });
-
   const handleCreate = () => {
     setSelectedTask(null);
     setIsModalOpen(true);
@@ -132,9 +124,14 @@ export const TasksPage: React.FC = () => {
   };
 
   const handleDuplicate = (task: Task) => {
-    if (window.confirm(`Создать копию задачи "${task.title}"?`)) {
-      duplicateMutation.mutate(task.id);
-    }
+    // Создаём копию данных задачи для модалки создания (без ID)
+    const duplicateData = {
+      ...task,
+      id: undefined,
+      title: `${task.title} (копия)`,
+    };
+    setSelectedTask(duplicateData as unknown as Task);
+    setIsModalOpen(true);
   };
 
   const handleStatusChange = (task: Task, newStatus: string) => {
@@ -174,21 +171,18 @@ export const TasksPage: React.FC = () => {
   const getStatusBadge = (status: string) => {
     const badges = {
       pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      acknowledged: 'bg-blue-100 text-blue-800 border-blue-200',
       completed: 'bg-green-100 text-green-800 border-green-200',
       overdue: 'bg-red-100 text-red-800 border-red-200',
     };
 
     const icons = {
       pending: <ClockIcon className="w-3 h-3" />,
-      acknowledged: <CheckCircleIcon className="w-3 h-3" />,
       completed: <CheckCircleIcon className="w-3 h-3" />,
       overdue: <XCircleIcon className="w-3 h-3" />,
     };
 
     const labels = {
       pending: 'Ожидает',
-      acknowledged: 'Принято',
       completed: 'Выполнено',
       overdue: 'Просрочено',
     };
@@ -364,7 +358,6 @@ export const TasksPage: React.FC = () => {
                 >
                   <option value="">Все статусы</option>
                   <option value="pending">Ожидает</option>
-                  <option value="acknowledged">Принято</option>
                   <option value="completed">Выполнено</option>
                   <option value="overdue">Просрочено</option>
                 </select>
@@ -571,30 +564,34 @@ export const TasksPage: React.FC = () => {
                             </button>
                             <button
                               onClick={() => handleDuplicate(task)}
-                              disabled={duplicateMutation.isPending}
-                              className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                              className="inline-flex items-center px-3 py-1.5 border border-blue-300 shadow-sm text-sm font-medium rounded-lg text-blue-700 bg-white hover:bg-blue-50 transition-colors"
+                              title="Создать копию"
                             >
-                              <DocumentDuplicateIcon className="w-4 h-4 mr-1" />
+                              <DocumentDuplicateIcon className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => handleDelete(task)}
                               disabled={deleteMutation.isPending}
                               className="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded-lg text-red-700 bg-white hover:bg-red-50 transition-colors disabled:opacity-50"
                             >
-                              <TrashIcon className="w-4 h-4 mr-1" />
+                              <TrashIcon className="w-4 h-4" />
                             </button>
                           </div>
 
                           {/* Quick Status Change */}
-                          <select
-                            value={task.status}
-                            onChange={(e) => handleStatusChange(task, e.target.value)}
-                            className="text-xs px-2 py-1 border border-gray-300 rounded focus:border-blue-500 focus:ring-blue-500"
-                          >
-                            <option value="pending">Ожидает</option>
-                            <option value="acknowledged">Принято</option>
-                            <option value="completed">Выполнено</option>
-                          </select>
+                          <div className="relative">
+                            <select
+                              value={task.status === 'overdue' ? 'pending' : task.status}
+                              onChange={(e) => handleStatusChange(task, e.target.value)}
+                              className={`appearance-none text-xs font-medium pl-3 pr-8 py-1.5 rounded-lg border cursor-pointer transition-all focus:ring-2 focus:ring-offset-1 ${task.status === 'completed'
+                                ? 'bg-green-50 border-green-300 text-green-700 focus:ring-green-500'
+                                : 'bg-yellow-50 border-yellow-300 text-yellow-700 focus:ring-yellow-500'
+                                }`}
+                            >
+                              <option value="pending">Ожидает</option>
+                              <option value="completed">Выполнено</option>
+                            </select>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -659,21 +656,44 @@ export const TasksPage: React.FC = () => {
                   )}
 
                   {permissions.canManageTasks && (
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleEdit(task)}
-                        className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-                      >
-                        <PencilIcon className="w-4 h-4 mr-1" />
-                        Изменить
-                      </button>
-                      <button
-                        onClick={() => handleDelete(task)}
-                        disabled={deleteMutation.isPending}
-                        className="inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-lg text-red-700 bg-white hover:bg-red-50 transition-colors disabled:opacity-50"
-                      >
-                        <TrashIcon className="w-4 h-4" />
-                      </button>
+                    <div className="flex flex-col space-y-2 mt-auto pt-4 border-t border-gray-100">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEdit(task)}
+                          className="flex-1 inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                        >
+                          <PencilIcon className="w-4 h-4 mr-1" />
+                          Изменить
+                        </button>
+                        <button
+                          onClick={() => handleDuplicate(task)}
+                          className="inline-flex items-center px-3 py-1.5 border border-blue-300 shadow-sm text-sm font-medium rounded-lg text-blue-700 bg-white hover:bg-blue-50 transition-colors"
+                          title="Создать копию"
+                        >
+                          <DocumentDuplicateIcon className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(task)}
+                          disabled={deleteMutation.isPending}
+                          className="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded-lg text-red-700 bg-white hover:bg-red-50 transition-colors disabled:opacity-50"
+                        >
+                          <TrashIcon className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="relative">
+                        <select
+                          value={task.status === 'overdue' ? 'pending' : task.status}
+                          onChange={(e) => handleStatusChange(task, e.target.value)}
+                          className={`w-full appearance-none text-xs font-medium px-3 py-2 rounded-lg border cursor-pointer transition-all focus:ring-2 focus:ring-offset-1 text-center ${task.status === 'completed'
+                              ? 'bg-green-50 border-green-300 text-green-700 focus:ring-green-500'
+                              : 'bg-yellow-50 border-yellow-300 text-yellow-700 focus:ring-yellow-500'
+                            }`}
+                        >
+                          <option value="pending">Ожидает</option>
+                          <option value="completed">Выполнено</option>
+                        </select>
+                      </div>
                     </div>
                   )}
                 </div>
