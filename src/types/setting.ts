@@ -41,7 +41,7 @@ export interface BotConfig {
   shift_end_time?: string;
   late_tolerance_minutes?: number;
   rows_per_page?: number;
-  auto_archive_days?: number;
+  auto_archive_day_of_week?: number; // 0 = disabled, 1-7 = Monday-Sunday
   notification_types?: {
     task_overdue?: boolean;
     shift_late?: boolean;
@@ -104,6 +104,7 @@ export interface UpdateBotConfigRequest {
   shift_reminder_minutes?: number;
   maintenance_mode?: boolean;
   rows_per_page?: number;
+  auto_archive_day_of_week?: number;
   dealership_id?: number;
   notification_types?: {
     task_overdue?: boolean;

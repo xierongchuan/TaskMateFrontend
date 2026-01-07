@@ -1,23 +1,24 @@
 # TaskMate Frontend
 
-Frontend приложение для системы управления задачами TaskMate, построенное на React + TypeScript + Vite.
+Frontend приложение для системы управления задачами TaskMate, построенное на React 19 + TypeScript + Vite 7.
 
 ## Технологический стек
 
-- **React 18** - UI библиотека
+- **React 19** - UI библиотека
 - **TypeScript** - Типизация
-- **Vite** - Сборщик и dev сервер
+- **Vite 7** - Сборщик и dev сервер
 - **React Router** - Маршрутизация
 - **Zustand** - State management
-- **TanStack Query** - Управление серверным состоянием
+- **TanStack Query v5** - Управление серверным состоянием
 - **Axios** - HTTP клиент
 - **Tailwind CSS** - CSS фреймворк
 - **date-fns** - Работа с датами
 - **react-hook-form** - Работа с формами
+- **heroicons** - Иконки
 
 ## Требования
 
-- Node.js 18+
+- Node.js 20+
 - npm или yarn
 
 ## Установка
@@ -111,19 +112,24 @@ src/
 │   ├── auth.ts          # Аутентификация
 │   ├── users.ts         # Пользователи
 │   ├── tasks.ts         # Задачи
+│   ├── taskGenerators.ts # Генераторы задач
+│   ├── archivedTasks.ts # Архивные задачи
 │   └── dashboard.ts     # Dashboard
 │
 ├── components/          # React компоненты
 │   ├── auth/           # Компоненты аутентификации
 │   ├── layout/         # Layout компоненты
 │   ├── users/          # Компоненты пользователей
-│   └── tasks/          # Компоненты задач
+│   ├── tasks/          # Компоненты задач
+│   └── generators/     # Компоненты генераторов
 │
 ├── pages/              # Страницы приложения
 │   ├── LoginPage.tsx
 │   ├── DashboardPage.tsx
 │   ├── UsersPage.tsx
-│   └── TasksPage.tsx
+│   ├── TasksPage.tsx
+│   ├── TaskGeneratorsPage.tsx # Страница генераторов
+│   └── ArchivedTasksPage.tsx  # Страница архива
 │
 ├── stores/             # Zustand stores
 │   └── authStore.ts
@@ -135,6 +141,8 @@ src/
 ├── types/              # TypeScript типы
 │   ├── user.ts
 │   ├── task.ts
+│   ├── taskGenerator.ts
+│   ├── archivedTask.ts
 │   ├── api.ts
 │   └── dashboard.ts
 │
@@ -145,7 +153,18 @@ src/
 └── constants/          # Константы
 ```
 
-## Аутентификация
+## Функциональность
+
+### Задачи и Генераторы
+- **Task Generators**: Система для создания повторяющихся регулярных задач (ежедневно, еженедельно, ежемесячно).
+  - Поддержка гибких настроек уведомлений.
+  - Назначение исполнителей сразу для всей серии задач.
+- **Tasks**: Разовые задачи или инстансы, созданные генераторами.
+  - Обычные задачи (без повторений).
+  - Улучшенная фильтрация и поиск.
+- **Archive**: Просмотр завершенных и просроченных задач.
+
+### Аутентификация
 
 Приложение использует Bearer Token аутентификацию (Laravel Sanctum):
 
@@ -210,4 +229,4 @@ VITE_API_BASE_URL=http://localhost:8007/api/v1
 ## Лицензия
 
 Proprietary License
-Copyright © 2023-2025 谢榕川 All rights reserved.
+Copyright © 2023-2026 谢榕川 All rights reserved.

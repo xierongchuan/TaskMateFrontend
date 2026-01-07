@@ -128,6 +128,7 @@ export const SettingsPage: React.FC = () => {
     } else if (activeTab === 'interface') {
       updateBotConfigMutation.mutate({
         rows_per_page: botConfig.rows_per_page,
+        auto_archive_day_of_week: botConfig.auto_archive_day_of_week,
         dealership_id: selectedDealershipId,
       }, {
         onSuccess: () => showSuccessNotification('Настройки интерфейса сохранены'),
@@ -404,28 +405,33 @@ export const SettingsPage: React.FC = () => {
                       </p>
                     </div>
 
-                    {/* Auto archive is currently disabled/hidden as per request
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Автоархивация (дни)
+                        Автоархивация задач
                       </label>
-                      <input
-                        type="number"
-                        min="1"
-                        value={botConfig.auto_archive_days || 30}
+                      <select
+                        value={botConfig.auto_archive_day_of_week || 0}
                         onChange={(e) =>
                           setBotConfig({
                             ...botConfig,
-                            auto_archive_days: parseInt(e.target.value) || 30,
+                            auto_archive_day_of_week: parseInt(e.target.value) || 0,
                           })
                         }
                         className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-3 border min-h-[44px]"
-                      />
+                      >
+                        <option value="0">Отключено</option>
+                        <option value="1">Каждый понедельник</option>
+                        <option value="2">Каждый вторник</option>
+                        <option value="3">Каждую среду</option>
+                        <option value="4">Каждый четверг</option>
+                        <option value="5">Каждую пятницу</option>
+                        <option value="6">Каждую субботу</option>
+                        <option value="7">Каждое воскресенье</option>
+                      </select>
                       <p className="mt-1 text-xs text-gray-500">
-                        Автоматическая архивация задач через указанное количество дней
+                        Задачи будут автоматически архивироваться в выбранный день недели
                       </p>
                     </div>
-                    */}
                   </div>
                 </div>
               )}
