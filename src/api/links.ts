@@ -2,10 +2,19 @@ import apiClient from './client';
 import type { Link, CreateLinkRequest, UpdateLinkRequest } from '../types/link';
 import type { PaginatedResponse } from '../types/api';
 
+export interface LinksFilters {
+  search?: string;
+  category?: string;
+  per_page?: number;
+  page?: number;
+}
+
 export const linksApi = {
-  getLinks: async (): Promise<Link[]> => {
-    const response = await apiClient.get<PaginatedResponse<Link>>('/links');
-    return response.data.data;
+  getLinks: async (filters?: LinksFilters): Promise<PaginatedResponse<Link>> => {
+    const response = await apiClient.get<PaginatedResponse<Link>>('/links', {
+      params: filters
+    });
+    return response.data;
   },
 
   createLink: async (data: CreateLinkRequest): Promise<{ data: Link }> => {

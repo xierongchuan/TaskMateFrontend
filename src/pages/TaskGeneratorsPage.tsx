@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { taskGeneratorsApi } from '../api/taskGenerators';
 import { usePermissions } from '../hooks/usePermissions';
+import { usePagination } from '../hooks/usePagination';
 import { TaskGeneratorModal } from '../components/generators/TaskGeneratorModal';
 import { DealershipSelector } from '../components/common/DealershipSelector';
 import type { TaskGenerator, TaskGeneratorFilters } from '../types/taskGenerator';
@@ -34,6 +35,7 @@ import { useResponsiveViewMode } from '../hooks/useResponsiveViewMode';
 export const TaskGeneratorsPage: React.FC = () => {
   const permissions = usePermissions();
   const queryClient = useQueryClient();
+  const { limit } = usePagination();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedGenerator, setSelectedGenerator] = useState<TaskGenerator | null>(null);
   const [showFilters, setShowFilters] = useState(false);
@@ -51,9 +53,9 @@ export const TaskGeneratorsPage: React.FC = () => {
   }, [filters]);
 
   const { data: generatorsData, isLoading, error } = useQuery({
-    queryKey: ['task-generators', filters, page],
+    queryKey: ['task-generators', filters, page, limit],
     queryFn: () => {
-      const cleanedFilters: TaskGeneratorFilters = { page, per_page: 15 };
+      const cleanedFilters: TaskGeneratorFilters = { page, per_page: limit };
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== '' && value !== null) {
           (cleanedFilters as Record<string, unknown>)[key] = value;

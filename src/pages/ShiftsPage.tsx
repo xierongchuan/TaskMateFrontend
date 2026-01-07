@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useShifts, useCurrentShifts } from '../hooks/useShifts';
 import { useResponsiveViewMode } from '../hooks/useResponsiveViewMode';
+import { usePagination } from '../hooks/usePagination';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import type { ShiftsFilters } from '../types/shift';
@@ -18,12 +19,13 @@ import { useSearchParams } from 'react-router-dom';
 export const ShiftsPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'cards');
+  const { limit } = usePagination();
   const [filters, setFilters] = useState<ShiftsFilters>({
     status: searchParams.get('status') || '',
     is_late: searchParams.get('is_late') === 'true' ? true : searchParams.get('is_late') === 'false' ? false : undefined,
   });
 
-  const { data: shiftsData, isLoading, error } = useShifts(filters);
+  const { data: shiftsData, isLoading, error } = useShifts({ ...filters, per_page: limit });
   const { data: currentShiftsData } = useCurrentShifts();
   const currentShifts = currentShiftsData?.data || [];
 

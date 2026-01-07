@@ -4,25 +4,26 @@ import { usePermissions } from '../hooks/usePermissions';
 import { useAuth } from '../hooks/useAuth';
 import { DealershipSelector } from '../components/common/DealershipSelector';
 import type { BotConfig, ShiftConfig } from '../types/setting';
+// Icons
 import {
   CogIcon,
   ClockIcon,
-  // TrashIcon,
   BellIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
   InformationCircleIcon,
   ArrowPathIcon,
   WrenchIcon,
-  ChevronDownIcon,
-  ChevronUpIcon
+  ComputerDesktopIcon,
+  ClipboardDocumentListIcon,
+  SwatchIcon
 } from '@heroicons/react/24/outline';
 import { NotificationSettingsContent } from '../components/notifications/NotificationSettingsContent';
 
 export const SettingsPage: React.FC = () => {
   const permissions = usePermissions();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'shifts' | 'interface' | 'notifications' | 'maintenance'>('shifts');
+  const [activeTab, setActiveTab] = useState<'general' | 'interface' | 'tasks' | 'shifts' | 'notifications' | 'maintenance'>('general');
   const [selectedDealershipId, setSelectedDealershipId] = useState<number | undefined>(user?.dealership_id || undefined);
   const [showDetailedNotifications, setShowDetailedNotifications] = useState(false);
 
@@ -34,7 +35,7 @@ export const SettingsPage: React.FC = () => {
     shift_2_end_time: '02:00',
     late_tolerance_minutes: 15,
     break_duration_minutes: 60,
-    work_days: [1, 2, 3, 4, 5], // Monday-Friday
+    work_days: [1, 2, 3, 4, 5],
     timezone: 'Europe/Moscow',
   });
 
@@ -44,54 +45,38 @@ export const SettingsPage: React.FC = () => {
     auto_close_shifts: false,
     shift_reminder_minutes: 15,
     maintenance_mode: false,
+    rows_per_page: 15,
+    auto_archive_day_of_week: 0
   });
 
-  // Get shift configuration
+  // Data fetching
   const { data: shiftConfigData, isLoading: shiftConfigLoading } = useShiftConfig(selectedDealershipId);
-
-  // Get bot configuration
   const { data: botConfigData, isLoading: botConfigLoading } = useBotConfig(selectedDealershipId);
-
-  // Get dealership settings for legacy compatibility
   const { data: config } = useDealershipSettings(selectedDealershipId || 0);
 
+  // Effects to filter data
   useEffect(() => {
     if (shiftConfigData?.data) {
-      setShiftConfig(prev => ({
-        ...prev,
-        ...shiftConfigData.data,
-      }));
+      setShiftConfig(prev => ({ ...prev, ...shiftConfigData.data }));
     }
   }, [shiftConfigData]);
 
   useEffect(() => {
     if (botConfigData?.data) {
-      setBotConfig(prev => ({
-        ...prev,
-        ...botConfigData.data,
-      }));
+      setBotConfig(prev => ({ ...prev, ...botConfigData.data }));
     }
   }, [botConfigData]);
 
+  // Mutations
   const updateShiftConfigMutation = useUpdateShiftConfig();
   const updateBotConfigMutation = useUpdateBotConfig();
-
-  // Placeholder for future implementation of utility mutations
-  // Placeholder for future implementation of utility mutations
-  /*
-  const clearTasksMutation = {
-    mutate: () => showSuccessNotification('Функция очистки задач временно недоступна'),
-    isPending: false,
-  };
-  */
-
   const testBotMutation = {
-    mutate: () => showSuccessNotification('Проверка подключения к боту временно недоступна'),
+    mutate: () => alert('Проверка подключения...'), // Placeholder
     isPending: false,
   };
 
-  const showSuccessNotification = (message: string = 'Настройки успешно сохранены') => {
-    // В реальном приложении здесь будет красивое уведомление
+  const showSuccessNotification = (message: string) => {
+    // Ideally use a toast library
     alert(message);
   };
 
@@ -104,594 +89,437 @@ export const SettingsPage: React.FC = () => {
         dealership_id: selectedDealershipId,
       }, {
         onSuccess: () => showSuccessNotification('Настройки смен сохранены'),
-        onError: (error) => {
-          console.error('Error saving shift config:', error);
-          alert('Ошибка сохранения настроек смен');
-        },
+        onError: () => alert('Ошибка сохранения настроек смен'),
       });
-    } else if (activeTab === 'notifications' || activeTab === 'maintenance') {
-      // Отправляем только валидные поля для UpdateBotConfigRequest
+    } else {
+      // For General, Interface, Tasks, Notifications, Maintenance - use BotConfig
       updateBotConfigMutation.mutate({
-        notification_enabled: botConfig.notification_enabled,
-        auto_close_shifts: botConfig.auto_close_shifts,
-        shift_reminder_minutes: botConfig.shift_reminder_minutes,
-        maintenance_mode: botConfig.maintenance_mode,
-        notification_types: botConfig.notification_types,
+        ...botConfig, // Send full config update for simplicity in this refactor
         dealership_id: selectedDealershipId,
       }, {
         onSuccess: () => showSuccessNotification('Настройки сохранены'),
-        onError: (error) => {
-          console.error('Error saving settings:', error);
-          alert('Ошибка сохранения настроек');
-        },
-      });
-    } else if (activeTab === 'interface') {
-      updateBotConfigMutation.mutate({
-        rows_per_page: botConfig.rows_per_page,
-        auto_archive_day_of_week: botConfig.auto_archive_day_of_week,
-        dealership_id: selectedDealershipId,
-      }, {
-        onSuccess: () => showSuccessNotification('Настройки интерфейса сохранены'),
-        onError: (error) => {
-          console.error('Error saving settings:', error);
-          alert('Ошибка сохранения настроек');
-        },
+        onError: () => alert('Ошибка сохранения настроек'),
       });
     }
   };
-
-  /*
-  const handleClearOldTasks = () => {
-    if (window.confirm('Вы уверены, что хотите очистить старые задачи? Это действие нельзя отменить.')) {
-      clearTasksMutation.mutate();
-    }
-  };
-  */
 
   const handleTestBot = () => {
     testBotMutation.mutate();
   };
 
+  // Tabs definition
   const tabs = [
+    { id: 'general', name: 'Общие', icon: CogIcon },
+    { id: 'interface', name: 'Интерфейс', icon: ComputerDesktopIcon },
+    { id: 'tasks', name: 'Задачи', icon: ClipboardDocumentListIcon },
     { id: 'shifts', name: 'Смены', icon: ClockIcon },
-    { id: 'interface', name: 'Интерфейс', icon: CogIcon },
     { id: 'notifications', name: 'Уведомления', icon: BellIcon },
     { id: 'maintenance', name: 'Обслуживание', icon: WrenchIcon },
   ];
 
   if (!permissions.canManageSettings) {
     return (
-      <div className="px-4 py-6 sm:px-0">
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <p className="text-yellow-800">У вас нет прав для просмотра настроек</p>
+      <div className="px-4 py-8 max-w-7xl mx-auto">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center">
+          <ExclamationTriangleIcon className="w-12 h-12 text-yellow-500 mx-auto mb-3" />
+          <h3 className="text-lg font-medium text-yellow-800">Доступ запрещен</h3>
+          <p className="text-yellow-600 mt-1">У вас нет прав для просмотра этого раздела.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="px-4 py-6 sm:px-0 max-w-7xl mx-auto">
+    <div className="px-4 py-8 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Настройки</h1>
-        <p className="mt-2 text-sm text-gray-600">
-          Управление конфигурацией системы и настройками бота
-        </p>
+      <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Настройки</h1>
+          <p className="mt-2 text-gray-500">Управление параметрами системы, интерфейса и автоматизации</p>
+        </div>
+
+        {/* Dealership Selector as a prominent action if allowed */}
+        {permissions.canManageDealershipSettings && (
+          <div className="w-full md:w-72 bg-white p-1 rounded-lg border border-gray-200 shadow-sm">
+            <DealershipSelector
+              value={selectedDealershipId}
+              onChange={(value) => setSelectedDealershipId(value || undefined)}
+              placeholder="Глобальные настройки"
+              showAllOption={permissions.canManageGlobalSettings}
+              allOptionLabel="Глобальные настройки"
+              className="w-full border-0 focus:ring-0 text-sm"
+            />
+          </div>
+        )}
       </div>
 
-      {/* Dealership Selector */}
-      {permissions.canManageDealershipSettings && (
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Настройки для дилерского центра:
-          </label>
-          <DealershipSelector
-            value={selectedDealershipId}
-            onChange={(value) => setSelectedDealershipId(value || undefined)}
-            placeholder="Выберите дилерский центр"
-            showAllOption={permissions.canManageGlobalSettings}
-            allOptionLabel="Глобальные настройки"
-          />
-        </div>
-      )}
-
       {shiftConfigLoading || botConfigLoading ? (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-          <div className="animate-pulse space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded-lg"></div>
-            ))}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+          <div className="animate-pulse space-y-6">
+            <div className="h-8 bg-gray-100 rounded w-1/4"></div>
+            <div className="h-32 bg-gray-100 rounded"></div>
+            <div className="h-32 bg-gray-100 rounded"></div>
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-          {/* Tabs */}
-          <div className="border-b border-gray-200">
-            {/* Mobile Dropdown */}
-            <div className="sm:hidden">
-              <select
-                value={activeTab}
-                onChange={(e) => setActiveTab(e.target.value as any)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[44px] bg-white"
-              >
-                {tabs.map((tab) => (
-                  <option key={tab.id} value={tab.id}>
-                    {tab.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden min-h-[600px] flex flex-col md:flex-row">
 
-            {/* Desktop Tabs */}
-            <nav className="hidden sm:flex -mb-px overflow-x-auto">
+          {/* Sidebar Navigation (Desktop) */}
+          <div className="w-full md:w-64 bg-gray-50 border-r border-gray-200 flex-shrink-0">
+            <nav className="p-4 space-y-1">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`${activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    } whitespace-nowrap py-4 px-6 sm:px-8 border-b-2 font-medium text-sm flex items-center min-w-[120px] justify-center transition-colors`}
+                  className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all ${activeTab === tab.id
+                    ? 'bg-white text-blue-600 shadow-sm ring-1 ring-gray-200'
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    }`}
                 >
-                  <tab.icon className="w-4 h-4 mr-2" />
+                  <tab.icon className={`w-5 h-5 mr-3 ${activeTab === tab.id ? 'text-blue-500' : 'text-gray-400'}`} />
                   {tab.name}
                 </button>
               ))}
             </nav>
           </div>
 
-          <form onSubmit={handleSubmit}>
-            <div className="p-4 sm:p-6">
-              {/* Shift Settings Tab */}
-              {activeTab === 'shifts' && (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center">
-                      <ClockIcon className="w-6 h-6 text-blue-500 mr-3" />
-                      <h3 className="text-lg font-semibold text-gray-900">Настройки смен</h3>
-                    </div>
-                    {selectedDealershipId && (
-                      <div className="flex items-center text-sm text-gray-500">
-                        <InformationCircleIcon className="w-4 h-4 mr-1" />
-                        {config?.inherited_fields && config.inherited_fields.length > 0 ? (
-                          <span className="text-orange-600">Часть настроек унаследованы</span>
-                        ) : (
-                          <span className="text-green-600">Настройки ДЦ</span>
+          {/* Content Area */}
+          <div className="flex-1 flex flex-col min-w-0">
+            <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
+              <div className="flex-1 p-6 md:p-8 overflow-y-auto">
+
+                {/* GENERAL TAB */}
+                {activeTab === 'general' && (
+                  <div className="space-y-8 max-w-2xl">
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900 mb-4">Общие настройки</h2>
+                      <div className="bg-gray-50 rounded-xl p-6 border border-gray-100 space-y-6">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Язык системы</label>
+                          <select disabled className="block w-full rounded-lg border-gray-300 shadow-sm bg-gray-100 cursor-not-allowed">
+                            <option>Русский (Default)</option>
+                          </select>
+                          <p className="mt-1 text-xs text-gray-500">Смена языка пока недоступна в этой версии.</p>
+                        </div>
+
+                        {permissions.canManageDealershipSettings && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Текущая конфигурация</label>
+                            <div className="bg-white p-3 rounded-lg border border-gray-200 flex items-center">
+                              <div className={`w-2 h-2 rounded-full mr-2 ${selectedDealershipId ? 'bg-green-500' : 'bg-blue-500'}`}></div>
+                              <span className="text-sm text-gray-700">
+                                {selectedDealershipId
+                                  ? 'Настройки конкретного дилерского центра'
+                                  : 'Глобальные настройки системы'
+                                }
+                              </span>
+                            </div>
+                          </div>
                         )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* INTERFACE TAB */}
+                {activeTab === 'interface' && (
+                  <div className="space-y-8 max-w-2xl">
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900 mb-4">Интерфейс и Отображение</h2>
+
+                      <div className="space-y-6">
+                        {/* Theme (Placeholder) */}
+                        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                          <div className="flex items-start">
+                            <SwatchIcon className="w-6 h-6 text-purple-500 mr-4 mt-1" />
+                            <div>
+                              <label className="block text-base font-medium text-gray-900 mb-1">Тема оформления</label>
+                              <p className="text-sm text-gray-500 mb-4">Выберите цветовую схему приложения</p>
+
+                              <div className="grid grid-cols-3 gap-3">
+                                <div className="border-2 border-blue-500 rounded-lg p-2 bg-gray-50 cursor-pointer">
+                                  <div className="h-4 bg-white border border-gray-200 rounded mb-2"></div>
+                                  <div className="text-xs font-medium text-center text-blue-700">Светлая</div>
+                                </div>
+                                <div className="border border-gray-200 rounded-lg p-2 bg-gray-900 opacity-50 cursor-not-allowed">
+                                  <div className="h-4 bg-gray-800 border border-gray-700 rounded mb-2"></div>
+                                  <div className="text-xs font-medium text-center text-gray-400">Темная</div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Pagination */}
+                        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                          <div className="flex items-start">
+                            <ClipboardDocumentListIcon className="w-6 h-6 text-blue-500 mr-4 mt-1" />
+                            <div className="flex-1">
+                              <label className="block text-base font-medium text-gray-900 mb-1">Пагинация (Строк на странице)</label>
+                              <p className="text-sm text-gray-500 mb-4">
+                                Количество элементов, отображаемых в таблицах задач, сотрудников и смен.
+                                <br /><span className="text-xs text-blue-600 bg-blue-50 px-1 rounded">Глобальная настройка</span>
+                              </p>
+
+                              <div className="flex items-center gap-4">
+                                <input
+                                  type="range"
+                                  min="5"
+                                  max="100"
+                                  step="5"
+                                  value={botConfig.rows_per_page || 15}
+                                  onChange={(e) => setBotConfig({ ...botConfig, rows_per_page: parseInt(e.target.value) })}
+                                  className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                />
+                                <div className="w-16 h-10 flex items-center justify-center border border-gray-300 rounded-lg font-mono font-bold text-gray-700 bg-gray-50">
+                                  {botConfig.rows_per_page || 15}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TASKS TAB */}
+                {activeTab === 'tasks' && (
+                  <div className="space-y-8 max-w-2xl">
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900 mb-4">Настройки Задач</h2>
+
+                      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                        <div className="flex items-start mb-6">
+                          <ArrowPathIcon className="w-6 h-6 text-green-500 mr-4 mt-1" />
+                          <div className="flex-1">
+                            <label className="block text-base font-medium text-gray-900 mb-1">Автоматическая архивация</label>
+                            <p className="text-sm text-gray-500 mb-4">
+                              Выполненные задачи будут автоматически переноситься в архив в выбранный день недели.
+                            </p>
+
+                            <select
+                              value={botConfig.auto_archive_day_of_week || 0}
+                              onChange={(e) => setBotConfig({
+                                ...botConfig,
+                                auto_archive_day_of_week: parseInt(e.target.value) || 0
+                              })}
+                              className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2.5"
+                            >
+                              <option value="0">Отключено (Вручную)</option>
+                              <option value="1">Каждый Понедельник</option>
+                              <option value="2">Каждый Вторник</option>
+                              <option value="3">Каждую Среду</option>
+                              <option value="4">Каждый Четверг</option>
+                              <option value="5">Каждую Пятницу</option>
+                              <option value="6">Каждую Субботу</option>
+                              <option value="7">Каждое Воскресенье</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="bg-blue-50 rounded-lg p-4 border border-blue-100 flex gap-3">
+                          <InformationCircleIcon className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                          <p className="text-sm text-blue-700">
+                            Архивированные задачи пропадают из активного списка, но доступны через фильтр "Архив". Это помогает держать список задач чистым.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* SHIFTS TAB */}
+                {activeTab === 'shifts' && (
+                  <div className="space-y-8 max-w-3xl">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-xl font-semibold text-gray-900">График и Смены</h2>
+                      {/* Config inheritance indicator */}
+                      {selectedDealershipId && (
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${config?.inherited_fields && config.inherited_fields.length > 0
+                          ? 'bg-orange-100 text-orange-800'
+                          : 'bg-green-100 text-green-800'
+                          }`}>
+                          {config?.inherited_fields && config.inherited_fields.length > 0
+                            ? 'Смешанные настройки'
+                            : 'Настройки дилера'
+                          }
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Shift 1 */}
+                      <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                        <h4 className="font-medium text-gray-900 mb-4 pb-2 border-b border-gray-100 flex items-center">
+                          <span className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs mr-2">1</span>
+                          Первая смена
+                        </h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Начало</label>
+                            <input type="time" value={shiftConfig.shift_1_start_time || ''} onChange={(e) => setShiftConfig({ ...shiftConfig, shift_1_start_time: e.target.value })} className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Конец</label>
+                            <input type="time" value={shiftConfig.shift_1_end_time || ''} onChange={(e) => setShiftConfig({ ...shiftConfig, shift_1_end_time: e.target.value })} className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Shift 2 */}
+                      <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                        <h4 className="font-medium text-gray-900 mb-4 pb-2 border-b border-gray-100 flex items-center">
+                          <span className="w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs mr-2">2</span>
+                          Вторая смена
+                        </h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Начало</label>
+                            <input type="time" value={shiftConfig.shift_2_start_time || ''} onChange={(e) => setShiftConfig({ ...shiftConfig, shift_2_start_time: e.target.value })} className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Конец</label>
+                            <input type="time" value={shiftConfig.shift_2_end_time || ''} onChange={(e) => setShiftConfig({ ...shiftConfig, shift_2_end_time: e.target.value })} className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Tolerance */}
+                      <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                        <label className="block text-sm font-medium text-gray-900 mb-2">Допустимое опоздание</label>
+                        <div className="flex items-center gap-3">
+                          <input type="number" min="0" value={shiftConfig.late_tolerance_minutes || 0} onChange={(e) => setShiftConfig({ ...shiftConfig, late_tolerance_minutes: parseInt(e.target.value) || 0 })} className="block w-24 rounded-lg border-gray-300" />
+                          <span className="text-gray-500 text-sm">минут</span>
+                        </div>
+                        <p className="mt-2 text-xs text-gray-400">Сотрудники могут опоздать на это время без штрафа</p>
+                      </div>
+
+                      {/* Break Duration */}
+                      <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                        <label className="block text-sm font-medium text-gray-900 mb-2">Обеденный перерыв</label>
+                        <div className="flex items-center gap-3">
+                          <input type="number" min="0" value={shiftConfig.break_duration_minutes || 0} onChange={(e) => setShiftConfig({ ...shiftConfig, break_duration_minutes: parseInt(e.target.value) || 0 })} className="block w-24 rounded-lg border-gray-300" />
+                          <span className="text-gray-500 text-sm">минут</span>
+                        </div>
+                        <p className="mt-2 text-xs text-gray-400">Стандартная продолжительность перерыва</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* NOTIFICATIONS TAB */}
+                {activeTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-xl font-semibold text-gray-900">Центр уведомлений</h2>
+                      <button
+                        type="button"
+                        onClick={() => setShowDetailedNotifications(!showDetailedNotifications)}
+                        className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                      >
+                        {showDetailedNotifications ? 'Скрыть детали' : 'Расширенные настройки'}
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4">
+                      {[
+                        { key: 'task_overdue', label: 'Просроченные задачи', desc: 'Задачи, срок которых истек' },
+                        { key: 'shift_late', label: 'Опоздания', desc: 'Сотрудник не открыл смену вовремя' },
+                        { key: 'task_completed', label: 'Завершение задач', desc: 'Сотрудник выполнил задачу' },
+                        { key: 'system_errors', label: 'Системные ошибки', desc: 'Сбои в работе оборудования или API' },
+                      ].map((item) => (
+                        <label key={item.key} className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl cursor-pointer hover:border-blue-300 transition-colors shadow-sm">
+                          <div>
+                            <div className="font-medium text-gray-900">{item.label}</div>
+                            <div className="text-sm text-gray-500">{item.desc}</div>
+                          </div>
+                          <input
+                            type="checkbox"
+                            checked={((botConfig as any).notification_types?.[item.key]) || false}
+                            onChange={(e) => setBotConfig({
+                              ...botConfig,
+                              notification_types: {
+                                ...(botConfig as any).notification_types,
+                                [item.key]: e.target.checked
+                              }
+                            })}
+                            className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                        </label>
+                      ))}
+                    </div>
+
+                    {showDetailedNotifications && (
+                      <div className="pt-6 border-t border-gray-200">
+                        <NotificationSettingsContent dealershipId={selectedDealershipId} />
                       </div>
                     )}
                   </div>
-                  <div className="space-y-6">
+                )}
+
+                {/* MAINTENANCE TAB */}
+                {activeTab === 'maintenance' && (
+                  <div className="space-y-8 max-w-2xl">
                     <div>
-                      <h4 className="text-md font-medium text-gray-900 mb-4">Первая смена</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Время начала
-                          </label>
-                          <input
-                            type="time"
-                            value={shiftConfig.shift_1_start_time || ''}
-                            onChange={(e) =>
-                              setShiftConfig({ ...shiftConfig, shift_1_start_time: e.target.value })
-                            }
-                            className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-3 border min-h-[44px]"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Время окончания
-                          </label>
-                          <input
-                            type="time"
-                            value={shiftConfig.shift_1_end_time || ''}
-                            onChange={(e) =>
-                              setShiftConfig({ ...shiftConfig, shift_1_end_time: e.target.value })
-                            }
-                            className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-3 border min-h-[44px]"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 className="text-md font-medium text-gray-900 mb-4">Вторая смена</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Время начала
-                          </label>
-                          <input
-                            type="time"
-                            value={shiftConfig.shift_2_start_time || ''}
-                            onChange={(e) =>
-                              setShiftConfig({ ...shiftConfig, shift_2_start_time: e.target.value })
-                            }
-                            className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-3 border min-h-[44px]"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Время окончания
-                          </label>
-                          <input
-                            type="time"
-                            value={shiftConfig.shift_2_end_time || ''}
-                            onChange={(e) =>
-                              setShiftConfig({ ...shiftConfig, shift_2_end_time: e.target.value })
-                            }
-                            className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-3 border min-h-[44px]"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Допустимое опоздание (минуты)
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          value={shiftConfig.late_tolerance_minutes || 0}
-                          onChange={(e) =>
-                            setShiftConfig({
-                              ...shiftConfig,
-                              late_tolerance_minutes: parseInt(e.target.value) || 0,
-                            })
-                          }
-                          className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-3 border min-h-[44px]"
-                        />
-                        <p className="mt-1 text-xs text-gray-500">
-                          Количество минут, после которого фиксируется опоздание
-                        </p>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Длительность перерыва (минуты)
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          value={shiftConfig.break_duration_minutes || 0}
-                          onChange={(e) =>
-                            setShiftConfig({
-                              ...shiftConfig,
-                              break_duration_minutes: parseInt(e.target.value) || 0,
-                            })
-                          }
-                          className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-3 border min-h-[44px]"
-                        />
-                        <p className="mt-1 text-xs text-gray-500">
-                          Стандартная длительность обеденного перерыва
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Interface Settings Tab */}
-              {activeTab === 'interface' && (
-                <div className="space-y-6">
-                  <div className="flex items-center mb-4">
-                    <CogIcon className="w-6 h-6 text-green-500 mr-3" />
-                    <h3 className="text-lg font-semibold text-gray-900">Настройки интерфейса</h3>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Строк на странице
-                      </label>
-                      <input
-                        type="number"
-                        min="5"
-                        max="100"
-                        value={botConfig.rows_per_page || 10}
-                        onChange={(e) =>
-                          setBotConfig({
-                            ...botConfig,
-                            rows_per_page: parseInt(e.target.value) || 10,
-                          })
-                        }
-                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-3 border min-h-[44px]"
-                      />
-                      <p className="mt-1 text-xs text-gray-500">
-                        Количество записей в таблицах по умолчанию
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Автоархивация задач
-                      </label>
-                      <select
-                        value={botConfig.auto_archive_day_of_week || 0}
-                        onChange={(e) =>
-                          setBotConfig({
-                            ...botConfig,
-                            auto_archive_day_of_week: parseInt(e.target.value) || 0,
-                          })
-                        }
-                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-3 border min-h-[44px]"
-                      >
-                        <option value="0">Отключено</option>
-                        <option value="1">Каждый понедельник</option>
-                        <option value="2">Каждый вторник</option>
-                        <option value="3">Каждую среду</option>
-                        <option value="4">Каждый четверг</option>
-                        <option value="5">Каждую пятницу</option>
-                        <option value="6">Каждую субботу</option>
-                        <option value="7">Каждое воскресенье</option>
-                      </select>
-                      <p className="mt-1 text-xs text-gray-500">
-                        Задачи будут автоматически архивироваться в выбранный день недели
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Notifications Settings Tab */}
-              {activeTab === 'notifications' && (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center">
-                      <BellIcon className="w-6 h-6 text-purple-500 mr-3" />
-                      <h3 className="text-lg font-semibold text-gray-900">Настройки уведомлений</h3>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setShowDetailedNotifications(!showDetailedNotifications)}
-                      className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
-                    >
-                      {showDetailedNotifications ? (
-                        <>
-                          <ChevronUpIcon className="w-4 h-4 mr-2" />
-                          Скрыть детальные настройки
-                        </>
-                      ) : (
-                        <>
-                          <ChevronDownIcon className="w-4 h-4 mr-2" />
-                          Показать детальные настройки
-                        </>
-                      )}
-                    </button>
-                  </div>
-
-                  {!showDetailedNotifications && (
-                    <>
-                      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-4">
-                        <div className="flex">
-                          <InformationCircleIcon className="w-5 h-5 text-blue-600 mr-2 flex-shrink-0" />
-                          <div>
-                            <h4 className="text-sm font-medium text-blue-800 mb-1">Детальные настройки доступны</h4>
-                            <p className="text-sm text-blue-700">
-                              Для настройки времени уведомлений (например, за 49 минут до дедлайна), включения/отключения каналов, выбора получателей и времени отчётов нажмите <strong>Показать детальные настройки</strong>.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
+                      <h2 className="text-xl font-semibold text-gray-900 mb-4 text-red-700">Опасная зона</h2>
 
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
                           <div>
-                            <h4 className="font-medium text-gray-900">Просроченные задачи</h4>
-                            <p className="text-sm text-gray-500">Уведомлять о задачах с истекшим сроком выполнения</p>
+                            <h4 className="font-medium text-gray-900">Проверка бота</h4>
+                            <p className="text-sm text-gray-500">Отправить тестовое сообщение для проверки связи</p>
                           </div>
-                          <input
-                            type="checkbox"
-                            checked={(botConfig as any).notification_types?.task_overdue}
-                            onChange={(e) => setBotConfig({
-                              ...botConfig,
-                              notification_types: {
-                                ...(botConfig as any).notification_types,
-                                task_overdue: e.target.checked
-                              }
-                            })}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                          />
+                          <button onClick={handleTestBot} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium">
+                            Проверить
+                          </button>
                         </div>
 
-                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <div className="bg-red-50 p-6 rounded-xl border border-red-100 flex items-start justify-between">
                           <div>
-                            <h4 className="font-medium text-gray-900">Опоздания на смены</h4>
-                            <p className="text-sm text-gray-500">Уведомлять об опозданиях сотрудников</p>
+                            <h4 className="font-medium text-red-900">Режим обслуживания</h4>
+                            <p className="text-sm text-red-700 mb-2">Временно заблокировать доступ для всех пользователей кроме администраторов.</p>
+                            <label className="flex items-center mt-2">
+                              <input
+                                type="checkbox"
+                                checked={(botConfig as any).maintenance_mode || false}
+                                onChange={(e) => setBotConfig({ ...botConfig, maintenance_mode: e.target.checked })}
+                                className="h-4 w-4 text-red-600 focus:ring-red-500 border-red-300 rounded"
+                              />
+                              <span className="ml-2 text-sm font-medium text-red-800">Активировать режим</span>
+                            </label>
                           </div>
-                          <input
-                            type="checkbox"
-                            checked={(botConfig as any).notification_types?.shift_late}
-                            onChange={(e) => setBotConfig({
-                              ...botConfig,
-                              notification_types: {
-                                ...(botConfig as any).notification_types,
-                                shift_late: e.target.checked
-                              }
-                            })}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                          />
-                        </div>
-
-                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                          <div>
-                            <h4 className="font-medium text-gray-900">Выполненные задачи</h4>
-                            <p className="text-sm text-gray-500">Уведомлять о выполнении задач</p>
-                          </div>
-                          <input
-                            type="checkbox"
-                            checked={(botConfig as any).notification_types?.task_completed}
-                            onChange={(e) => setBotConfig({
-                              ...botConfig,
-                              notification_types: {
-                                ...(botConfig as any).notification_types,
-                                task_completed: e.target.checked
-                              }
-                            })}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                          />
-                        </div>
-
-                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                          <div>
-                            <h4 className="font-medium text-gray-900">Ошибки системы</h4>
-                            <p className="text-sm text-gray-500">Уведомлять о системных ошибках</p>
-                          </div>
-                          <input
-                            type="checkbox"
-                            checked={(botConfig as any).notification_types?.system_errors}
-                            onChange={(e) => setBotConfig({
-                              ...botConfig,
-                              notification_types: {
-                                ...(botConfig as any).notification_types,
-                                system_errors: e.target.checked
-                              }
-                            })}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                          />
+                          <WrenchIcon className="w-8 h-8 text-red-200" />
                         </div>
                       </div>
-                    </>
-                  )}
-
-                  {showDetailedNotifications && (
-                    <div className="border-t border-gray-200 pt-6">
-                      <NotificationSettingsContent dealershipId={selectedDealershipId} />
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Maintenance Tab */}
-              {activeTab === 'maintenance' && (
-                <div className="space-y-6">
-                  <div className="flex items-center mb-4">
-                    <WrenchIcon className="w-6 h-6 text-red-500 mr-3" />
-                    <h3 className="text-lg font-semibold text-gray-900">Обслуживание системы</h3>
-                  </div>
-
-                  <div className="space-y-6">
-                    {/* Clear old tasks is currently disabled/hidden as per request
-                    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                      <div className="flex items-center mb-2">
-                        <ExclamationTriangleIcon className="w-5 h-5 text-yellow-600 mr-2" />
-                        <h4 className="font-medium text-yellow-800">Очистка старых задач</h4>
-                      </div>
-                      <p className="text-sm text-yellow-700 mb-4">
-                        Удаление старых архивных задач для освобождения места в базе данных
-                      </p>
-                      <button
-                        type="button"
-                        onClick={handleClearOldTasks}
-                        disabled={clearTasksMutation.isPending}
-                        className="inline-flex items-center px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors disabled:opacity-50"
-                      >
-                        <TrashIcon className="w-4 h-4 mr-2" />
-                        {clearTasksMutation.isPending ? 'Очистка...' : 'Очистить старые задачи'}
-                      </button>
-                    </div>
-                    */}
-
-                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                      <div className="flex items-center mb-2">
-                        <InformationCircleIcon className="w-5 h-5 text-blue-600 mr-2" />
-                        <h4 className="font-medium text-blue-800">Проверка подключения к боту</h4>
-                      </div>
-                      <p className="text-sm text-blue-700 mb-4">
-                        Проверить работоспособность подключения к Telegram боту
-                      </p>
-                      <button
-                        type="button"
-                        onClick={handleTestBot}
-                        disabled={testBotMutation.isPending}
-                        className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-                      >
-                        <ArrowPathIcon className="w-4 h-4 mr-2" />
-                        {testBotMutation.isPending ? 'Проверка...' : 'Проверить подключение'}
-                      </button>
-                    </div>
-
-                    <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                      <div className="flex items-center mb-2">
-                        <ExclamationTriangleIcon className="w-5 h-5 text-red-600 mr-2" />
-                        <h4 className="font-medium text-red-800">Режим обслуживания</h4>
-                      </div>
-                      <p className="text-sm text-red-700 mb-4">
-                        Отключение доступа пользователей к системе для технических работ
-                      </p>
-                      <label className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={(botConfig as any).maintenance_mode}
-                          onChange={(e) => setBotConfig({
-                            ...botConfig,
-                            maintenance_mode: e.target.checked
-                          })}
-                          className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
-                        />
-                        <span className="ml-2 text-sm text-red-700">
-                          Включить режим обслуживания
-                        </span>
-                      </label>
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
 
-            {/* Form Actions */}
-            <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-between items-center">
-              <div className="text-sm text-gray-500">
-                * Обязательные поля для сохранения
               </div>
-              <div className="flex flex-col sm:flex-row gap-3">
+
+              {/* Sticky Footer */}
+              <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 md:px-8 flex items-center justify-between z-10">
+                <div className="text-xs text-gray-400 hidden sm:block">
+                  Изменения вступают в силу немедленно после сохранения
+                </div>
                 <button
                   type="submit"
                   disabled={updateShiftConfigMutation.isPending || updateBotConfigMutation.isPending}
-                  className="inline-flex items-center px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                  className="w-full sm:w-auto px-6 py-2.5 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 focus:ring-4 focus:ring-blue-100 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center shadow-lg shadow-blue-200"
                 >
-                  <CheckCircleIcon className="w-4 h-4 mr-2" />
-                  {updateShiftConfigMutation.isPending || updateBotConfigMutation.isPending ? 'Сохранение...' : 'Сохранить настройки'}
+                  {updateShiftConfigMutation.isPending || updateBotConfigMutation.isPending ? (
+                    <ArrowPathIcon className="w-5 h-5 animate-spin mr-2" />
+                  ) : (
+                    <CheckCircleIcon className="w-5 h-5 mr-2" />
+                  )}
+                  {updateShiftConfigMutation.isPending || updateBotConfigMutation.isPending ? 'Сохранение...' : 'Сохранить изменения'}
                 </button>
-                {selectedDealershipId && config?.inherited_fields && config.inherited_fields.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      // Reset to global defaults
-                      const resetConfig = {
-                        ...shiftConfig,
-                        shift_1_start_time: config.global_settings.shift_start_time || '09:00',
-                        shift_1_end_time: config.global_settings.shift_end_time || '18:00',
-                        late_tolerance_minutes: config.global_settings.late_tolerance_minutes || 15,
-                      };
-                      setShiftConfig(resetConfig);
-                    }}
-                    className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
-                  >
-                    <ArrowPathIcon className="w-4 h-4 mr-2" />
-                    Сбросить к глобальным
-                  </button>
-                )}
               </div>
-            </div>
-
-            {/* Error Message */}
-            {(updateShiftConfigMutation.isError || updateBotConfigMutation.isError) && (
-              <div className="px-6 pb-4">
-                <div className="rounded-lg bg-red-50 border border-red-200 p-4">
-                  <div className="flex items-center">
-                    <ExclamationTriangleIcon className="w-5 h-5 text-red-500 mr-2" />
-                    <p className="text-sm text-red-700">
-                      Ошибка сохранения настроек: {(updateShiftConfigMutation.error as any)?.response?.data?.message || (updateBotConfigMutation.error as any)?.response?.data?.message || 'Неизвестная ошибка'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </form>
+            </form>
+          </div>
         </div>
       )}
     </div>

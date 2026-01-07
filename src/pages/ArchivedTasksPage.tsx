@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { archivedTasksApi } from '../api/archivedTasks';
 import { usePermissions } from '../hooks/usePermissions';
 import { useResponsiveViewMode } from '../hooks/useResponsiveViewMode';
+import { usePagination } from '../hooks/usePagination';
 import { DealershipSelector } from '../components/common/DealershipSelector';
 import type { ArchivedTask, ArchivedTaskFilters } from '../types/archivedTask';
 import { format } from 'date-fns';
@@ -28,6 +29,7 @@ import {
 export const ArchivedTasksPage: React.FC = () => {
   const permissions = usePermissions();
   const queryClient = useQueryClient();
+  const { limit } = usePagination();
   const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'cards');
   const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(1);
@@ -44,9 +46,9 @@ export const ArchivedTasksPage: React.FC = () => {
   }, [filters]);
 
   const { data: tasksData, isLoading, error } = useQuery({
-    queryKey: ['archived-tasks', filters, page],
+    queryKey: ['archived-tasks', filters, page, limit],
     queryFn: () => {
-      const cleanedFilters: ArchivedTaskFilters = { page, per_page: 20 };
+      const cleanedFilters: ArchivedTaskFilters = { page, per_page: limit };
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== '' && value !== null) {
           (cleanedFilters as Record<string, unknown>)[key] = value;

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDealerships, useDeleteDealership } from '../../hooks/useDealerships';
 import { usePermissions } from '../../hooks/usePermissions';
+import { usePagination } from '../../hooks/usePagination';
 import type { Dealership } from '../../types/dealership';
 import {
   MagnifyingGlassIcon,
@@ -21,6 +22,7 @@ interface DealershipListProps {
 
 export const DealershipList: React.FC<DealershipListProps> = ({ onEdit }) => {
   const { canManageDealerships } = usePermissions();
+  const { limit } = usePagination();
   const [searchInput, setSearchInput] = useState('');
   const [filters, setFilters] = useState({
     search: '',
@@ -30,7 +32,7 @@ export const DealershipList: React.FC<DealershipListProps> = ({ onEdit }) => {
   const [dealershipToDelete, setDealershipToDelete] = useState<Dealership | null>(null);
   const [isSearchLoading, setIsSearchLoading] = useState(false);
 
-  const { data, isLoading, error } = useDealerships(filters);
+  const { data, isLoading, error } = useDealerships({ ...filters, per_page: limit });
 
   // Обработчик изменения ввода с useCallback для оптимизации
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {

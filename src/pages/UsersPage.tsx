@@ -4,6 +4,7 @@ import { usersApi } from '../api/users';
 import { usePermissions } from '../hooks/usePermissions';
 import { useResponsiveViewMode } from '../hooks/useResponsiveViewMode';
 import { useAuth } from '../hooks/useAuth';
+import { usePagination } from '../hooks/usePagination';
 import { UserModal } from '../components/users/UserModal';
 import { formatPhoneNumber } from '../utils/phoneFormatter';
 import type { User } from '../types/user';
@@ -30,6 +31,7 @@ import {
 export const UsersPage: React.FC = () => {
   const permissions = usePermissions();
   const { user: currentUser } = useAuth();
+  const { limit } = usePagination();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -54,8 +56,8 @@ export const UsersPage: React.FC = () => {
   });
 
   const { data: usersData, isLoading, error } = useQuery({
-    queryKey: ['users', filters],
-    queryFn: () => usersApi.getUsers(filters),
+    queryKey: ['users', filters, limit],
+    queryFn: () => usersApi.getUsers({ ...filters, per_page: limit }),
   });
 
   const deleteMutation = useMutation({

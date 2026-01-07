@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { tasksApi } from '../api/tasks';
 import { usePermissions } from '../hooks/usePermissions';
 import { useResponsiveViewMode } from '../hooks/useResponsiveViewMode';
+import { usePagination } from '../hooks/usePagination';
 import { TaskModal } from '../components/tasks/TaskModal';
 import { TaskDetailsModal } from '../components/tasks/TaskDetailsModal';
 import { DealershipSelector } from '../components/common/DealershipSelector';
@@ -43,6 +44,7 @@ export const TasksPage: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
   const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'grid');
   const [page, setPage] = useState(1);
+  const { limit } = usePagination();
   const [filters, setFilters] = useState({
     search: searchParams.get('search') || '',
     status: searchParams.get('status') || '',
@@ -61,7 +63,7 @@ export const TasksPage: React.FC = () => {
   }, [filters]);
 
   const { data: tasksData, isLoading, error } = useQuery({
-    queryKey: ['tasks', filters, page],
+    queryKey: ['tasks', filters, page, limit],
     queryFn: () => {
       // Clean filters: remove empty strings, null values, and empty arrays
       const cleanedFilters: {
@@ -74,8 +76,9 @@ export const TasksPage: React.FC = () => {
         dealership_id?: number;
         tags?: string[];
         priority?: string;
+        per_page?: number;
         page?: number;
-      } = { page };
+      } = { page, per_page: limit };
 
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== null && value !== undefined && value !== '') {
@@ -686,8 +689,8 @@ export const TasksPage: React.FC = () => {
                           value={task.status === 'overdue' ? 'pending' : task.status}
                           onChange={(e) => handleStatusChange(task, e.target.value)}
                           className={`w-full appearance-none text-xs font-medium px-3 py-2 rounded-lg border cursor-pointer transition-all focus:ring-2 focus:ring-offset-1 text-center ${task.status === 'completed'
-                              ? 'bg-green-50 border-green-300 text-green-700 focus:ring-green-500'
-                              : 'bg-yellow-50 border-yellow-300 text-yellow-700 focus:ring-yellow-500'
+                            ? 'bg-green-50 border-green-300 text-green-700 focus:ring-green-500'
+                            : 'bg-yellow-50 border-yellow-300 text-yellow-700 focus:ring-yellow-500'
                             }`}
                         >
                           <option value="pending">Ожидает</option>

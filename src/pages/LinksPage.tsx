@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { linksApi } from '../api/links';
 import { usePermissions } from '../hooks/usePermissions';
 import { useResponsiveViewMode } from '../hooks/useResponsiveViewMode';
+import { usePagination } from '../hooks/usePagination';
 import type { Link, CreateLinkRequest } from '../types/link';
 import {
   PlusIcon,
@@ -18,16 +19,21 @@ import {
   DocumentTextIcon,
   ChartBarIcon,
   UserGroupIcon,
-  XCircleIcon
+  XCircleIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon
 } from '@heroicons/react/24/outline';
 
 export const LinksPage: React.FC = () => {
   const permissions = usePermissions();
   const queryClient = useQueryClient();
+  const { limit } = usePagination();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLink, setSelectedLink] = useState<Link | null>(null);
   const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('grid', 'grid');
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [page, setPage] = useState(1);
   const [formData, setFormData] = useState<CreateLinkRequest>({
     title: '',
     url: '',
@@ -35,9 +41,22 @@ export const LinksPage: React.FC = () => {
     category: 'general',
   });
 
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setPage(1); // Reset to page 1 on search
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   const { data: linksData, isLoading, error } = useQuery({
-    queryKey: ['links'],
-    queryFn: () => linksApi.getLinks(),
+    queryKey: ['links', page, limit, debouncedSearch],
+    queryFn: () => linksApi.getLinks({
+      page,
+      per_page: limit,
+      search: debouncedSearch
+    }),
   });
 
   const createMutation = useMutation({
@@ -101,13 +120,9 @@ export const LinksPage: React.FC = () => {
     }
   };
 
-  const filteredLinks = linksData?.filter(link =>
-    link.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    link.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    link.url.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
-
-  const groupedLinks = filteredLinks.reduce((acc, link) => {
+  // Grouping logic (simplified for paginated data)
+  // Note: Grouping happens only for current page data
+  const groupedLinks = (linksData?.data || []).reduce((acc, link) => {
     const category = link.category || 'general';
     if (!acc[category]) acc[category] = [];
     acc[category].push(link);
@@ -225,7 +240,7 @@ export const LinksPage: React.FC = () => {
             <p className="text-red-800">Ошибка загрузки ссылок</p>
           </div>
         </div>
-      ) : filteredLinks.length === 0 ? (
+      ) : linksData?.data.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
           <LinkIcon className="w-16 h-16 mx-auto text-gray-300 mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -250,11 +265,11 @@ export const LinksPage: React.FC = () => {
                       {getCategoryLabel(category)}
                     </h2>
                     <span className="ml-3 text-sm text-gray-500">
-                      {categoryLinks.length} ссылок
+                      {(categoryLinks as Link[]).length} ссылок
                     </span>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {categoryLinks.map((link) => (
+                    {(categoryLinks as Link[]).map((link) => (
                       <div
                         key={link.id}
                         className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-200 hover:border-blue-300 group"
@@ -316,7 +331,7 @@ export const LinksPage: React.FC = () => {
           {viewMode === 'list' && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
               <div className="space-y-4">
-                {filteredLinks.map((link) => (
+                {linksData?.data.map((link) => (
                   <div key={link.id} className="p-5 rounded-lg border border-gray-200 hover:shadow-sm hover:border-blue-200 transition-all">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center flex-1 min-w-0 pr-4">
@@ -370,6 +385,68 @@ export const LinksPage: React.FC = () => {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {linksData && linksData.last_page > 1 && (
+            <div className="mt-8 flex items-center justify-between border-t border-gray-200 pt-6">
+              <div className="flex-1 flex justify-between sm:hidden">
+                <button
+                  onClick={() => setPage(page - 1)}
+                  disabled={page === 1}
+                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Назад
+                </button>
+                <button
+                  onClick={() => setPage(page + 1)}
+                  disabled={page === linksData.last_page}
+                  className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Вперед
+                </button>
+              </div>
+              <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm text-gray-700">
+                    Показано <span className="font-medium">{(page - 1) * limit + 1}</span> - <span className="font-medium">{Math.min(page * limit, linksData.total)}</span> из <span className="font-medium">{linksData.total}</span> результатов
+                  </p>
+                </div>
+                <div>
+                  <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                    <button
+                      onClick={() => setPage(page - 1)}
+                      disabled={page === 1}
+                      className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                    >
+                      <span className="sr-only">Previous</span>
+                      <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
+                    </button>
+                    {/* Simple page numbers */}
+                    {[...Array(linksData.last_page)].map((_, i) => (
+                      <button
+                        key={i + 1}
+                        onClick={() => setPage(i + 1)}
+                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${page === i + 1
+                          ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
+                          : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                          }`}
+                      >
+                        {i + 1}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => setPage(page + 1)}
+                      disabled={page === linksData.last_page}
+                      className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                    >
+                      <span className="sr-only">Next</span>
+                      <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
+                    </button>
+                  </nav>
+                </div>
               </div>
             </div>
           )}
