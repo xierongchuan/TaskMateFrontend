@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usersApi } from '../api/users';
 import { usePermissions } from '../hooks/usePermissions';
+import { useResponsiveViewMode } from '../hooks/useResponsiveViewMode';
 import { useAuth } from '../hooks/useAuth';
 import { UserModal } from '../components/users/UserModal';
 import { formatPhoneNumber } from '../utils/phoneFormatter';
@@ -21,7 +22,9 @@ import {
   TrashIcon,
   ShieldCheckIcon,
   EyeIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  ListBulletIcon,
+  Squares2X2Icon
 } from '@heroicons/react/24/outline';
 
 export const UsersPage: React.FC = () => {
@@ -30,7 +33,7 @@ export const UsersPage: React.FC = () => {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [viewMode, setViewMode] = useState<'list' | 'cards'>('list');
+  const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'cards');
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<{
     search: string;
@@ -156,26 +159,30 @@ export const UsersPage: React.FC = () => {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="flex items-center bg-white rounded-lg border border-gray-200 w-full sm:w-auto">
-              <button
-                onClick={() => setViewMode('list')}
-                className={`flex-1 sm:flex-initial px-3 py-2 text-sm font-medium rounded-l-lg ${viewMode === 'list'
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'text-gray-500 hover:text-gray-700'
-                  }`}
-              >
-                Список
-              </button>
-              <button
-                onClick={() => setViewMode('cards')}
-                className={`flex-1 sm:flex-initial px-3 py-2 text-sm font-medium rounded-r-lg ${viewMode === 'cards'
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'text-gray-500 hover:text-gray-700'
-                  }`}
-              >
-                Карточки
-              </button>
-            </div>
+            {!isMobile && (
+              <div className="flex items-center bg-white rounded-lg border border-gray-200 w-full sm:w-auto">
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`flex-1 sm:flex-initial px-3 py-2 text-sm font-medium rounded-l-lg ${viewMode === 'list'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  title="Список"
+                >
+                  <ListBulletIcon className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('cards')}
+                  className={`flex-1 sm:flex-initial px-3 py-2 text-sm font-medium rounded-r-lg ${viewMode === 'cards'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  title="Карточки"
+                >
+                  <Squares2X2Icon className="w-4 h-4" />
+                </button>
+              </div>
+            )}
             {permissions.canCreateUsers && (
               <button
                 onClick={handleCreate}

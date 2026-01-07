@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useShifts, useCurrentShifts } from '../hooks/useShifts';
-
+import { useResponsiveViewMode } from '../hooks/useResponsiveViewMode';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import type { ShiftsFilters } from '../types/shift';
@@ -8,14 +8,16 @@ import {
   BriefcaseIcon,
   ClockIcon,
   SunIcon,
-  StarIcon
+  StarIcon,
+  ListBulletIcon,
+  Squares2X2Icon,
 } from '@heroicons/react/24/outline';
-
 
 import { useSearchParams } from 'react-router-dom';
 
 export const ShiftsPage: React.FC = () => {
   const [searchParams] = useSearchParams();
+  const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'cards');
   const [filters, setFilters] = useState<ShiftsFilters>({
     status: searchParams.get('status') || '',
     is_late: searchParams.get('is_late') === 'true' ? true : searchParams.get('is_late') === 'false' ? false : undefined,
@@ -106,11 +108,21 @@ export const ShiftsPage: React.FC = () => {
 
   return (
     <div className="px-4 py-6 sm:px-0">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">Смены</h1>
-        <p className="mt-2 text-sm text-gray-700">
-          Отслеживание смен сотрудников в реальном времени
-        </p>
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-900">Смены</h1>
+          <p className="mt-2 text-sm text-gray-700">Отслеживание смен сотрудников в реальном времени</p>
+        </div>
+        {!isMobile && (
+          <div className="flex rounded-lg border border-gray-300 overflow-hidden">
+            <button onClick={() => setViewMode('list')} className={`px-3 py-2 text-sm font-medium ${viewMode === 'list' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}>
+              <ListBulletIcon className="w-4 h-4" />
+            </button>
+            <button onClick={() => setViewMode('cards')} className={`px-3 py-2 text-sm font-medium ${viewMode === 'cards' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}>
+              <Squares2X2Icon className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Shift Control Component */}
@@ -257,49 +269,57 @@ export const ShiftsPage: React.FC = () => {
         <div className="bg-white shadow overflow-hidden sm:rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <h2 className="text-lg font-medium text-gray-900 mb-4">История смен</h2>
-            <div className="space-y-4">
-              {shiftsData?.data.map((shift) => (
-                <div key={shift.id} className="p-4 rounded-lg border border-gray-200 hover:shadow-sm transition-all">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="text-base font-medium text-gray-900">
-                          {shift.user?.full_name}
-                        </h3>
-                        {getStatusBadge(shift.status)}
-                        {shift.is_late && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-                            Опоздание {shift.late_minutes} мин
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-sm text-gray-500 space-y-1">
-                        <div className="flex flex-wrap gap-x-4">
-                          <span>Начало: {format(new Date(shift.shift_start), 'PPp', { locale: ru })}</span>
-                          {shift.shift_end && (
-                            <span>Конец: {format(new Date(shift.shift_end), 'PPp', { locale: ru })}</span>
-                          )}
+
+            {/* List View */}
+            {viewMode === 'list' && (
+              <div className="space-y-4">
+                {shiftsData?.data.map((shift) => (
+                  <div key={shift.id} className="p-4 rounded-lg border border-gray-200 hover:shadow-sm transition-all">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="text-base font-medium text-gray-900">{shift.user?.full_name}</h3>
+                          {getStatusBadge(shift.status)}
+                          {shift.is_late && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">Опоздание {shift.late_minutes} мин</span>}
                         </div>
-                        <div className="flex flex-wrap gap-x-4 items-center">
-                          <div className="flex items-center">
-                            <span className="mr-2 text-sm text-gray-500">Тип:</span>
-                            {getShiftTypeBadge(shift.shift_type)}
+                        <div className="text-sm text-gray-500 space-y-1">
+                          <div className="flex flex-wrap gap-x-4">
+                            <span>Начало: {format(new Date(shift.shift_start), 'PPp', { locale: ru })}</span>
+                            {shift.shift_end && <span>Конец: {format(new Date(shift.shift_end), 'PPp', { locale: ru })}</span>}
                           </div>
-                          {shift.break_duration && (
-                            <span>Перерыв: {shift.break_duration} мин</span>
-                          )}
+                          <div className="flex flex-wrap gap-x-4 items-center">
+                            <div className="flex items-center"><span className="mr-2 text-sm text-gray-500">Тип:</span>{getShiftTypeBadge(shift.shift_type)}</div>
+                            {shift.break_duration && <span>Перерыв: {shift.break_duration} мин</span>}
+                          </div>
+                          {shift.dealership && <div className="text-gray-600">Автосалон: {shift.dealership.name}</div>}
                         </div>
-                        {shift.dealership && (
-                          <div className="text-gray-600">
-                            Автосалон: {shift.dealership.name}
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
+
+            {/* Cards View */}
+            {viewMode === 'cards' && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {shiftsData?.data.map((shift) => (
+                  <div key={shift.id} className="p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-medium text-gray-900">{shift.user?.full_name}</h3>
+                      {getStatusBadge(shift.status)}
+                    </div>
+                    <div className="text-sm text-gray-500 space-y-2">
+                      <div>Начало: {format(new Date(shift.shift_start), 'PPp', { locale: ru })}</div>
+                      {shift.shift_end && <div>Конец: {format(new Date(shift.shift_end), 'PPp', { locale: ru })}</div>}
+                      <div className="flex items-center mt-2"><span className="mr-1">Тип:</span>{getShiftTypeBadge(shift.shift_type)}</div>
+                      {shift.is_late && <div className="text-red-600 font-medium">Опоздание: {shift.late_minutes} мин</div>}
+                      {shift.dealership && <div>Автосалон: {shift.dealership.name}</div>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}

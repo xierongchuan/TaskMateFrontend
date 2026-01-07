@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { linksApi } from '../api/links';
 import { usePermissions } from '../hooks/usePermissions';
+import { useResponsiveViewMode } from '../hooks/useResponsiveViewMode';
 import type { Link, CreateLinkRequest } from '../types/link';
 import {
   PlusIcon,
@@ -25,7 +26,7 @@ export const LinksPage: React.FC = () => {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLink, setSelectedLink] = useState<Link | null>(null);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('grid', 'grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState<CreateLinkRequest>({
     title: '',
@@ -160,26 +161,28 @@ export const LinksPage: React.FC = () => {
             </p>
           </div>
           <div className="flex items-center space-x-3">
-            <div className="flex items-center bg-white rounded-lg border border-gray-200">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`px-3 py-2 text-sm font-medium rounded-l-lg ${viewMode === 'grid'
+            {!isMobile && (
+              <div className="flex items-center bg-white rounded-lg border border-gray-200">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`px-3 py-2 text-sm font-medium rounded-l-lg ${viewMode === 'grid'
                     ? 'bg-blue-100 text-blue-700'
                     : 'text-gray-500 hover:text-gray-700'
-                  }`}
-              >
-                <Squares2X2Icon className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`px-3 py-2 text-sm font-medium rounded-r-lg ${viewMode === 'list'
+                    }`}
+                >
+                  <Squares2X2Icon className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`px-3 py-2 text-sm font-medium rounded-r-lg ${viewMode === 'list'
                     ? 'bg-blue-100 text-blue-700'
                     : 'text-gray-500 hover:text-gray-700'
-                  }`}
-              >
-                <ListBulletIcon className="w-4 h-4" />
-              </button>
-            </div>
+                    }`}
+                >
+                  <ListBulletIcon className="w-4 h-4" />
+                </button>
+              </div>
+            )}
             {permissions.canManageTasks && (
               <button
                 onClick={handleCreate}

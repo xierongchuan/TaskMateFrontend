@@ -25,7 +25,11 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ExclamationTriangleIcon,
+  ListBulletIcon,
+  Squares2X2Icon,
 } from '@heroicons/react/24/outline';
+
+import { useResponsiveViewMode } from '../hooks/useResponsiveViewMode';
 
 export const TaskGeneratorsPage: React.FC = () => {
   const permissions = usePermissions();
@@ -33,6 +37,7 @@ export const TaskGeneratorsPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedGenerator, setSelectedGenerator] = useState<TaskGenerator | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'cards');
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<TaskGeneratorFilters>({
     search: '',
@@ -164,6 +169,30 @@ export const TaskGeneratorsPage: React.FC = () => {
             </p>
           </div>
           <div className="flex items-center space-x-3">
+            {!isMobile && (
+              <div className="flex items-center bg-white rounded-lg border border-gray-200">
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`px-3 py-2 text-sm font-medium rounded-l-lg ${viewMode === 'list'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  title="Список"
+                >
+                  <ListBulletIcon className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('cards')}
+                  className={`px-3 py-2 text-sm font-medium rounded-r-lg ${viewMode === 'cards'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  title="Карточки"
+                >
+                  <Squares2X2Icon className="w-4 h-4" />
+                </button>
+              </div>
+            )}
             {permissions.canManageTasks && (
               <button
                 onClick={handleCreate}
@@ -284,123 +313,205 @@ export const TaskGeneratorsPage: React.FC = () => {
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-            <div className="space-y-4">
+          {/* List View */}
+          {viewMode === 'list' && (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+              <div className="space-y-4">
+                {generators.map((generator) => (
+                  <div
+                    key={generator.id}
+                    className={`p-5 rounded-lg border hover:shadow-sm transition-all ${generator.is_active
+                      ? 'bg-white border-gray-200'
+                      : 'bg-gray-50 border-gray-300 opacity-75'
+                      }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0 pr-4">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-lg font-semibold text-gray-900 truncate">
+                            {generator.title}
+                          </h3>
+                          {getStatusBadge(generator.is_active)}
+                          {getRecurrenceBadge(generator.recurrence)}
+                        </div>
+
+                        {generator.description && (
+                          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                            {generator.description}
+                          </p>
+                        )}
+
+                        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-500">
+                          <span className="flex items-center">
+                            <ClockIcon className="w-4 h-4 mr-1" />
+                            {generator.recurrence_time?.slice(0, 5)} → {generator.deadline_time?.slice(0, 5)}
+                          </span>
+                          <span className="flex items-center">
+                            <UserIcon className="w-4 h-4 mr-1" />
+                            {generator.task_type === 'individual' ? 'Индивидуальная' : 'Групповая'}
+                          </span>
+                          <span className="flex items-center">
+                            <CalendarIcon className="w-4 h-4 mr-1" />
+                            С {format(new Date(generator.start_date), 'dd.MM.yyyy', { locale: ru })}
+                            {generator.end_date && ` по ${format(new Date(generator.end_date), 'dd.MM.yyyy', { locale: ru })}`}
+                          </span>
+                          <span className="flex items-center">
+                            <BuildingOfficeIcon className="w-4 h-4 mr-1" />
+                            {generator.dealership?.name || 'Все салоны'}
+                          </span>
+                          {generator.total_generated !== undefined && (
+                            <span className="flex items-center">
+                              <ChartBarIcon className="w-4 h-4 mr-1" />
+                              Создано: {generator.total_generated}
+                            </span>
+                          )}
+                        </div>
+
+                        {generator.assignments && generator.assignments.length > 0 && (
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {generator.assignments.slice(0, 5).map((assignment) => (
+                              <span
+                                key={assignment.id}
+                                className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800"
+                              >
+                                <UserIcon className="w-3 h-3 mr-1" />
+                                {assignment.user?.full_name}
+                              </span>
+                            ))}
+                            {generator.assignments.length > 5 && (
+                              <span className="text-xs text-gray-500">
+                                +{generator.assignments.length - 5} ещё
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {permissions.canManageTasks && (
+                        <div className="flex flex-col space-y-2">
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => handlePauseResume(generator)}
+                              disabled={pauseMutation.isPending || resumeMutation.isPending}
+                              className={`inline-flex items-center px-3 py-1.5 border shadow-sm text-sm font-medium rounded-lg transition-colors ${generator.is_active
+                                ? 'border-yellow-300 text-yellow-700 bg-white hover:bg-yellow-50'
+                                : 'border-green-300 text-green-700 bg-white hover:bg-green-50'
+                                }`}
+                            >
+                              {generator.is_active ? (
+                                <>
+                                  <PauseIcon className="w-4 h-4 mr-1" />
+                                  Пауза
+                                </>
+                              ) : (
+                                <>
+                                  <PlayIcon className="w-4 h-4 mr-1" />
+                                  Запустить
+                                </>
+                              )}
+                            </button>
+                            <button
+                              onClick={() => handleEdit(generator)}
+                              className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                            >
+                              <PencilIcon className="w-4 h-4 mr-1" />
+                              Изменить
+                            </button>
+                            <button
+                              onClick={() => handleDelete(generator)}
+                              disabled={deleteMutation.isPending}
+                              className="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded-lg text-red-700 bg-white hover:bg-red-50 transition-colors disabled:opacity-50"
+                            >
+                              <TrashIcon className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Cards View */}
+          {viewMode === 'cards' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {generators.map((generator) => (
                 <div
                   key={generator.id}
-                  className={`p-5 rounded-lg border hover:shadow-sm transition-all ${generator.is_active
+                  className={`p-4 rounded-lg border hover:shadow-md transition-all ${generator.is_active
                     ? 'bg-white border-gray-200'
                     : 'bg-gray-50 border-gray-300 opacity-75'
                     }`}
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0 pr-4">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900 truncate">
-                          {generator.title}
-                        </h3>
-                        {getStatusBadge(generator.is_active)}
-                        {getRecurrenceBadge(generator.recurrence)}
-                      </div>
-
-                      {generator.description && (
-                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                          {generator.description}
-                        </p>
-                      )}
-
-                      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-500">
-                        <span className="flex items-center">
-                          <ClockIcon className="w-4 h-4 mr-1" />
-                          {generator.recurrence_time?.slice(0, 5)} → {generator.deadline_time?.slice(0, 5)}
-                        </span>
-                        <span className="flex items-center">
-                          <UserIcon className="w-4 h-4 mr-1" />
-                          {generator.task_type === 'individual' ? 'Индивидуальная' : 'Групповая'}
-                        </span>
-                        <span className="flex items-center">
-                          <CalendarIcon className="w-4 h-4 mr-1" />
-                          С {format(new Date(generator.start_date), 'dd.MM.yyyy', { locale: ru })}
-                          {generator.end_date && ` по ${format(new Date(generator.end_date), 'dd.MM.yyyy', { locale: ru })}`}
-                        </span>
-                        <span className="flex items-center">
-                          <BuildingOfficeIcon className="w-4 h-4 mr-1" />
-                          {generator.dealership?.name || 'Все салоны'}
-                        </span>
-                        {generator.total_generated !== undefined && (
-                          <span className="flex items-center">
-                            <ChartBarIcon className="w-4 h-4 mr-1" />
-                            Создано: {generator.total_generated}
-                          </span>
-                        )}
-                      </div>
-
-                      {generator.assignments && generator.assignments.length > 0 && (
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {generator.assignments.slice(0, 5).map((assignment) => (
-                            <span
-                              key={assignment.id}
-                              className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800"
-                            >
-                              <UserIcon className="w-3 h-3 mr-1" />
-                              {assignment.user?.full_name}
-                            </span>
-                          ))}
-                          {generator.assignments.length > 5 && (
-                            <span className="text-xs text-gray-500">
-                              +{generator.assignments.length - 5} ещё
-                            </span>
-                          )}
-                        </div>
-                      )}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {getStatusBadge(generator.is_active)}
+                      {getRecurrenceBadge(generator.recurrence)}
                     </div>
-
                     {permissions.canManageTasks && (
-                      <div className="flex flex-col space-y-2">
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => handlePauseResume(generator)}
-                            disabled={pauseMutation.isPending || resumeMutation.isPending}
-                            className={`inline-flex items-center px-3 py-1.5 border shadow-sm text-sm font-medium rounded-lg transition-colors ${generator.is_active
-                              ? 'border-yellow-300 text-yellow-700 bg-white hover:bg-yellow-50'
-                              : 'border-green-300 text-green-700 bg-white hover:bg-green-50'
-                              }`}
-                          >
-                            {generator.is_active ? (
-                              <>
-                                <PauseIcon className="w-4 h-4 mr-1" />
-                                Пауза
-                              </>
-                            ) : (
-                              <>
-                                <PlayIcon className="w-4 h-4 mr-1" />
-                                Запустить
-                              </>
-                            )}
-                          </button>
-                          <button
-                            onClick={() => handleEdit(generator)}
-                            className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-                          >
-                            <PencilIcon className="w-4 h-4 mr-1" />
-                            Изменить
-                          </button>
-                          <button
-                            onClick={() => handleDelete(generator)}
-                            disabled={deleteMutation.isPending}
-                            className="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded-lg text-red-700 bg-white hover:bg-red-50 transition-colors disabled:opacity-50"
-                          >
-                            <TrashIcon className="w-4 h-4" />
-                          </button>
-                        </div>
+                      <div className="flex space-x-1">
+                        <button
+                          onClick={() => handlePauseResume(generator)}
+                          disabled={pauseMutation.isPending || resumeMutation.isPending}
+                          className={`p-1.5 rounded ${generator.is_active
+                            ? 'text-yellow-600 hover:bg-yellow-50'
+                            : 'text-green-600 hover:bg-green-50'
+                            }`}
+                          title={generator.is_active ? 'Пауза' : 'Запустить'}
+                        >
+                          {generator.is_active ? <PauseIcon className="w-4 h-4" /> : <PlayIcon className="w-4 h-4" />}
+                        </button>
+                        <button
+                          onClick={() => handleEdit(generator)}
+                          className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded"
+                          title="Изменить"
+                        >
+                          <PencilIcon className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(generator)}
+                          disabled={deleteMutation.isPending}
+                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded disabled:opacity-50"
+                          title="Удалить"
+                        >
+                          <TrashIcon className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <h3 className="text-base font-semibold text-gray-900 truncate mb-2">
+                    {generator.title}
+                  </h3>
+
+                  {generator.description && (
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                      {generator.description}
+                    </p>
+                  )}
+
+                  <div className="text-sm text-gray-500 space-y-1">
+                    <div className="flex items-center">
+                      <ClockIcon className="w-4 h-4 mr-1" />
+                      {generator.recurrence_time?.slice(0, 5)} → {generator.deadline_time?.slice(0, 5)}
+                    </div>
+                    <div className="flex items-center">
+                      <BuildingOfficeIcon className="w-4 h-4 mr-1" />
+                      {generator.dealership?.name || 'Все салоны'}
+                    </div>
+                    {generator.total_generated !== undefined && (
+                      <div className="flex items-center">
+                        <ChartBarIcon className="w-4 h-4 mr-1" />
+                        Создано: {generator.total_generated}
                       </div>
                     )}
                   </div>
                 </div>
               ))}
             </div>
-          </div>
+          )}
 
           {/* Pagination */}
           {generatorsData && generatorsData.last_page > 1 && (

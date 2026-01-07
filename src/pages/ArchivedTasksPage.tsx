@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { archivedTasksApi } from '../api/archivedTasks';
 import { usePermissions } from '../hooks/usePermissions';
+import { useResponsiveViewMode } from '../hooks/useResponsiveViewMode';
 import { DealershipSelector } from '../components/common/DealershipSelector';
 import type { ArchivedTask, ArchivedTaskFilters } from '../types/archivedTask';
 import { format } from 'date-fns';
@@ -20,11 +21,14 @@ import {
   ChevronRightIcon,
   ExclamationTriangleIcon,
   TagIcon,
+  ListBulletIcon,
+  Squares2X2Icon,
 } from '@heroicons/react/24/outline';
 
 export const ArchivedTasksPage: React.FC = () => {
   const permissions = usePermissions();
   const queryClient = useQueryClient();
+  const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'cards');
   const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<ArchivedTaskFilters>({
@@ -115,6 +119,23 @@ export const ArchivedTasksPage: React.FC = () => {
             </p>
           </div>
           <div className="flex items-center space-x-3">
+            {/* View Toggle */}
+            {!isMobile && (
+              <div className="flex rounded-lg border border-gray-300 overflow-hidden">
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`px-3 py-2 text-sm font-medium ${viewMode === 'list' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                >
+                  <ListBulletIcon className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('cards')}
+                  className={`px-3 py-2 text-sm font-medium ${viewMode === 'cards' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                >
+                  <Squares2X2Icon className="w-4 h-4" />
+                </button>
+              </div>
+            )}
             <button
               onClick={handleExport}
               className="inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
@@ -239,80 +260,90 @@ export const ArchivedTasksPage: React.FC = () => {
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Задача
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Статус
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Дата архивации
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Автосалон
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Действия
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {tasks.map((task) => (
-                  <tr key={task.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium text-gray-900">{task.title}</span>
-                        {task.description && (
-                          <span className="text-sm text-gray-500 truncate max-w-xs">{task.description}</span>
-                        )}
-                        {task.tags && task.tags.length > 0 && (
-                          <div className="mt-1 flex flex-wrap gap-1">
-                            {task.tags.slice(0, 3).map((tag, idx) => (
-                              <span key={idx} className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-blue-100 text-blue-700">
-                                <TagIcon className="w-2.5 h-2.5 mr-0.5" />
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {getReasonBadge(task.archive_reason)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <div className="flex items-center">
-                        <CalendarIcon className="w-4 h-4 mr-1" />
-                        {format(new Date(task.archived_at), 'dd.MM.yyyy HH:mm', { locale: ru })}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <div className="flex items-center">
-                        <BuildingOfficeIcon className="w-4 h-4 mr-1" />
-                        {task.dealership?.name || '—'}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                      {permissions.canManageTasks && (
-                        <button
-                          onClick={() => handleRestore(task)}
-                          disabled={restoreMutation.isPending}
-                          className="inline-flex items-center px-3 py-1.5 border border-green-300 shadow-sm text-sm font-medium rounded-lg text-green-700 bg-white hover:bg-green-50 transition-colors disabled:opacity-50"
-                        >
-                          <ArrowUturnLeftIcon className="w-4 h-4 mr-1" />
-                          Восстановить
-                        </button>
-                      )}
-                    </td>
+          {/* List View */}
+          {viewMode === 'list' && (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Задача</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Статус</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата архивации</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Автосалон</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {tasks.map((task) => (
+                    <tr key={task.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-gray-900">{task.title}</span>
+                          {task.description && <span className="text-sm text-gray-500 truncate max-w-xs">{task.description}</span>}
+                          {task.tags && task.tags.length > 0 && (
+                            <div className="mt-1 flex flex-wrap gap-1">
+                              {task.tags.slice(0, 3).map((tag, idx) => (
+                                <span key={idx} className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-blue-100 text-blue-700">
+                                  <TagIcon className="w-2.5 h-2.5 mr-0.5" />{tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">{getReasonBadge(task.archive_reason)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <div className="flex items-center"><CalendarIcon className="w-4 h-4 mr-1" />{format(new Date(task.archived_at), 'dd.MM.yyyy HH:mm', { locale: ru })}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <div className="flex items-center"><BuildingOfficeIcon className="w-4 h-4 mr-1" />{task.dealership?.name || '—'}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                        {permissions.canManageTasks && (
+                          <button onClick={() => handleRestore(task)} disabled={restoreMutation.isPending} className="inline-flex items-center px-3 py-1.5 border border-green-300 shadow-sm text-sm font-medium rounded-lg text-green-700 bg-white hover:bg-green-50 transition-colors disabled:opacity-50">
+                            <ArrowUturnLeftIcon className="w-4 h-4 mr-1" />Восстановить
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Cards View */}
+          {viewMode === 'cards' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {tasks.map((task) => (
+                <div key={task.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="text-sm font-medium text-gray-900 line-clamp-2">{task.title}</h3>
+                    {getReasonBadge(task.archive_reason)}
+                  </div>
+                  {task.description && <p className="text-sm text-gray-500 line-clamp-2 mb-3">{task.description}</p>}
+                  {task.tags && task.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {task.tags.slice(0, 3).map((tag, idx) => (
+                        <span key={idx} className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-blue-100 text-blue-700">
+                          <TagIcon className="w-2.5 h-2.5 mr-0.5" />{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <div className="text-xs text-gray-500 space-y-1 mb-3">
+                    <div className="flex items-center"><CalendarIcon className="w-3.5 h-3.5 mr-1" />{format(new Date(task.archived_at), 'dd.MM.yyyy HH:mm', { locale: ru })}</div>
+                    <div className="flex items-center"><BuildingOfficeIcon className="w-3.5 h-3.5 mr-1" />{task.dealership?.name || '—'}</div>
+                  </div>
+                  {permissions.canManageTasks && (
+                    <button onClick={() => handleRestore(task)} disabled={restoreMutation.isPending} className="w-full inline-flex items-center justify-center px-3 py-2 border border-green-300 shadow-sm text-sm font-medium rounded-lg text-green-700 bg-white hover:bg-green-50 transition-colors disabled:opacity-50">
+                      <ArrowUturnLeftIcon className="w-4 h-4 mr-1" />Восстановить
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Pagination */}
           {tasksData && tasksData.last_page > 1 && (

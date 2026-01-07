@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { tasksApi } from '../api/tasks';
 import { usePermissions } from '../hooks/usePermissions';
+import { useResponsiveViewMode } from '../hooks/useResponsiveViewMode';
 import { TaskModal } from '../components/tasks/TaskModal';
 import { TaskDetailsModal } from '../components/tasks/TaskDetailsModal';
 import { DealershipSelector } from '../components/common/DealershipSelector';
@@ -25,7 +26,9 @@ import {
   ArrowPathIcon,
   BuildingOfficeIcon,
   ChevronLeftIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  ListBulletIcon,
+  Squares2X2Icon
 } from '@heroicons/react/24/outline';
 
 import { useSearchParams } from 'react-router-dom';
@@ -38,7 +41,7 @@ export const TasksPage: React.FC = () => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'grid');
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState({
     search: searchParams.get('search') || '',
@@ -286,26 +289,30 @@ export const TasksPage: React.FC = () => {
             </p>
           </div>
           <div className="flex items-center space-x-3">
-            <div className="flex items-center bg-white rounded-lg border border-gray-200">
-              <button
-                onClick={() => setViewMode('list')}
-                className={`px-3 py-2 text-sm font-medium rounded-l-lg ${viewMode === 'list'
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'text-gray-500 hover:text-gray-700'
-                  }`}
-              >
-                Список
-              </button>
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`px-3 py-2 text-sm font-medium rounded-r-lg ${viewMode === 'grid'
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'text-gray-500 hover:text-gray-700'
-                  }`}
-              >
-                Карточки
-              </button>
-            </div>
+            {!isMobile && (
+              <div className="flex items-center bg-white rounded-lg border border-gray-200">
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`px-3 py-2 text-sm font-medium rounded-l-lg ${viewMode === 'list'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  title="Список"
+                >
+                  <ListBulletIcon className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`px-3 py-2 text-sm font-medium rounded-r-lg ${viewMode === 'grid'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  title="Карточки"
+                >
+                  <Squares2X2Icon className="w-4 h-4" />
+                </button>
+              </div>
+            )}
             {permissions.canManageTasks && (
               <button
                 onClick={handleCreate}
