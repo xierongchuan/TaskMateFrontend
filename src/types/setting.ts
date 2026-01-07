@@ -22,7 +22,6 @@ export interface ShiftConfig {
   shift_2_start_time?: string;
   shift_2_end_time?: string;
   late_tolerance_minutes?: number;
-  break_duration_minutes?: number;
   work_days?: number[]; // [1,2,3,4,5] for Mon-Fri
   timezone?: string;
 }
@@ -59,7 +58,6 @@ export interface DealershipBotConfig {
   shift_2_start_time?: string;
   shift_2_end_time?: string;
   late_tolerance_minutes?: number;
-  break_duration_minutes?: number;
 }
 
 // Response type for dealership settings with fallback
@@ -91,7 +89,6 @@ export interface UpdateShiftConfigRequest {
   shift_2_start_time?: string;
   shift_2_end_time?: string;
   late_tolerance_minutes?: number;
-  break_duration_minutes?: number;
   dealership_id?: number;
 }
 

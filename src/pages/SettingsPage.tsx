@@ -34,7 +34,6 @@ export const SettingsPage: React.FC = () => {
     shift_2_start_time: '18:00',
     shift_2_end_time: '02:00',
     late_tolerance_minutes: 15,
-    break_duration_minutes: 60,
     work_days: [1, 2, 3, 4, 5],
     timezone: 'Europe/Moscow',
   });
@@ -397,15 +396,7 @@ export const SettingsPage: React.FC = () => {
                         <p className="mt-2 text-xs text-gray-400">Сотрудники могут опоздать на это время без штрафа</p>
                       </div>
 
-                      {/* Break Duration */}
-                      <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-                        <label className="block text-sm font-medium text-gray-900 mb-2">Обеденный перерыв</label>
-                        <div className="flex items-center gap-3">
-                          <input type="number" min="0" value={shiftConfig.break_duration_minutes || 0} onChange={(e) => setShiftConfig({ ...shiftConfig, break_duration_minutes: parseInt(e.target.value) || 0 })} className="block w-24 rounded-lg border-gray-300" />
-                          <span className="text-gray-500 text-sm">минут</span>
-                        </div>
-                        <p className="mt-2 text-xs text-gray-400">Стандартная продолжительность перерыва</p>
-                      </div>
+
                     </div>
                   </div>
                 )}
@@ -464,7 +455,12 @@ export const SettingsPage: React.FC = () => {
                 {activeTab === 'maintenance' && (
                   <div className="space-y-8 max-w-2xl">
                     <div>
-                      <h2 className="text-xl font-semibold text-gray-900 mb-4 text-red-700">Опасная зона</h2>
+                      <div className="flex items-center gap-3 mb-4">
+                        <h2 className="text-xl font-semibold text-red-700">Опасная зона</h2>
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
+                          Глобально
+                        </span>
+                      </div>
 
                       <div className="space-y-4">
                         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
