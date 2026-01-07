@@ -45,6 +45,22 @@ export const Layout: React.FC = () => {
                 >
                   Задачи
                 </Link>
+                {permissions.canManageTasks && (
+                  <Link
+                    to="/task-generators"
+                    className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 md:px-2 pt-1 border-b-2 text-xs md:text-sm font-medium truncate max-w-[80px] md:max-w-[100px] lg:max-w-none"
+                  >
+                    Генераторы
+                  </Link>
+                )}
+                {permissions.canManageTasks && (
+                  <Link
+                    to="/archived-tasks"
+                    className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 md:px-2 pt-1 border-b-2 text-xs md:text-sm font-medium truncate max-w-[80px] md:max-w-[100px] lg:max-w-none"
+                  >
+                    Архив
+                  </Link>
+                )}
                 <Link
                   to="/shifts"
                   className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 md:px-2 pt-1 border-b-2 text-xs md:text-sm font-medium truncate max-w-[80px] md:max-w-[100px] lg:max-w-none"
@@ -175,6 +191,24 @@ export const Layout: React.FC = () => {
             >
               Задачи
             </Link>
+            {permissions.canManageTasks && (
+              <Link
+                to="/task-generators"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300"
+              >
+                Генераторы
+              </Link>
+            )}
+            {permissions.canManageTasks && (
+              <Link
+                to="/archived-tasks"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300"
+              >
+                Архив
+              </Link>
+            )}
             <Link
               to="/shifts"
               onClick={() => setMobileMenuOpen(false)}

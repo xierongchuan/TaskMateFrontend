@@ -5,7 +5,7 @@ import { usersApi } from '../../api/users';
 import { DealershipSelector } from '../common/DealershipSelector';
 import { TaskNotificationSettings } from './TaskNotificationSettings';
 import { getRoleLabel } from '../../utils/roleTranslations';
-import type { Task, CreateTaskRequest, TaskRecurrence, TaskType, ResponseType, TaskPriority } from '../../types/task';
+import type { Task, CreateTaskRequest, TaskType, ResponseType, TaskPriority } from '../../types/task';
 
 /**
  * Convert ISO 8601 date string (with timezone) to datetime-local format (YYYY-MM-DDTHH:mm)
@@ -29,24 +29,6 @@ const toDateTimeLocalFormat = (isoString: string | null | undefined): string | u
   }
 };
 
-/**
- * Extract time (HH:mm) from ISO 8601 date string
- */
-const toTimeFormat = (isoString: string | null | undefined): string => {
-  if (!isoString) return '';
-  try {
-    const date = new Date(isoString);
-    if (isNaN(date.getTime())) return '';
-
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-
-    return `${hours}:${minutes}`;
-  } catch {
-    return '';
-  }
-};
-
 interface TaskModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -61,7 +43,6 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
     comment: '',
     task_type: 'individual',
     response_type: 'acknowledge',
-    recurrence: 'none',
     dealership_id: undefined,
     assignments: [],
     priority: 'medium',
@@ -98,10 +79,6 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
         comment: task.comment || '',
         task_type: task.task_type,
         response_type: task.response_type,
-        recurrence: task.recurrence || 'none',
-        recurrence_time: task.recurrence_time || undefined,
-        recurrence_day_of_week: task.recurrence_day_of_week || undefined,
-        recurrence_day_of_month: task.recurrence_day_of_month || undefined,
         appear_date: toDateTimeLocalFormat(task.appear_date),
         deadline: toDateTimeLocalFormat(task.deadline),
         dealership_id: task.dealership_id,
@@ -118,7 +95,6 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
         comment: '',
         task_type: 'individual',
         response_type: 'acknowledge',
-        recurrence: 'none',
         dealership_id: undefined,
         assignments: [],
         notification_settings: undefined,
@@ -149,7 +125,6 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Format recurrence_time to HH:MM (remove seconds if present)
     const dataToSubmit = { ...formData };
 
     // Parse tags
@@ -157,28 +132,6 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
       dataToSubmit.tags = tagsInput.split(',').map(t => t.trim()).filter(Boolean);
     } else {
       dataToSubmit.tags = [];
-    }
-
-    // Clean up recurrence-related fields when recurrence is 'none'
-    if (dataToSubmit.recurrence === 'none') {
-      delete dataToSubmit.recurrence_time;
-      delete dataToSubmit.recurrence_day_of_week;
-      delete dataToSubmit.recurrence_day_of_month;
-    } else {
-      if (dataToSubmit.recurrence_time) {
-        // Extract only HH:MM from HH:MM:SS format
-        dataToSubmit.recurrence_time = dataToSubmit.recurrence_time.substring(0, 5);
-      }
-
-      // Clean up day_of_week if not weekly
-      if (dataToSubmit.recurrence !== 'weekly') {
-        delete dataToSubmit.recurrence_day_of_week;
-      }
-
-      // Clean up day_of_month if not monthly
-      if (dataToSubmit.recurrence !== 'monthly') {
-        delete dataToSubmit.recurrence_day_of_month;
-      }
     }
 
     if (task) {
@@ -310,89 +263,6 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Повторяемость</label>
-                  <select
-                    value={formData.recurrence}
-                    onChange={(e) => {
-                      const newRecurrence = e.target.value as TaskRecurrence;
-                      const updates: Partial<CreateTaskRequest> = { recurrence: newRecurrence };
-
-                      // Clear recurrence-specific fields when changing type
-                      if (newRecurrence === 'none') {
-                        updates.recurrence_time = undefined;
-                        updates.recurrence_day_of_week = undefined;
-                        updates.recurrence_day_of_month = undefined;
-                      } else {
-                        // Clear fields not applicable to the selected recurrence type
-                        if (newRecurrence !== 'weekly') {
-                          updates.recurrence_day_of_week = undefined;
-                        }
-                        if (newRecurrence !== 'monthly') {
-                          updates.recurrence_day_of_month = undefined;
-                        }
-                      }
-
-                      setFormData({ ...formData, ...updates });
-                    }}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
-                  >
-                    <option value="none">Не повторяется</option>
-                    <option value="daily">Ежедневно</option>
-                    <option value="weekly">Еженедельно</option>
-                    <option value="monthly">Ежемесячно</option>
-                  </select>
-                </div>
-
-                {formData.recurrence !== 'none' && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Время повторения</label>
-                    <input
-                      type="time"
-                      step="60"
-                      value={formData.recurrence_time || ''}
-                      onChange={(e) => setFormData({ ...formData, recurrence_time: e.target.value })}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
-                    />
-                  </div>
-                )}
-
-                {formData.recurrence === 'weekly' && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">День недели</label>
-                    <select
-                      value={formData.recurrence_day_of_week || ''}
-                      onChange={(e) => setFormData({ ...formData, recurrence_day_of_week: e.target.value ? parseInt(e.target.value) : undefined })}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
-                    >
-                      <option value="">Выберите день недели</option>
-                      <option value="1">Понедельник</option>
-                      <option value="2">Вторник</option>
-                      <option value="3">Среда</option>
-                      <option value="4">Четверг</option>
-                      <option value="5">Пятница</option>
-                      <option value="6">Суббота</option>
-                      <option value="0">Воскресенье</option>
-                    </select>
-                  </div>
-                )}
-
-                {formData.recurrence === 'monthly' && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">День месяца</label>
-                    <select
-                      value={formData.recurrence_day_of_month || ''}
-                      onChange={(e) => setFormData({ ...formData, recurrence_day_of_month: e.target.value ? parseInt(e.target.value) : undefined })}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
-                    >
-                      <option value="">Выберите день месяца</option>
-                      {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
-                        <option key={day} value={day}>{day}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Дата появления</label>
@@ -405,40 +275,13 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      {formData.recurrence !== 'none' ? 'Дедлайн (время)' : 'Дедлайн'}
-                    </label>
-                    {formData.recurrence !== 'none' ? (
-                      <input
-                        type="time"
-                        value={toTimeFormat(formData.deadline)}
-                        onChange={(e) => {
-                          const time = e.target.value;
-                          if (time) {
-                            // Use appear_date as base if available, otherwise today
-                            const baseDate = formData.appear_date ? new Date(formData.appear_date) : new Date();
-                            const [hours, minutes] = time.split(':').map(Number);
-                            baseDate.setHours(hours, minutes, 0, 0);
-                            // Format to YYYY-MM-DDTHH:mm for datetime-local compatibility/backend
-                            const year = baseDate.getFullYear();
-                            const month = String(baseDate.getMonth() + 1).padStart(2, '0');
-                            const day = String(baseDate.getDate()).padStart(2, '0');
-                            const formattedDate = `${year}-${month}-${day}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-                            setFormData({ ...formData, deadline: formattedDate });
-                          } else {
-                            setFormData({ ...formData, deadline: undefined });
-                          }
-                        }}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
-                      />
-                    ) : (
-                      <input
-                        type="datetime-local"
-                        value={formData.deadline || ''}
-                        onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
-                      />
-                    )}
+                    <label className="block text-sm font-medium text-gray-700">Дедлайн</label>
+                    <input
+                      type="datetime-local"
+                      value={formData.deadline || ''}
+                      onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                    />
                   </div>
                 </div>
 

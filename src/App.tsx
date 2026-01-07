@@ -7,6 +7,8 @@ import { Layout } from './components/layout/Layout';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { TasksPage } from './pages/TasksPage';
+import { TaskGeneratorsPage } from './pages/TaskGeneratorsPage';
+import { ArchivedTasksPage } from './pages/ArchivedTasksPage';
 import { UsersPage } from './pages/UsersPage';
 import { ShiftsPage } from './pages/ShiftsPage';
 import { LinksPage } from './pages/LinksPage';
@@ -84,6 +86,22 @@ function App() {
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="tasks" element={<TasksPage />} />
+            <Route
+              path="task-generators"
+              element={
+                <ProtectedRoute requiredRoles={['manager', 'owner']}>
+                  <TaskGeneratorsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="archived-tasks"
+              element={
+                <ProtectedRoute requiredRoles={['manager', 'owner']}>
+                  <ArchivedTasksPage />
+                </ProtectedRoute>
+              }
+            />
             <Route path="users" element={<Navigate to="/employees" replace />} />
             <Route
               path="employees"

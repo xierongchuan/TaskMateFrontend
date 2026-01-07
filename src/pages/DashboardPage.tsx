@@ -13,7 +13,8 @@ import {
   UserIcon,
   CalendarIcon,
   LinkIcon,
-  ChartBarIcon
+  ChartBarIcon,
+  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 
 import type { Task } from '../types/task';
@@ -123,13 +124,13 @@ export const DashboardPage: React.FC = () => {
       link: '/tasks?status=completed&date_range=today'
     },
     {
-      name: 'Опоздания',
-      value: dashboardData?.late_shifts_today || 0,
-      icon: <ClockIcon className="w-6 h-6" />,
-      color: 'bg-orange-500',
-      textColor: 'text-orange-600',
-      description: 'За сегодня',
-      link: '/shifts?is_late=true'
+      name: 'Генераторы',
+      value: dashboardData?.active_generators || 0,
+      icon: <ArrowPathIcon className="w-6 h-6" />,
+      color: 'bg-purple-500',
+      textColor: 'text-purple-600',
+      description: `Сегодня: ${dashboardData?.tasks_generated_today || 0} задач`,
+      link: '/task-generators'
     },
   ];
 

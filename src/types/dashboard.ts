@@ -10,6 +10,10 @@ export interface DashboardData {
   overdue_tasks_list?: Task[];
   open_shifts: number;
   late_shifts_today: number;
+  // Generator metrics
+  active_generators?: number;
+  total_generators?: number;
+  tasks_generated_today?: number;
   active_shifts?: Array<{
     id: number;
     user?: {
@@ -35,3 +39,4 @@ export interface DashboardData {
     created_at: string;
   }>;
 }
+
