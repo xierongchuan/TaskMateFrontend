@@ -102,10 +102,10 @@ export const UsersPage: React.FC = () => {
 
   const getRoleBadge = (role: string) => {
     const badges = {
-      employee: 'bg-blue-100 text-blue-800 border-blue-200',
-      observer: 'bg-purple-100 text-purple-800 border-purple-200',
-      manager: 'bg-green-100 text-green-800 border-green-200',
-      owner: 'bg-red-100 text-red-800 border-red-200',
+      employee: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700',
+      observer: 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700',
+      manager: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700',
+      owner: 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700',
     };
 
     const icons = {
@@ -121,7 +121,7 @@ export const UsersPage: React.FC = () => {
 
     return (
       <div className="flex items-center space-x-2">
-        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${badges[role as keyof typeof badges] || 'bg-gray-100 text-gray-800'}`}>
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${badges[role as keyof typeof badges] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600'}`}>
           {icons[role as keyof typeof icons]}
           <span className="ml-1">{labels[role as keyof typeof labels] || role}</span>
         </span>
@@ -133,13 +133,13 @@ export const UsersPage: React.FC = () => {
   };
 
   const getUserCardClass = (user: User) => {
-    const baseClasses = 'bg-white rounded-lg shadow-sm border hover:shadow-md transition-all duration-200';
+    const baseClasses = 'bg-white dark:bg-gray-800 rounded-lg shadow-sm border hover:shadow-md transition-all duration-200';
 
     if (!user.telegram_id) {
-      return `${baseClasses} border-orange-200 bg-orange-50`;
+      return `${baseClasses} border-orange-200 bg-orange-50 dark:bg-orange-900/10 dark:border-orange-800`;
     }
 
-    return `${baseClasses} border-gray-200`;
+    return `${baseClasses} border-gray-200 dark:border-gray-700`;
   };
 
   const getDealershipsDisplay = (user: User) => {
@@ -155,19 +155,19 @@ export const UsersPage: React.FC = () => {
       <div className="mb-8">
         <div className="flex flex-col gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Сотрудники</h1>
-            <p className="mt-2 text-sm text-gray-600">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Сотрудники</h1>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
               Управление сотрудниками, ролями и доступом к салонам
             </p>
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             {!isMobile && (
-              <div className="flex items-center bg-white rounded-lg border border-gray-200 w-full sm:w-auto">
+              <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 w-full sm:w-auto">
                 <button
                   onClick={() => setViewMode('list')}
                   className={`flex-1 sm:flex-initial px-3 py-2 text-sm font-medium rounded-l-lg ${viewMode === 'list'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
                     }`}
                   title="Список"
                 >
@@ -176,8 +176,8 @@ export const UsersPage: React.FC = () => {
                 <button
                   onClick={() => setViewMode('cards')}
                   className={`flex-1 sm:flex-initial px-3 py-2 text-sm font-medium rounded-r-lg ${viewMode === 'cards'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
                     }`}
                   title="Карточки"
                 >
@@ -199,11 +199,11 @@ export const UsersPage: React.FC = () => {
       </div>
 
       {/* Advanced Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
-        <div className="p-4 border-b border-gray-200">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-900"
+            className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
           >
             <FunnelIcon className="w-4 h-4 mr-2" />
             Фильтры {showFilters ? 'Скрыть' : 'Показать'}
@@ -223,7 +223,7 @@ export const UsersPage: React.FC = () => {
                   placeholder="Имя, логин..."
                   value={filters.search}
                   onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                  className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
 
@@ -232,7 +232,7 @@ export const UsersPage: React.FC = () => {
                 <select
                   value={filters.role}
                   onChange={(e) => setFilters({ ...filters, role: e.target.value })}
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                  className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   <option value="">Все роли</option>
                   <option value="employee">Сотрудник</option>
@@ -247,7 +247,7 @@ export const UsersPage: React.FC = () => {
                 <select
                   value={filters.dealership_id || ''}
                   onChange={(e) => setFilters({ ...filters, dealership_id: e.target.value ? Number(e.target.value) : undefined })}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                  className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   <option value="">Все салоны</option>
                   {dealershipsData?.data.map((dealership: Dealership) => (
@@ -263,7 +263,7 @@ export const UsersPage: React.FC = () => {
                 <select
                   value={filters.has_telegram}
                   onChange={(e) => setFilters({ ...filters, has_telegram: e.target.value })}
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                  className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   <option value="">Все</option>
                   <option value="connected">Подключен</option>
@@ -274,7 +274,7 @@ export const UsersPage: React.FC = () => {
               <div className="flex items-end">
                 <button
                   onClick={clearFilters}
-                  className="w-full px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                  className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
                   Сбросить
                 </button>
@@ -285,25 +285,25 @@ export const UsersPage: React.FC = () => {
       </div>
 
       {isLoading ? (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
           <div className="animate-pulse space-y-4">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-24 bg-gray-200 rounded-lg"></div>
+              <div key={i} className="h-24 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
             ))}
           </div>
         </div>
       ) : error ? (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+        <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-xl p-6">
           <div className="flex items-center">
             <XCircleIcon className="w-5 h-5 text-red-500 mr-2" />
-            <p className="text-red-800">Ошибка загрузки сотрудников</p>
+            <p className="text-red-800 dark:text-red-300">Ошибка загрузки сотрудников</p>
           </div>
         </div>
       ) : usersData?.data.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-          <UserIcon className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Сотрудники не найдены</h3>
-          <p className="text-gray-500">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
+          <UserIcon className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Сотрудники не найдены</h3>
+          <p className="text-gray-500 dark:text-gray-400">
             {filters.search || filters.role || filters.dealership_id ?
               'Попробуйте изменить фильтры для поиска сотрудников' :
               'Добавьте первого сотрудника для начала работы'}
@@ -313,7 +313,7 @@ export const UsersPage: React.FC = () => {
         <>
           {/* List View */}
           {viewMode === 'list' && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
               <div className="space-y-4">
                 {usersData?.data.map((user) => (
                   <div key={user.id} className={`p-4 sm:p-5 rounded-lg border hover:shadow-sm transition-all ${getUserCardClass(user)}`}>
@@ -332,27 +332,27 @@ export const UsersPage: React.FC = () => {
                             )}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
+                            <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
                               {user.full_name}
                             </h3>
-                            <p className="text-sm text-gray-500 truncate">@{user.login}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 truncate">@{user.login}</p>
                           </div>
                         </div>
 
                         {getRoleBadge(user.role)}
 
                         <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
-                          <div className="flex items-center text-gray-500">
+                          <div className="flex items-center text-gray-500 dark:text-gray-400">
                             <PhoneIcon className="w-4 h-4 mr-2 flex-shrink-0" />
                             <span className="truncate">{formatPhoneNumber(user.phone_number || user.phone)}</span>
                           </div>
-                          <div className="flex items-center text-gray-500">
+                          <div className="flex items-center text-gray-500 dark:text-gray-400">
                             <BuildingOfficeIcon className="w-4 h-4 mr-2 flex-shrink-0" />
                             <span className="truncate" title={getDealershipsDisplay(user)}>
                               {getDealershipsDisplay(user)}
                             </span>
                           </div>
-                          <div className="flex items-center text-gray-500">
+                          <div className="flex items-center text-gray-500 dark:text-gray-400">
                             <ChatBubbleLeftRightIcon className="w-4 h-4 mr-2 flex-shrink-0" />
                             <span className={user.telegram_id ? 'text-green-600' : 'text-orange-600'}>
                               {user.telegram_id ? 'Подключен' : 'Не подключен'}
@@ -368,7 +368,7 @@ export const UsersPage: React.FC = () => {
                               <>
                                 <button
                                   onClick={() => handleEdit(user)}
-                                  className="inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors min-h-[44px] min-w-[44px]"
+                                  className="inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors min-h-[44px] min-w-[44px] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
                                 >
                                   <PencilIcon className="w-4 h-4 mr-1 sm:mr-0" />
                                   <span className="hidden sm:inline">Изменить</span>
@@ -376,7 +376,7 @@ export const UsersPage: React.FC = () => {
                                 <button
                                   onClick={() => handleDelete(user)}
                                   disabled={deleteMutation.isPending}
-                                  className="inline-flex items-center justify-center px-3 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-lg text-red-700 bg-white hover:bg-red-50 transition-colors disabled:opacity-50 min-h-[44px] min-w-[44px]"
+                                  className="inline-flex items-center justify-center px-3 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-lg text-red-700 bg-white hover:bg-red-50 transition-colors disabled:opacity-50 min-h-[44px] min-w-[44px] dark:bg-gray-800 dark:border-red-800 dark:text-red-300 dark:hover:bg-red-900/20"
                                 >
                                   <TrashIcon className="w-4 h-4 mr-1 sm:mr-0" />
                                   <span className="hidden sm:inline">Удалить</span>
@@ -390,7 +390,7 @@ export const UsersPage: React.FC = () => {
                             <select
                               value={user.role}
                               onChange={(e) => handleRoleChange(user, e.target.value)}
-                              className="w-full sm:w-auto text-sm px-2 py-2 border border-gray-300 rounded focus:border-blue-500 focus:ring-blue-500 min-h-[44px]"
+                              className="w-full sm:w-auto text-sm px-2 py-2 border border-gray-300 rounded focus:border-blue-500 focus:ring-blue-500 min-h-[44px] bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                             >
                               <option value="employee">Сотрудник</option>
                               <option value="observer">Наблюдатель</option>
@@ -431,14 +431,14 @@ export const UsersPage: React.FC = () => {
                             <>
                               <button
                                 onClick={() => handleEdit(user)}
-                                className="p-2 text-gray-400 hover:text-gray-600 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                                className="p-2 text-gray-400 hover:text-gray-600 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center dark:hover:text-gray-200"
                               >
                                 <PencilIcon className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={() => handleDelete(user)}
                                 disabled={deleteMutation.isPending}
-                                className="p-2 text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                                className="p-2 text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50 min-h-[44px] min-w-[44px] flex items-center justify-center dark:hover:text-red-400"
                               >
                                 <TrashIcon className="w-4 h-4" />
                               </button>
@@ -450,17 +450,17 @@ export const UsersPage: React.FC = () => {
                   </div>
 
                   <div className="mb-3">
-                    <h3 className="text-lg font-semibold text-gray-900 truncate">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
                       {user.full_name}
                     </h3>
-                    <p className="text-sm text-gray-500 truncate">@{user.login}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">@{user.login}</p>
                   </div>
 
                   <div className="mb-4">
                     {getRoleBadge(user.role)}
                   </div>
 
-                  <div className="space-y-2 text-sm text-gray-600">
+                  <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                     <div className="flex items-center">
                       <PhoneIcon className="w-4 h-4 mr-2 flex-shrink-0" />
                       <span className="truncate">{formatPhoneNumber(user.phone_number || user.phone)}</span>

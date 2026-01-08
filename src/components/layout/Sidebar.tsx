@@ -53,19 +53,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     <>
       {/* Overlay for mobile - closes sidebar on tap */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
         onClick={onClose}
       />
 
       {/* Sidebar */}
       <aside
         className="
-          fixed lg:static top-0 left-0 z-50 h-screen bg-white shadow-lg
+          fixed lg:static top-0 left-0 z-50 h-screen
           w-64 flex-shrink-0 flex flex-col
+          bg-gray-50/80 dark:bg-gray-900/95 backdrop-blur-sm
+          border-r border-gray-200 dark:border-gray-800
+          transition-colors duration-200
         "
       >
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 overflow-y-auto">
+        <nav className="flex-1 p-4 overflow-y-auto">
           <ul className="space-y-1">
             {filteredItems.map((item) => {
               const isActive = location.pathname === item.path ||
@@ -82,14 +85,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                       }
                     }}
                     className={`
-                      flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+                      w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all
                       ${isActive
-                        ? 'bg-indigo-50 text-indigo-700 border-l-4 border-indigo-600'
-                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                        ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700'
+                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200'
                       }
                     `}
                   >
-                    <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-indigo-600' : 'text-gray-500'}`} />
+                    <Icon className={`w-5 h-5 mr-3 ${isActive ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`} />
                     <span>{item.label}</span>
                   </NavLink>
                 </li>

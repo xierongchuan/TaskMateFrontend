@@ -173,9 +173,9 @@ export const TasksPage: React.FC = () => {
 
   const getStatusBadge = (status: string) => {
     const badges = {
-      pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      completed: 'bg-green-100 text-green-800 border-green-200',
-      overdue: 'bg-red-100 text-red-800 border-red-200',
+      pending: 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-700',
+      completed: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700',
+      overdue: 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700',
     };
 
     const icons = {
@@ -191,7 +191,7 @@ export const TasksPage: React.FC = () => {
     };
 
     return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${badges[status as keyof typeof badges] || 'bg-gray-100 text-gray-800'}`}>
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${badges[status as keyof typeof badges] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600'}`}>
         {icons[status as keyof typeof icons]}
         <span className="ml-1">{labels[status as keyof typeof labels] || status}</span>
       </span>
@@ -200,9 +200,9 @@ export const TasksPage: React.FC = () => {
 
   const getPriorityBadge = (priority?: string) => {
     const badges = {
-      high: 'bg-red-100 text-red-800 border-red-200',
-      medium: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      low: 'bg-green-100 text-green-800 border-green-200',
+      high: 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700',
+      medium: 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-700',
+      low: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700',
     };
 
     const labels = {
@@ -225,9 +225,9 @@ export const TasksPage: React.FC = () => {
     if (status === 'normal') return null;
 
     const badges = {
-      overdue: 'bg-red-100 text-red-800 border-red-200',
-      urgent: 'bg-orange-100 text-orange-800 border-orange-200',
-      soon: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      overdue: 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700',
+      urgent: 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-700',
+      soon: 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-700',
     };
 
     const labels = {
@@ -255,7 +255,7 @@ export const TasksPage: React.FC = () => {
     };
     if (!recurrence || recurrence === 'none') return null;
     return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200">
+      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700">
         <ArrowPathIcon className="w-3 h-3 mr-1" />
         {labels[recurrence as keyof typeof labels] || recurrence}
       </span>
@@ -264,35 +264,35 @@ export const TasksPage: React.FC = () => {
 
   const getTaskCardClass = (task: Task) => {
     const deadlineStatus = getDeadlineStatus(task);
-    const baseClasses = 'bg-white rounded-lg shadow-sm border hover:shadow-md transition-all duration-200';
+    const baseClasses = 'bg-white dark:bg-gray-800 rounded-lg shadow-sm border hover:shadow-md transition-all duration-200';
 
     switch (deadlineStatus) {
-      case 'overdue': return `${baseClasses} border-red-200 bg-red-50`;
-      case 'urgent': return `${baseClasses} border-orange-200 bg-orange-50`;
-      case 'soon': return `${baseClasses} border-yellow-200 bg-yellow-50`;
-      default: return `${baseClasses} border-gray-200`;
+      case 'overdue': return `${baseClasses} border-red-200 bg-red-50 dark:bg-red-900/10 dark:border-red-800`;
+      case 'urgent': return `${baseClasses} border-orange-200 bg-orange-50 dark:bg-orange-900/10 dark:border-orange-800`;
+      case 'soon': return `${baseClasses} border-yellow-200 bg-yellow-50 dark:bg-yellow-900/10 dark:border-yellow-800`;
+      default: return `${baseClasses} border-gray-200 dark:border-gray-700`;
     }
   };
 
   return (
-    <div className="px-4 py-6 sm:px-0 max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Header */}
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Задачи</h1>
-            <p className="mt-2 text-sm text-gray-600">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors">Задачи</h1>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 transition-colors">
               Управление задачами и отслеживание выполнения
             </p>
           </div>
           <div className="flex items-center space-x-3">
             {!isMobile && (
-              <div className="flex items-center bg-white rounded-lg border border-gray-200">
+              <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 transition-colors">
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`px-3 py-2 text-sm font-medium rounded-l-lg ${viewMode === 'list'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-500 hover:text-gray-700'
+                  className={`px-3 py-2 text-sm font-medium rounded-l-lg transition-colors ${viewMode === 'list'
+                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
                     }`}
                   title="Список"
                 >
@@ -300,9 +300,9 @@ export const TasksPage: React.FC = () => {
                 </button>
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`px-3 py-2 text-sm font-medium rounded-r-lg ${viewMode === 'grid'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-500 hover:text-gray-700'
+                  className={`px-3 py-2 text-sm font-medium rounded-r-lg transition-colors ${viewMode === 'grid'
+                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
                     }`}
                   title="Карточки"
                 >
@@ -313,7 +313,7 @@ export const TasksPage: React.FC = () => {
             {permissions.canManageTasks && (
               <button
                 onClick={handleCreate}
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 transition-colors shadow-sm"
               >
                 <PlusIcon className="w-4 h-4 mr-2" />
                 Создать задачу
@@ -324,11 +324,11 @@ export const TasksPage: React.FC = () => {
       </div>
 
       {/* Advanced Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
-        <div className="p-4 border-b border-gray-200">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-6 transition-colors">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700 transition-colors">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-900"
+            className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors"
           >
             <FunnelIcon className="w-4 h-4 mr-2" />
             Фильтры {showFilters ? 'Скрыть' : 'Показать'}
@@ -339,7 +339,7 @@ export const TasksPage: React.FC = () => {
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   <MagnifyingGlassIcon className="w-4 h-4 inline mr-1" />
                   Поиск
                 </label>
@@ -348,16 +348,16 @@ export const TasksPage: React.FC = () => {
                   placeholder="Название или описание..."
                   value={filters.search}
                   onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                  className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Статус</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Статус</label>
                 <select
                   value={filters.status}
                   onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                  className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
                 >
                   <option value="">Все статусы</option>
                   <option value="pending">Ожидает</option>
@@ -367,11 +367,11 @@ export const TasksPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Приоритет</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Приоритет</label>
                 <select
                   value={filters.priority}
                   onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                  className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
                 >
                   <option value="">Все приоритеты</option>
                   <option value="low">Низкий</option>
@@ -381,11 +381,11 @@ export const TasksPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Тип задачи</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Тип задачи</label>
                 <select
                   value={filters.task_type}
                   onChange={(e) => setFilters({ ...filters, task_type: e.target.value })}
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                  className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
                 >
                   <option value="">Все типы</option>
                   <option value="individual">Индивидуальная</option>
@@ -394,11 +394,11 @@ export const TasksPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Тип ответа</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Тип ответа</label>
                 <select
                   value={filters.response_type}
                   onChange={(e) => setFilters({ ...filters, response_type: e.target.value })}
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                  className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
                 >
                   <option value="">Все</option>
                   <option value="acknowledge">Уведомление</option>
@@ -407,11 +407,11 @@ export const TasksPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Период</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Период</label>
                 <select
                   value={filters.date_range}
                   onChange={(e) => setFilters({ ...filters, date_range: e.target.value })}
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                  className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
                 >
                   <option value="all">Все время</option>
                   <option value="today">Сегодня</option>
@@ -421,37 +421,38 @@ export const TasksPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="flex items-center space-x-2 cursor-pointer">
+                <label className="flex items-center space-x-2 cursor-pointer border border-gray-200 dark:border-gray-600 rounded-lg p-2.5 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                   <input
                     type="checkbox"
                     checked={filters.recurrence === 'recurring'}
                     onChange={(e) => setFilters({ ...filters, recurrence: e.target.checked ? 'recurring' : '' })}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600"
                   />
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     <ArrowPathIcon className="w-4 h-4 inline mr-1" />
                     Только повторяемые
                   </span>
                 </label>
-                <p className="text-xs text-gray-500 mt-1 ml-6">
-                  Задачи с расписанием (ежедневные, еженедельные, ежемесячные)
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 ml-1 px-1">
+                  Задачи с расписанием
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Автосалон</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Автосалон</label>
                 <DealershipSelector
                   value={filters.dealership_id}
                   onChange={(dealershipId) => setFilters({ ...filters, dealership_id: dealershipId })}
                   showAllOption={true}
                   allOptionLabel="Все автосалоны"
+                  className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
                 />
               </div>
 
               <div className="flex items-end">
                 <button
                   onClick={clearFilters}
-                  className="w-full px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                  className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors border border-transparent dark:border-gray-600"
                 >
                   Сбросить фильтры
                 </button>
@@ -462,25 +463,25 @@ export const TasksPage: React.FC = () => {
       </div>
 
       {isLoading ? (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
           <div className="animate-pulse space-y-4">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-24 bg-gray-200 rounded-lg"></div>
+              <div key={i} className="h-24 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
             ))}
           </div>
         </div>
       ) : error ? (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+        <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-xl p-6">
           <div className="flex items-center">
             <XCircleIcon className="w-5 h-5 text-red-500 mr-2" />
-            <p className="text-red-800">Ошибка загрузки задач</p>
+            <p className="text-red-800 dark:text-red-300">Ошибка загрузки задач</p>
           </div>
         </div>
       ) : tasksData?.data.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-          <CalendarIcon className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Задачи не найдены</h3>
-          <p className="text-gray-500">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
+          <CalendarIcon className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Задачи не найдены</h3>
+          <p className="text-gray-500 dark:text-gray-400">
             {filters.search || filters.status || filters.task_type ?
               'Попробуйте изменить фильтры для поиска задач' :
               'Создайте первую задачу для начала работы'}
@@ -490,7 +491,7 @@ export const TasksPage: React.FC = () => {
         <>
           {/* List View */}
           {viewMode === 'list' && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
               <div className="space-y-4">
                 {tasksData?.data.map((task) => (
                   <div key={task.id} className={`p-5 rounded-lg border hover:shadow-sm transition-all ${getTaskCardClass(task)}`}>
@@ -498,7 +499,7 @@ export const TasksPage: React.FC = () => {
                       <div className="flex-1 min-w-0 pr-4">
                         <div className="flex items-center gap-3 mb-2">
                           <h3
-                            className="text-lg font-semibold text-gray-900 truncate cursor-pointer hover:text-blue-600 transition-colors"
+                            className="text-lg font-semibold text-gray-900 dark:text-white truncate cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                             onClick={() => handleView(task)}
                           >
                             {task.title}
@@ -510,10 +511,10 @@ export const TasksPage: React.FC = () => {
                         </div>
 
                         {task.description && (
-                          <p className="text-sm text-gray-600 mb-3 line-clamp-2">{task.description}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">{task.description}</p>
                         )}
 
-                        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-500">
+                        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-500 dark:text-gray-400">
                           <span className="flex items-center">
                             <UserIcon className="w-4 h-4 mr-1" />
                             {task.task_type === 'individual' ? 'Индивидуальная' : 'Групповая'}
@@ -546,7 +547,7 @@ export const TasksPage: React.FC = () => {
                         {task.tags && task.tags.length > 0 && (
                           <div className="mt-3 flex flex-wrap gap-2">
                             {task.tags.map((tag, idx) => (
-                              <span key={idx} className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                              <span key={idx} className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700">
                                 <TagIcon className="w-3 h-3 mr-1" />
                                 {tag}
                               </span>
@@ -560,14 +561,14 @@ export const TasksPage: React.FC = () => {
                           <div className="flex space-x-2">
                             <button
                               onClick={() => handleEdit(task)}
-                              className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                              className="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                             >
                               <PencilIcon className="w-4 h-4 mr-1" />
                               Изменить
                             </button>
                             <button
                               onClick={() => handleDuplicate(task)}
-                              className="inline-flex items-center px-3 py-1.5 border border-blue-300 shadow-sm text-sm font-medium rounded-lg text-blue-700 bg-white hover:bg-blue-50 transition-colors"
+                              className="inline-flex items-center px-3 py-1.5 border border-blue-300 dark:border-blue-700 shadow-sm text-sm font-medium rounded-lg text-blue-700 dark:text-blue-300 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                               title="Создать копию"
                             >
                               <DocumentDuplicateIcon className="w-4 h-4" />
@@ -575,7 +576,7 @@ export const TasksPage: React.FC = () => {
                             <button
                               onClick={() => handleDelete(task)}
                               disabled={deleteMutation.isPending}
-                              className="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded-lg text-red-700 bg-white hover:bg-red-50 transition-colors disabled:opacity-50"
+                              className="inline-flex items-center px-3 py-1.5 border border-red-300 dark:border-red-800 shadow-sm text-sm font-medium rounded-lg text-red-700 dark:text-red-300 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
                             >
                               <TrashIcon className="w-4 h-4" />
                             </button>
@@ -587,8 +588,8 @@ export const TasksPage: React.FC = () => {
                               value={task.status === 'overdue' ? 'pending' : task.status}
                               onChange={(e) => handleStatusChange(task, e.target.value)}
                               className={`appearance-none text-xs font-medium pl-3 pr-8 py-1.5 rounded-lg border cursor-pointer transition-all focus:ring-2 focus:ring-offset-1 ${task.status === 'completed'
-                                ? 'bg-green-50 border-green-300 text-green-700 focus:ring-green-500'
-                                : 'bg-yellow-50 border-yellow-300 text-yellow-700 focus:ring-yellow-500'
+                                ? 'bg-green-50 dark:bg-green-900/30 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300 focus:ring-green-500'
+                                : 'bg-yellow-50 dark:bg-yellow-900/30 border-yellow-300 dark:border-yellow-700 text-yellow-700 dark:text-yellow-300 focus:ring-yellow-500'
                                 }`}
                             >
                               <option value="pending">Ожидает</option>
@@ -611,7 +612,7 @@ export const TasksPage: React.FC = () => {
                 <div key={task.id} className={`p-6 ${getTaskCardClass(task)}`}>
                   <div className="flex items-start justify-between mb-3">
                     <h3
-                      className="text-lg font-semibold text-gray-900 truncate pr-2 cursor-pointer hover:text-blue-600 transition-colors"
+                      className="text-lg font-semibold text-gray-900 dark:text-white truncate pr-2 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                       onClick={() => handleView(task)}
                     >
                       {task.title}
@@ -628,10 +629,10 @@ export const TasksPage: React.FC = () => {
                   </div>
 
                   {task.description && (
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-3">{task.description}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">{task.description}</p>
                   )}
 
-                  <div className="space-y-2 text-sm text-gray-500 mb-4">
+                  <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
                     {task.deadline && (
                       <div className="flex items-center">
                         <ClockIcon className="w-4 h-4 mr-2" />
@@ -651,7 +652,7 @@ export const TasksPage: React.FC = () => {
                   {task.tags && task.tags.length > 0 && (
                     <div className="mb-4 flex flex-wrap gap-1">
                       {task.tags.map((tag, idx) => (
-                        <span key={idx} className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                        <span key={idx} className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
                           {tag}
                         </span>
                       ))}
@@ -659,18 +660,18 @@ export const TasksPage: React.FC = () => {
                   )}
 
                   {permissions.canManageTasks && (
-                    <div className="flex flex-col space-y-2 mt-auto pt-4 border-t border-gray-100">
+                    <div className="flex flex-col space-y-2 mt-auto pt-4 border-t border-gray-100 dark:border-gray-700">
                       <div className="flex space-x-2">
                         <button
                           onClick={() => handleEdit(task)}
-                          className="flex-1 inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                          className="flex-1 inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                         >
                           <PencilIcon className="w-4 h-4 mr-1" />
                           Изменить
                         </button>
                         <button
                           onClick={() => handleDuplicate(task)}
-                          className="inline-flex items-center px-3 py-1.5 border border-blue-300 shadow-sm text-sm font-medium rounded-lg text-blue-700 bg-white hover:bg-blue-50 transition-colors"
+                          className="inline-flex items-center px-3 py-1.5 border border-blue-300 dark:border-blue-700 shadow-sm text-sm font-medium rounded-lg text-blue-700 dark:text-blue-300 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                           title="Создать копию"
                         >
                           <DocumentDuplicateIcon className="w-4 h-4" />
@@ -678,7 +679,7 @@ export const TasksPage: React.FC = () => {
                         <button
                           onClick={() => handleDelete(task)}
                           disabled={deleteMutation.isPending}
-                          className="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded-lg text-red-700 bg-white hover:bg-red-50 transition-colors disabled:opacity-50"
+                          className="inline-flex items-center px-3 py-1.5 border border-red-300 dark:border-red-800 shadow-sm text-sm font-medium rounded-lg text-red-700 dark:text-red-300 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
                         >
                           <TrashIcon className="w-4 h-4" />
                         </button>
@@ -689,8 +690,8 @@ export const TasksPage: React.FC = () => {
                           value={task.status === 'overdue' ? 'pending' : task.status}
                           onChange={(e) => handleStatusChange(task, e.target.value)}
                           className={`w-full appearance-none text-xs font-medium px-3 py-2 rounded-lg border cursor-pointer transition-all focus:ring-2 focus:ring-offset-1 text-center ${task.status === 'completed'
-                            ? 'bg-green-50 border-green-300 text-green-700 focus:ring-green-500'
-                            : 'bg-yellow-50 border-yellow-300 text-yellow-700 focus:ring-yellow-500'
+                            ? 'bg-green-50 dark:bg-green-900/30 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300 focus:ring-green-500'
+                            : 'bg-yellow-50 dark:bg-yellow-900/30 border-yellow-300 dark:border-yellow-700 text-yellow-700 dark:text-yellow-300 focus:ring-yellow-500'
                             }`}
                         >
                           <option value="pending">Ожидает</option>
@@ -711,14 +712,14 @@ export const TasksPage: React.FC = () => {
                 <button
                   onClick={() => setPage(Math.max(1, page - 1))}
                   disabled={page === 1}
-                  className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  className="relative inline-flex items-center rounded-md border border-gray-300 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 dark:border-gray-600"
                 >
                   Назад
                 </button>
                 <button
                   onClick={() => setPage(Math.min(tasksData.last_page, page + 1))}
                   disabled={page === tasksData.last_page}
-                  className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 dark:border-gray-600"
                 >
                   Вперед
                 </button>
@@ -734,7 +735,7 @@ export const TasksPage: React.FC = () => {
                     <button
                       onClick={() => setPage(Math.max(1, page - 1))}
                       disabled={page === 1}
-                      className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
+                      className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
                     >
                       <span className="sr-only">Назад</span>
                       <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
@@ -754,7 +755,7 @@ export const TasksPage: React.FC = () => {
                             onClick={() => setPage(pageNum)}
                             className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${page === pageNum
                               ? 'z-10 bg-blue-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600'
-                              : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0'
+                              : 'text-gray-900 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 focus:z-20 focus:outline-offset-0'
                               }`}
                           >
                             {pageNum}
@@ -775,7 +776,7 @@ export const TasksPage: React.FC = () => {
                     <button
                       onClick={() => setPage(Math.min(tasksData.last_page, page + 1))}
                       disabled={page === tasksData.last_page}
-                      className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
+                      className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
                     >
                       <span className="sr-only">Вперед</span>
                       <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />

@@ -165,10 +165,10 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
       <div className="flex min-h-screen items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={onClose}></div>
 
-        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+        <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
           <form onSubmit={handleSubmit}>
-            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-              <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
+            <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+              <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
                 {task?.id ? 'Редактировать задачу' : 'Создать задачу'}
               </h3>
 
@@ -180,53 +180,53 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
 
               <div className="space-y-4 max-h-[70vh] overflow-y-auto">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Название *</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Название *</label>
                   <input
                     type="text"
                     required
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Описание</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Описание</label>
                   <textarea
                     rows={3}
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Комментарий</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Комментарий</label>
                   <textarea
                     rows={2}
                     value={formData.comment}
                     onChange={(e) => setFormData({ ...formData, comment: e.target.value })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Теги (через запятую)</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Теги (через запятую)</label>
                   <input
                     type="text"
                     value={tagsInput}
                     onChange={(e) => setTagsInput(e.target.value)}
                     placeholder="срочно, важно, backend"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Приоритет</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Приоритет</label>
                   <select
                     value={formData.priority || 'medium'}
                     onChange={(e) => setFormData({ ...formData, priority: e.target.value as TaskPriority })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     <option value="low">Низкий</option>
                     <option value="medium">Средний</option>
@@ -236,11 +236,11 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Тип задачи</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Тип задачи</label>
                     <select
                       value={formData.task_type}
                       onChange={(e) => setFormData({ ...formData, task_type: e.target.value as TaskType })}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     >
                       <option value="individual">Индивидуальная</option>
                       <option value="group">Групповая</option>
@@ -248,11 +248,11 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Тип ответа</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Тип ответа</label>
                     <select
                       value={formData.response_type}
                       onChange={(e) => setFormData({ ...formData, response_type: e.target.value as ResponseType })}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     >
                       <option value="acknowledge">Уведомление (ОК)</option>
                       <option value="complete">Выполнение</option>
@@ -261,7 +261,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Автосалон *</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Автосалон *</label>
                   <DealershipSelector
                     value={formData.dealership_id}
                     onChange={(dealershipId) => {
@@ -279,22 +279,22 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Дата появления</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Дата появления</label>
                     <input
                       type="datetime-local"
                       value={formData.appear_date || ''}
                       onChange={(e) => setFormData({ ...formData, appear_date: e.target.value })}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Дедлайн</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Дедлайн</label>
                     <input
                       type="datetime-local"
                       value={formData.deadline || ''}
                       onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
                   </div>
                 </div>
@@ -308,8 +308,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Получатели</label>
-                  <div className="border border-gray-300 rounded-md p-3 max-h-48 overflow-y-auto">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Получатели</label>
+                  <div className="border border-gray-300 dark:border-gray-600 rounded-md p-3 max-h-48 overflow-y-auto bg-white dark:bg-gray-700">
                     {!formData.dealership_id ? (
                       <p className="text-sm text-gray-500 text-center py-2">
                         Сначала выберите автосалон
@@ -330,9 +330,9 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
                             id={`user-${user.id}`}
                             checked={formData.assignments?.includes(user.id)}
                             onChange={(e) => handleUserSelection(user.id, e.target.checked)}
-                            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                            className="h-4 w-4 rounded border-gray-300 dark:border-gray-500 text-indigo-600 focus:ring-indigo-500 bg-white dark:bg-gray-600"
                           />
-                          <label htmlFor={`user-${user.id}`} className="ml-2 text-sm text-gray-700">
+                          <label htmlFor={`user-${user.id}`} className="ml-2 text-sm text-gray-700 dark:text-gray-300">
                             {user.full_name} ({getRoleLabel(user.role)})
                           </label>
                         </div>
@@ -343,7 +343,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
               </div>
             </div>
 
-            <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+            <div className="bg-gray-50 dark:bg-gray-800/50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
               <button
                 type="submit"
                 disabled={createMutation.isPending || updateMutation.isPending}
@@ -354,7 +354,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
               <button
                 type="button"
                 onClick={onClose}
-                className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-base font-medium text-gray-700 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
               >
                 Отмена
               </button>

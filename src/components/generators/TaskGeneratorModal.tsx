@@ -157,14 +157,14 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
       <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={onClose} />
 
-        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+        <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
           <form onSubmit={handleSubmit}>
-            <div className="bg-white px-6 pt-5 pb-4">
+            <div className="bg-white dark:bg-gray-800 px-6 pt-5 pb-4">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold text-gray-900">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                   {isEditing ? 'Редактировать генератор' : 'Создать генератор'}
                 </h3>
-                <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-500">
+                <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
                   <XMarkIcon className="h-6 w-6" />
                 </button>
               </div>
@@ -172,47 +172,48 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
               <div className="space-y-4">
                 {/* Title */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Название *</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Название *</label>
                   <input
                     type="text"
                     required
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                    className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     placeholder="Название генератора"
                   />
                 </div>
 
                 {/* Description */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Описание</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Описание</label>
                   <textarea
                     rows={3}
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                    className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     placeholder="Описание задачи"
                   />
                 </div>
 
                 {/* Dealership */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Автосалон *</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Автосалон *</label>
                   <DealershipSelector
                     value={formData.dealership_id}
                     onChange={(id) => setFormData({ ...formData, dealership_id: id, assignments: [] })}
                     showAllOption={false}
+                    className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
 
                 {/* Recurrence */}
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Повторяемость</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Повторяемость</label>
                     <select
                       value={formData.recurrence}
                       onChange={(e) => setFormData({ ...formData, recurrence: e.target.value as GeneratorRecurrence })}
-                      className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                      className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     >
                       <option value="daily">Ежедневно</option>
                       <option value="weekly">Еженедельно</option>
@@ -222,11 +223,11 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
 
                   {formData.recurrence === 'weekly' && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">День недели</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">День недели</label>
                       <select
                         value={formData.recurrence_day_of_week}
                         onChange={(e) => setFormData({ ...formData, recurrence_day_of_week: Number(e.target.value) })}
-                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                        className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       >
                         <option value={1}>Понедельник</option>
                         <option value={2}>Вторник</option>
@@ -241,16 +242,16 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
 
                   {formData.recurrence === 'monthly' && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">День месяца</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">День месяца</label>
                       <input
                         type="number"
                         min={-2}
                         max={31}
                         value={formData.recurrence_day_of_month}
                         onChange={(e) => setFormData({ ...formData, recurrence_day_of_month: Number(e.target.value) })}
-                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                        className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       />
-                      <p className="text-xs text-gray-500 mt-1">-1 = последний день, -2 = предпоследний</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">-1 = последний день, -2 = предпоследний</p>
                     </div>
                   )}
                 </div>
@@ -258,21 +259,21 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
                 {/* Times */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Время появления</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Время появления</label>
                     <input
                       type="time"
                       value={formData.recurrence_time}
                       onChange={(e) => setFormData({ ...formData, recurrence_time: e.target.value })}
-                      className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                      className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Дедлайн</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дедлайн</label>
                     <input
                       type="time"
                       value={formData.deadline_time}
                       onChange={(e) => setFormData({ ...formData, deadline_time: e.target.value })}
-                      className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                      className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
                   </div>
                 </div>
@@ -280,57 +281,57 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
                 {/* Date Range */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Дата начала *</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата начала *</label>
                     <input
                       type="date"
                       required
                       value={formData.start_date}
                       onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                      className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                      className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Дата окончания</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата окончания</label>
                     <input
                       type="date"
                       value={formData.end_date}
                       onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                      className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                      className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Оставьте пустым для бессрочного</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Оставьте пустым для бессрочного</p>
                   </div>
                 </div>
 
                 {/* Type & Priority */}
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Тип задачи</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Тип задачи</label>
                     <select
                       value={formData.task_type}
                       onChange={(e) => setFormData({ ...formData, task_type: e.target.value as 'individual' | 'group' })}
-                      className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                      className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     >
                       <option value="individual">Индивидуальная</option>
                       <option value="group">Групповая</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Тип ответа</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Тип ответа</label>
                     <select
                       value={formData.response_type}
                       onChange={(e) => setFormData({ ...formData, response_type: e.target.value as 'acknowledge' | 'complete' })}
-                      className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                      className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     >
                       <option value="acknowledge">Уведомление</option>
                       <option value="complete">Выполнение</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Приоритет</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Приоритет</label>
                     <select
                       value={formData.priority}
                       onChange={(e) => setFormData({ ...formData, priority: e.target.value as 'low' | 'medium' | 'high' })}
-                      className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                      className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     >
                       <option value="low">Низкий</option>
                       <option value="medium">Средний</option>
@@ -341,12 +342,12 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
 
                 {/* Tags */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Теги</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Теги</label>
                   <input
                     type="text"
                     value={formData.tags}
                     onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                    className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                    className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     placeholder="тег1, тег2, тег3"
                   />
                 </div>
@@ -354,23 +355,23 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
                 {/* Assignments */}
                 {formData.dealership_id && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Исполнители * ({formData.assignments.length} выбрано)
                     </label>
-                    <div className="border border-gray-300 rounded-lg max-h-40 overflow-y-auto p-2">
+                    <div className="border border-gray-300 dark:border-gray-600 rounded-lg max-h-40 overflow-y-auto p-2 bg-white dark:bg-gray-700">
                       {users.length === 0 ? (
-                        <p className="text-sm text-gray-500 p-2">Нет сотрудников</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 p-2">Нет сотрудников</p>
                       ) : (
                         users.map((user) => (
-                          <label key={user.id} className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
+                          <label key={user.id} className="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-600 rounded cursor-pointer">
                             <input
                               type="checkbox"
                               checked={formData.assignments.includes(user.id)}
                               onChange={() => handleUserToggle(user.id)}
-                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
                             />
-                            <span className="ml-2 text-sm text-gray-900">{user.full_name}</span>
-                            <span className="ml-2 text-xs text-gray-500">({user.role})</span>
+                            <span className="ml-2 text-sm text-gray-900 dark:text-white">{user.full_name}</span>
+                            <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">({user.role})</span>
                           </label>
                         ))
                       )}
@@ -388,11 +389,11 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
               </div>
             </div>
 
-            <div className="bg-gray-50 px-6 py-4 flex justify-end space-x-3">
+            <div className="bg-gray-50 dark:bg-gray-700 px-6 py-4 flex justify-end space-x-3">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600"
               >
                 Отмена
               </button>

@@ -57,7 +57,7 @@ export const DealershipSelector: React.FC<DealershipSelectorProps> = ({
       onChange={handleChange}
       disabled={disabled || isLoading}
       required={required}
-      className={`block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border disabled:bg-gray-100 disabled:cursor-not-allowed ${className}`}
+      className={`block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border disabled:bg-gray-100 disabled:cursor-not-allowed bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors ${className}`}
     >
       {isDataLoading ? (
         <option value="">Загрузка...</option>

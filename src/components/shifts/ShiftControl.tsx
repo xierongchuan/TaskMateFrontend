@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useMyCurrentShift, useCreateShift, useUpdateShift } from '../../hooks/useShifts';
 import { useAuth } from '../../hooks/useAuth';
 import { usePermissions } from '../../hooks/usePermissions';
-import { CameraIcon, PlayIcon, StopIcon } from '@heroicons/react/24/outline';
+import { CameraIcon, PlayIcon, StopIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import { DealershipSelector } from '../common/DealershipSelector';
 import type { CreateShiftRequest, UpdateShiftRequest } from '../../types/shift';
 
@@ -25,10 +25,21 @@ export const ShiftControl: React.FC = () => {
 
   const [openingPhoto, setOpeningPhoto] = useState<File | null>(null);
   const [closingPhoto, setClosingPhoto] = useState<File | null>(null);
+  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' | null }>({
+    message: '',
+    type: null,
+  });
+
+  const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => {
+      setNotification(prev => prev.message === message ? { message: '', type: null } : prev);
+    }, 3000);
+  };
 
   const handleOpenShift = async () => {
     if (!openingPhoto || !selectedDealershipId) {
-      alert('Необходимо выбрать фото открытия смены и автосалон');
+      showNotification('Необходимо выбрать фото открытия смены и автосалон', 'error');
       return;
     }
 
@@ -41,10 +52,10 @@ export const ShiftControl: React.FC = () => {
     createShiftMutation.mutate(shiftData, {
       onSuccess: () => {
         setOpeningPhoto(null);
-        alert('Смена успешно открыта!');
+        showNotification('Смена успешно открыта!');
       },
       onError: (error: any) => {
-        alert(`Ошибка открытия смены: ${error.response?.data?.message || 'Неизвестная ошибка'}`);
+        showNotification(`Ошибка открытия смены: ${error.response?.data?.message || 'Неизвестная ошибка'}`, 'error');
       },
     });
   };
@@ -65,10 +76,10 @@ export const ShiftControl: React.FC = () => {
       {
         onSuccess: () => {
           setClosingPhoto(null);
-          alert('Смена успешно закрыта!');
+          showNotification('Смена успешно закрыта!');
         },
         onError: (error: any) => {
-          alert(`Ошибка закрытия смены: ${error.response?.data?.message || 'Неизвестная ошибка'}`);
+          showNotification(`Ошибка закрытия смены: ${error.response?.data?.message || 'Неизвестная ошибка'}`, 'error');
         },
       }
     );
@@ -79,14 +90,14 @@ export const ShiftControl: React.FC = () => {
   }
 
   return (
-    <div className="bg-white shadow rounded-lg p-6 mb-6">
+    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6 border border-gray-200 dark:border-gray-700">
       <div className="flex items-center justify-end mb-4">
         {currentShift?.status && currentShift.status !== 'closed' ? (
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
             Смена открыта
           </span>
         ) : (
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
             Смена закрыта
           </span>
         )}
@@ -95,7 +106,7 @@ export const ShiftControl: React.FC = () => {
       <div className="space-y-6">
         {/* Dealership Selection */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Автосалон *
           </label>
           <DealershipSelector
@@ -110,23 +121,23 @@ export const ShiftControl: React.FC = () => {
           <>
             {currentShift?.status && currentShift.status !== 'closed' ? (
               // Close Shift Form
-              <div className="space-y-4 border-t pt-4">
-                <div className="text-sm text-gray-600">
+              <div className="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+                <div className="text-sm text-gray-600 dark:text-gray-400">
                   <p>Начало смены: {new Date(currentShift.shift_start).toLocaleString('ru-RU')}</p>
                   {currentShift.is_late && (
-                    <p className="text-red-600 font-medium">
+                    <p className="text-red-600 dark:text-red-400 font-medium">
                       Опоздание: {currentShift.late_minutes} минут
                     </p>
                   )}
                   <p>Автосалон: {currentShift.dealership?.name}</p>
                 </div>
 
-                <div className="pt-4 border-t border-gray-100">
-                  <h3 className="text-base font-medium text-gray-900 mb-4">Закрытие смены</h3>
+                <div className="pt-4 border-t border-gray-100 dark:border-gray-700">
+                  <h3 className="text-base font-medium text-gray-900 dark:text-white mb-4">Закрытие смены</h3>
 
                   <div className="flex flex-col sm:flex-row sm:items-end gap-4">
                     <div className="flex-1">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Фото закрытия смены (необязательно)
                       </label>
                       <div className="flex items-center gap-3">
@@ -139,7 +150,7 @@ export const ShiftControl: React.FC = () => {
                         />
                         <label
                           htmlFor="closing-photo"
-                          className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer transition-colors"
+                          className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer transition-colors"
                         >
                           <CameraIcon className="w-5 h-5 mr-2 text-gray-500" />
                           {closingPhoto ? (
@@ -174,9 +185,9 @@ export const ShiftControl: React.FC = () => {
               </div>
             ) : (
               // Open Shift Form
-              <div className="space-y-4 border-t pt-4">
+              <div className="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Фото открытия смены *
                   </label>
                   <div className="flex items-center space-x-4">
@@ -189,7 +200,7 @@ export const ShiftControl: React.FC = () => {
                     />
                     <label
                       htmlFor="opening-photo"
-                      className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                      className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer"
                     >
                       <CameraIcon className="w-4 h-4 mr-2" />
                       {openingPhoto ? openingPhoto.name : 'Выбрать фото'}
@@ -204,7 +215,7 @@ export const ShiftControl: React.FC = () => {
                       </button>
                     )}
                   </div>
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                     Сделайте фото экрана компьютера с текущим временем
                   </p>
                 </div>
@@ -223,6 +234,29 @@ export const ShiftControl: React.FC = () => {
           </>
         ) : null}
       </div>
+
+      {/* Notification Toast */}
+      {notification.type && (
+        <div className="fixed bottom-8 right-8 z-[100] animate-slide-in-up">
+          <div className={`flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl border ${notification.type === 'success'
+              ? 'bg-green-600 border-green-500 text-white'
+              : 'bg-red-600 border-red-500 text-white'
+            }`}>
+            {notification.type === 'success' ? (
+              <CheckCircleIcon className="w-6 h-6" />
+            ) : (
+              <XCircleIcon className="w-6 h-6" />
+            )}
+            <p className="font-medium text-sm sm:text-base">{notification.message}</p>
+            <button
+              onClick={() => setNotification({ message: '', type: null })}
+              className="ml-2 hover:bg-black/10 rounded-full p-1 transition-colors"
+            >
+              <XCircleIcon className="w-4 h-4 opacity-70" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

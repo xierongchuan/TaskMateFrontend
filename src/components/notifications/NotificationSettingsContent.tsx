@@ -113,12 +113,12 @@ export const NotificationSettingsContent: React.FC<NotificationSettingsContentPr
   // Если не выбран дилерский центр, показываем сообщение
   if (!dealershipId) {
     return (
-      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+      <div className="p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
         <div className="flex">
-          <InformationCircleIcon className="w-5 h-5 text-blue-600 mr-2 flex-shrink-0" />
+          <InformationCircleIcon className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2 flex-shrink-0" />
           <div>
-            <h4 className="text-sm font-medium text-blue-800 mb-1">Выберите дилерский центр</h4>
-            <p className="text-sm text-blue-700">
+            <h4 className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-1">Выберите дилерский центр</h4>
+            <p className="text-sm text-blue-700 dark:text-blue-400">
               Для настройки уведомлений необходимо выбрать дилерский центр в выпадающем списке вверху страницы.
               Настройки уведомлений применяются отдельно для каждого автосалона.
             </p>
@@ -141,12 +141,12 @@ export const NotificationSettingsContent: React.FC<NotificationSettingsContentPr
   // Если настройки пусты, показываем информацию
   if (settings.length === 0) {
     return (
-      <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+      <div className="p-4 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-lg">
         <div className="flex">
-          <InformationCircleIcon className="w-5 h-5 text-yellow-600 mr-2 flex-shrink-0" />
+          <InformationCircleIcon className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mr-2 flex-shrink-0" />
           <div>
-            <h4 className="text-sm font-medium text-yellow-800 mb-1">Настройки уведомлений не найдены</h4>
-            <p className="text-sm text-yellow-700">
+            <h4 className="text-sm font-medium text-yellow-800 dark:text-yellow-300 mb-1">Настройки уведомлений не найдены</h4>
+            <p className="text-sm text-yellow-700 dark:text-yellow-400">
               Для выбранного дилерского центра не настроены уведомления.
               Попробуйте выбрать другой автосалон или обратитесь к администратору.
             </p>
@@ -172,7 +172,7 @@ export const NotificationSettingsContent: React.FC<NotificationSettingsContentPr
   const renderSettingRow = (setting: NotificationSetting) => (
     <div
       key={setting.id}
-      className="p-4 bg-white border border-gray-200 rounded-lg hover:shadow-sm transition-shadow space-y-3"
+      className="p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-sm transition-shadow space-y-3"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4 flex-1">
@@ -185,8 +185,8 @@ export const NotificationSettingsContent: React.FC<NotificationSettingsContentPr
           </div>
 
           <div className="flex-1">
-            <h3 className="text-sm font-medium text-gray-900">{setting.channel_label}</h3>
-            <p className="text-xs text-gray-500">
+            <h3 className="text-sm font-medium text-gray-900 dark:text-white">{setting.channel_label}</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               {setting.channel_type}
             </p>
           </div>
@@ -200,7 +200,7 @@ export const NotificationSettingsContent: React.FC<NotificationSettingsContentPr
                 value={setting.notification_time || ''}
                 onChange={(e) => handleTimeChange(setting, e.target.value)}
                 disabled={!setting.is_enabled || isSaving}
-                className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
+                className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
           )}
@@ -212,7 +212,7 @@ export const NotificationSettingsContent: React.FC<NotificationSettingsContentPr
                 value={setting.notification_day || 'monday'}
                 onChange={(e) => handleDayChange(setting, e.target.value)}
                 disabled={!setting.is_enabled || isSaving}
-                className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
+                className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="monday">Понедельник</option>
                 <option value="tuesday">Вторник</option>
@@ -236,7 +236,7 @@ export const NotificationSettingsContent: React.FC<NotificationSettingsContentPr
                 value={setting.notification_offset || (setting.channel_type === 'task_deadline_30min' ? 30 : 60)}
                 onChange={(e) => handleOffsetChange(setting, parseInt(e.target.value))}
                 disabled={!setting.is_enabled || isSaving}
-                className="w-20 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
+                className="w-20 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
               <span className="text-xs text-gray-500">мин</span>
             </div>
@@ -259,7 +259,7 @@ export const NotificationSettingsContent: React.FC<NotificationSettingsContentPr
 
       {/* Role selector - show only when enabled */}
       {setting.is_enabled && (
-        <div className="pt-2 border-t border-gray-100">
+        <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
           <RoleSelector
             value={setting.recipient_roles || []}
             onChange={(roles) => handleRolesChange(setting, roles)}
@@ -274,14 +274,14 @@ export const NotificationSettingsContent: React.FC<NotificationSettingsContentPr
     <div className="space-y-6">
       {/* Error Banner */}
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+        <div className="p-4 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-lg">
           <div className="flex">
             <div className="flex-shrink-0">
               <XCircleIcon className="h-5 w-5 text-red-400" />
             </div>
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">Ошибка</h3>
-              <div className="mt-1 text-sm text-red-700">
+              <h3 className="text-sm font-medium text-red-800 dark:text-red-300">Ошибка</h3>
+              <div className="mt-1 text-sm text-red-700 dark:text-red-400">
                 <p>{error}</p>
               </div>
             </div>
@@ -300,7 +300,7 @@ export const NotificationSettingsContent: React.FC<NotificationSettingsContentPr
 
       {/* Task Notifications Section */}
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">📋 Уведомления о задачах</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">📋 Уведомления о задачах</h2>
         <div className="space-y-3">
           {taskNotifications.map(renderSettingRow)}
         </div>
@@ -308,7 +308,7 @@ export const NotificationSettingsContent: React.FC<NotificationSettingsContentPr
 
       {/* Manager Notifications Section */}
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">👔 Уведомления для менеджеров</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">👔 Уведомления для менеджеров</h2>
         <div className="space-y-3">
           {managerNotifications.map(renderSettingRow)}
         </div>
@@ -316,7 +316,7 @@ export const NotificationSettingsContent: React.FC<NotificationSettingsContentPr
 
       {/* Reports Section */}
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">📊 Отчёты</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">📊 Отчёты</h2>
         <div className="space-y-3">
           {reports.map(renderSettingRow)}
         </div>

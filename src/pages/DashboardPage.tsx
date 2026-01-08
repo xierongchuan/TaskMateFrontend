@@ -39,12 +39,12 @@ export const DashboardPage: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'bg-green-100 text-green-800 border-green-200';
-      case 'overdue': return 'bg-red-100 text-red-800 border-red-200';
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'acknowledged': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'completed': return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700';
+      case 'overdue': return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700';
+      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-700';
+      case 'acknowledged': return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700';
 
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600';
     }
   };
 
@@ -60,9 +60,9 @@ export const DashboardPage: React.FC = () => {
   };
 
   const getShiftStatusColor = (status: string, isLate: boolean) => {
-    if (isLate) return 'bg-red-100 text-red-800 border-red-200';
-    if (status === 'open') return 'bg-green-100 text-green-800 border-green-200';
-    return 'bg-gray-100 text-gray-800 border-gray-200';
+    if (isLate) return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700';
+    if (status === 'open') return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700';
+    return 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600';
   };
 
   const handleOpenTask = (task: Task) => {
@@ -74,10 +74,10 @@ export const DashboardPage: React.FC = () => {
     return (
       <div className="px-4 py-6 sm:px-0">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
+          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-4"></div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[...Array(8)].map((_, i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded"></div>
+              <div key={i} className="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
             ))}
           </div>
         </div>
@@ -88,8 +88,8 @@ export const DashboardPage: React.FC = () => {
   if (error) {
     return (
       <div className="px-4 py-6 sm:px-0">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">Ошибка загрузки данных dashboard</p>
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+          <p className="text-red-800 dark:text-red-200">Ошибка загрузки данных dashboard</p>
         </div>
       </div>
     );
@@ -140,19 +140,19 @@ export const DashboardPage: React.FC = () => {
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
               Панель управления
             </h1>
-            <p className="mt-1 text-sm text-gray-600">
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
               Добро пожаловать, {user?.full_name}! • Роль: <span className="font-medium">{user?.role}</span>
             </p>
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-2">
-            <div className="flex items-center space-x-2 px-3 py-1 bg-green-100 rounded-full">
+            <div className="flex items-center space-x-2 px-3 py-1 bg-green-100 dark:bg-green-900/30 rounded-full">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-sm text-green-800 whitespace-nowrap">Live обновления</span>
+              <span className="text-sm text-green-800 dark:text-green-300 whitespace-nowrap">Live обновления</span>
             </div>
-            <span className="text-sm text-gray-500 whitespace-nowrap">
+            <span className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
               {format(new Date(), 'HH:mm:ss', { locale: ru })}
             </span>
           </div>
@@ -165,16 +165,16 @@ export const DashboardPage: React.FC = () => {
           <div
             key={stat.name}
             onClick={() => navigate(stat.link)}
-            className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 cursor-pointer"
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all duration-200 cursor-pointer"
           >
             <div className="p-4 sm:p-6">
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">{stat.name}</p>
-                  <p className={`text-2xl sm:text-3xl font-bold mt-1 sm:mt-2 ${stat.textColor}`}>
+                  <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">{stat.name}</p>
+                  <p className={`text-2xl sm:text-3xl font-bold mt-1 sm:mt-2 ${stat.textColor} dark:text-white`}>
                     {stat.value}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1 hidden sm:block">{stat.description}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-1 hidden sm:block">{stat.description}</p>
                 </div>
                 <div className={`${stat.color} rounded-lg p-2 sm:p-3 text-white flex-shrink-0`}>
                   {stat.icon}
@@ -187,14 +187,14 @@ export const DashboardPage: React.FC = () => {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Live Tablo - Active Shifts */}
-        <div className="xl:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200">
-          <div className="p-4 sm:p-6 border-b border-gray-200">
+        <div className="xl:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <h2 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
-                <UserIcon className="w-5 h-5 mr-2" />
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                <UserIcon className="w-5 h-5 mr-2 text-gray-500 dark:text-gray-400" />
                 Live-табло: активные смены
               </h2>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-gray-500 dark:text-gray-400">
                 Обновляется автоматически
               </span>
             </div>
@@ -203,16 +203,16 @@ export const DashboardPage: React.FC = () => {
             {dashboardData?.active_shifts && dashboardData.active_shifts.length > 0 ? (
               <div className="space-y-3 sm:space-y-4">
                 {dashboardData.active_shifts.map((shift: any) => (
-                  <div key={shift.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <div key={shift.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
                     <div className="flex items-center space-x-3">
                       <div className={`w-3 h-3 rounded-full flex-shrink-0 ${shift.status === 'open' ? 'bg-green-500' : 'bg-gray-400'
                         }`}></div>
                       <div className="min-w-0 flex-1">
-                        <p className="font-medium text-gray-900 truncate">{shift.user?.full_name}</p>
-                        <p className="text-sm text-gray-500">
+                        <p className="font-medium text-gray-900 dark:text-white truncate">{shift.user?.full_name}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                           Открыта: {format(new Date(shift.opened_at), 'HH:mm', { locale: ru })}
                           {shift.replacement && (
-                            <span className="ml-2 text-orange-600 block sm:inline">
+                            <span className="ml-2 text-orange-600 dark:text-orange-400 block sm:inline">
                               Заменяет: {shift.replacement.full_name}
                             </span>
                           )}
@@ -233,8 +233,8 @@ export const DashboardPage: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500">
-                <UserIcon className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <UserIcon className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
                 <p>Нет активных смен</p>
               </div>
             )}
@@ -242,10 +242,10 @@ export const DashboardPage: React.FC = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-          <div className="p-4 sm:p-6 border-b border-gray-200">
-            <h2 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
-              <ChartBarIcon className="w-5 h-5 mr-2" />
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+              <ChartBarIcon className="w-5 h-5 mr-2 text-gray-500 dark:text-gray-400" />
               Быстрые действия
             </h2>
           </div>
@@ -260,14 +260,14 @@ export const DashboardPage: React.FC = () => {
             </button>
             <button
               onClick={() => navigate('/links')}
-              className="w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center min-h-[44px]"
+              className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center justify-center min-h-[44px]"
             >
               <LinkIcon className="w-4 h-4 mr-2" />
               Добавить ссылку
             </button>
             <button
               onClick={() => navigate('/reports')}
-              className="w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center min-h-[44px]"
+              className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center justify-center min-h-[44px]"
             >
               <ChartBarIcon className="w-4 h-4 mr-2" />
               Отчеты
@@ -279,13 +279,13 @@ export const DashboardPage: React.FC = () => {
       {/* Recent Tasks and Issues */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
         {/* Recent Tasks */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-          <div className="p-4 sm:p-6 border-b border-gray-200">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
             <h2
               onClick={() => navigate('/tasks')}
-              className="text-base sm:text-lg font-semibold text-gray-900 flex items-center cursor-pointer hover:text-blue-600 transition-colors"
+              className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white flex items-center cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
             >
-              <CalendarIcon className="w-5 h-5 mr-2" />
+              <CalendarIcon className="w-5 h-5 mr-2 text-gray-500 dark:text-gray-400" />
               Задачи
             </h2>
           </div>
@@ -293,10 +293,10 @@ export const DashboardPage: React.FC = () => {
             {dashboardData?.recent_tasks && dashboardData.recent_tasks.length > 0 ? (
               <div className="space-y-3">
                 {dashboardData.recent_tasks.slice(0, 5).map((task) => (
-                  <div key={task.id} className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 p-3 bg-gray-50 rounded-lg">
+                  <div key={task.id} className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900 text-sm truncate">{task.title}</p>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="font-medium text-gray-900 dark:text-white text-sm truncate">{task.title}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {format(new Date(task.created_at), 'HH:mm', { locale: ru })}
                       </p>
                     </div>
@@ -314,8 +314,8 @@ export const DashboardPage: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500">
-                <CalendarIcon className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <CalendarIcon className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
                 <p>Нет недавних задач</p>
               </div>
             )}
@@ -323,9 +323,9 @@ export const DashboardPage: React.FC = () => {
         </div>
 
         {/* Issues Alert */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-          <div className="p-4 sm:p-6 border-b border-gray-200">
-            <h2 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white flex items-center">
               <ExclamationTriangleIcon className="w-5 h-5 mr-2 text-orange-500" />
               Требует внимания
             </h2>
@@ -339,12 +339,12 @@ export const DashboardPage: React.FC = () => {
                       <div
                         key={task.id}
                         onClick={() => handleOpenTask(task)}
-                        className="p-3 bg-red-50 border border-red-200 rounded-lg cursor-pointer hover:bg-red-100 transition-colors group"
+                        className="p-3 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-lg cursor-pointer hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors group"
                       >
                         <div className="flex items-start">
                           <XCircleIcon className="w-5 h-5 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-red-900 text-sm group-hover:text-red-700 transition-colors">
+                            <p className="font-medium text-red-900 dark:text-red-200 text-sm group-hover:text-red-700 dark:group-hover:text-red-300 transition-colors">
                               {task.title}
                             </p>
                             <div className="flex items-center text-xs text-red-700 mt-1">
@@ -359,14 +359,14 @@ export const DashboardPage: React.FC = () => {
                   </div>
                 ) : (
                   (dashboardData?.overdue_tasks || 0) > 0 && (
-                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="p-3 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-lg">
                       <div className="flex items-center">
                         <XCircleIcon className="w-5 h-5 text-red-500 mr-2" />
                         <div>
-                          <p className="font-medium text-red-900 text-sm">
+                          <p className="font-medium text-red-900 dark:text-red-200 text-sm">
                             {dashboardData?.overdue_tasks} просроченных задач
                           </p>
-                          <p className="text-xs text-red-700">
+                          <p className="text-xs text-red-700 dark:text-red-300">
                             Требуют немедленного внимания
                           </p>
                         </div>
@@ -376,14 +376,14 @@ export const DashboardPage: React.FC = () => {
                 )}
 
                 {(dashboardData?.late_shifts_today || 0) > 0 && (
-                  <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                  <div className="p-3 bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-800 rounded-lg">
                     <div className="flex items-center">
                       <ClockIcon className="w-5 h-5 text-orange-500 mr-2" />
                       <div>
-                        <p className="font-medium text-orange-900 text-sm">
+                        <p className="font-medium text-orange-900 dark:text-orange-200 text-sm">
                           {dashboardData?.late_shifts_today} опозданий сегодня
                         </p>
-                        <p className="text-xs text-orange-700">
+                        <p className="text-xs text-orange-700 dark:text-orange-300">
                           Необходимо проконтролировать
                         </p>
                       </div>
@@ -392,10 +392,10 @@ export const DashboardPage: React.FC = () => {
                 )}
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500">
-                <CheckCircleIcon className="w-12 h-12 mx-auto text-green-300 mb-3" />
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <CheckCircleIcon className="w-12 h-12 mx-auto text-green-300 dark:text-green-700 mb-3" />
                 <p>Все в порядке</p>
-                <p className="text-xs text-gray-400">Нет проблем для внимания</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500">Нет проблем для внимания</p>
               </div>
             )}
           </div>

@@ -39,8 +39,8 @@ export const DealershipsPage: React.FC = () => {
             <div className="flex items-center space-x-3">
               <BuildingOfficeIcon className="w-8 h-8 text-blue-600" />
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Автосалоны</h1>
-                <p className="text-sm text-gray-600 mt-1">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Автосалоны</h1>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                   Управление автосалонами вашей компании
                 </p>
               </div>
@@ -60,14 +60,14 @@ export const DealershipsPage: React.FC = () => {
 
       {/* Form View */}
       {isFormOpen && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-8">
-          <div className="p-6 border-b border-gray-200">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-8">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                   {editingDealership ? 'Редактировать автосалон' : 'Создать новый автосалон'}
                 </h2>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                   {editingDealership
                     ? 'Обновите информацию об автосалоне'
                     : 'Заполните информацию о новом автосалоне'
@@ -76,7 +76,7 @@ export const DealershipsPage: React.FC = () => {
               </div>
               <button
                 onClick={handleFormClose}
-                className="inline-flex items-center p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="inline-flex items-center p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
               >
                 <XMarkIcon className="w-5 h-5" />
               </button>

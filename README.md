@@ -117,34 +117,43 @@ src/
 │   └── dashboard.ts     # Dashboard
 │
 ├── components/          # React компоненты
+│   ├── common/         # Общие компоненты (PageContainer, PageHeader, DealershipSelector)
 │   ├── auth/           # Компоненты аутентификации
-│   ├── layout/         # Layout компоненты
+│   ├── layout/         # Layout (Sidebar, Layout)
 │   ├── users/          # Компоненты пользователей
-│   ├── tasks/          # Компоненты задач
-│   └── generators/     # Компоненты генераторов
+│   ├── tasks/          # Компоненты задач (TaskModal, TaskDetailsModal)
+│   ├── generators/     # Компоненты генераторов
+│   ├── shifts/         # Управление сменами (ShiftControl)
+│   └── notifications/  # Настройки уведомлений (NotificationSettingsContent)
 │
 ├── pages/              # Страницы приложения
-│   ├── LoginPage.tsx
 │   ├── DashboardPage.tsx
-│   ├── UsersPage.tsx
 │   ├── TasksPage.tsx
-│   ├── TaskGeneratorsPage.tsx # Страница генераторов
-│   └── ArchivedTasksPage.tsx  # Страница архива
+│   ├── TaskGeneratorsPage.tsx
+│   ├── ArchivedTasksPage.tsx
+│   ├── UsersPage.tsx
+│   ├── ShiftsPage.tsx
+│   ├── LinksPage.tsx
+│   ├── SettingsPage.tsx
+│   ├── ReportsPage.tsx
+│   └── NotificationSettingsPage.tsx
+│
+├── context/            # Context API
+│   └── ThemeContext.tsx # Управление темами и Dark Mode
 │
 ├── stores/             # Zustand stores
 │   └── authStore.ts
 │
 ├── hooks/              # Custom hooks
 │   ├── useAuth.ts
-│   └── usePermissions.ts
+│   ├── usePermissions.ts
+│   └── useTheme.ts
 │
 ├── types/              # TypeScript типы
 │   ├── user.ts
 │   ├── task.ts
-│   ├── taskGenerator.ts
-│   ├── archivedTask.ts
-│   ├── api.ts
-│   └── dashboard.ts
+│   ├── setting.ts
+│   └── ...
 │
 ├── utils/              # Утилиты
 │   ├── debug.ts        # Отладочные функции

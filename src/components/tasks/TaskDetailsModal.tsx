@@ -111,12 +111,12 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
 
         <span className="hidden sm:inline-block sm:h-screen sm:align-middle" aria-hidden="true">&#8203;</span>
 
-        <div className="relative inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+        <div className="relative inline-block align-bottom bg-white dark:bg-gray-800 rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
           {/* Header */}
-          <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-gray-100">
+          <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-gray-100 dark:border-gray-700">
             <div className="flex justify-between items-start">
               <div className="pr-8">
-                <h3 className="text-xl font-semibold leading-6 text-gray-900 mb-2">
+                <h3 className="text-xl font-semibold leading-6 text-gray-900 dark:text-white mb-2">
                   {task.title}
                 </h3>
                 <div className="flex flex-wrap gap-2 items-center">
@@ -126,7 +126,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
               </div>
               <button
                 type="button"
-                className="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none"
+                className="bg-white dark:bg-gray-800 rounded-md text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none"
                 onClick={onClose}
               >
                 <span className="sr-only">Close</span>
@@ -143,8 +143,8 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
             {/* Description */}
             {task.description && (
               <div>
-                <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Описание</h4>
-                <p className="text-gray-700 whitespace-pre-wrap leading-relaxed bg-gray-50 p-3 rounded-lg border border-gray-100">
+                <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Описание</h4>
+                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-100 dark:border-gray-600">
                   {task.description}
                 </p>
               </div>
@@ -152,22 +152,22 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
 
             {/* Key Info Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+              <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-100 dark:border-gray-600">
                 <div className="flex items-center text-sm text-gray-500 mb-1">
                   <CalendarIcon className="w-4 h-4 mr-1.5" />
                   Дедлайн
                 </div>
-                <div className="text-gray-900 font-medium ml-5.5">
+                <div className="text-gray-900 dark:text-white font-medium ml-5.5">
                   {task.deadline ? format(new Date(task.deadline), 'd MMMM yyyy, HH:mm', { locale: ru }) : 'Не установлен'}
                 </div>
               </div>
 
-              <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+              <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-100 dark:border-gray-600">
                 <div className="flex items-center text-sm text-gray-500 mb-1">
                   <BuildingOfficeIcon className="w-4 h-4 mr-1.5" />
                   Автосалон
                 </div>
-                <div className="text-gray-900 font-medium ml-5.5">
+                <div className="text-gray-900 dark:text-white font-medium ml-5.5">
                   {task.dealership?.name || 'Все салоны'}
                 </div>
               </div>
@@ -177,7 +177,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                   <UserIcon className="w-4 h-4 mr-1.5" />
                   Создатель
                 </div>
-                <div className="text-gray-900 font-medium ml-5.5">
+                <div className="text-gray-900 dark:text-white font-medium ml-5.5">
                   {task.creator?.full_name || 'Неизвестно'}
                 </div>
               </div>
@@ -187,7 +187,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                   <ClockIcon className="w-4 h-4 mr-1.5" />
                   Создано
                 </div>
-                <div className="text-gray-900 font-medium ml-5.5">
+                <div className="text-gray-900 dark:text-white font-medium ml-5.5">
                   {format(new Date(task.created_at), 'd MMM yyyy', { locale: ru })}
                 </div>
               </div>
@@ -196,11 +196,11 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
             {/* Comment */}
             {task.comment && (
               <div>
-                <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2 flex items-center">
+                <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center">
                   <ChatBubbleLeftIcon className="w-4 h-4 mr-1.5" />
                   Комментарий
                 </h4>
-                <p className="text-sm text-gray-600 italic border-l-4 border-gray-200 pl-3 py-1">
+                <p className="text-sm text-gray-600 dark:text-gray-400 italic border-l-4 border-gray-200 dark:border-gray-600 pl-3 py-1">
                   {task.comment}
                 </p>
               </div>
@@ -209,13 +209,13 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
             {/* Tags */}
             {task.tags && task.tags.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2 flex items-center">
+                <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center">
                   <TagIcon className="w-4 h-4 mr-1.5" />
                   Теги
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {task.tags.map((tag, idx) => (
-                    <span key={idx} className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                    <span key={idx} className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-800">
                       {tag}
                     </span>
                   ))}
@@ -226,17 +226,17 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
             {/* Assignees */}
             {task.assignments && task.assignments.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2 flex items-center">
+                <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center">
                   <UserIcon className="w-4 h-4 mr-1.5" />
                   Исполнители
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {task.assignments.map((assignment) => (
-                    <div key={assignment.id} className="flex items-center p-2 rounded-lg border border-gray-200 bg-white">
-                      <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-xs font-semibold mr-3">
+                    <div key={assignment.id} className="flex items-center p-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700">
+                      <div className="h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-600 flex items-center justify-center text-gray-500 dark:text-gray-300 text-xs font-semibold mr-3">
                         {assignment.user.full_name.charAt(0)}
                       </div>
-                      <span className="text-sm text-gray-900 font-medium">{assignment.user.full_name}</span>
+                      <span className="text-sm text-gray-900 dark:text-white font-medium">{assignment.user.full_name}</span>
                     </div>
                   ))}
                 </div>
@@ -245,7 +245,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
           </div>
 
           {/* Footer */}
-          <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse border-t border-gray-100">
+          <div className="bg-gray-50 dark:bg-gray-800 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse border-t border-gray-100 dark:border-gray-700">
             {onEdit && permissions.canManageTasks && (
               <button
                 type="button"

@@ -82,18 +82,18 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
   return (
     <div className="fixed inset-0 z-10 overflow-y-auto">
       <div className="flex min-h-full items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={onClose}></div>
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm dark:bg-gray-900/80" onClick={onClose}></div>
 
-        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full w-full">
+        <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full w-full">
           <form onSubmit={handleSubmit}>
-            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 max-h-[70vh] overflow-y-auto">
-              <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
+            <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4 max-h-[70vh] overflow-y-auto">
+              <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
                 {user ? 'Редактировать пользователя' : 'Создать пользователя'}
               </h3>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Логин *</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Логин *</label>
                   <input
                     type="text"
                     required
@@ -102,19 +102,19 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
                     title="Только латинские буквы, цифры, одна точка и одно подчеркивание"
                     maxLength={64}
                     pattern="^(?!.*\..*\.)(?!.*_.*_)[a-zA-Z0-9._]+$"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px]"
+                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
 
                 {!user && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Пароль *</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Пароль *</label>
                     <input
                       type="password"
                       required
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px]"
+                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
                   </div>
                 )}
@@ -132,34 +132,34 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Полное имя *</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Полное имя *</label>
                   <input
                     type="text"
                     required
                     value={formData.full_name}
                     onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px]"
+                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Телефон *</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Телефон *</label>
                   <input
                     type="tel"
                     required
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="+7 XXX XXX XX XX"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px]"
+                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Роль *</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Роль *</label>
                   <select
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value as Role })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px]"
+                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     <option value="employee">Сотрудник</option>
                     <option value="observer">Наблюдатель</option>
@@ -172,10 +172,10 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Автосалон</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Автосалон</label>
                   {formData.role === 'manager' ? (
-                    <div className="mt-1 border rounded-md border-gray-300 p-3 max-h-48 overflow-y-auto">
-                      <p className="text-sm text-gray-500 mb-2">Выберите салоны для управления:</p>
+                    <div className="mt-1 border rounded-md border-gray-300 dark:border-gray-600 p-3 max-h-48 overflow-y-auto bg-white dark:bg-gray-700">
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Выберите салоны для управления:</p>
                       <div className="space-y-2">
                         {dealershipsData?.data.map((dealership) => (
                           <label key={dealership.id} className="flex items-center space-x-2">
@@ -200,7 +200,7 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
                               }}
                               className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                             />
-                            <span className="text-sm text-gray-700">{dealership.name}</span>
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{dealership.name}</span>
                           </label>
                         ))}
                       </div>
@@ -210,23 +210,24 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
                       value={formData.dealership_id}
                       onChange={(dealershipId) => setFormData({ ...formData, dealership_id: dealershipId || undefined })}
                       placeholder="Выберите автосалон"
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                     />
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Telegram ID</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Telegram ID</label>
                   <input
                     type="number"
                     value={formData.telegram_id || ''}
                     onChange={(e) => setFormData({ ...formData, telegram_id: e.target.value ? parseInt(e.target.value) : undefined })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px]"
+                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+            <div className="bg-gray-50 dark:bg-gray-700/50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
               <button
                 type="submit"
                 disabled={createMutation.isPending || updateMutation.isPending}
@@ -237,7 +238,7 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
               <button
                 type="button"
                 onClick={onClose}
-                className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-base font-medium text-gray-700 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
               >
                 Отмена
               </button>

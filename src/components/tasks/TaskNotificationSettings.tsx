@@ -93,21 +93,21 @@ export const TaskNotificationSettings: React.FC<TaskNotificationSettingsProps> =
   const hasActiveOverrides = Object.keys(value).length > 0 && Object.values(value).some(v => v.enabled !== undefined);
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden transition-colors">
       {/* Header */}
       <div
-        className={`px-4 py-3 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors ${hasActiveOverrides ? 'border-l-4 border-l-indigo-500' : ''
+        className={`px-4 py-3 bg-gray-50 dark:bg-gray-800 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${hasActiveOverrides ? 'border-l-4 border-l-indigo-500' : ''
           }`}
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <BellIcon className="w-5 h-5 text-gray-600" />
-            <h4 className="text-sm font-medium text-gray-900">
+            <BellIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+            <h4 className="text-sm font-medium text-gray-900 dark:text-white">
               Расширенные настройки уведомлений
             </h4>
             {hasActiveOverrides && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200">
                 Активны
               </span>
             )}
@@ -118,26 +118,26 @@ export const TaskNotificationSettings: React.FC<TaskNotificationSettingsProps> =
             <ChevronDownIcon className="w-5 h-5 text-gray-400" />
           )}
         </div>
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
           Переопределить настройки уведомлений для этой конкретной задачи
         </p>
       </div>
 
       {/* Content */}
       {isExpanded && (
-        <div className="px-4 py-4 space-y-4">
+        <div className="px-4 py-4 space-y-4 bg-white dark:bg-gray-800">
           {/* Toggle for custom settings */}
-          <div className="flex items-center justify-between p-3 bg-blue-50 rounded-md">
+          <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md transition-colors">
             <div>
-              <p className="text-sm font-medium text-gray-900">Использовать индивидуальные настройки</p>
-              <p className="text-xs text-gray-600">
+              <p className="text-sm font-medium text-gray-900 dark:text-white">Использовать индивидуальные настройки</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">
                 Переопределить настройки автосалона для этой задачи
               </p>
             </div>
             <button
               type="button"
               onClick={handleToggleCustomSettings}
-              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 ${useCustomSettings ? 'bg-indigo-600' : 'bg-gray-200'
+              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 ${useCustomSettings ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-600'
                 }`}
             >
               <span
@@ -158,7 +158,7 @@ export const TaskNotificationSettings: React.FC<TaskNotificationSettingsProps> =
                 return (
                   <div
                     key={channel.key}
-                    className="p-3 border border-gray-200 rounded-md hover:border-gray-300 transition-colors"
+                    className="p-3 border border-gray-200 dark:border-gray-700 rounded-md hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -168,13 +168,13 @@ export const TaskNotificationSettings: React.FC<TaskNotificationSettingsProps> =
                             id={`notify-${channel.key}`}
                             checked={isEnabled}
                             onChange={(e) => handleChannelToggle(channel.key, e.target.checked)}
-                            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                            className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500 bg-white dark:bg-gray-700"
                           />
-                          <label htmlFor={`notify-${channel.key}`} className="text-sm font-medium text-gray-900">
+                          <label htmlFor={`notify-${channel.key}`} className="text-sm font-medium text-gray-900 dark:text-gray-200">
                             {channel.label}
                           </label>
                         </div>
-                        <p className="mt-1 text-xs text-gray-500 ml-6">{channel.description}</p>
+                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 ml-6">{channel.description}</p>
 
                         {/* Offset input */}
                         {channel.hasOffset && isEnabled && (
@@ -186,9 +186,9 @@ export const TaskNotificationSettings: React.FC<TaskNotificationSettingsProps> =
                               max="1440"
                               value={offset}
                               onChange={(e) => handleOffsetChange(channel.key, parseInt(e.target.value) || 30)}
-                              className="w-20 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500"
+                              className="w-20 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                             />
-                            <span className="text-xs text-gray-500">минут</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">минут</span>
                           </div>
                         )}
                       </div>
@@ -197,8 +197,8 @@ export const TaskNotificationSettings: React.FC<TaskNotificationSettingsProps> =
                 );
               })}
 
-              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                <p className="text-xs text-yellow-800">
+              <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-900/50 rounded-md">
+                <p className="text-xs text-yellow-800 dark:text-yellow-200">
                   💡 <strong>Совет:</strong> Снимите галочку, чтобы отключить канал уведомлений для этой задачи.
                   Если канал не отмечен, будут использованы настройки автосалона.
                 </p>

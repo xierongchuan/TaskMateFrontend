@@ -23,6 +23,7 @@ export interface TaskGenerator {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  next_run_at?: string;
 
   // Computed fields from API
   total_generated?: number;

@@ -25,9 +25,9 @@ import {
   ArrowPathIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  ExclamationTriangleIcon,
   ListBulletIcon,
   Squares2X2Icon,
+  UserGroupIcon,
 } from '@heroicons/react/24/outline';
 
 import { useResponsiveViewMode } from '../hooks/useResponsiveViewMode';
@@ -131,12 +131,12 @@ export const TaskGeneratorsPage: React.FC = () => {
 
   const getRecurrenceBadge = (recurrence: string) => {
     const colors: Record<string, string> = {
-      daily: 'bg-green-100 text-green-800 border-green-200',
-      weekly: 'bg-blue-100 text-blue-800 border-blue-200',
-      monthly: 'bg-purple-100 text-purple-800 border-purple-200',
+      daily: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700',
+      weekly: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700',
+      monthly: 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700',
     };
     return (
-      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${colors[recurrence] || 'bg-gray-100 text-gray-800'}`}>
+      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${colors[recurrence] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600'}`}>
         <ArrowPathIcon className="w-3 h-3 mr-1" />
         {getRecurrenceLabel(recurrence)}
       </span>
@@ -145,12 +145,12 @@ export const TaskGeneratorsPage: React.FC = () => {
 
   const getStatusBadge = (isActive: boolean) => {
     return isActive ? (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700">
         <CheckCircleIcon className="w-3 h-3 mr-1" />
         Активен
       </span>
     ) : (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600">
         <PauseIcon className="w-3 h-3 mr-1" />
         Приостановлен
       </span>
@@ -165,36 +165,35 @@ export const TaskGeneratorsPage: React.FC = () => {
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Генераторы задач</h1>
-            <p className="mt-2 text-sm text-gray-600">
-              Управление автоматическим созданием повторяющихся задач
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Генераторы задач</h1>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+              Автоматическое создание периодических задач
             </p>
           </div>
           <div className="flex items-center space-x-3">
             {!isMobile && (
-              <div className="flex items-center bg-white rounded-lg border border-gray-200">
+              <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-0.5">
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`px-3 py-2 text-sm font-medium rounded-l-lg ${viewMode === 'list'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-500 hover:text-gray-700'
+                  className={`p-1.5 rounded-md transition-colors ${viewMode === 'list'
+                    ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                    : 'text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300'
                     }`}
-                  title="Список"
                 >
-                  <ListBulletIcon className="w-4 h-4" />
+                  <ListBulletIcon className="w-5 h-5" />
                 </button>
                 <button
-                  onClick={() => setViewMode('cards')}
-                  className={`px-3 py-2 text-sm font-medium rounded-r-lg ${viewMode === 'cards'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-500 hover:text-gray-700'
+                  onClick={() => setViewMode('grid')}
+                  className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid'
+                    ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                    : 'text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300'
                     }`}
-                  title="Карточки"
                 >
-                  <Squares2X2Icon className="w-4 h-4" />
+                  <Squares2X2Icon className="w-5 h-5" />
                 </button>
               </div>
             )}
+
             {permissions.canManageTasks && (
               <button
                 onClick={handleCreate}
@@ -208,15 +207,31 @@ export const TaskGeneratorsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
-        <div className="p-4 border-b border-gray-200">
+      {/* Search and Filters */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-6 font-sans">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="relative flex-1 max-w-lg">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Поиск генераторов..."
+              value={filters.search || ''} // Ensure controlled component
+              onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+              className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm pl-10 px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            />
+          </div>
+
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-900"
+            className={`flex items-center text-sm font-medium transition-colors ${showFilters
+              ? 'text-blue-600 dark:text-blue-400'
+              : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
+              }`}
           >
             <FunnelIcon className="w-4 h-4 mr-2" />
-            Фильтры {showFilters ? 'Скрыть' : 'Показать'}
+            Фильтры
           </button>
         </div>
 
@@ -224,25 +239,11 @@ export const TaskGeneratorsPage: React.FC = () => {
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <MagnifyingGlassIcon className="w-4 h-4 inline mr-1" />
-                  Поиск
-                </label>
-                <input
-                  type="text"
-                  placeholder="Название..."
-                  value={filters.search || ''}
-                  onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Статус</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Статус</label>
                 <select
                   value={filters.is_active === undefined ? '' : String(filters.is_active)}
-                  onChange={(e) => setFilters({ ...filters, is_active: e.target.value === '' ? undefined : e.target.value === 'true' })}
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                  onChange={(e) => setFilters(prev => ({ ...prev, is_active: e.target.value === '' ? undefined : e.target.value === 'true' }))}
+                  className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   <option value="">Все</option>
                   <option value="true">Активные</option>
@@ -251,11 +252,11 @@ export const TaskGeneratorsPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Повторяемость</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Повторяемость</label>
                 <select
                   value={filters.recurrence || ''}
-                  onChange={(e) => setFilters({ ...filters, recurrence: e.target.value as TaskGeneratorFilters['recurrence'] || undefined })}
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                  onChange={(e) => setFilters(prev => ({ ...prev, recurrence: e.target.value as TaskGeneratorFilters['recurrence'] || undefined }))}
+                  className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   <option value="">Все</option>
                   <option value="daily">Ежедневно</option>
@@ -265,11 +266,12 @@ export const TaskGeneratorsPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Автосалон</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Автосалон</label>
                 <DealershipSelector
-                  value={filters.dealership_id || null}
-                  onChange={(dealershipId) => setFilters({ ...filters, dealership_id: dealershipId || undefined })}
-                  showAllOption={true}
+                  value={filters.dealership_id || null} // Ensure value is null for no selection
+                  onChange={(id) => setFilters(prev => ({ ...prev, dealership_id: id || undefined }))}
+                  showAllOption
+                  className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   allOptionLabel="Все автосалоны"
                 />
               </div>
@@ -277,7 +279,7 @@ export const TaskGeneratorsPage: React.FC = () => {
               <div className="flex items-end">
                 <button
                   onClick={clearFilters}
-                  className="w-full px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                  className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
                   Сбросить
                 </button>
@@ -289,48 +291,46 @@ export const TaskGeneratorsPage: React.FC = () => {
 
       {/* Content */}
       {isLoading ? (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center">
           <div className="animate-pulse space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-24 bg-gray-200 rounded-lg"></div>
-            ))}
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mx-auto"></div>
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mx-auto"></div>
           </div>
         </div>
       ) : error ? (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
-          <div className="flex items-center">
-            <ExclamationTriangleIcon className="w-5 h-5 text-red-500 mr-2" />
-            <p className="text-red-800">Ошибка загрузки генераторов</p>
-          </div>
+        <div className="bg-red-50 dark:bg-red-900/10 rounded-xl p-6 text-center border border-red-200 dark:border-red-800">
+          <p className="text-red-600 dark:text-red-400">Ошибка загрузки данных</p>
         </div>
       ) : generators.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-          <ArrowPathIcon className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Генераторы не найдены</h3>
-          <p className="text-gray-500">
-            {filters.search || filters.is_active !== undefined
-              ? 'Попробуйте изменить фильтры'
-              : 'Создайте первый генератор для автоматического создания задач'}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
+          <ArrowPathIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" />
+          <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">Нет генераторов</h3>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            {filters.search || filters.is_active !== undefined || filters.recurrence || filters.dealership_id
+              ? 'Попробуйте изменить параметры поиска'
+              : 'Начните с создания нового генератора задач'
+            }
           </p>
+
         </div>
       ) : (
         <>
           {/* List View */}
           {viewMode === 'list' && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
               <div className="space-y-4">
                 {generators.map((generator) => (
                   <div
                     key={generator.id}
                     className={`p-5 rounded-lg border hover:shadow-sm transition-all ${generator.is_active
-                      ? 'bg-white border-gray-200'
-                      : 'bg-gray-50 border-gray-300 opacity-75'
+                      ? 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+                      : 'bg-gray-50 dark:bg-gray-900/50 border-gray-300 dark:border-gray-600 opacity-75'
                       }`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0 pr-4">
                         <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-lg font-semibold text-gray-900 truncate">
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
                             {generator.title}
                           </h3>
                           {getStatusBadge(generator.is_active)}
@@ -338,12 +338,12 @@ export const TaskGeneratorsPage: React.FC = () => {
                         </div>
 
                         {generator.description && (
-                          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
                             {generator.description}
                           </p>
                         )}
 
-                        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-500">
+                        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-500 dark:text-gray-400">
                           <span className="flex items-center">
                             <ClockIcon className="w-4 h-4 mr-1" />
                             {generator.recurrence_time?.slice(0, 5)} → {generator.deadline_time?.slice(0, 5)}
@@ -374,14 +374,14 @@ export const TaskGeneratorsPage: React.FC = () => {
                             {generator.assignments.slice(0, 5).map((assignment) => (
                               <span
                                 key={assignment.id}
-                                className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800"
+                                className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
                               >
                                 <UserIcon className="w-3 h-3 mr-1" />
                                 {assignment.user?.full_name}
                               </span>
                             ))}
                             {generator.assignments.length > 5 && (
-                              <span className="text-xs text-gray-500">
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
                                 +{generator.assignments.length - 5} ещё
                               </span>
                             )}
@@ -396,8 +396,8 @@ export const TaskGeneratorsPage: React.FC = () => {
                               onClick={() => handlePauseResume(generator)}
                               disabled={pauseMutation.isPending || resumeMutation.isPending}
                               className={`inline-flex items-center px-3 py-1.5 border shadow-sm text-sm font-medium rounded-lg transition-colors ${generator.is_active
-                                ? 'border-yellow-300 text-yellow-700 bg-white hover:bg-yellow-50'
-                                : 'border-green-300 text-green-700 bg-white hover:bg-green-50'
+                                ? 'border-yellow-300 text-yellow-700 bg-white hover:bg-yellow-50 dark:bg-gray-800 dark:border-yellow-700 dark:text-yellow-300 dark:hover:bg-yellow-900/20'
+                                : 'border-green-300 text-green-700 bg-white hover:bg-green-50 dark:bg-gray-800 dark:border-green-700 dark:text-green-300 dark:hover:bg-green-900/20'
                                 }`}
                             >
                               {generator.is_active ? (
@@ -414,7 +414,7 @@ export const TaskGeneratorsPage: React.FC = () => {
                             </button>
                             <button
                               onClick={() => handleEdit(generator)}
-                              className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                              className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
                             >
                               <PencilIcon className="w-4 h-4 mr-1" />
                               Изменить
@@ -422,7 +422,7 @@ export const TaskGeneratorsPage: React.FC = () => {
                             <button
                               onClick={() => handleDelete(generator)}
                               disabled={deleteMutation.isPending}
-                              className="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded-lg text-red-700 bg-white hover:bg-red-50 transition-colors disabled:opacity-50"
+                              className="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded-lg text-red-700 bg-white hover:bg-red-50 transition-colors disabled:opacity-50 dark:bg-gray-800 dark:border-red-800 dark:text-red-300 dark:hover:bg-red-900/20"
                             >
                               <TrashIcon className="w-4 h-4" />
                             </button>
@@ -438,75 +438,82 @@ export const TaskGeneratorsPage: React.FC = () => {
 
           {/* Cards View */}
           {viewMode === 'cards' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {generators.map((generator) => (
                 <div
                   key={generator.id}
-                  className={`p-4 rounded-lg border hover:shadow-md transition-all ${generator.is_active
-                    ? 'bg-white border-gray-200'
-                    : 'bg-gray-50 border-gray-300 opacity-75'
-                    }`}
+                  className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow p-6 flex flex-col"
                 >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {getStatusBadge(generator.is_active)}
-                      {getRecurrenceBadge(generator.recurrence)}
-                    </div>
-                    {permissions.canManageTasks && (
-                      <div className="flex space-x-1">
-                        <button
-                          onClick={() => handlePauseResume(generator)}
-                          disabled={pauseMutation.isPending || resumeMutation.isPending}
-                          className={`p-1.5 rounded ${generator.is_active
-                            ? 'text-yellow-600 hover:bg-yellow-50'
-                            : 'text-green-600 hover:bg-green-50'
-                            }`}
-                          title={generator.is_active ? 'Пауза' : 'Запустить'}
-                        >
-                          {generator.is_active ? <PauseIcon className="w-4 h-4" /> : <PlayIcon className="w-4 h-4" />}
-                        </button>
-                        <button
-                          onClick={() => handleEdit(generator)}
-                          className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded"
-                          title="Изменить"
-                        >
-                          <PencilIcon className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(generator)}
-                          disabled={deleteMutation.isPending}
-                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded disabled:opacity-50"
-                          title="Удалить"
-                        >
-                          <TrashIcon className="w-4 h-4" />
-                        </button>
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-1" title={generator.title}>
+                        {generator.title}
+                      </h3>
+                      <div className="flex items-center mt-1 space-x-2">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${generator.is_active
+                          ? 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800'
+                          : 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600'
+                          }`}>
+                          {generator.is_active ? 'Активен' : 'Остановлен'}
+                        </span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
+                          <BuildingOfficeIcon className="w-3 h-3 mr-1" />
+                          {generator.dealership?.name || 'Нет салона'}
+                        </span>
                       </div>
-                    )}
+                    </div>
+
+                    <div className="flex items-center space-x-1">
+                      <button
+                        onClick={() => handlePauseResume(generator)}
+                        disabled={pauseMutation.isPending || resumeMutation.isPending}
+                        className={`p-1.5 rounded-lg transition-colors ${generator.is_active
+                          ? 'text-yellow-600 hover:bg-yellow-50 dark:text-yellow-400 dark:hover:bg-yellow-900/20'
+                          : 'text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20'
+                          }`}
+                        title={generator.is_active ? "Остановить" : "Запустить"}
+                      >
+                        {generator.is_active ? <PauseIcon className="w-5 h-5" /> : <PlayIcon className="w-5 h-5" />}
+                      </button>
+                      <button
+                        onClick={() => handleEdit(generator)}
+                        className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-500 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                        title="Редактировать"
+                      >
+                        <PencilIcon className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(generator)}
+                        disabled={deleteMutation.isPending}
+                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:text-gray-500 dark:hover:text-red-400 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        title="Удалить"
+                      >
+                        <TrashIcon className="w-5 h-5" />
+                      </button>
+                    </div>
                   </div>
 
-                  <h3 className="text-base font-semibold text-gray-900 truncate mb-2">
-                    {generator.title}
-                  </h3>
-
-                  {generator.description && (
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                      {generator.description}
-                    </p>
-                  )}
-
-                  <div className="text-sm text-gray-500 space-y-1">
-                    <div className="flex items-center">
-                      <ClockIcon className="w-4 h-4 mr-1" />
-                      {generator.recurrence_time?.slice(0, 5)} → {generator.deadline_time?.slice(0, 5)}
+                  <div className="space-y-3 mb-6 flex-grow">
+                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                      <ClockIcon className="w-4 h-4 mr-2" />
+                      <span>
+                        {getRecurrenceLabel(generator.recurrence)} в {generator.recurrence_time?.slice(0, 5)}
+                      </span>
                     </div>
-                    <div className="flex items-center">
-                      <BuildingOfficeIcon className="w-4 h-4 mr-1" />
-                      {generator.dealership?.name || 'Все салоны'}
+
+                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                      <UserGroupIcon className="w-4 h-4 mr-2" />
+                      <span>
+                        {generator.assignments?.length || 0} исполнителей
+                      </span>
                     </div>
-                    {generator.total_generated !== undefined && (
-                      <div className="flex items-center">
-                        <ChartBarIcon className="w-4 h-4 mr-1" />
-                        Создано: {generator.total_generated}
+
+                    {generator.next_run_at && (
+                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                        <CalendarIcon className="w-4 h-4 mr-2" />
+                        <span>
+                          След. запуск: {format(new Date(generator.next_run_at), 'd MMM HH:mm', { locale: ru })}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -517,26 +524,26 @@ export const TaskGeneratorsPage: React.FC = () => {
 
           {/* Pagination */}
           {generatorsData && generatorsData.last_page > 1 && (
-            <div className="mt-8 flex items-center justify-between border-t border-gray-200 pt-6">
+            <div className="mt-8 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-6">
               <div className="flex flex-1 justify-between sm:hidden">
                 <button
                   onClick={() => setPage(Math.max(1, page - 1))}
                   disabled={page === 1}
-                  className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
                 >
                   Назад
                 </button>
                 <button
                   onClick={() => setPage(Math.min(generatorsData.last_page, page + 1))}
                   disabled={page === generatorsData.last_page}
-                  className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
                 >
                   Вперед
                 </button>
               </div>
               <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-sm text-gray-700">
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
                     Показано <span className="font-medium">{generatorsData.total}</span> генераторов
                   </p>
                 </div>
@@ -544,14 +551,14 @@ export const TaskGeneratorsPage: React.FC = () => {
                   <button
                     onClick={() => setPage(Math.max(1, page - 1))}
                     disabled={page === 1}
-                    className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50"
+                    className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 dark:bg-gray-800 dark:ring-gray-600 dark:hover:bg-gray-700"
                   >
                     <ChevronLeftIcon className="h-5 w-5" />
                   </button>
                   <button
                     onClick={() => setPage(Math.min(generatorsData.last_page, page + 1))}
                     disabled={page === generatorsData.last_page}
-                    className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50"
+                    className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 dark:bg-gray-800 dark:ring-gray-600 dark:hover:bg-gray-700"
                   >
                     <ChevronRightIcon className="h-5 w-5" />
                   </button>
