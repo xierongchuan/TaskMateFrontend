@@ -20,6 +20,7 @@ export interface Task {
   status: TaskStatus;
   priority: TaskPriority;
   dealership_id: number;
+  generator_id: number | null;
   created_by: number;
   tags: string[];
   created_at: string;

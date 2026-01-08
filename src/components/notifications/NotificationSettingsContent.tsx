@@ -4,6 +4,7 @@ import { notificationSettingsApi } from '../../api/notification-settings';
 import type { NotificationSetting } from '../../api/notification-settings';
 import { ClockIcon, CheckCircleIcon, XCircleIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import { RoleSelector } from './RoleSelector';
+import { Card, Input, Select, Skeleton, ErrorState } from '../ui';
 
 interface NotificationSettingsContentProps {
   dealershipId?: number;
@@ -18,6 +19,7 @@ export const NotificationSettingsContent: React.FC<NotificationSettingsContentPr
     queryKey: ['notification-settings', dealershipId],
     queryFn: () => notificationSettingsApi.getSettings(dealershipId),
     enabled: !!dealershipId,
+    placeholderData: (prev) => prev, // Сохраняем предыдущие данные во время refetch
   });
 
   const updateMutation = useMutation({
@@ -130,8 +132,8 @@ export const NotificationSettingsContent: React.FC<NotificationSettingsContentPr
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <div className="text-gray-500">Загрузка...</div>
+      <div className="space-y-4">
+        <Skeleton variant="list" count={4} />
       </div>
     );
   }
@@ -169,158 +171,176 @@ export const NotificationSettingsContent: React.FC<NotificationSettingsContentPr
     ['daily_summary', 'weekly_report'].includes(s.channel_type)
   );
 
+  const dayOptions = [
+    { value: 'monday', label: 'Понедельник' },
+    { value: 'tuesday', label: 'Вторник' },
+    { value: 'wednesday', label: 'Среда' },
+    { value: 'thursday', label: 'Четверг' },
+    { value: 'friday', label: 'Пятница' },
+    { value: 'saturday', label: 'Суббота' },
+    { value: 'sunday', label: 'Воскресенье' },
+  ];
+
   const renderSettingRow = (setting: NotificationSetting) => (
-    <div
-      key={setting.id}
-      className="p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-sm transition-shadow space-y-3"
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4 flex-1">
-          <div className={`flex-shrink-0 ${setting.is_enabled ? 'text-green-500' : 'text-gray-400'}`}>
-            {setting.is_enabled ? (
-              <CheckCircleIcon className="w-6 h-6" />
-            ) : (
-              <XCircleIcon className="w-6 h-6" />
-            )}
+    <Card key={setting.id} className="hover:shadow-sm transition-shadow">
+      <Card.Body className="space-y-4">
+        {/* Header row with toggle */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-3 flex-1 min-w-0">
+            <div className={`flex-shrink-0 mt-0.5 ${setting.is_enabled ? 'text-green-500' : 'text-gray-400 dark:text-gray-500'}`}>
+              {setting.is_enabled ? (
+                <CheckCircleIcon className="w-5 h-5" />
+              ) : (
+                <XCircleIcon className="w-5 h-5" />
+              )}
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white truncate">{setting.channel_label}</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                {setting.channel_type}
+              </p>
+            </div>
           </div>
 
-          <div className="flex-1">
-            <h3 className="text-sm font-medium text-gray-900 dark:text-white">{setting.channel_label}</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              {setting.channel_type}
-            </p>
-          </div>
-
-          {/* Time picker for scheduled notifications */}
-          {(setting.channel_type === 'daily_summary' || setting.channel_type === 'weekly_report') && (
-            <div className="flex items-center space-x-2">
-              <ClockIcon className="w-4 h-4 text-gray-400" />
-              <input
-                type="time"
-                value={setting.notification_time || ''}
-                onChange={(e) => handleTimeChange(setting, e.target.value)}
-                disabled={!setting.is_enabled || isSaving}
-                className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              />
-            </div>
-          )}
-
-          {/* Day picker for weekly reports */}
-          {setting.channel_type === 'weekly_report' && (
-            <div className="flex items-center space-x-2">
-              <select
-                value={setting.notification_day || 'monday'}
-                onChange={(e) => handleDayChange(setting, e.target.value)}
-                disabled={!setting.is_enabled || isSaving}
-                className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              >
-                <option value="monday">Понедельник</option>
-                <option value="tuesday">Вторник</option>
-                <option value="wednesday">Среда</option>
-                <option value="thursday">Четверг</option>
-                <option value="friday">Пятница</option>
-                <option value="saturday">Суббота</option>
-                <option value="sunday">Воскресенье</option>
-              </select>
-            </div>
-          )}
-
-          {/* Offset picker for time-based notifications */}
-          {(setting.channel_type === 'task_deadline_30min' || setting.channel_type === 'task_hour_late') && (
-            <div className="flex items-center space-x-2">
-              <ClockIcon className="w-4 h-4 text-gray-400" />
-              <input
-                type="number"
-                min="1"
-                max="1440"
-                value={setting.notification_offset || (setting.channel_type === 'task_deadline_30min' ? 30 : 60)}
-                onChange={(e) => handleOffsetChange(setting, parseInt(e.target.value))}
-                disabled={!setting.is_enabled || isSaving}
-                className="w-20 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              />
-              <span className="text-xs text-gray-500">мин</span>
-            </div>
-          )}
-        </div>
-
-        {/* Toggle switch */}
-        <button
-          onClick={() => handleToggle(setting)}
-          disabled={isSaving}
-          className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 disabled:opacity-50 ${setting.is_enabled ? 'bg-indigo-600' : 'bg-gray-200'
-            }`}
-        >
-          <span
-            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${setting.is_enabled ? 'translate-x-5' : 'translate-x-0'
-              }`}
-          />
-        </button>
-      </div>
-
-      {/* Role selector - show only when enabled */}
-      {setting.is_enabled && (
-        <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
-          <RoleSelector
-            value={setting.recipient_roles || []}
-            onChange={(roles) => handleRolesChange(setting, roles)}
+          {/* Toggle switch - с увеличенным отступом */}
+          <button
+            onClick={() => handleToggle(setting)}
             disabled={isSaving}
-          />
+            className={`
+              relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent
+              transition-colors duration-200 ease-in-out ml-4
+              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800
+              disabled:opacity-50 disabled:cursor-not-allowed
+              ${setting.is_enabled ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'}
+            `}
+          >
+            <span
+              className={`
+                pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0
+                transition duration-200 ease-in-out
+                ${setting.is_enabled ? 'translate-x-5' : 'translate-x-0'}
+              `}
+            />
+          </button>
         </div>
-      )}
-    </div>
+
+        {/* Settings row - адаптивная для мобильных */}
+        {(setting.channel_type === 'daily_summary' ||
+          setting.channel_type === 'weekly_report' ||
+          setting.channel_type === 'task_deadline_30min' ||
+          setting.channel_type === 'task_hour_late') && (
+            <div className="flex flex-wrap items-center gap-3 pl-8">
+              {/* Time picker for scheduled notifications */}
+              {(setting.channel_type === 'daily_summary' || setting.channel_type === 'weekly_report') && (
+                <div className="flex items-center gap-2">
+                  <ClockIcon className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                  <span className="text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">Время:</span>
+                  <Input
+                    type="time"
+                    value={setting.notification_time || ''}
+                    onChange={(e) => handleTimeChange(setting, e.target.value)}
+                    disabled={!setting.is_enabled || isSaving}
+                    className="w-28"
+                  />
+                </div>
+              )}
+
+              {/* Day picker for weekly reports */}
+              {setting.channel_type === 'weekly_report' && (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">День:</span>
+                  <Select
+                    value={setting.notification_day || 'monday'}
+                    onChange={(e) => handleDayChange(setting, e.target.value)}
+                    disabled={!setting.is_enabled || isSaving}
+                    options={dayOptions}
+                    className="w-36"
+                  />
+                </div>
+              )}
+
+              {/* Offset picker for time-based notifications */}
+              {(setting.channel_type === 'task_deadline_30min' || setting.channel_type === 'task_hour_late') && (
+                <div className="flex items-center gap-2">
+                  <ClockIcon className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                  <span className="text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">За:</span>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={1440}
+                    value={setting.notification_offset || (setting.channel_type === 'task_deadline_30min' ? 30 : 60)}
+                    onChange={(e) => handleOffsetChange(setting, parseInt(e.target.value))}
+                    disabled={!setting.is_enabled || isSaving}
+                    className="w-20"
+                  />
+                  <span className="text-xs text-gray-500 dark:text-gray-400">мин</span>
+                </div>
+              )}
+            </div>
+          )}
+
+        {/* Role selector - show only when enabled */}
+        {setting.is_enabled && (
+          <div className="pt-3 border-t border-gray-100 dark:border-gray-700">
+            <RoleSelector
+              value={setting.recipient_roles || []}
+              onChange={(roles) => handleRolesChange(setting, roles)}
+              disabled={isSaving}
+            />
+          </div>
+        )}
+      </Card.Body>
+    </Card>
   );
 
   return (
     <div className="space-y-6">
       {/* Error Banner */}
       {error && (
-        <div className="p-4 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-lg">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <XCircleIcon className="h-5 w-5 text-red-400" />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800 dark:text-red-300">Ошибка</h3>
-              <div className="mt-1 text-sm text-red-700 dark:text-red-400">
-                <p>{error}</p>
-              </div>
-            </div>
-            <div className="ml-auto pl-3">
-              <button
-                onClick={() => setError(null)}
-                className="inline-flex text-red-400 hover:text-red-500 focus:outline-none"
-              >
-                <span className="sr-only">Закрыть</span>
-                <XCircleIcon className="h-5 w-5" />
-              </button>
-            </div>
+        <ErrorState
+          title="Ошибка"
+          description={error}
+          onRetry={() => setError(null)}
+          retryText="Закрыть"
+        />
+      )}
+
+      {/* Task Notifications Section */}
+      {taskNotifications.length > 0 && (
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <span className="text-xl">📋</span> Уведомления о задачах
+          </h2>
+          <div className="space-y-3">
+            {taskNotifications.map(renderSettingRow)}
           </div>
         </div>
       )}
 
-      {/* Task Notifications Section */}
-      <div>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">📋 Уведомления о задачах</h2>
-        <div className="space-y-3">
-          {taskNotifications.map(renderSettingRow)}
-        </div>
-      </div>
-
       {/* Manager Notifications Section */}
-      <div>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">👔 Уведомления для менеджеров</h2>
-        <div className="space-y-3">
-          {managerNotifications.map(renderSettingRow)}
+      {managerNotifications.length > 0 && (
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <span className="text-xl">👔</span> Уведомления для менеджеров
+          </h2>
+          <div className="space-y-3">
+            {managerNotifications.map(renderSettingRow)}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Reports Section */}
-      <div>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">📊 Отчёты</h2>
-        <div className="space-y-3">
-          {reports.map(renderSettingRow)}
+      {reports.length > 0 && (
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <span className="text-xl">📊</span> Отчёты
+          </h2>
+          <div className="space-y-3">
+            {reports.map(renderSettingRow)}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

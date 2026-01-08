@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usersApi } from '../api/users';
 import { usePermissions } from '../hooks/usePermissions';
@@ -9,7 +9,6 @@ import { UserModal } from '../components/users/UserModal';
 import { formatPhoneNumber } from '../utils/phoneFormatter';
 import type { User } from '../types/user';
 import type { Dealership } from '../types/dealership';
-import { roleLabels, roleDescriptions } from '../utils/roleTranslations';
 import {
   PlusIcon,
   UserIcon,
@@ -33,6 +32,7 @@ import {
   PageContainer,
   Card,
   ConfirmDialog,
+  Pagination,
 } from '../components/ui';
 import { RoleBadge, ActionButtons } from '../components/common';
 
@@ -45,6 +45,7 @@ export const UsersPage: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'cards');
   const [showFilters, setShowFilters] = useState(false);
+  const [page, setPage] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState<User | null>(null);
   const [filters, setFilters] = useState<{
     search: string;
@@ -58,6 +59,11 @@ export const UsersPage: React.FC = () => {
     has_telegram: '',
   });
 
+  // Сброс страницы при изменении фильтров
+  useEffect(() => {
+    setPage(1);
+  }, [filters]);
+
   // Fetch dealerships for filtering
   const { data: dealershipsData } = useQuery({
     queryKey: ['dealerships'],
@@ -65,8 +71,9 @@ export const UsersPage: React.FC = () => {
   });
 
   const { data: usersData, isLoading, error, refetch } = useQuery({
-    queryKey: ['users', filters, limit],
-    queryFn: () => usersApi.getUsers({ ...filters, per_page: limit }),
+    queryKey: ['users', filters, page, limit],
+    queryFn: () => usersApi.getUsers({ ...filters, page, per_page: limit }),
+    placeholderData: (prev) => prev,
   });
 
   const deleteMutation = useMutation({
@@ -105,6 +112,7 @@ export const UsersPage: React.FC = () => {
       dealership_id: undefined,
       has_telegram: '',
     });
+    setPage(1);
   };
 
   const getUserCardClass = (user: User) => {
@@ -172,7 +180,7 @@ export const UsersPage: React.FC = () => {
             {!isMobile && (
               <ViewModeToggle
                 mode={viewMode}
-                onChange={setViewMode}
+                onChange={(mode) => setViewMode(mode as 'list' | 'cards')}
                 options={[
                   { value: 'list', icon: <ListBulletIcon />, label: 'Список' },
                   { value: 'cards', icon: <Squares2X2Icon />, label: 'Карточки' },
@@ -399,6 +407,18 @@ export const UsersPage: React.FC = () => {
             </div>
           )}
         </>
+      )}
+
+      {/* Pagination */}
+      {usersData && usersData.last_page && usersData.last_page > 1 && (
+        <Pagination
+          currentPage={page}
+          totalPages={usersData.last_page}
+          total={usersData.total}
+          perPage={usersData.per_page}
+          onPageChange={setPage}
+          className="mt-8"
+        />
       )}
 
       <UserModal

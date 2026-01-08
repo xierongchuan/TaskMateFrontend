@@ -4,7 +4,6 @@ import {
   ClockIcon,
   CheckCircleIcon,
   XCircleIcon,
-  ExclamationCircleIcon,
 } from '@heroicons/react/24/outline';
 
 export type TaskStatus = 'pending' | 'completed' | 'overdue' | 'acknowledged';

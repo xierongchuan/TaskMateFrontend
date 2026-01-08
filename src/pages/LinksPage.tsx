@@ -197,7 +197,7 @@ export const LinksPage: React.FC = () => {
             {!isMobile && (
               <ViewModeToggle
                 mode={viewMode}
-                onChange={setViewMode}
+                onChange={(mode) => setViewMode(mode as 'grid' | 'list')}
                 options={[
                   { value: 'grid', icon: <Squares2X2Icon />, label: 'Сетка' },
                   { value: 'list', icon: <ListBulletIcon />, label: 'Список' },

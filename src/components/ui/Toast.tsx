@@ -101,10 +101,10 @@ const ToastItem: React.FC<{ toast: Toast; onRemove: () => void }> = ({ toast, on
 
   return (
     <div
-      className={`flex items-start gap-3 p-4 rounded-lg border shadow-lg max-w-sm w-full animate-slide-in-up ${classes}`}
+      className={`flex items-center gap-3 p-4 rounded-lg border shadow-lg max-w-sm w-full animate-slide-in-up ${classes}`}
       role="alert"
     >
-      <Icon className="w-5 h-5 flex-shrink-0 mt-0.5" />
+      <Icon className="w-5 h-5 flex-shrink-0" />
       <p className="text-sm font-medium flex-1">{toast.message}</p>
       <button
         onClick={onRemove}

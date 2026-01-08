@@ -8,9 +8,27 @@ import { DealershipSelector } from '../components/common/DealershipSelector';
 import type { ArchivedTask, ArchivedTaskFilters } from '../types/archivedTask';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+
+// UI Components
+import {
+  PageContainer,
+  Card,
+  Button,
+  Input,
+  Select,
+  Skeleton,
+  ErrorState,
+  EmptyState,
+  Badge,
+  FilterPanel,
+  Pagination,
+  ViewModeToggle,
+} from '../components/ui';
+import { useToast } from '../components/ui/Toast';
+
+// Icons
 import {
   MagnifyingGlassIcon,
-  FunnelIcon,
   CalendarIcon,
   CheckCircleIcon,
   XCircleIcon,
@@ -18,9 +36,6 @@ import {
   ArrowDownTrayIcon,
   BuildingOfficeIcon,
   ArchiveBoxIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ExclamationTriangleIcon,
   TagIcon,
   ListBulletIcon,
   Squares2X2Icon,
@@ -29,6 +44,7 @@ import {
 export const ArchivedTasksPage: React.FC = () => {
   const permissions = usePermissions();
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   const { limit } = usePagination();
   const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'cards');
   const [showFilters, setShowFilters] = useState(false);
@@ -57,6 +73,7 @@ export const ArchivedTasksPage: React.FC = () => {
       return archivedTasksApi.getArchivedTasks(cleanedFilters);
     },
     refetchInterval: 60000,
+    placeholderData: (prev) => prev,
   });
 
   const restoreMutation = useMutation({
@@ -64,6 +81,10 @@ export const ArchivedTasksPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['archived-tasks'] });
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      showToast({ type: 'success', message: 'Задача восстановлена из архива' });
+    },
+    onError: () => {
+      showToast({ type: 'error', message: 'Ошибка восстановления задачи' });
     },
   });
 
@@ -76,9 +97,10 @@ export const ArchivedTasksPage: React.FC = () => {
   const handleExport = async () => {
     try {
       await archivedTasksApi.downloadCsv(filters);
+      showToast({ type: 'success', message: 'Экспорт CSV начат' });
     } catch (err) {
       console.error('Export failed:', err);
-      alert('Ошибка экспорта');
+      showToast({ type: 'error', message: 'Ошибка экспорта' });
     }
   };
 
@@ -92,305 +114,271 @@ export const ArchivedTasksPage: React.FC = () => {
     });
   };
 
+  const hasActiveFilters = filters.search || filters.archive_reason || filters.dealership_id || filters.date_from || filters.date_to;
+
+  const reasonOptions = [
+    { value: '', label: 'Все' },
+    { value: 'completed', label: 'Выполнено' },
+    { value: 'expired', label: 'Просрочено' },
+  ];
+
   const getReasonBadge = (reason: string) => {
-    const config = {
-      completed: { label: 'Выполнено', icon: CheckCircleIcon, color: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700' },
-      expired: { label: 'Просрочено', icon: XCircleIcon, color: 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700' },
+    const config: Record<string, { label: string; variant: 'success' | 'danger' | 'gray' }> = {
+      completed: { label: 'Выполнено', variant: 'success' },
+      expired: { label: 'Просрочено', variant: 'danger' },
     };
-    const cfg = config[reason as keyof typeof config] || { label: reason, icon: ArchiveBoxIcon, color: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' };
-    const Icon = cfg.icon;
+    const cfg = config[reason] || { label: reason, variant: 'gray' as const };
+    const Icon = reason === 'completed' ? CheckCircleIcon : reason === 'expired' ? XCircleIcon : ArchiveBoxIcon;
+
     return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${cfg.color}`}>
-        <Icon className="w-3 h-3 mr-1" />
+      <Badge variant={cfg.variant} size="sm" icon={<Icon className="w-3 h-3" />}>
         {cfg.label}
-      </span>
+      </Badge>
     );
   };
 
   const tasks = tasksData?.data || [];
 
   return (
-    <div className="px-4 py-6 sm:px-0 max-w-7xl mx-auto">
+    <PageContainer>
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Архив задач</h1>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              История выполненных и просроченных задач
-            </p>
-          </div>
-          <div className="flex items-center space-x-3">
-            {/* View Toggle */}
-            {!isMobile && (
-              <div className="flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden">
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`px-3 py-2 text-sm font-medium ${viewMode === 'list' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'}`}
-                >
-                  <ListBulletIcon className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setViewMode('cards')}
-                  className={`px-3 py-2 text-sm font-medium ${viewMode === 'cards' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'}`}
-                >
-                  <Squares2X2Icon className="w-4 h-4" />
-                </button>
-              </div>
-            )}
-            <button
-              onClick={handleExport}
-              className="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-            >
-              <ArrowDownTrayIcon className="w-4 h-4 mr-2" />
-              Экспорт CSV
-            </button>
-          </div>
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Архив задач</h1>
+          <p className="mt-2 text-gray-500 dark:text-gray-400">
+            История выполненных и просроченных задач
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          {!isMobile && (
+            <ViewModeToggle
+              mode={viewMode}
+              onChange={(mode) => setViewMode(mode as 'list' | 'cards')}
+              options={[
+                { value: 'list', icon: <ListBulletIcon className="w-4 h-4" /> },
+                { value: 'cards', icon: <Squares2X2Icon className="w-4 h-4" /> },
+              ]}
+            />
+          )}
+          <Button
+            variant="secondary"
+            icon={<ArrowDownTrayIcon />}
+            onClick={handleExport}
+          >
+            Экспорт CSV
+          </Button>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-          >
-            <FunnelIcon className="w-4 h-4 mr-2" />
-            Фильтры {showFilters ? 'Скрыть' : 'Показать'}
-          </button>
-        </div>
+      <FilterPanel
+        isOpen={showFilters}
+        onToggle={() => setShowFilters(!showFilters)}
+        onClear={clearFilters}
+        className="mb-6"
+      >
+        <FilterPanel.Grid columns={5}>
+          <Input
+            label="Поиск"
+            placeholder="Название..."
+            value={filters.search || ''}
+            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+            icon={<MagnifyingGlassIcon />}
+          />
 
-        {showFilters && (
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  <MagnifyingGlassIcon className="w-4 h-4 inline mr-1" />
-                  Поиск
-                </label>
-                <input
-                  type="text"
-                  placeholder="Название..."
-                  value={filters.search || ''}
-                  onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                  className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
+          <Select
+            label="Причина архивации"
+            value={filters.archive_reason || ''}
+            onChange={(e) => setFilters({ ...filters, archive_reason: e.target.value as ArchivedTaskFilters['archive_reason'] || undefined })}
+            options={reasonOptions}
+          />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Причина архивации</label>
-                <select
-                  value={filters.archive_reason || ''}
-                  onChange={(e) => setFilters({ ...filters, archive_reason: e.target.value as ArchivedTaskFilters['archive_reason'] || undefined })}
-                  className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  <option value="">Все</option>
-                  <option value="completed">Выполнено</option>
-                  <option value="expired">Просрочено</option>
-                </select>
-              </div>
+          <Input
+            type="date"
+            label="С даты"
+            value={filters.date_from || ''}
+            onChange={(e) => setFilters({ ...filters, date_from: e.target.value })}
+          />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">С даты</label>
-                <input
-                  type="date"
-                  value={filters.date_from || ''}
-                  onChange={(e) => setFilters({ ...filters, date_from: e.target.value })}
-                  className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
+          <Input
+            type="date"
+            label="По дату"
+            value={filters.date_to || ''}
+            onChange={(e) => setFilters({ ...filters, date_to: e.target.value })}
+          />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">По дату</label>
-                <input
-                  type="date"
-                  value={filters.date_to || ''}
-                  onChange={(e) => setFilters({ ...filters, date_to: e.target.value })}
-                  className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Автосалон</label>
-                <DealershipSelector
-                  value={filters.dealership_id || null}
-                  onChange={(dealershipId) => setFilters({ ...filters, dealership_id: dealershipId || undefined })}
-                  showAllOption={true}
-                  allOptionLabel="Все"
-                />
-              </div>
-
-              <div className="flex items-end">
-                <button
-                  onClick={clearFilters}
-                  className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                >
-                  Сбросить
-                </button>
-              </div>
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Автосалон</label>
+            <DealershipSelector
+              value={filters.dealership_id || null}
+              onChange={(dealershipId) => setFilters({ ...filters, dealership_id: dealershipId || undefined })}
+              showAllOption={true}
+              allOptionLabel="Все"
+              className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            />
           </div>
-        )}
-      </div>
+        </FilterPanel.Grid>
+      </FilterPanel>
 
       {/* Content */}
       {isLoading ? (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
-          <div className="animate-pulse space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-20 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
-            ))}
-          </div>
-        </div>
+        <Card>
+          <Card.Body>
+            <Skeleton variant="list" count={5} />
+          </Card.Body>
+        </Card>
       ) : error ? (
-        <div className="bg-red-50 border border-red-200 dark:bg-red-900/10 dark:border-red-800 rounded-xl p-6">
-          <div className="flex items-center">
-            <ExclamationTriangleIcon className="w-5 h-5 text-red-500 mr-2" />
-            <p className="text-red-800 dark:text-red-300">Ошибка загрузки архива</p>
-          </div>
-        </div>
+        <ErrorState
+          title="Ошибка загрузки архива"
+          description="Не удалось загрузить архивированные задачи. Попробуйте обновить страницу."
+          onRetry={() => queryClient.invalidateQueries({ queryKey: ['archived-tasks'] })}
+        />
       ) : tasks.length === 0 ? (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
-          <ArchiveBoxIcon className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Архив пуст</h3>
-          <p className="text-gray-500 dark:text-gray-400">
-            {filters.search || filters.archive_reason
-              ? 'Попробуйте изменить фильтры'
-              : 'Архивированные задачи появятся здесь'}
-          </p>
-        </div>
+        <EmptyState
+          icon={<ArchiveBoxIcon className="w-16 h-16" />}
+          title="Архив пуст"
+          description={hasActiveFilters ? 'Попробуйте изменить фильтры' : 'Архивированные задачи появятся здесь'}
+        />
       ) : (
         <>
           {/* List View */}
           {viewMode === 'list' && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-700/50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Задача</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Статус</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Дата архивации</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Автосалон</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Действия</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                  {tasks.map((task) => (
-                    <tr key={task.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col">
-                          <span className="text-sm font-medium text-gray-900 dark:text-white">{task.title}</span>
-                          {task.description && <span className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs">{task.description}</span>}
-                          {task.tags && task.tags.length > 0 && (
-                            <div className="mt-1 flex flex-wrap gap-1">
-                              {task.tags.slice(0, 3).map((tag, idx) => (
-                                <span key={idx} className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                                  <TagIcon className="w-2.5 h-2.5 mr-0.5" />{tag}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">{getReasonBadge(task.archive_reason)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        <div className="flex items-center"><CalendarIcon className="w-4 h-4 mr-1" />{format(new Date(task.archived_at), 'dd.MM.yyyy HH:mm', { locale: ru })}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        <div className="flex items-center"><BuildingOfficeIcon className="w-4 h-4 mr-1" />{task.dealership?.name || '—'}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                        {permissions.canManageTasks && (
-                          <button onClick={() => handleRestore(task)} disabled={restoreMutation.isPending} className="inline-flex items-center px-3 py-1.5 border border-green-300 shadow-sm text-sm font-medium rounded-lg text-green-700 bg-white hover:bg-green-50 transition-colors disabled:opacity-50 dark:bg-gray-800 dark:border-green-800 dark:text-green-300 dark:hover:bg-green-900/20">
-                            <ArrowUturnLeftIcon className="w-4 h-4 mr-1" />Восстановить
-                          </button>
-                        )}
-                      </td>
+            <Card>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-700/50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Задача</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Статус</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Дата архивации</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Автосалон</th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Действия</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {tasks.map((task) => (
+                      <tr key={task.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex flex-col gap-1">
+                            <span className="text-sm font-medium text-gray-900 dark:text-white">{task.title}</span>
+                            {task.description && (
+                              <span className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs">{task.description}</span>
+                            )}
+                            {task.tags && task.tags.length > 0 && (
+                              <div className="flex flex-wrap gap-1">
+                                {task.tags.slice(0, 3).map((tag, idx) => (
+                                  <span key={idx} className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                                    <TagIcon className="w-2.5 h-2.5 mr-0.5" />{tag}
+                                  </span>
+                                ))}
+                                {task.tags.length > 3 && (
+                                  <span className="text-xs text-gray-500 dark:text-gray-400">+{task.tags.length - 3}</span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">{getReasonBadge(task.archive_reason)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                          <div className="flex items-center gap-1">
+                            <CalendarIcon className="w-4 h-4" />
+                            {format(new Date(task.archived_at), 'dd.MM.yyyy HH:mm', { locale: ru })}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                          <div className="flex items-center gap-1">
+                            <BuildingOfficeIcon className="w-4 h-4" />
+                            {task.dealership?.name || '—'}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right">
+                          {permissions.canManageTasks && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              icon={<ArrowUturnLeftIcon />}
+                              onClick={() => handleRestore(task)}
+                              disabled={restoreMutation.isPending}
+                              className="text-green-600 border-green-300 hover:bg-green-50 dark:text-green-400 dark:border-green-700 dark:hover:bg-green-900/20"
+                            >
+                              Восстановить
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
           )}
 
           {/* Cards View */}
           {viewMode === 'cards' && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {tasks.map((task) => (
-                <div key={task.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-start mb-3">
-                    <h3 className="text-sm font-medium text-gray-900 dark:text-white line-clamp-2">{task.title}</h3>
-                    {getReasonBadge(task.archive_reason)}
-                  </div>
-                  {task.description && <p className="text-sm text-gray-500 line-clamp-2 mb-3">{task.description}</p>}
-                  {task.tags && task.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {task.tags.slice(0, 3).map((tag, idx) => (
-                        <span key={idx} className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                          <TagIcon className="w-2.5 h-2.5 mr-0.5" />{tag}
-                        </span>
-                      ))}
+                <Card key={task.id} className="hover:shadow-md transition-shadow">
+                  <Card.Body>
+                    <div className="flex justify-between items-start mb-3 gap-2">
+                      <h3 className="text-sm font-medium text-gray-900 dark:text-white line-clamp-2">{task.title}</h3>
+                      {getReasonBadge(task.archive_reason)}
                     </div>
-                  )}
-                  <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1 mb-3">
-                    <div className="flex items-center"><CalendarIcon className="w-3.5 h-3.5 mr-1" />{format(new Date(task.archived_at), 'dd.MM.yyyy HH:mm', { locale: ru })}</div>
-                    <div className="flex items-center"><BuildingOfficeIcon className="w-3.5 h-3.5 mr-1" />{task.dealership?.name || '—'}</div>
-                  </div>
-                  {permissions.canManageTasks && (
-                    <button onClick={() => handleRestore(task)} disabled={restoreMutation.isPending} className="w-full inline-flex items-center justify-center px-3 py-2 border border-green-300 shadow-sm text-sm font-medium rounded-lg text-green-700 bg-white hover:bg-green-50 transition-colors disabled:opacity-50 dark:bg-gray-800 dark:border-green-800 dark:text-green-300 dark:hover:bg-green-900/20">
-                      <ArrowUturnLeftIcon className="w-4 h-4 mr-1" />Восстановить
-                    </button>
-                  )}
-                </div>
+
+                    {task.description && (
+                      <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-3">{task.description}</p>
+                    )}
+
+                    {task.tags && task.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {task.tags.slice(0, 3).map((tag, idx) => (
+                          <span key={idx} className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                            <TagIcon className="w-2.5 h-2.5 mr-0.5" />{tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1 mb-4">
+                      <div className="flex items-center gap-1">
+                        <CalendarIcon className="w-3.5 h-3.5" />
+                        {format(new Date(task.archived_at), 'dd.MM.yyyy HH:mm', { locale: ru })}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <BuildingOfficeIcon className="w-3.5 h-3.5" />
+                        {task.dealership?.name || '—'}
+                      </div>
+                    </div>
+
+                    {permissions.canManageTasks && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        icon={<ArrowUturnLeftIcon />}
+                        onClick={() => handleRestore(task)}
+                        disabled={restoreMutation.isPending}
+                        className="w-full text-green-600 border-green-300 hover:bg-green-50 dark:text-green-400 dark:border-green-700 dark:hover:bg-green-900/20"
+                      >
+                        Восстановить
+                      </Button>
+                    )}
+                  </Card.Body>
+                </Card>
               ))}
             </div>
           )}
 
           {/* Pagination */}
           {tasksData && tasksData.last_page > 1 && (
-            <div className="mt-8 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-6">
-              <div className="flex flex-1 justify-between sm:hidden">
-                <button
-                  onClick={() => setPage(Math.max(1, page - 1))}
-                  disabled={page === 1}
-                  className="relative inline-flex items-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
-                >
-                  Назад
-                </button>
-                <button
-                  onClick={() => setPage(Math.min(tasksData.last_page, page + 1))}
-                  disabled={page === tasksData.last_page}
-                  className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
-                >
-                  Вперед
-                </button>
-              </div>
-              <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-                <p className="text-sm text-gray-700 dark:text-gray-300">
-                  Страница <span className="font-medium">{page}</span> из <span className="font-medium">{tasksData.last_page}</span> ({tasksData.total} записей)
-                </p>
-                <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm">
-                  <button
-                    onClick={() => setPage(Math.max(1, page - 1))}
-                    disabled={page === 1}
-                    className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 dark:ring-gray-600 dark:hover:bg-gray-700"
-                  >
-                    <ChevronLeftIcon className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={() => setPage(Math.min(tasksData.last_page, page + 1))}
-                    disabled={page === tasksData.last_page}
-                    className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 dark:ring-gray-600 dark:hover:bg-gray-700"
-                  >
-                    <ChevronRightIcon className="h-5 w-5" />
-                  </button>
-                </nav>
-              </div>
-            </div>
+            <Pagination
+              currentPage={page}
+              totalPages={tasksData.last_page}
+              total={tasksData.total}
+              onPageChange={setPage}
+              className="mt-8"
+            />
           )}
         </>
       )}
-    </div>
+    </PageContainer>
   );
 };

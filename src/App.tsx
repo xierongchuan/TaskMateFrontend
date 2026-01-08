@@ -20,6 +20,7 @@ import { debugAuth } from './utils/debug';
 import './index.css';
 
 import { ThemeProvider } from './context/ThemeContext';
+import { ToastProvider } from './components/ui/Toast';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -64,96 +65,98 @@ function App() {
 
   return (
     <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <Routes>
-            <Route
-              path="/login"
-              element={
-                isAuthenticated ? (
-                  <Navigate to="/dashboard" replace />
-                ) : (
-                  <LoginPage />
-                )
-              }
-            />
+      <ToastProvider>
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter>
+            <Routes>
+              <Route
+                path="/login"
+                element={
+                  isAuthenticated ? (
+                    <Navigate to="/dashboard" replace />
+                  ) : (
+                    <LoginPage />
+                  )
+                }
+              />
 
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Layout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<Navigate to="/dashboard" replace />} />
-              <Route path="dashboard" element={<DashboardPage />} />
-              <Route path="tasks" element={<TasksPage />} />
               <Route
-                path="task-generators"
+                path="/"
                 element={
-                  <ProtectedRoute requiredRoles={['manager', 'owner']}>
-                    <TaskGeneratorsPage />
+                  <ProtectedRoute>
+                    <Layout />
                   </ProtectedRoute>
                 }
-              />
-              <Route
-                path="archived-tasks"
-                element={
-                  <ProtectedRoute requiredRoles={['manager', 'owner']}>
-                    <ArchivedTasksPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="users" element={<Navigate to="/employees" replace />} />
-              <Route
-                path="employees"
-                element={
-                  <ProtectedRoute requiredRoles={['manager', 'owner', 'observer']}>
-                    <UsersPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="shifts" element={<ShiftsPage />} />
-              <Route path="links" element={<LinksPage />} />
-              <Route
-                path="dealerships"
-                element={
-                  <ProtectedRoute requiredRoles={['manager', 'owner']}>
-                    <DealershipsPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="settings"
-                element={
-                  <ProtectedRoute requiredRoles={['manager', 'owner']}>
-                    <SettingsPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="reports"
-                element={
-                  <ProtectedRoute requiredRoles={['manager', 'owner']}>
-                    <ReportsPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="notification-settings"
-                element={
-                  <ProtectedRoute requiredRoles={['manager', 'owner']}>
-                    <NotificationSettingsPage />
-                  </ProtectedRoute>
-                }
-              />
-            </Route>
+              >
+                <Route index element={<Navigate to="/dashboard" replace />} />
+                <Route path="dashboard" element={<DashboardPage />} />
+                <Route path="tasks" element={<TasksPage />} />
+                <Route
+                  path="task-generators"
+                  element={
+                    <ProtectedRoute requiredRoles={['manager', 'owner']}>
+                      <TaskGeneratorsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="archived-tasks"
+                  element={
+                    <ProtectedRoute requiredRoles={['manager', 'owner']}>
+                      <ArchivedTasksPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="users" element={<Navigate to="/employees" replace />} />
+                <Route
+                  path="employees"
+                  element={
+                    <ProtectedRoute requiredRoles={['manager', 'owner', 'observer']}>
+                      <UsersPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="shifts" element={<ShiftsPage />} />
+                <Route path="links" element={<LinksPage />} />
+                <Route
+                  path="dealerships"
+                  element={
+                    <ProtectedRoute requiredRoles={['manager', 'owner']}>
+                      <DealershipsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="settings"
+                  element={
+                    <ProtectedRoute requiredRoles={['manager', 'owner']}>
+                      <SettingsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="reports"
+                  element={
+                    <ProtectedRoute requiredRoles={['manager', 'owner']}>
+                      <ReportsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="notification-settings"
+                  element={
+                    <ProtectedRoute requiredRoles={['manager', 'owner']}>
+                      <NotificationSettingsPage />
+                    </ProtectedRoute>
+                  }
+                />
+              </Route>
 
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
-        </BrowserRouter>
-      </QueryClientProvider>
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
+          </BrowserRouter>
+        </QueryClientProvider>
+      </ToastProvider>
     </ThemeProvider>
   );
 }
