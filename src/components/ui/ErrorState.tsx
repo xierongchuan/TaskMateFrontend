@@ -10,16 +10,6 @@ export interface ErrorStateProps {
   className?: string;
 }
 
-/**
- * Компонент для отображения состояния ошибки.
- *
- * @example
- * <ErrorState
- *   title="Ошибка загрузки"
- *   description="Не удалось загрузить данные"
- *   onRetry={() => refetch()}
- * />
- */
 export const ErrorState: React.FC<ErrorStateProps> = ({
   title = 'Ошибка загрузки',
   description,
@@ -28,23 +18,24 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
   className = '',
 }) => {
   const containerClasses = [
-    'bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-xl p-6 transition-colors',
+    'bg-error-container rounded-md p-6',
+    'transition-all duration-short3 ease-standard',
     className,
   ].filter(Boolean).join(' ');
 
   return (
     <div className={containerClasses}>
       <div className="flex items-start">
-        <XCircleIcon className="w-5 h-5 text-red-500 mr-3 mt-0.5 flex-shrink-0" />
+        <XCircleIcon className="w-6 h-6 text-on-error-container mr-3 mt-0.5 flex-shrink-0" />
         <div className="flex-1">
-          <p className="text-red-800 dark:text-red-300 font-medium">{title}</p>
+          <p className="text-on-error-container font-medium">{title}</p>
           {description && (
-            <p className="text-red-700 dark:text-red-400 text-sm mt-1">{description}</p>
+            <p className="text-on-error-container/80 text-sm mt-1">{description}</p>
           )}
           {onRetry && (
             <div className="mt-4">
               <Button
-                variant="outline"
+                variant="outlined"
                 size="sm"
                 onClick={onRetry}
                 icon={<ArrowPathIcon />}

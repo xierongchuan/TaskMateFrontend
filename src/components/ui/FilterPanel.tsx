@@ -39,17 +39,17 @@ export const FilterPanel: React.FC<FilterPanelProps> & {
   clearButtonText = 'Сбросить фильтры',
 }) => {
     const containerClasses = [
-      'bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 transition-colors',
+      'bg-surface-container-low rounded-xl shadow-elevation-1 transition-colors duration-short3',
       className,
     ].filter(Boolean).join(' ');
 
     return (
       <div className={containerClasses}>
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700 transition-colors">
+        <div className="p-4 border-b border-outline-variant transition-colors">
           <button
             type="button"
             onClick={onToggle}
-            className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors"
+            className="flex items-center text-sm font-medium text-on-surface hover:text-on-surface/80 transition-colors duration-short3"
           >
             <FunnelIcon className="w-4 h-4 mr-2" />
             {title} {isOpen ? 'Скрыть' : 'Показать'}
@@ -63,7 +63,7 @@ export const FilterPanel: React.FC<FilterPanelProps> & {
             {onClear && (
               <div className="mt-4 flex justify-end">
                 <Button
-                  variant="secondary"
+                  variant="tonal"
                   size="sm"
                   onClick={onClear}
                 >

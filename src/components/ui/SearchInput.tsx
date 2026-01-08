@@ -11,17 +11,6 @@ export interface SearchInputProps {
   fullWidth?: boolean;
 }
 
-/**
- * Поле поиска с дебаунсом для предотвращения лишних запросов.
- *
- * @example
- * <SearchInput
- *   value={search}
- *   onChange={setSearch}
- *   placeholder="Поиск..."
- *   debounceMs={300}
- * />
- */
 export const SearchInput: React.FC<SearchInputProps> = ({
   value,
   onChange,
@@ -33,7 +22,6 @@ export const SearchInput: React.FC<SearchInputProps> = ({
   const [localValue, setLocalValue] = useState(value);
   const isInternalChange = useRef(false);
 
-  // Sync local value with external value (only if not from internal change)
   useEffect(() => {
     if (!isInternalChange.current) {
       setLocalValue(value);
@@ -41,7 +29,6 @@ export const SearchInput: React.FC<SearchInputProps> = ({
     isInternalChange.current = false;
   }, [value]);
 
-  // Debounced onChange
   useEffect(() => {
     const timer = setTimeout(() => {
       if (localValue !== value) {
@@ -63,7 +50,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
       onChange={handleChange}
       placeholder={placeholder}
       icon={<MagnifyingGlassIcon />}
-      iconPosition="left"
+      inputSize="sm"
       fullWidth={fullWidth}
       className={className}
     />

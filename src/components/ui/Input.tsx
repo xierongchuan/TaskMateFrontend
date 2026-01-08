@@ -1,5 +1,6 @@
 import React from 'react';
 
+export type InputVariant = 'filled' | 'outlined';
 export type InputSize = 'sm' | 'md' | 'lg';
 
 export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
@@ -7,123 +8,133 @@ export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElem
   error?: string;
   hint?: string;
   icon?: React.ReactNode;
-  iconPosition?: 'left' | 'right';
+  trailingIcon?: React.ReactNode;
   inputSize?: InputSize;
+  variant?: InputVariant;
   fullWidth?: boolean;
 }
 
 const sizeClasses: Record<InputSize, string> = {
-  sm: 'px-3 py-1.5 text-xs',
-  md: 'px-3 py-2 text-sm',
-  lg: 'px-4 py-3 text-base',
+  sm: 'h-10 text-sm',
+  md: 'h-14 text-base',
+  lg: 'h-16 text-lg',
 };
 
-const iconPaddingLeft: Record<InputSize, string> = {
-  sm: 'pl-8',
-  md: 'pl-10',
-  lg: 'pl-12',
-};
-
-const iconPaddingRight: Record<InputSize, string> = {
-  sm: 'pr-8',
-  md: 'pr-10',
-  lg: 'pr-12',
-};
-
-const iconPositionClasses: Record<InputSize, { left: string; right: string }> = {
-  sm: { left: 'left-2.5', right: 'right-2.5' },
-  md: { left: 'left-3', right: 'right-3' },
-  lg: { left: 'left-4', right: 'right-4' },
+const labelSizeClasses: Record<InputSize, string> = {
+  sm: 'text-xs',
+  md: 'text-sm',
+  lg: 'text-base',
 };
 
 const iconSizeClasses: Record<InputSize, string> = {
   sm: 'w-4 h-4',
   md: 'w-5 h-5',
-  lg: 'w-5 h-5',
+  lg: 'w-6 h-6',
 };
 
-/**
- * Универсальный компонент текстового поля ввода.
- *
- * @example
- * <Input label="Поиск" icon={<MagnifyingGlassIcon />} placeholder="Введите текст..." />
- * <Input label="Email" type="email" error="Неверный формат" />
- */
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(({
   label,
   error,
   hint,
   icon,
-  iconPosition = 'left',
+  trailingIcon,
   inputSize = 'md',
+  variant = 'outlined',
   fullWidth = true,
   className = '',
   id,
+  disabled,
   ...props
 }, ref) => {
   const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
 
-  const baseInputClasses = 'block rounded-lg border shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed';
-
-  const stateClasses = error
-    ? 'border-red-300 dark:border-red-600 focus:ring-red-500 focus:border-red-500'
-    : 'border-gray-300 dark:border-gray-600';
-
-  const colorClasses = 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500';
-
-  const inputClasses = [
-    baseInputClasses,
-    sizeClasses[inputSize],
-    stateClasses,
-    colorClasses,
-    icon && iconPosition === 'left' ? iconPaddingLeft[inputSize] : '',
-    icon && iconPosition === 'right' ? iconPaddingRight[inputSize] : '',
+  const baseContainerClasses = [
+    'relative',
+    'rounded-xs',
+    'transition-all duration-short3 ease-standard',
     fullWidth ? 'w-full' : '',
-    className,
-  ].filter(Boolean).join(' ');
+  ].join(' ');
 
-  const renderIcon = (iconElement: React.ReactNode) => {
+  const inputBaseClasses = [
+    'w-full rounded-xs',
+    'text-on-surface',
+    'placeholder:text-on-surface-variant',
+    'transition-all duration-short3 ease-standard',
+    'focus:outline-none',
+    'disabled:opacity-[0.38] disabled:cursor-not-allowed',
+    sizeClasses[inputSize],
+    icon ? 'pl-12' : 'pl-4',
+    trailingIcon ? 'pr-12' : 'pr-4',
+  ].join(' ');
+
+  const variantClasses = variant === 'filled'
+    ? [
+      'bg-surface-container-highest',
+      'border-b-2 border-on-surface-variant',
+      'rounded-t-xs rounded-b-none',
+      'focus:border-primary',
+      error ? 'border-error focus:border-error' : '',
+    ].join(' ')
+    : [
+      'bg-transparent',
+      'border border-outline',
+      'rounded-xs',
+      'focus:border-2 focus:border-primary focus:-m-px',
+      error ? 'border-error focus:border-error' : '',
+    ].join(' ');
+
+  const labelClasses = [
+    'block mb-2 font-medium',
+    labelSizeClasses[inputSize],
+    error ? 'text-error' : 'text-on-surface-variant',
+  ].join(' ');
+
+  const renderIcon = (iconElement: React.ReactNode, position: 'left' | 'right') => {
+    if (!iconElement) return null;
+
+    const positionClasses = position === 'left'
+      ? 'left-4'
+      : 'right-4';
+
     if (React.isValidElement<{ className?: string }>(iconElement)) {
-      return React.cloneElement(iconElement, {
-        className: `${iconSizeClasses[inputSize]} text-gray-400 ${iconElement.props.className || ''}`.trim(),
-      });
+      return (
+        <div className={`absolute ${positionClasses} top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none`}>
+          {React.cloneElement(iconElement, {
+            className: `${iconSizeClasses[inputSize]} ${iconElement.props.className || ''}`.trim(),
+          })}
+        </div>
+      );
     }
-    return iconElement;
+    return (
+      <div className={`absolute ${positionClasses} top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none`}>
+        {iconElement}
+      </div>
+    );
   };
 
   return (
-    <div className={fullWidth ? 'w-full' : ''}>
+    <div className={`${fullWidth ? 'w-full' : ''} ${className}`}>
       {label && (
-        <label
-          htmlFor={inputId}
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-        >
+        <label htmlFor={inputId} className={labelClasses}>
           {label}
         </label>
       )}
-      <div className="relative">
-        {icon && iconPosition === 'left' && (
-          <div className={`absolute ${iconPositionClasses[inputSize].left} top-1/2 transform -translate-y-1/2 pointer-events-none`}>
-            {renderIcon(icon)}
-          </div>
-        )}
+      <div className={baseContainerClasses}>
+        {renderIcon(icon, 'left')}
         <input
           ref={ref}
           id={inputId}
-          className={inputClasses}
+          disabled={disabled}
+          className={`${inputBaseClasses} ${variantClasses}`}
           {...props}
         />
-        {icon && iconPosition === 'right' && (
-          <div className={`absolute ${iconPositionClasses[inputSize].right} top-1/2 transform -translate-y-1/2 pointer-events-none`}>
-            {renderIcon(icon)}
-          </div>
-        )}
+        {renderIcon(trailingIcon, 'right')}
       </div>
       {error && (
-        <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>
+        <p className="mt-1.5 text-xs text-error">{error}</p>
       )}
       {hint && !error && (
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{hint}</p>
+        <p className="mt-1.5 text-xs text-on-surface-variant">{hint}</p>
       )}
     </div>
   );

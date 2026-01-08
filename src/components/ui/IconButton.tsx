@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type IconButtonVariant = 'default' | 'primary' | 'danger' | 'ghost';
+export type IconButtonVariant = 'standard' | 'filled' | 'tonal' | 'outlined';
 export type IconButtonSize = 'sm' | 'md' | 'lg';
 
 export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -9,19 +9,27 @@ export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEl
   size?: IconButtonSize;
   tooltip?: string;
   isLoading?: boolean;
+  selected?: boolean;
 }
 
 const variantClasses: Record<IconButtonVariant, string> = {
-  default: 'text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700',
-  primary: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/20',
-  danger: 'text-gray-400 hover:text-red-600 hover:bg-red-50 dark:text-gray-400 dark:hover:text-red-400 dark:hover:bg-red-900/20',
-  ghost: 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
+  standard: 'text-on-surface-variant hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12]',
+  filled: 'bg-primary text-on-primary hover:shadow-elevation-1 active:shadow-elevation-0',
+  tonal: 'bg-secondary-container text-on-secondary-container hover:shadow-elevation-1 active:shadow-elevation-0',
+  outlined: 'text-on-surface-variant border border-outline hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12]',
+};
+
+const selectedVariantClasses: Record<IconButtonVariant, string> = {
+  standard: 'text-primary bg-primary/[0.12]',
+  filled: 'bg-primary text-on-primary',
+  tonal: 'bg-secondary-container text-on-secondary-container',
+  outlined: 'text-primary bg-primary/[0.12] border-primary',
 };
 
 const sizeClasses: Record<IconButtonSize, string> = {
-  sm: 'p-1',
-  md: 'p-2',
-  lg: 'p-3',
+  sm: 'w-8 h-8',
+  md: 'w-10 h-10',
+  lg: 'w-12 h-12',
 };
 
 const iconSizeClasses: Record<IconButtonSize, string> = {
@@ -30,29 +38,30 @@ const iconSizeClasses: Record<IconButtonSize, string> = {
   lg: 'w-6 h-6',
 };
 
-/**
- * Кнопка-иконка для компактных действий.
- *
- * @example
- * <IconButton icon={<PencilIcon />} variant="default" tooltip="Редактировать" />
- * <IconButton icon={<TrashIcon />} variant="danger" tooltip="Удалить" />
- */
 export const IconButton: React.FC<IconButtonProps> = ({
   icon,
-  variant = 'default',
+  variant = 'standard',
   size = 'md',
   tooltip,
   isLoading = false,
+  selected = false,
   disabled,
   className = '',
   ...props
 }) => {
-  const baseClasses = 'inline-flex items-center justify-center rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed';
+  const baseClasses = [
+    'inline-flex items-center justify-center',
+    'rounded-full',
+    'transition-all duration-short3 ease-standard',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+    'disabled:opacity-[0.38] disabled:cursor-not-allowed disabled:shadow-none',
+    'relative overflow-hidden',
+  ].join(' ');
 
   const classes = [
     baseClasses,
-    variantClasses[variant],
     sizeClasses[size],
+    selected ? selectedVariantClasses[variant] : variantClasses[variant],
     className,
   ].filter(Boolean).join(' ');
 

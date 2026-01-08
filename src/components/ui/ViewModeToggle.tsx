@@ -1,15 +1,15 @@
 import React from 'react';
 
-export interface ViewModeOption {
-  value: string;
+export interface ViewModeOption<T extends string = string> {
+  value: T;
   icon: React.ReactNode;
   label?: string;
 }
 
-export interface ViewModeToggleProps {
-  mode: string;
-  onChange: (mode: string) => void;
-  options: ViewModeOption[];
+export interface ViewModeToggleProps<T extends string = string> {
+  mode: T;
+  onChange: (mode: T) => void;
+  options: ViewModeOption<T>[];
   className?: string;
 }
 
@@ -26,31 +26,28 @@ export interface ViewModeToggleProps {
  *   ]}
  * />
  */
-export const ViewModeToggle: React.FC<ViewModeToggleProps> = ({
+export function ViewModeToggle<T extends string = string>({
   mode,
   onChange,
   options,
   className = '',
-}) => {
+}: ViewModeToggleProps<T>) {
   const containerClasses = [
-    'flex items-center bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 transition-colors',
+    'inline-flex items-center bg-surface-container rounded-full p-1 transition-colors duration-short3',
     className,
   ].filter(Boolean).join(' ');
 
   return (
     <div className={containerClasses}>
-      {options.map((option, index) => {
+      {options.map((option) => {
         const isActive = mode === option.value;
-        const isFirst = index === 0;
-        const isLast = index === options.length - 1;
 
         const buttonClasses = [
-          'px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500',
+          'px-4 py-2 text-sm font-medium rounded-full transition-all duration-short3 ease-standard',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
           isActive
-            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-            : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
-          isFirst ? 'rounded-l-lg' : '',
-          isLast ? 'rounded-r-lg' : '',
+            ? 'bg-secondary-container text-on-secondary-container'
+            : 'text-on-surface-variant hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12]',
         ].filter(Boolean).join(' ');
 
         const iconClasses = 'w-4 h-4';
@@ -78,4 +75,4 @@ export const ViewModeToggle: React.FC<ViewModeToggleProps> = ({
       })}
     </div>
   );
-};
+}

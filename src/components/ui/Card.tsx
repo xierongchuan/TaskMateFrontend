@@ -1,11 +1,13 @@
 import React from 'react';
 
+export type CardVariant = 'elevated' | 'filled' | 'outlined';
+
 export interface CardProps {
   children: React.ReactNode;
   className?: string;
   hover?: boolean;
   padding?: 'none' | 'sm' | 'md' | 'lg';
-  variant?: 'default' | 'highlighted' | 'warning' | 'danger';
+  variant?: CardVariant;
 }
 
 export interface CardHeaderProps {
@@ -28,27 +30,16 @@ export interface CardFooterProps {
 const paddingClasses = {
   none: '',
   sm: 'p-4',
-  md: 'p-6',
-  lg: 'p-8',
+  md: 'p-5',
+  lg: 'p-6',
 };
 
-const variantClasses = {
-  default: 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700',
-  highlighted: 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800',
-  warning: 'bg-yellow-50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800',
-  danger: 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800',
+const variantClasses: Record<CardVariant, string> = {
+  elevated: 'bg-surface-container-low shadow-elevation-1',
+  filled: 'bg-surface-container-highest',
+  outlined: 'bg-surface border border-outline-variant',
 };
 
-/**
- * Универсальный компонент карточки.
- *
- * @example
- * <Card variant="default" hover>
- *   <Card.Header>Заголовок</Card.Header>
- *   <Card.Body>Контент</Card.Body>
- *   <Card.Footer>Действия</Card.Footer>
- * </Card>
- */
 export const Card: React.FC<CardProps> & {
   Header: typeof CardHeader;
   Body: typeof CardBody;
@@ -58,13 +49,14 @@ export const Card: React.FC<CardProps> & {
   className = '',
   hover = false,
   padding = 'none',
-  variant = 'default',
+  variant = 'elevated',
 }) => {
     const cardClasses = [
-      'rounded-xl shadow-sm border transition-all duration-200',
+      'rounded-md overflow-hidden',
+      'transition-all duration-short3 ease-standard',
       variantClasses[variant],
       paddingClasses[padding],
-      hover ? 'hover:shadow-md' : '',
+      hover ? 'hover:shadow-elevation-2 cursor-pointer' : '',
       className,
     ].filter(Boolean).join(' ');
 
@@ -78,11 +70,11 @@ export const Card: React.FC<CardProps> & {
 const CardHeader: React.FC<CardHeaderProps> = ({
   children,
   className = '',
-  border = true,
+  border = false,
 }) => {
   const headerClasses = [
-    'p-4 sm:p-6',
-    border ? 'border-b border-gray-200 dark:border-gray-700' : '',
+    'p-4 sm:p-5',
+    border ? 'border-b border-outline-variant' : '',
     className,
   ].filter(Boolean).join(' ');
 
@@ -93,18 +85,18 @@ const CardBody: React.FC<CardBodyProps> = ({
   children,
   className = '',
 }) => {
-  const bodyClasses = ['p-4 sm:p-6', className].filter(Boolean).join(' ');
+  const bodyClasses = ['p-4 sm:p-5', className].filter(Boolean).join(' ');
   return <div className={bodyClasses}>{children}</div>;
 };
 
 const CardFooter: React.FC<CardFooterProps> = ({
   children,
   className = '',
-  border = true,
+  border = false,
 }) => {
   const footerClasses = [
-    'p-4 sm:p-6',
-    border ? 'border-t border-gray-200 dark:border-gray-700' : '',
+    'p-4 sm:p-5',
+    border ? 'border-t border-outline-variant' : '',
     className,
   ].filter(Boolean).join(' ');
 

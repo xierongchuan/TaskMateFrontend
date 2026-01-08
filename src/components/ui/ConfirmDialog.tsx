@@ -21,41 +21,28 @@ const variantConfig: Record<ConfirmDialogVariant, {
   icon: React.ElementType;
   iconBg: string;
   iconColor: string;
-  confirmVariant: 'danger' | 'primary';
+  confirmVariant: 'danger' | 'filled';
 }> = {
   danger: {
     icon: TrashIcon,
-    iconBg: 'bg-red-100 dark:bg-red-900/30',
-    iconColor: 'text-red-600 dark:text-red-400',
+    iconBg: 'bg-error-container',
+    iconColor: 'text-on-error-container',
     confirmVariant: 'danger',
   },
   warning: {
     icon: ExclamationTriangleIcon,
-    iconBg: 'bg-yellow-100 dark:bg-yellow-900/30',
-    iconColor: 'text-yellow-600 dark:text-yellow-400',
-    confirmVariant: 'primary',
+    iconBg: 'bg-tertiary-container',
+    iconColor: 'text-on-tertiary-container',
+    confirmVariant: 'filled',
   },
   info: {
     icon: QuestionMarkCircleIcon,
-    iconBg: 'bg-blue-100 dark:bg-blue-900/30',
-    iconColor: 'text-blue-600 dark:text-blue-400',
-    confirmVariant: 'primary',
+    iconBg: 'bg-primary-container',
+    iconColor: 'text-on-primary-container',
+    confirmVariant: 'filled',
   },
 };
 
-/**
- * Диалог подтверждения действия.
- *
- * @example
- * <ConfirmDialog
- *   isOpen={showConfirm}
- *   title="Удалить задачу?"
- *   message="Это действие нельзя отменить"
- *   onConfirm={handleDelete}
- *   onCancel={() => setShowConfirm(false)}
- *   variant="danger"
- * />
- */
 export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   isOpen,
   title,
@@ -77,16 +64,16 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       showCloseButton={false}
     >
       <div className="p-6">
-        <div className="flex items-start">
+        <div className="flex items-start gap-4">
           <div className={`flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full ${iconBg}`}>
             <Icon className={`h-6 w-6 ${iconColor}`} />
           </div>
-          <div className="ml-4 text-left">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+          <div className="text-left flex-1">
+            <h3 className="text-on-surface md3-title-large">
               {title}
             </h3>
             {message && (
-              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              <p className="mt-2 text-on-surface-variant md3-body-medium">
                 {message}
               </p>
             )}
@@ -95,19 +82,19 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       </div>
       <Modal.Footer>
         <Button
+          variant="text"
+          onClick={onCancel}
+          disabled={isLoading}
+        >
+          {cancelText}
+        </Button>
+        <Button
           variant={confirmVariant}
           onClick={onConfirm}
           isLoading={isLoading}
           disabled={isLoading}
         >
           {confirmText}
-        </Button>
-        <Button
-          variant="secondary"
-          onClick={onCancel}
-          disabled={isLoading}
-        >
-          {cancelText}
         </Button>
       </Modal.Footer>
     </Modal>

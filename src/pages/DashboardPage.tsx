@@ -51,9 +51,9 @@ export const DashboardPage: React.FC = () => {
   });
 
   const getShiftStatusBadge = (status: string, isLate: boolean) => {
-    if (isLate) return <Badge variant="danger">На смене (Опоздание)</Badge>;
+    if (isLate) return <Badge variant="error">На смене (Опоздание)</Badge>;
     if (status === 'open') return <Badge variant="success">На смене</Badge>;
-    return <Badge variant="gray">Закрыта</Badge>;
+    return <Badge variant="secondary">Закрыта</Badge>;
   };
 
   const handleOpenTask = (task: Task) => {
@@ -202,7 +202,7 @@ export const DashboardPage: React.FC = () => {
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                     {shift.is_late && (
-                      <Badge variant="danger" size="sm">
+                      <Badge variant="error" size="sm">
                         Опоздание {shift.late_minutes} мин
                       </Badge>
                     )}
@@ -223,7 +223,7 @@ export const DashboardPage: React.FC = () => {
         <Section title="Быстрые действия" icon={<ChartBarIcon />}>
           <div className="space-y-3">
             <Button
-              variant="primary"
+              variant="filled"
               icon={<CalendarIcon />}
               onClick={() => navigate('/tasks')}
               fullWidth
@@ -231,7 +231,7 @@ export const DashboardPage: React.FC = () => {
               Создать задачу
             </Button>
             <Button
-              variant="secondary"
+              variant="tonal"
               icon={<LinkIcon />}
               onClick={() => navigate('/links')}
               fullWidth
@@ -239,7 +239,7 @@ export const DashboardPage: React.FC = () => {
               Добавить ссылку
             </Button>
             <Button
-              variant="secondary"
+              variant="tonal"
               icon={<ChartBarIcon />}
               onClick={() => navigate('/reports')}
               fullWidth
@@ -257,7 +257,7 @@ export const DashboardPage: React.FC = () => {
           title="Задачи"
           icon={<CalendarIcon />}
           action={
-            <Button variant="ghost" size="sm" onClick={() => navigate('/tasks')}>
+            <Button variant="text" size="sm" onClick={() => navigate('/tasks')}>
               Все задачи
             </Button>
           }
@@ -293,17 +293,16 @@ export const DashboardPage: React.FC = () => {
                   {dashboardData.overdue_tasks_list.map(task => (
                     <Card
                       key={task.id}
-                      variant="danger"
-                      className="cursor-pointer hover:shadow-md transition-shadow"
+                      className="cursor-pointer hover:shadow-md transition-shadow bg-error-container"
                     >
                       <div onClick={() => handleOpenTask(task)} className="p-3">
                         <div className="flex items-start">
-                          <XCircleIcon className="w-5 h-5 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
+                          <XCircleIcon className="w-5 h-5 text-on-error-container mr-2 mt-0.5 flex-shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-red-900 dark:text-red-200 text-sm">
+                            <p className="font-medium text-on-error-container text-sm">
                               {task.title}
                             </p>
-                            <div className="flex items-center text-xs text-red-700 mt-1">
+                            <div className="flex items-center text-xs text-on-error-container/80 mt-1">
                               <span>Просрочено: {task.deadline ? format(new Date(task.deadline), 'PP p', { locale: ru }) : 'Без срока'}</span>
                               <span className="mx-1">•</span>
                               <span>{task.creator?.full_name}</span>
@@ -316,14 +315,14 @@ export const DashboardPage: React.FC = () => {
                 </div>
               ) : (
                 (dashboardData?.overdue_tasks || 0) > 0 && (
-                  <Card variant="danger">
+                  <Card className="bg-error-container">
                     <div className="p-3 flex items-center">
-                      <XCircleIcon className="w-5 h-5 text-red-500 mr-2" />
+                      <XCircleIcon className="w-5 h-5 text-on-error-container mr-2" />
                       <div>
-                        <p className="font-medium text-red-900 dark:text-red-200 text-sm">
+                        <p className="font-medium text-on-error-container text-sm">
                           {dashboardData?.overdue_tasks} просроченных задач
                         </p>
-                        <p className="text-xs text-red-700 dark:text-red-300">
+                        <p className="text-xs text-on-error-container/80">
                           Требуют немедленного внимания
                         </p>
                       </div>
@@ -333,14 +332,14 @@ export const DashboardPage: React.FC = () => {
               )}
 
               {(dashboardData?.late_shifts_today || 0) > 0 && (
-                <Card variant="warning">
+                <Card className="bg-tertiary-container">
                   <div className="p-3 flex items-center">
-                    <ClockIcon className="w-5 h-5 text-yellow-500 mr-2" />
+                    <ClockIcon className="w-5 h-5 text-on-tertiary-container mr-2" />
                     <div>
-                      <p className="font-medium text-yellow-900 dark:text-yellow-200 text-sm">
+                      <p className="font-medium text-on-tertiary-container text-sm">
                         {dashboardData?.late_shifts_today} опозданий сегодня
                       </p>
-                      <p className="text-xs text-yellow-700 dark:text-yellow-300">
+                      <p className="text-xs text-on-tertiary-container/80">
                         Необходимо проконтролировать
                       </p>
                     </div>

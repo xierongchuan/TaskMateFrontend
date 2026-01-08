@@ -1,7 +1,7 @@
 import React from 'react';
 
-export type BadgeVariant = 'success' | 'warning' | 'danger' | 'info' | 'purple' | 'gray' | 'blue' | 'orange';
-export type BadgeSize = 'sm' | 'md';
+export type BadgeVariant = 'primary' | 'secondary' | 'tertiary' | 'error' | 'success' | 'warning';
+export type BadgeSize = 'sm' | 'md' | 'lg';
 
 export interface BadgeProps {
   variant?: BadgeVariant;
@@ -9,64 +9,46 @@ export interface BadgeProps {
   icon?: React.ReactNode;
   children: React.ReactNode;
   className?: string;
-  withBorder?: boolean;
 }
 
 const variantClasses: Record<BadgeVariant, string> = {
-  success: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-  warning: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
-  danger: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
-  info: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-  purple: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
-  gray: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
-  blue: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-  orange: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
-};
-
-const borderClasses: Record<BadgeVariant, string> = {
-  success: 'border-green-200 dark:border-green-700',
-  warning: 'border-yellow-200 dark:border-yellow-700',
-  danger: 'border-red-200 dark:border-red-700',
-  info: 'border-blue-200 dark:border-blue-700',
-  purple: 'border-purple-200 dark:border-purple-700',
-  gray: 'border-gray-200 dark:border-gray-600',
-  blue: 'border-blue-200 dark:border-blue-700',
-  orange: 'border-orange-200 dark:border-orange-700',
+  primary: 'bg-primary-container text-on-primary-container',
+  secondary: 'bg-secondary-container text-on-secondary-container',
+  tertiary: 'bg-tertiary-container text-on-tertiary-container',
+  error: 'bg-error-container text-on-error-container',
+  success: 'bg-[#d3f5d3] text-[#1a5d1a] dark:bg-[#1a4d1a] dark:text-[#b3e6b3]',
+  warning: 'bg-[#fff3cd] text-[#856404] dark:bg-[#4d4000] dark:text-[#ffe066]',
 };
 
 const sizeClasses: Record<BadgeSize, string> = {
-  sm: 'px-2 py-0.5 text-xs',
-  md: 'px-2.5 py-0.5 text-xs',
+  sm: 'h-5 px-2 text-[11px]',
+  md: 'h-6 px-3 text-xs',
+  lg: 'h-7 px-4 text-sm',
 };
 
 const iconSizeClasses: Record<BadgeSize, string> = {
   sm: 'w-3 h-3',
-  md: 'w-3 h-3',
+  md: 'w-3.5 h-3.5',
+  lg: 'w-4 h-4',
 };
 
-/**
- * Универсальный компонент Badge для отображения статусов, меток и т.д.
- *
- * @example
- * <Badge variant="success" icon={<CheckCircleIcon />}>Выполнено</Badge>
- * <Badge variant="danger">Просрочено</Badge>
- * <Badge variant="warning" withBorder>Ожидает</Badge>
- */
 export const Badge: React.FC<BadgeProps> = ({
-  variant = 'gray',
+  variant = 'secondary',
   size = 'md',
   icon,
   children,
   className = '',
-  withBorder = true,
 }) => {
-  const baseClasses = 'inline-flex items-center rounded-full font-medium';
+  const baseClasses = [
+    'inline-flex items-center justify-center',
+    'rounded-sm font-medium',
+    'transition-colors duration-short3 ease-standard',
+  ].join(' ');
 
   const classes = [
     baseClasses,
     variantClasses[variant],
     sizeClasses[size],
-    withBorder ? `border ${borderClasses[variant]}` : '',
     className,
   ].filter(Boolean).join(' ');
 
@@ -84,7 +66,7 @@ export const Badge: React.FC<BadgeProps> = ({
   return (
     <span className={classes}>
       {icon && (
-        <span className="mr-1">
+        <span className="mr-1.5 -ml-0.5">
           {renderIcon(icon)}
         </span>
       )}

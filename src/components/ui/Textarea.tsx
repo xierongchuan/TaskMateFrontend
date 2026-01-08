@@ -1,53 +1,65 @@
 import React from 'react';
 
+export type TextareaVariant = 'filled' | 'outlined';
+
 export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
   error?: string;
   hint?: string;
+  variant?: TextareaVariant;
   fullWidth?: boolean;
 }
 
-/**
- * Универсальный компонент многострочного текстового поля.
- *
- * @example
- * <Textarea label="Описание" placeholder="Введите описание..." rows={4} />
- */
 export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(({
   label,
   error,
   hint,
+  variant = 'outlined',
   fullWidth = true,
   className = '',
   id,
   rows = 3,
+  disabled,
   ...props
 }, ref) => {
   const textareaId = id || `textarea-${Math.random().toString(36).substr(2, 9)}`;
 
-  const baseClasses = 'block rounded-lg border shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-2 text-sm';
+  const textareaBaseClasses = [
+    'w-full rounded-xs',
+    'px-4 py-3',
+    'text-on-surface text-base',
+    'placeholder:text-on-surface-variant',
+    'transition-all duration-short3 ease-standard',
+    'focus:outline-none',
+    'disabled:opacity-[0.38] disabled:cursor-not-allowed',
+    'resize-y min-h-[100px]',
+  ].join(' ');
 
-  const stateClasses = error
-    ? 'border-red-300 dark:border-red-600 focus:ring-red-500 focus:border-red-500'
-    : 'border-gray-300 dark:border-gray-600';
+  const variantClasses = variant === 'filled'
+    ? [
+      'bg-surface-container-highest',
+      'border-b-2 border-on-surface-variant',
+      'rounded-t-xs rounded-b-none',
+      'focus:border-primary',
+      error ? 'border-error focus:border-error' : '',
+    ].join(' ')
+    : [
+      'bg-transparent',
+      'border border-outline',
+      'rounded-xs',
+      'focus:border-2 focus:border-primary focus:-m-px',
+      error ? 'border-error focus:border-error' : '',
+    ].join(' ');
 
-  const colorClasses = 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500';
-
-  const textareaClasses = [
-    baseClasses,
-    stateClasses,
-    colorClasses,
-    fullWidth ? 'w-full' : '',
-    className,
-  ].filter(Boolean).join(' ');
+  const labelClasses = [
+    'block mb-2 text-sm font-medium',
+    error ? 'text-error' : 'text-on-surface-variant',
+  ].join(' ');
 
   return (
-    <div className={fullWidth ? 'w-full' : ''}>
+    <div className={`${fullWidth ? 'w-full' : ''} ${className}`}>
       {label && (
-        <label
-          htmlFor={textareaId}
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-        >
+        <label htmlFor={textareaId} className={labelClasses}>
           {label}
         </label>
       )}
@@ -55,14 +67,15 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(({
         ref={ref}
         id={textareaId}
         rows={rows}
-        className={textareaClasses}
+        disabled={disabled}
+        className={`${textareaBaseClasses} ${variantClasses}`}
         {...props}
       />
       {error && (
-        <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>
+        <p className="mt-1.5 text-xs text-error">{error}</p>
       )}
       {hint && !error && (
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{hint}</p>
+        <p className="mt-1.5 text-xs text-on-surface-variant">{hint}</p>
       )}
     </div>
   );

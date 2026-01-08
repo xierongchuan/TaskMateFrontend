@@ -13,6 +13,7 @@ export interface ModalProps {
   closeOnOverlayClick?: boolean;
   closeOnEscape?: boolean;
   showCloseButton?: boolean;
+  icon?: React.ReactNode;
 }
 
 export interface ModalBodyProps {
@@ -34,20 +35,6 @@ const sizeClasses: Record<ModalSize, string> = {
   full: 'max-w-full mx-4',
 };
 
-/**
- * Универсальный компонент модального окна.
- *
- * @example
- * <Modal isOpen={isOpen} onClose={onClose} title="Создать задачу" size="lg">
- *   <Modal.Body>
- *     <form>...</form>
- *   </Modal.Body>
- *   <Modal.Footer>
- *     <Button variant="secondary" onClick={onClose}>Отмена</Button>
- *     <Button variant="primary">Сохранить</Button>
- *   </Modal.Footer>
- * </Modal>
- */
 export const Modal: React.FC<ModalProps> & {
   Body: typeof ModalBody;
   Footer: typeof ModalFooter;
@@ -61,8 +48,8 @@ export const Modal: React.FC<ModalProps> & {
   closeOnOverlayClick = true,
   closeOnEscape = true,
   showCloseButton = true,
+  icon,
 }) => {
-    // Handle escape key
     const handleEscape = useCallback((e: KeyboardEvent) => {
       if (closeOnEscape && e.key === 'Escape') {
         onClose();
@@ -90,7 +77,13 @@ export const Modal: React.FC<ModalProps> & {
     };
 
     const modalClasses = [
-      'inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:w-full',
+      'inline-block align-bottom',
+      'bg-surface-container-high',
+      'rounded-xl overflow-hidden',
+      'shadow-elevation-3',
+      'transform transition-all',
+      'sm:my-8 sm:align-middle sm:w-full',
+      'md3-animate-scale-in',
       sizeClasses[size],
       className,
     ].filter(Boolean).join(' ');
@@ -98,34 +91,37 @@ export const Modal: React.FC<ModalProps> & {
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto">
         <div className="flex min-h-screen items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-          {/* Overlay */}
           <div
-            className="fixed inset-0 bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75 transition-opacity"
+            className="fixed inset-0 bg-on-surface/32 transition-opacity md3-animate-fade-in"
             onClick={handleOverlayClick}
             aria-hidden="true"
           />
 
-          {/* Centering trick */}
           <span className="hidden sm:inline-block sm:h-screen sm:align-middle" aria-hidden="true">
             &#8203;
           </span>
 
-          {/* Modal */}
           <div className={modalClasses} onClick={(e) => e.stopPropagation()}>
-            {/* Header */}
-            {(title || showCloseButton) && (
-              <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
-                {title && (
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {title}
-                  </h3>
-                )}
+            {(title || showCloseButton || icon) && (
+              <div className="flex items-start justify-between gap-4 p-6">
+                <div className="flex items-start gap-4">
+                  {icon && (
+                    <div className="flex-shrink-0 text-primary">
+                      {icon}
+                    </div>
+                  )}
+                  {title && (
+                    <h2 className="text-on-surface md3-headline-small">
+                      {title}
+                    </h2>
+                  )}
+                </div>
                 {showCloseButton && (
                   <button
                     onClick={onClose}
-                    className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="flex-shrink-0 p-2 -m-2 text-on-surface-variant hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12] rounded-full transition-colors duration-short3 ease-standard"
                   >
-                    <XMarkIcon className="w-5 h-5" />
+                    <XMarkIcon className="w-6 h-6" />
                   </button>
                 )}
               </div>
@@ -142,7 +138,11 @@ const ModalBody: React.FC<ModalBodyProps> = ({
   children,
   className = '',
 }) => {
-  const bodyClasses = ['p-4 sm:p-6', className].filter(Boolean).join(' ');
+  const bodyClasses = [
+    'px-6 pb-6',
+    'text-on-surface-variant md3-body-medium',
+    className,
+  ].filter(Boolean).join(' ');
   return <div className={bodyClasses}>{children}</div>;
 };
 
@@ -151,7 +151,8 @@ const ModalFooter: React.FC<ModalFooterProps> = ({
   className = '',
 }) => {
   const footerClasses = [
-    'bg-gray-50 dark:bg-gray-700/50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse sm:gap-3',
+    'px-6 pb-6 pt-2',
+    'flex flex-row justify-end gap-2',
     className,
   ].filter(Boolean).join(' ');
 
