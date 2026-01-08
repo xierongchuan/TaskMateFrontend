@@ -1,4 +1,6 @@
 import React from 'react';
+import { useRipple } from '../../hooks/useRipple';
+import { RippleContainer } from './Ripple';
 
 export type IconButtonVariant = 'standard' | 'filled' | 'tonal' | 'outlined';
 export type IconButtonSize = 'sm' | 'md' | 'lg';
@@ -10,6 +12,7 @@ export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEl
   tooltip?: string;
   isLoading?: boolean;
   selected?: boolean;
+  disableRipple?: boolean;
 }
 
 const variantClasses: Record<IconButtonVariant, string> = {
@@ -46,9 +49,20 @@ export const IconButton: React.FC<IconButtonProps> = ({
   isLoading = false,
   selected = false,
   disabled,
+  disableRipple = false,
   className = '',
+  onClick,
   ...props
 }) => {
+  const { ripples, addRipple } = useRipple();
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (!disabled && !disableRipple) {
+      addRipple(event);
+    }
+    onClick?.(event);
+  };
+
   const baseClasses = [
     'inline-flex items-center justify-center',
     'rounded-full',
@@ -56,6 +70,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
     'disabled:opacity-[0.38] disabled:cursor-not-allowed disabled:shadow-none',
     'relative overflow-hidden',
+    'select-none',
   ].join(' ');
 
   const classes = [
@@ -106,8 +121,10 @@ export const IconButton: React.FC<IconButtonProps> = ({
       className={classes}
       disabled={disabled || isLoading}
       title={tooltip}
+      onClick={handleClick}
       {...props}
     >
+      {!disableRipple && <RippleContainer ripples={ripples} />}
       {renderIcon()}
     </button>
   );

@@ -1,6 +1,6 @@
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
 import { usePermissions } from '../../hooks/usePermissions';
+import { NavItem } from './NavItem';
 import {
   HomeIcon,
   ClipboardDocumentListIcon,
@@ -19,7 +19,7 @@ interface SidebarProps {
   onClose: () => void;
 }
 
-interface NavItem {
+interface NavItemConfig {
   path: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
@@ -28,9 +28,8 @@ interface NavItem {
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const permissions = usePermissions();
-  const location = useLocation();
 
-  const navItems: NavItem[] = [
+  const navItems: NavItemConfig[] = [
     { path: '/dashboard', label: 'Dashboard', icon: HomeIcon },
     { path: '/tasks', label: 'Задачи', icon: ClipboardDocumentListIcon },
     { path: '/task-generators', label: 'Генераторы', icon: CogIcon, permission: permissions.canManageTasks },
@@ -44,6 +43,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   ];
 
   const filteredItems = navItems.filter(item => item.permission === undefined || item.permission);
+
+  const handleItemClick = () => {
+    if (window.innerWidth < 1024) {
+      onClose();
+    }
+  };
 
   if (!isOpen) {
     return null;
@@ -71,36 +76,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
         <nav className="flex-1 px-3 py-4 overflow-y-auto">
           <ul className="space-y-0.5">
-            {filteredItems.map((item) => {
-              const isActive = location.pathname === item.path ||
-                (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
-              const Icon = item.icon;
-
-              return (
-                <li key={item.path}>
-                  <NavLink
-                    to={item.path}
-                    onClick={() => {
-                      if (window.innerWidth < 1024) {
-                        onClose();
-                      }
-                    }}
-                    className={`
-                      w-full flex items-center h-14 px-4 rounded-full
-                      font-medium
-                      transition-all duration-short3 ease-standard
-                      ${isActive
-                        ? 'bg-secondary-container text-on-secondary-container'
-                        : 'text-on-surface-variant hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12]'
-                      }
-                    `}
-                  >
-                    <Icon className={`w-6 h-6 mr-3 ${isActive ? 'text-on-secondary-container' : 'text-on-surface-variant'}`} />
-                    <span className="md3-label-large">{item.label}</span>
-                  </NavLink>
-                </li>
-              );
-            })}
+            {filteredItems.map((item) => (
+              <li key={item.path}>
+                <NavItem
+                  path={item.path}
+                  label={item.label}
+                  icon={item.icon}
+                  onItemClick={handleItemClick}
+                />
+              </li>
+            ))}
           </ul>
         </nav>
       </aside>

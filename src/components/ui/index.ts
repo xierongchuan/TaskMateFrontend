@@ -1,3 +1,8 @@
+// MD3 компоненты
+export { RippleContainer } from './Ripple';
+export { FAB } from './FAB';
+export type { FABProps, FABVariant, FABSize } from './FAB';
+
 // Базовые UI примитивы
 export { Button } from './Button';
 export type { ButtonProps, ButtonVariant, ButtonSize } from './Button';

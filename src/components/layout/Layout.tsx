@@ -6,7 +6,7 @@ import { Sidebar } from './Sidebar';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { ClockIcon, Bars3Icon } from '@heroicons/react/24/outline';
-import { Button } from '../ui/Button';
+import { Button, IconButton } from '../ui';
 
 export const Layout: React.FC = () => {
   const { user, logout } = useAuth();
@@ -27,13 +27,11 @@ export const Layout: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0">
         <header className="bg-surface shadow-elevation-1 h-16 flex items-center justify-between px-4 lg:px-6 z-10 transition-colors duration-medium2">
           <div className="flex items-center gap-3">
-            <button
+            <IconButton
+              icon={<Bars3Icon />}
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12] transition-colors duration-short3 ease-standard"
-              title={sidebarOpen ? 'Скрыть меню' : 'Показать меню'}
-            >
-              <Bars3Icon className="w-6 h-6" />
-            </button>
+              tooltip={sidebarOpen ? 'Скрыть меню' : 'Показать меню'}
+            />
 
             <Link to="/" className="text-primary md3-title-large font-medium">
               TaskMate

@@ -1,4 +1,6 @@
 import React from 'react';
+import { useRipple } from '../../hooks/useRipple';
+import { RippleContainer } from './Ripple';
 
 export type ButtonVariant = 'filled' | 'outlined' | 'text' | 'elevated' | 'tonal' | 'danger';
 export type ButtonSize = 'sm' | 'md' | 'lg';
@@ -11,6 +13,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   isLoading?: boolean;
   fullWidth?: boolean;
   children?: React.ReactNode;
+  disableRipple?: boolean;
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
@@ -42,10 +45,21 @@ export const Button: React.FC<ButtonProps> = ({
   isLoading = false,
   fullWidth = false,
   disabled,
+  disableRipple = false,
   className = '',
   children,
+  onClick,
   ...props
 }) => {
+  const { ripples, addRipple } = useRipple();
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (!disabled && !disableRipple) {
+      addRipple(event);
+    }
+    onClick?.(event);
+  };
+
   const baseClasses = [
     'inline-flex items-center justify-center',
     'font-medium rounded-full',
@@ -53,7 +67,7 @@ export const Button: React.FC<ButtonProps> = ({
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
     'disabled:opacity-[0.38] disabled:cursor-not-allowed disabled:shadow-none',
     'relative overflow-hidden',
-    'md3-state-layer',
+    'select-none',
   ].join(' ');
 
   const classes = [
@@ -79,8 +93,10 @@ export const Button: React.FC<ButtonProps> = ({
     <button
       className={classes}
       disabled={disabled || isLoading}
+      onClick={handleClick}
       {...props}
     >
+      {!disableRipple && <RippleContainer ripples={ripples} />}
       {isLoading && (
         <svg
           className={`animate-spin ${iconClasses}`}
