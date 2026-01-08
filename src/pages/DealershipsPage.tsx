@@ -5,6 +5,9 @@ import { DealershipList } from '../components/dealerships/DealershipList';
 import { PlusIcon, XMarkIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
 import { usePermissions } from '../hooks/usePermissions';
 
+// UI Components
+import { PageContainer, Card, Button } from '../components/ui';
+
 export const DealershipsPage: React.FC = () => {
   const { canManageDealerships } = usePermissions();
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -31,43 +34,41 @@ export const DealershipsPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 sm:px-0">
+    <PageContainer>
       {/* Page Header */}
-      <div className="mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <div className="flex items-center space-x-3">
-              <BuildingOfficeIcon className="w-8 h-8 text-blue-600" />
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Автосалоны</h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Управление автосалонами вашей компании
-                </p>
-              </div>
-            </div>
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="flex-shrink-0 w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+            <BuildingOfficeIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
           </div>
-          {canManageDealerships && (
-            <button
-              onClick={handleCreateDealership}
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
-            >
-              <PlusIcon className="w-5 h-5 mr-2" />
-              Создать автосалон
-            </button>
-          )}
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Автосалоны</h1>
+            <p className="text-gray-500 dark:text-gray-400">
+              Управление автосалонами вашей компании
+            </p>
+          </div>
         </div>
+        {canManageDealerships && (
+          <Button
+            variant="primary"
+            icon={<PlusIcon />}
+            onClick={handleCreateDealership}
+          >
+            Создать автосалон
+          </Button>
+        )}
       </div>
 
       {/* Form View */}
       {isFormOpen && (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-8">
-          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+        <Card className="mb-8">
+          <Card.Header>
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                   {editingDealership ? 'Редактировать автосалон' : 'Создать новый автосалон'}
                 </h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   {editingDealership
                     ? 'Обновите информацию об автосалоне'
                     : 'Заполните информацию о новом автосалоне'
@@ -81,19 +82,19 @@ export const DealershipsPage: React.FC = () => {
                 <XMarkIcon className="w-5 h-5" />
               </button>
             </div>
-          </div>
-          <div className="p-6">
+          </Card.Header>
+          <Card.Body>
             <DealershipForm
               dealership={editingDealership}
               onSuccess={handleFormSuccess}
               onCancel={handleFormClose}
             />
-          </div>
-        </div>
+          </Card.Body>
+        </Card>
       )}
 
       {/* List View */}
       <DealershipList onEdit={handleEditDealership} />
-    </div>
+    </PageContainer>
   );
 };
