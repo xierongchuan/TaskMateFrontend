@@ -8,7 +8,7 @@ interface PageHeaderProps {
 }
 
 /**
- * Unified page header component with title, optional description, and action buttons.
+ * MD3 Page header component with title, optional description, and action buttons.
  * Provides consistent styling across all pages.
  */
 export const PageHeader: React.FC<PageHeaderProps> = ({
@@ -21,17 +21,17 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
     <div className={`mb-8 ${className}`}>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight transition-colors">
+          <h1 className="md3-display-small text-on-surface tracking-tight transition-colors duration-medium2">
             {title}
           </h1>
           {description && (
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 transition-colors">
+            <p className="mt-2 md3-body-large text-on-surface-variant transition-colors duration-medium2">
               {description}
             </p>
           )}
         </div>
         {actions && (
-          <div className="flex items-center space-x-3 flex-shrink-0">
+          <div className="flex items-center gap-3 flex-shrink-0">
             {actions}
           </div>
         )}

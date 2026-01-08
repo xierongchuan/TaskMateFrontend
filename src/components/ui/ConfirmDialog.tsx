@@ -2,6 +2,7 @@ import React from 'react';
 import { ExclamationTriangleIcon, TrashIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
 import { Modal } from './Modal';
 import { Button } from './Button';
+import type { ButtonVariant } from './Button';
 
 export type ConfirmDialogVariant = 'danger' | 'warning' | 'info';
 
@@ -21,30 +22,30 @@ const variantConfig: Record<ConfirmDialogVariant, {
   icon: React.ElementType;
   iconBg: string;
   iconColor: string;
-  confirmVariant: 'danger' | 'primary';
+  confirmVariant: ButtonVariant;
 }> = {
   danger: {
     icon: TrashIcon,
-    iconBg: 'bg-red-100 dark:bg-red-900/30',
-    iconColor: 'text-red-600 dark:text-red-400',
+    iconBg: 'bg-error-container',
+    iconColor: 'text-error',
     confirmVariant: 'danger',
   },
   warning: {
     icon: ExclamationTriangleIcon,
-    iconBg: 'bg-yellow-100 dark:bg-yellow-900/30',
-    iconColor: 'text-yellow-600 dark:text-yellow-400',
-    confirmVariant: 'primary',
+    iconBg: 'bg-warning-container',
+    iconColor: 'text-warning',
+    confirmVariant: 'filled',
   },
   info: {
     icon: QuestionMarkCircleIcon,
-    iconBg: 'bg-blue-100 dark:bg-blue-900/30',
-    iconColor: 'text-blue-600 dark:text-blue-400',
-    confirmVariant: 'primary',
+    iconBg: 'bg-primary-container',
+    iconColor: 'text-primary',
+    confirmVariant: 'filled',
   },
 };
 
 /**
- * Диалог подтверждения действия.
+ * MD3 Confirm Dialog with proper styling variants.
  *
  * @example
  * <ConfirmDialog
@@ -77,16 +78,16 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       showCloseButton={false}
     >
       <div className="p-6">
-        <div className="flex items-start">
+        <div className="flex items-start gap-4">
           <div className={`flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full ${iconBg}`}>
             <Icon className={`h-6 w-6 ${iconColor}`} />
           </div>
-          <div className="ml-4 text-left">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+          <div className="flex-1 text-left">
+            <h3 className="md3-headline-small text-on-surface">
               {title}
             </h3>
             {message && (
-              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              <p className="mt-2 md3-body-medium text-on-surface-variant">
                 {message}
               </p>
             )}
@@ -103,7 +104,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           {confirmText}
         </Button>
         <Button
-          variant="secondary"
+          variant="text"
           onClick={onCancel}
           disabled={isLoading}
         >

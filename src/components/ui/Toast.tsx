@@ -29,27 +29,27 @@ const DEFAULT_DURATION = 4000;
 const typeConfig: Record<ToastType, { icon: React.ElementType; classes: string }> = {
   success: {
     icon: CheckCircleIcon,
-    classes: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200',
+    classes: 'bg-success-container text-on-success-container',
   },
   error: {
     icon: XCircleIcon,
-    classes: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200',
+    classes: 'bg-error-container text-on-error-container',
   },
   warning: {
     icon: ExclamationTriangleIcon,
-    classes: 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200',
+    classes: 'bg-warning-container text-on-warning-container',
   },
   info: {
     icon: InformationCircleIcon,
-    classes: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200',
+    classes: 'bg-tertiary-container text-on-tertiary-container',
   },
 };
 
 /**
- * Toast Provider - оборачивает приложение для предоставления контекста уведомлений.
+ * MD3 Snackbar/Toast Provider - wraps the app to provide notification context.
  *
  * @example
- * // В App.tsx:
+ * // In App.tsx:
  * <ToastProvider>
  *   <App />
  * </ToastProvider>
@@ -75,7 +75,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 };
 
 /**
- * Hook для показа Toast уведомлений.
+ * Hook for showing Toast/Snackbar notifications.
  *
  * @example
  * const { showToast } = useToast();
@@ -89,7 +89,7 @@ export const useToast = (): ToastContextValue => {
   return context;
 };
 
-// Individual Toast component
+// Individual Toast/Snackbar component
 const ToastItem: React.FC<{ toast: Toast; onRemove: () => void }> = ({ toast, onRemove }) => {
   const { icon: Icon, classes } = typeConfig[toast.type];
 
@@ -101,14 +101,19 @@ const ToastItem: React.FC<{ toast: Toast; onRemove: () => void }> = ({ toast, on
 
   return (
     <div
-      className={`flex items-start gap-3 p-4 rounded-lg border shadow-lg max-w-sm w-full animate-slide-in-up ${classes}`}
+      className={`
+        flex items-center gap-3 px-4 py-3 rounded-xs shadow-elevation-3
+        min-w-[288px] max-w-[560px]
+        md3-animate-slide-up
+        ${classes}
+      `}
       role="alert"
     >
-      <Icon className="w-5 h-5 flex-shrink-0 mt-0.5" />
-      <p className="text-sm font-medium flex-1">{toast.message}</p>
+      <Icon className="w-5 h-5 flex-shrink-0" />
+      <p className="md3-body-medium flex-1">{toast.message}</p>
       <button
         onClick={onRemove}
-        className="flex-shrink-0 p-1 hover:opacity-70 transition-opacity rounded"
+        className="flex-shrink-0 w-8 h-8 -mr-2 rounded-full flex items-center justify-center hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12] transition-colors duration-short3 ease-standard"
         aria-label="Закрыть"
       >
         <XMarkIcon className="w-4 h-4" />
@@ -117,14 +122,14 @@ const ToastItem: React.FC<{ toast: Toast; onRemove: () => void }> = ({ toast, on
   );
 };
 
-// Container for all toasts
+// Container for all toasts - positioned at bottom center per MD3 spec
 const ToastContainer: React.FC = () => {
   const { toasts, removeToast } = useToast();
 
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 items-center">
       {toasts.map((toast) => (
         <ToastItem
           key={toast.id}

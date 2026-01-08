@@ -1,6 +1,13 @@
 import React from 'react';
 
-export type IconButtonVariant = 'default' | 'primary' | 'danger' | 'ghost';
+/**
+ * MD3 IconButton variants:
+ * - standard: No background, used for less prominent actions
+ * - filled: Filled background with primary color
+ * - tonal: Secondary container background
+ * - outlined: Border with no background
+ */
+export type IconButtonVariant = 'standard' | 'filled' | 'tonal' | 'outlined';
 export type IconButtonSize = 'sm' | 'md' | 'lg';
 
 export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -9,19 +16,63 @@ export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEl
   size?: IconButtonSize;
   tooltip?: string;
   isLoading?: boolean;
+  selected?: boolean;
 }
 
-const variantClasses: Record<IconButtonVariant, string> = {
-  default: 'text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700',
-  primary: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/20',
-  danger: 'text-gray-400 hover:text-red-600 hover:bg-red-50 dark:text-gray-400 dark:hover:text-red-400 dark:hover:bg-red-900/20',
-  ghost: 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
+const variantClasses: Record<IconButtonVariant, { default: string; selected: string }> = {
+  standard: {
+    default: `
+      text-on-surface-variant
+      hover:bg-on-surface-variant/[0.08]
+      active:bg-on-surface-variant/[0.12]
+    `,
+    selected: `
+      text-primary
+      hover:bg-primary/[0.08]
+      active:bg-primary/[0.12]
+    `,
+  },
+  filled: {
+    default: `
+      bg-primary text-on-primary
+      hover:shadow-elevation-1
+      active:shadow-elevation-0
+    `,
+    selected: `
+      bg-primary text-on-primary
+      hover:shadow-elevation-1
+      active:shadow-elevation-0
+    `,
+  },
+  tonal: {
+    default: `
+      bg-secondary-container text-on-secondary-container
+      hover:shadow-elevation-1
+      active:shadow-elevation-0
+    `,
+    selected: `
+      bg-secondary-container text-on-secondary-container
+      hover:shadow-elevation-1
+      active:shadow-elevation-0
+    `,
+  },
+  outlined: {
+    default: `
+      border border-outline text-on-surface-variant
+      hover:bg-on-surface/[0.08]
+      active:bg-on-surface/[0.12]
+    `,
+    selected: `
+      border border-outline bg-inverse-surface text-inverse-on-surface
+      hover:shadow-elevation-1
+    `,
+  },
 };
 
 const sizeClasses: Record<IconButtonSize, string> = {
-  sm: 'p-1',
-  md: 'p-2',
-  lg: 'p-3',
+  sm: 'w-8 h-8',
+  md: 'w-10 h-10',
+  lg: 'w-12 h-12',
 };
 
 const iconSizeClasses: Record<IconButtonSize, string> = {
@@ -31,30 +82,43 @@ const iconSizeClasses: Record<IconButtonSize, string> = {
 };
 
 /**
- * Кнопка-иконка для компактных действий.
+ * Material Design 3 IconButton component.
+ * Supports standard, filled, tonal, and outlined variants.
  *
  * @example
- * <IconButton icon={<PencilIcon />} variant="default" tooltip="Редактировать" />
- * <IconButton icon={<TrashIcon />} variant="danger" tooltip="Удалить" />
+ * <IconButton icon={<PencilIcon />} variant="standard" tooltip="Редактировать" />
+ * <IconButton icon={<TrashIcon />} variant="tonal" tooltip="Удалить" />
  */
 export const IconButton: React.FC<IconButtonProps> = ({
   icon,
-  variant = 'default',
+  variant = 'standard',
   size = 'md',
   tooltip,
   isLoading = false,
+  selected = false,
   disabled,
   className = '',
   ...props
 }) => {
-  const baseClasses = 'inline-flex items-center justify-center rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed';
+  const baseClasses = `
+    inline-flex items-center justify-center
+    rounded-full
+    transition-all duration-short3 ease-standard
+    focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
+    disabled:opacity-38 disabled:cursor-not-allowed disabled:shadow-none
+    md3-state-layer md3-ripple
+  `;
+
+  const variantClass = selected
+    ? variantClasses[variant].selected
+    : variantClasses[variant].default;
 
   const classes = [
     baseClasses,
-    variantClasses[variant],
+    variantClass,
     sizeClasses[size],
     className,
-  ].filter(Boolean).join(' ');
+  ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
 
   const iconClasses = iconSizeClasses[size];
 

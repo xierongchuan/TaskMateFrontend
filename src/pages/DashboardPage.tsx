@@ -51,9 +51,9 @@ export const DashboardPage: React.FC = () => {
   });
 
   const getShiftStatusBadge = (status: string, isLate: boolean) => {
-    if (isLate) return <Badge variant="danger">На смене (Опоздание)</Badge>;
+    if (isLate) return <Badge variant="error">На смене (Опоздание)</Badge>;
     if (status === 'open') return <Badge variant="success">На смене</Badge>;
-    return <Badge variant="gray">Закрыта</Badge>;
+    return <Badge variant="secondary">Закрыта</Badge>;
   };
 
   const handleOpenTask = (task: Task) => {
@@ -202,7 +202,7 @@ export const DashboardPage: React.FC = () => {
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                     {shift.is_late && (
-                      <Badge variant="danger" size="sm">
+                      <Badge variant="error" size="sm">
                         Опоздание {shift.late_minutes} мин
                       </Badge>
                     )}
@@ -223,7 +223,7 @@ export const DashboardPage: React.FC = () => {
         <Section title="Быстрые действия" icon={<ChartBarIcon />}>
           <div className="space-y-3">
             <Button
-              variant="primary"
+              variant="filled"
               icon={<CalendarIcon />}
               onClick={() => navigate('/tasks')}
               fullWidth
@@ -231,7 +231,7 @@ export const DashboardPage: React.FC = () => {
               Создать задачу
             </Button>
             <Button
-              variant="secondary"
+              variant="tonal"
               icon={<LinkIcon />}
               onClick={() => navigate('/links')}
               fullWidth
@@ -239,7 +239,7 @@ export const DashboardPage: React.FC = () => {
               Добавить ссылку
             </Button>
             <Button
-              variant="secondary"
+              variant="tonal"
               icon={<ChartBarIcon />}
               onClick={() => navigate('/reports')}
               fullWidth
@@ -257,7 +257,7 @@ export const DashboardPage: React.FC = () => {
           title="Задачи"
           icon={<CalendarIcon />}
           action={
-            <Button variant="ghost" size="sm" onClick={() => navigate('/tasks')}>
+            <Button variant="text" size="sm" onClick={() => navigate('/tasks')}>
               Все задачи
             </Button>
           }
@@ -293,8 +293,8 @@ export const DashboardPage: React.FC = () => {
                   {dashboardData.overdue_tasks_list.map(task => (
                     <Card
                       key={task.id}
-                      variant="danger"
-                      className="cursor-pointer hover:shadow-md transition-shadow"
+                      variant="outlined"
+                      className="cursor-pointer hover:shadow-md transition-shadow border-error bg-error-container/30"
                     >
                       <div onClick={() => handleOpenTask(task)} className="p-3">
                         <div className="flex items-start">
@@ -316,7 +316,7 @@ export const DashboardPage: React.FC = () => {
                 </div>
               ) : (
                 (dashboardData?.overdue_tasks || 0) > 0 && (
-                  <Card variant="danger">
+                  <Card variant="outlined" className="border-error bg-error-container/30">
                     <div className="p-3 flex items-center">
                       <XCircleIcon className="w-5 h-5 text-red-500 mr-2" />
                       <div>
@@ -333,7 +333,7 @@ export const DashboardPage: React.FC = () => {
               )}
 
               {(dashboardData?.late_shifts_today || 0) > 0 && (
-                <Card variant="warning">
+                <Card variant="outlined" className="border-warning bg-warning-container/30">
                   <div className="p-3 flex items-center">
                     <ClockIcon className="w-5 h-5 text-yellow-500 mr-2" />
                     <div>

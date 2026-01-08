@@ -1,11 +1,19 @@
 import React from 'react';
 
+/**
+ * MD3 Card variants:
+ * - elevated: Default card with shadow
+ * - filled: Card with surface container color
+ * - outlined: Card with border outline
+ */
+export type CardVariant = 'elevated' | 'filled' | 'outlined';
+
 export interface CardProps {
   children: React.ReactNode;
   className?: string;
   hover?: boolean;
   padding?: 'none' | 'sm' | 'md' | 'lg';
-  variant?: 'default' | 'highlighted' | 'warning' | 'danger';
+  variant?: CardVariant;
 }
 
 export interface CardHeaderProps {
@@ -32,18 +40,18 @@ const paddingClasses = {
   lg: 'p-8',
 };
 
-const variantClasses = {
-  default: 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700',
-  highlighted: 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800',
-  warning: 'bg-yellow-50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800',
-  danger: 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800',
+const variantClasses: Record<CardVariant, string> = {
+  elevated: 'bg-surface shadow-elevation-1 hover:shadow-elevation-2',
+  filled: 'bg-surface-container-highest',
+  outlined: 'bg-surface border border-outline-variant',
 };
 
 /**
- * Универсальный компонент карточки.
+ * Material Design 3 Card component.
+ * Supports elevated, filled, and outlined variants per MD3 spec.
  *
  * @example
- * <Card variant="default" hover>
+ * <Card variant="elevated" hover>
  *   <Card.Header>Заголовок</Card.Header>
  *   <Card.Body>Контент</Card.Body>
  *   <Card.Footer>Действия</Card.Footer>
@@ -58,13 +66,13 @@ export const Card: React.FC<CardProps> & {
   className = '',
   hover = false,
   padding = 'none',
-  variant = 'default',
+  variant = 'elevated',
 }) => {
     const cardClasses = [
-      'rounded-xl shadow-sm border transition-all duration-200',
+      'rounded-md transition-all duration-medium2 ease-standard overflow-hidden',
       variantClasses[variant],
       paddingClasses[padding],
-      hover ? 'hover:shadow-md' : '',
+      hover ? 'cursor-pointer' : '',
       className,
     ].filter(Boolean).join(' ');
 
@@ -82,7 +90,7 @@ const CardHeader: React.FC<CardHeaderProps> = ({
 }) => {
   const headerClasses = [
     'p-4 sm:p-6',
-    border ? 'border-b border-gray-200 dark:border-gray-700' : '',
+    border ? 'border-b border-outline-variant' : '',
     className,
   ].filter(Boolean).join(' ');
 
@@ -104,7 +112,7 @@ const CardFooter: React.FC<CardFooterProps> = ({
 }) => {
   const footerClasses = [
     'p-4 sm:p-6',
-    border ? 'border-t border-gray-200 dark:border-gray-700' : '',
+    border ? 'border-t border-outline-variant' : '',
     className,
   ].filter(Boolean).join(' ');
 

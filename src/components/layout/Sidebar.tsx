@@ -26,6 +26,10 @@ interface NavItem {
   permission?: boolean;
 }
 
+/**
+ * Material Design 3 Navigation Drawer component.
+ * Features pill-shaped navigation items and proper MD3 styling.
+ */
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const permissions = usePermissions();
   const location = useLocation();
@@ -51,31 +55,30 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
   return (
     <>
-      {/* Overlay for mobile - closes sidebar on tap */}
+      {/* Scrim overlay for mobile - closes drawer on tap */}
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+        className="fixed inset-0 bg-scrim/32 backdrop-blur-sm z-40 lg:hidden md3-animate-fade-in"
         onClick={onClose}
       />
 
-      {/* Sidebar */}
+      {/* Navigation Drawer */}
       <aside
         className="
           fixed lg:static top-0 left-0 z-50 h-screen
-          w-64 flex-shrink-0 flex flex-col
-          bg-white dark:bg-gray-900
-          lg:bg-gray-50/80 lg:dark:bg-gray-900/95 lg:backdrop-blur-sm
-          border-r border-gray-200 dark:border-gray-800
-          transition-colors duration-200
+          w-[280px] flex-shrink-0 flex flex-col
+          bg-surface-container-low
+          transition-transform duration-medium2 ease-emphasized
+          lg:translate-x-0
         "
       >
         {/* Mobile Header / Logo area */}
-        <div className="h-16 flex items-center px-6 border-b border-gray-100 dark:border-gray-800 lg:hidden shrink-0">
-          <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">TaskMate</span>
+        <div className="h-16 flex items-center px-7 shrink-0 lg:hidden">
+          <span className="text-primary md3-title-large font-medium">TaskMate</span>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 p-4 overflow-y-auto">
-          <ul className="space-y-1">
+        {/* Navigation items */}
+        <nav className="flex-1 px-3 py-4 overflow-y-auto">
+          <ul className="space-y-0.5">
             {filteredItems.map((item) => {
               const isActive = location.pathname === item.path ||
                 (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
@@ -91,14 +94,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                       }
                     }}
                     className={`
-                      w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all
+                      w-full flex items-center h-14 px-4 rounded-full
+                      md3-label-large font-medium
+                      transition-all duration-short3 ease-standard
+                      md3-state-layer md3-ripple
                       ${isActive
-                        ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700'
-                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200'
+                        ? 'bg-secondary-container text-on-secondary-container'
+                        : 'text-on-surface-variant hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12]'
                       }
                     `}
                   >
-                    <Icon className={`w-5 h-5 mr-3 ${isActive ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`} />
+                    <Icon className={`w-6 h-6 mr-3 ${isActive ? 'text-on-secondary-container' : 'text-on-surface-variant'}`} />
                     <span>{item.label}</span>
                   </NavLink>
                 </li>

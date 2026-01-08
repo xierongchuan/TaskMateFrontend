@@ -14,7 +14,7 @@ export interface ViewModeToggleProps {
 }
 
 /**
- * Переключатель режима отображения (список/карточки и т.д.)
+ * MD3 Segmented Button for view mode selection (list/grid, etc.)
  *
  * @example
  * <ViewModeToggle
@@ -33,27 +33,33 @@ export const ViewModeToggle: React.FC<ViewModeToggleProps> = ({
   className = '',
 }) => {
   const containerClasses = [
-    'flex items-center bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 transition-colors',
+    'inline-flex items-center bg-surface-container rounded-full border border-outline overflow-hidden',
+    'transition-colors duration-medium2',
     className,
   ].filter(Boolean).join(' ');
 
   return (
-    <div className={containerClasses}>
+    <div className={containerClasses} role="group" aria-label="Режим отображения">
       {options.map((option, index) => {
         const isActive = mode === option.value;
-        const isFirst = index === 0;
         const isLast = index === options.length - 1;
 
         const buttonClasses = [
-          'px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500',
+          // Base styles
+          'relative inline-flex items-center justify-center h-10 px-4',
+          'md3-label-large font-medium',
+          'transition-all duration-short3 ease-standard',
+          'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
+          'md3-state-layer',
+          // Active/inactive styles
           isActive
-            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-            : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
-          isFirst ? 'rounded-l-lg' : '',
-          isLast ? 'rounded-r-lg' : '',
+            ? 'bg-secondary-container text-on-secondary-container'
+            : 'bg-transparent text-on-surface hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12]',
+          // Border between buttons (except last)
+          !isLast ? 'border-r border-outline' : '',
         ].filter(Boolean).join(' ');
 
-        const iconClasses = 'w-4 h-4';
+        const iconClasses = 'w-5 h-5';
 
         const renderIcon = (iconElement: React.ReactNode) => {
           if (React.isValidElement<{ className?: string }>(iconElement)) {
@@ -71,6 +77,7 @@ export const ViewModeToggle: React.FC<ViewModeToggleProps> = ({
             onClick={() => onChange(option.value)}
             className={buttonClasses}
             title={option.label}
+            aria-pressed={isActive}
           >
             {renderIcon(option.icon)}
           </button>

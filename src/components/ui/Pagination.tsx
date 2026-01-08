@@ -12,7 +12,7 @@ export interface PaginationProps {
 }
 
 /**
- * Унифицированный компонент пагинации.
+ * MD3 Pagination component with segmented button styling.
  *
  * @example
  * <Pagination
@@ -69,27 +69,38 @@ export const Pagination: React.FC<PaginationProps> = ({
 
   const visiblePages = getVisiblePages();
 
-  const baseButtonClasses = 'relative inline-flex items-center px-2 py-2 text-sm font-medium transition-colors focus:z-20 focus:outline-offset-0 disabled:opacity-50';
-  const activeClasses = 'z-10 bg-blue-600 text-white focus:ring-2 focus:ring-offset-2 focus:ring-blue-500';
-  const inactiveClasses = 'text-gray-900 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800';
+  // MD3 Segmented Button styling
+  const baseButtonClasses = `
+    relative inline-flex items-center justify-center min-w-[40px] h-10 px-3
+    md3-label-large font-medium
+    transition-all duration-short3 ease-standard
+    focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
+    disabled:opacity-38 disabled:pointer-events-none
+    md3-state-layer
+  `;
+
+  const activeClasses = 'bg-secondary-container text-on-secondary-container';
+  const inactiveClasses = 'bg-surface text-on-surface hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12]';
 
   return (
-    <div className={`flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-6 ${className}`}>
+    <div className={`flex items-center justify-between border-t border-outline-variant pt-6 ${className}`}>
       {/* Mobile pagination */}
       <div className="flex flex-1 justify-between sm:hidden">
         <button
           onClick={() => onPageChange(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
-          className="relative inline-flex items-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container text-on-surface md3-label-large font-medium transition-all duration-short3 ease-standard hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12] disabled:opacity-38 disabled:pointer-events-none md3-state-layer"
         >
+          <ChevronLeftIcon className="w-4 h-4" />
           Назад
         </button>
         <button
           onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
           disabled={currentPage === totalPages}
-          className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container text-on-surface md3-label-large font-medium transition-all duration-short3 ease-standard hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12] disabled:opacity-38 disabled:pointer-events-none md3-state-layer"
         >
           Вперед
+          <ChevronRightIcon className="w-4 h-4" />
         </button>
       </div>
 
@@ -97,24 +108,27 @@ export const Pagination: React.FC<PaginationProps> = ({
       <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
         {showInfo && startItem && endItem && total && (
           <div>
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              Показано с <span className="font-medium">{startItem}</span> по{' '}
-              <span className="font-medium">{endItem}</span> из{' '}
-              <span className="font-medium">{total}</span> результатов
+            <p className="md3-body-medium text-on-surface-variant">
+              Показано с <span className="font-medium text-on-surface">{startItem}</span> по{' '}
+              <span className="font-medium text-on-surface">{endItem}</span> из{' '}
+              <span className="font-medium text-on-surface">{total}</span> результатов
             </p>
           </div>
         )}
 
         <div>
-          <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+          <nav
+            className="inline-flex items-center bg-surface-container rounded-full border border-outline-variant overflow-hidden"
+            aria-label="Pagination"
+          >
             {/* Previous button */}
             <button
               onClick={() => onPageChange(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
-              className={`${baseButtonClasses} ${inactiveClasses} rounded-l-md`}
+              className={`${baseButtonClasses} ${inactiveClasses} border-r border-outline-variant`}
             >
               <span className="sr-only">Назад</span>
-              <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
+              <ChevronLeftIcon className="w-5 h-5" aria-hidden="true" />
             </button>
 
             {/* Page numbers */}
@@ -123,19 +137,20 @@ export const Pagination: React.FC<PaginationProps> = ({
                 return (
                   <span
                     key={`ellipsis-${index}`}
-                    className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-600"
+                    className="inline-flex items-center justify-center min-w-[40px] h-10 px-2 text-on-surface-variant md3-body-medium border-r border-outline-variant"
                   >
                     ...
                   </span>
                 );
               }
 
+              const isActive = currentPage === page;
               return (
                 <button
                   key={page}
                   onClick={() => onPageChange(page)}
-                  className={`${baseButtonClasses} px-4 ${currentPage === page ? activeClasses : inactiveClasses
-                    }`}
+                  className={`${baseButtonClasses} ${isActive ? activeClasses : inactiveClasses} border-r border-outline-variant`}
+                  aria-current={isActive ? 'page' : undefined}
                 >
                   {page}
                 </button>
@@ -146,10 +161,10 @@ export const Pagination: React.FC<PaginationProps> = ({
             <button
               onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
               disabled={currentPage === totalPages}
-              className={`${baseButtonClasses} ${inactiveClasses} rounded-r-md`}
+              className={`${baseButtonClasses} ${inactiveClasses}`}
             >
               <span className="sr-only">Вперед</span>
-              <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
+              <ChevronRightIcon className="w-5 h-5" aria-hidden="true" />
             </button>
           </nav>
         </div>

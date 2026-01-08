@@ -1,5 +1,6 @@
 import React from 'react';
 import { Badge } from '../ui/Badge';
+import type { BadgeVariant } from '../ui/Badge';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 export type Priority = 'low' | 'medium' | 'high';
@@ -10,14 +11,14 @@ export interface PriorityBadgeProps {
   className?: string;
 }
 
-const priorityConfig: Record<Priority, { label: string; variant: 'success' | 'warning' | 'danger' }> = {
+const priorityConfig: Record<Priority, { label: string; variant: BadgeVariant }> = {
   low: { label: 'Низкий', variant: 'success' },
   medium: { label: 'Средний', variant: 'warning' },
-  high: { label: 'Высокий', variant: 'danger' },
+  high: { label: 'Высокий', variant: 'error' },
 };
 
 /**
- * Бейдж приоритета задачи.
+ * MD3 Priority Badge for tasks.
  *
  * @example
  * <PriorityBadge priority="high" />

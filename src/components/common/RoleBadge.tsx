@@ -1,5 +1,6 @@
 import React from 'react';
 import { Badge } from '../ui/Badge';
+import type { BadgeVariant } from '../ui/Badge';
 import {
   UserIcon,
   EyeIcon,
@@ -18,19 +19,19 @@ export interface RoleBadgeProps {
 const roleConfig: Record<UserRole, {
   label: string;
   description: string;
-  variant: 'info' | 'purple' | 'success' | 'danger';
+  variant: BadgeVariant;
   icon: React.ElementType
 }> = {
   employee: {
     label: 'Сотрудник',
     description: 'Базовый доступ',
-    variant: 'info',
+    variant: 'tertiary',
     icon: UserIcon
   },
   observer: {
     label: 'Наблюдатель',
     description: 'Только просмотр',
-    variant: 'purple',
+    variant: 'secondary',
     icon: EyeIcon
   },
   manager: {
@@ -42,13 +43,13 @@ const roleConfig: Record<UserRole, {
   owner: {
     label: 'Владелец',
     description: 'Полный доступ',
-    variant: 'danger',
+    variant: 'error',
     icon: ShieldCheckIcon
   },
 };
 
 /**
- * Бейдж роли пользователя.
+ * MD3 Role Badge for user roles.
  *
  * @example
  * <RoleBadge role="manager" />
@@ -62,18 +63,18 @@ export const RoleBadge: React.FC<RoleBadgeProps> = ({
   const config = roleConfig[role as UserRole] || {
     label: role,
     description: '',
-    variant: 'gray' as const,
+    variant: 'secondary' as BadgeVariant,
     icon: UserIcon
   };
   const Icon = config.icon;
 
   return (
-    <div className={`flex items-center space-x-2 ${className}`}>
+    <div className={`flex items-center gap-2 ${className}`}>
       <Badge variant={config.variant} icon={<Icon />}>
         {config.label}
       </Badge>
       {showDescription && config.description && (
-        <span className="text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">
+        <span className="md3-label-small text-on-surface-variant hidden sm:inline">
           {config.description}
         </span>
       )}

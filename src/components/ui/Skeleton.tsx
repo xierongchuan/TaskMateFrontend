@@ -12,7 +12,7 @@ export interface SkeletonProps {
 }
 
 /**
- * Компонент скелетона для отображения состояния загрузки.
+ * MD3 Skeleton component for loading states with proper surface colors.
  *
  * @example
  * <Skeleton variant="card" count={5} />
@@ -27,7 +27,8 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   className = '',
   rows = 5,
 }) => {
-  const baseClasses = 'animate-pulse bg-gray-200 dark:bg-gray-700 rounded';
+  // MD3 skeleton uses surface-container colors with pulse animation
+  const baseClasses = 'animate-pulse bg-surface-container-highest rounded-xs';
 
   const getStyle = (): React.CSSProperties => {
     const style: React.CSSProperties = {};
@@ -71,7 +72,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
         return (
           <div
             key={key}
-            className={`${baseClasses} rounded-lg ${className}`}
+            className={`${baseClasses} rounded-md ${className}`}
             style={{ width: width || '100%', height: height || 96, ...getStyle() }}
           />
         );
@@ -89,16 +90,16 @@ export const Skeleton: React.FC<SkeletonProps> = ({
           <div key={key} className={`space-y-3 ${className}`}>
             {/* Table header */}
             <div className="flex gap-4">
-              <div className={`${baseClasses} h-8 flexr-1`} />
-              <div className={`${baseClasses} h-8 flex-1`} />
-              <div className={`${baseClasses} h-8 flex-1`} />
+              <div className={`${baseClasses} h-10 flex-1`} />
+              <div className={`${baseClasses} h-10 flex-1`} />
+              <div className={`${baseClasses} h-10 flex-1`} />
             </div>
             {/* Table rows */}
             {[...Array(rows)].map((_, i) => (
               <div key={i} className="flex gap-4">
-                <div className={`${baseClasses} h-6 flex-1`} />
-                <div className={`${baseClasses} h-6 flex-1`} />
-                <div className={`${baseClasses} h-6 flex-1`} />
+                <div className={`${baseClasses} h-8 flex-1`} />
+                <div className={`${baseClasses} h-8 flex-1`} />
+                <div className={`${baseClasses} h-8 flex-1`} />
               </div>
             ))}
           </div>

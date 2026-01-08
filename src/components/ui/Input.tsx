@@ -1,6 +1,7 @@
 import React from 'react';
 
 export type InputSize = 'sm' | 'md' | 'lg';
+export type InputVariant = 'filled' | 'outlined';
 
 export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   label?: string;
@@ -9,30 +10,31 @@ export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElem
   icon?: React.ReactNode;
   iconPosition?: 'left' | 'right';
   inputSize?: InputSize;
+  variant?: InputVariant;
   fullWidth?: boolean;
 }
 
 const sizeClasses: Record<InputSize, string> = {
-  sm: 'px-3 py-1.5 text-xs',
-  md: 'px-3 py-2 text-sm',
-  lg: 'px-4 py-3 text-base',
+  sm: 'h-10 px-3 text-sm',
+  md: 'h-12 px-4 text-base',
+  lg: 'h-14 px-4 text-base',
 };
 
 const iconPaddingLeft: Record<InputSize, string> = {
-  sm: 'pl-8',
-  md: 'pl-10',
+  sm: 'pl-9',
+  md: 'pl-11',
   lg: 'pl-12',
 };
 
 const iconPaddingRight: Record<InputSize, string> = {
-  sm: 'pr-8',
-  md: 'pr-10',
+  sm: 'pr-9',
+  md: 'pr-11',
   lg: 'pr-12',
 };
 
 const iconPositionClasses: Record<InputSize, { left: string; right: string }> = {
-  sm: { left: 'left-2.5', right: 'right-2.5' },
-  md: { left: 'left-3', right: 'right-3' },
+  sm: { left: 'left-3', right: 'right-3' },
+  md: { left: 'left-4', right: 'right-4' },
   lg: { left: 'left-4', right: 'right-4' },
 };
 
@@ -43,11 +45,12 @@ const iconSizeClasses: Record<InputSize, string> = {
 };
 
 /**
- * Универсальный компонент текстового поля ввода.
+ * Material Design 3 Text Field component.
+ * Supports filled and outlined variants per MD3 spec.
  *
  * @example
  * <Input label="Поиск" icon={<MagnifyingGlassIcon />} placeholder="Введите текст..." />
- * <Input label="Email" type="email" error="Неверный формат" />
+ * <Input label="Email" type="email" error="Неверный формат" variant="outlined" />
  */
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(({
   label,
@@ -56,6 +59,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(({
   icon,
   iconPosition = 'left',
   inputSize = 'md',
+  variant = 'outlined',
   fullWidth = true,
   className = '',
   id,
@@ -63,29 +67,42 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(({
 }, ref) => {
   const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
 
-  const baseInputClasses = 'block rounded-lg border shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed';
+  const baseInputClasses = `
+    block rounded-xs transition-all duration-short3 ease-standard
+    focus:outline-none
+    disabled:opacity-38 disabled:cursor-not-allowed
+    placeholder:text-on-surface-variant
+  `;
 
-  const stateClasses = error
-    ? 'border-red-300 dark:border-red-600 focus:ring-red-500 focus:border-red-500'
-    : 'border-gray-300 dark:border-gray-600';
+  const variantClasses = variant === 'filled'
+    ? `
+      bg-surface-container-highest border-b-2 border-on-surface-variant rounded-t-xs rounded-b-none
+      focus:border-primary focus:bg-surface-container-high
+      ${error ? 'border-error focus:border-error' : ''}
+    `
+    : `
+      bg-transparent border border-outline rounded-xs
+      focus:border-2 focus:border-primary focus:px-[15px]
+      ${error ? 'border-error focus:border-error' : ''}
+    `;
 
-  const colorClasses = 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500';
+  const colorClasses = 'text-on-surface';
 
   const inputClasses = [
     baseInputClasses,
     sizeClasses[inputSize],
-    stateClasses,
+    variantClasses,
     colorClasses,
     icon && iconPosition === 'left' ? iconPaddingLeft[inputSize] : '',
     icon && iconPosition === 'right' ? iconPaddingRight[inputSize] : '',
     fullWidth ? 'w-full' : '',
     className,
-  ].filter(Boolean).join(' ');
+  ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
 
   const renderIcon = (iconElement: React.ReactNode) => {
     if (React.isValidElement<{ className?: string }>(iconElement)) {
       return React.cloneElement(iconElement, {
-        className: `${iconSizeClasses[inputSize]} text-gray-400 ${iconElement.props.className || ''}`.trim(),
+        className: `${iconSizeClasses[inputSize]} text-on-surface-variant ${iconElement.props.className || ''}`.trim(),
       });
     }
     return iconElement;
@@ -96,7 +113,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(({
       {label && (
         <label
           htmlFor={inputId}
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+          className={`block md3-body-small font-medium mb-1 ${error ? 'text-error' : 'text-on-surface-variant'}`}
         >
           {label}
         </label>
@@ -120,10 +137,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(({
         )}
       </div>
       {error && (
-        <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>
+        <p className="mt-1 md3-body-small text-error">{error}</p>
       )}
       {hint && !error && (
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{hint}</p>
+        <p className="mt-1 md3-body-small text-on-surface-variant">{hint}</p>
       )}
     </div>
   );

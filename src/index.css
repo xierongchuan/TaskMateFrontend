@@ -2,13 +2,214 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   Material Design 3 Design System
+   ============================================ */
+
+:root {
+  /* ----------------------------------------
+     MD3 Color System - Light Theme
+     Based on Material Design 3 specifications
+     ---------------------------------------- */
+
+  /* Primary colors */
+  --md-sys-color-primary: #1d4ed8;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #dbeafe;
+  --md-sys-color-on-primary-container: #1e3a5f;
+
+  /* Secondary colors */
+  --md-sys-color-secondary: #625b71;
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #e8def8;
+  --md-sys-color-on-secondary-container: #1d192b;
+
+  /* Tertiary colors */
+  --md-sys-color-tertiary: #7d5260;
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #ffd8e4;
+  --md-sys-color-on-tertiary-container: #31111d;
+
+  /* Error colors */
+  --md-sys-color-error: #b3261e;
+  --md-sys-color-on-error: #ffffff;
+  --md-sys-color-error-container: #f9dedc;
+  --md-sys-color-on-error-container: #410e0b;
+
+  /* Success colors (custom extension) */
+  --md-sys-color-success: #146c2e;
+  --md-sys-color-on-success: #ffffff;
+  --md-sys-color-success-container: #c4eed0;
+  --md-sys-color-on-success-container: #0d3f1a;
+
+  /* Warning colors (custom extension) */
+  --md-sys-color-warning: #9a5700;
+  --md-sys-color-on-warning: #ffffff;
+  --md-sys-color-warning-container: #ffddb5;
+  --md-sys-color-on-warning-container: #311f00;
+
+  /* Surface colors */
+  --md-sys-color-background: #fefbff;
+  --md-sys-color-on-background: #1c1b1f;
+  --md-sys-color-surface: #fefbff;
+  --md-sys-color-on-surface: #1c1b1f;
+  --md-sys-color-surface-variant: #e7e0ec;
+  --md-sys-color-on-surface-variant: #49454f;
+
+  /* Surface container colors */
+  --md-sys-color-surface-container-lowest: #ffffff;
+  --md-sys-color-surface-container-low: #f7f2fa;
+  --md-sys-color-surface-container: #f3edf7;
+  --md-sys-color-surface-container-high: #ece6f0;
+  --md-sys-color-surface-container-highest: #e6e1e5;
+
+  /* Outline colors */
+  --md-sys-color-outline: #79747e;
+  --md-sys-color-outline-variant: #cac4d0;
+
+  /* Inverse colors */
+  --md-sys-color-inverse-surface: #313033;
+  --md-sys-color-inverse-on-surface: #f4eff4;
+  --md-sys-color-inverse-primary: #d0bcff;
+
+  /* Shadow and scrim */
+  --md-sys-color-shadow: #000000;
+  --md-sys-color-scrim: #000000;
+
+  /* ----------------------------------------
+     MD3 Elevation System
+     ---------------------------------------- */
+  --md-sys-elevation-level0: none;
+  --md-sys-elevation-level1: 0px 1px 2px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+  --md-sys-elevation-level2: 0px 1px 2px rgba(0, 0, 0, 0.3), 0px 2px 6px 2px rgba(0, 0, 0, 0.15);
+  --md-sys-elevation-level3: 0px 4px 8px 3px rgba(0, 0, 0, 0.15), 0px 1px 3px rgba(0, 0, 0, 0.3);
+  --md-sys-elevation-level4: 0px 6px 10px 4px rgba(0, 0, 0, 0.15), 0px 2px 3px rgba(0, 0, 0, 0.3);
+  --md-sys-elevation-level5: 0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px rgba(0, 0, 0, 0.3);
+
+  /* ----------------------------------------
+     MD3 Shape System (Corner Radius)
+     ---------------------------------------- */
+  --md-sys-shape-corner-none: 0px;
+  --md-sys-shape-corner-extra-small: 4px;
+  --md-sys-shape-corner-small: 8px;
+  --md-sys-shape-corner-medium: 12px;
+  --md-sys-shape-corner-large: 16px;
+  --md-sys-shape-corner-extra-large: 28px;
+  --md-sys-shape-corner-full: 9999px;
+
+  /* ----------------------------------------
+     MD3 Motion System
+     ---------------------------------------- */
+  /* Durations */
+  --md-sys-motion-duration-short1: 50ms;
+  --md-sys-motion-duration-short2: 100ms;
+  --md-sys-motion-duration-short3: 150ms;
+  --md-sys-motion-duration-short4: 200ms;
+  --md-sys-motion-duration-medium1: 250ms;
+  --md-sys-motion-duration-medium2: 300ms;
+  --md-sys-motion-duration-medium3: 350ms;
+  --md-sys-motion-duration-medium4: 400ms;
+  --md-sys-motion-duration-long1: 450ms;
+  --md-sys-motion-duration-long2: 500ms;
+  --md-sys-motion-duration-long3: 550ms;
+  --md-sys-motion-duration-long4: 600ms;
+
+  /* Easing curves */
+  --md-sys-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --md-sys-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --md-sys-motion-easing-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+  --md-sys-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --md-sys-motion-easing-standard-decelerate: cubic-bezier(0, 0, 0, 1);
+  --md-sys-motion-easing-standard-accelerate: cubic-bezier(0.3, 0, 1, 1);
+  --md-sys-motion-easing-linear: linear;
+
+  /* ----------------------------------------
+     MD3 State Layer Opacities
+     ---------------------------------------- */
+  --md-sys-state-hover-opacity: 0.08;
+  --md-sys-state-focus-opacity: 0.12;
+  --md-sys-state-pressed-opacity: 0.12;
+  --md-sys-state-dragged-opacity: 0.16;
+}
+
+/* ----------------------------------------
+   MD3 Dark Theme Colors
+   ---------------------------------------- */
+.dark {
+  /* Primary colors */
+  --md-sys-color-primary: #a5c8ff;
+  --md-sys-color-on-primary: #00315c;
+  --md-sys-color-primary-container: #004881;
+  --md-sys-color-on-primary-container: #d4e3ff;
+
+  /* Secondary colors */
+  --md-sys-color-secondary: #ccc2dc;
+  --md-sys-color-on-secondary: #332d41;
+  --md-sys-color-secondary-container: #4a4458;
+  --md-sys-color-on-secondary-container: #e8def8;
+
+  /* Tertiary colors */
+  --md-sys-color-tertiary: #efb8c8;
+  --md-sys-color-on-tertiary: #492532;
+  --md-sys-color-tertiary-container: #633b48;
+  --md-sys-color-on-tertiary-container: #ffd8e4;
+
+  /* Error colors */
+  --md-sys-color-error: #f2b8b5;
+  --md-sys-color-on-error: #601410;
+  --md-sys-color-error-container: #8c1d18;
+  --md-sys-color-on-error-container: #f9dedc;
+
+  /* Success colors */
+  --md-sys-color-success: #8bd89f;
+  --md-sys-color-on-success: #00391a;
+  --md-sys-color-success-container: #00522a;
+  --md-sys-color-on-success-container: #a4f4b9;
+
+  /* Warning colors */
+  --md-sys-color-warning: #ffb870;
+  --md-sys-color-on-warning: #4d2600;
+  --md-sys-color-warning-container: #6e3900;
+  --md-sys-color-on-warning-container: #ffddb5;
+
+  /* Surface colors */
+  --md-sys-color-background: #1c1b1f;
+  --md-sys-color-on-background: #e6e1e5;
+  --md-sys-color-surface: #1c1b1f;
+  --md-sys-color-on-surface: #e6e1e5;
+  --md-sys-color-surface-variant: #49454f;
+  --md-sys-color-on-surface-variant: #cac4d0;
+
+  /* Surface container colors */
+  --md-sys-color-surface-container-lowest: #0f0d13;
+  --md-sys-color-surface-container-low: #1d1b20;
+  --md-sys-color-surface-container: #211f26;
+  --md-sys-color-surface-container-high: #2b2930;
+  --md-sys-color-surface-container-highest: #36343b;
+
+  /* Outline colors */
+  --md-sys-color-outline: #938f99;
+  --md-sys-color-outline-variant: #49454f;
+
+  /* Inverse colors */
+  --md-sys-color-inverse-surface: #e6e1e5;
+  --md-sys-color-inverse-on-surface: #313033;
+  --md-sys-color-inverse-primary: #0061a4;
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: var(--md-sys-color-background);
+  color: var(--md-sys-color-on-background);
 }
 
 code {
@@ -16,6 +217,182 @@ code {
     monospace;
 }
 
+/* ============================================
+   MD3 Typography Scale
+   ============================================ */
+
+.md3-display-large {
+  font-size: 57px;
+  line-height: 64px;
+  font-weight: 400;
+  letter-spacing: -0.25px;
+}
+
+.md3-display-medium {
+  font-size: 45px;
+  line-height: 52px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.md3-display-small {
+  font-size: 36px;
+  line-height: 44px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.md3-headline-large {
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.md3-headline-medium {
+  font-size: 28px;
+  line-height: 36px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.md3-headline-small {
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.md3-title-large {
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.md3-title-medium {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+  letter-spacing: 0.15px;
+}
+
+.md3-title-small {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+}
+
+.md3-label-large {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+}
+
+.md3-label-medium {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.md3-label-small {
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.md3-body-large {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+.md3-body-medium {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  letter-spacing: 0.25px;
+}
+
+.md3-body-small {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  letter-spacing: 0.4px;
+}
+
+/* ============================================
+   MD3 Animation Keyframes
+   ============================================ */
+
+@keyframes md3-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes md3-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes md3-slide-up {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes md3-slide-down {
+  from {
+    transform: translateY(-16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes md3-scale-in {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes md3-ripple {
+  from {
+    transform: scale(0);
+    opacity: 0.24;
+  }
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Legacy animation for backward compatibility */
 @keyframes slideInUp {
   from {
     transform: translateY(1rem);
@@ -27,7 +404,237 @@ code {
   }
 }
 
+/* ============================================
+   MD3 Animation Utility Classes
+   ============================================ */
+
+.md3-animate-fade-in {
+  animation: md3-fade-in var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized-decelerate);
+}
+
+.md3-animate-fade-out {
+  animation: md3-fade-out var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-emphasized-accelerate);
+}
+
+.md3-animate-slide-up {
+  animation: md3-slide-up var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized-decelerate);
+}
+
+.md3-animate-slide-down {
+  animation: md3-slide-down var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized-decelerate);
+}
+
+.md3-animate-scale-in {
+  animation: md3-scale-in var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-emphasized-decelerate);
+}
+
 .animate-slide-in-up {
   animation: slideInUp 0.3s ease-out forwards;
 }
 
+/* ============================================
+   MD3 State Layer System
+   ============================================ */
+
+.md3-state-layer {
+  position: relative;
+  overflow: hidden;
+}
+
+.md3-state-layer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: currentColor;
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.md3-state-layer:hover::before {
+  opacity: var(--md-sys-state-hover-opacity);
+}
+
+.md3-state-layer:focus-visible::before {
+  opacity: var(--md-sys-state-focus-opacity);
+}
+
+.md3-state-layer:active::before {
+  opacity: var(--md-sys-state-pressed-opacity);
+}
+
+/* ============================================
+   MD3 Ripple Effect
+   ============================================ */
+
+.md3-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.md3-ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  background-color: currentColor;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.md3-ripple:active::after {
+  animation: md3-ripple var(--md-sys-motion-duration-medium4) var(--md-sys-motion-easing-standard);
+}
+
+/* ============================================
+   MD3 Elevation Classes
+   ============================================ */
+
+.shadow-elevation-0 {
+  box-shadow: var(--md-sys-elevation-level0);
+}
+
+.shadow-elevation-1 {
+  box-shadow: var(--md-sys-elevation-level1);
+}
+
+.shadow-elevation-2 {
+  box-shadow: var(--md-sys-elevation-level2);
+}
+
+.shadow-elevation-3 {
+  box-shadow: var(--md-sys-elevation-level3);
+}
+
+.shadow-elevation-4 {
+  box-shadow: var(--md-sys-elevation-level4);
+}
+
+.shadow-elevation-5 {
+  box-shadow: var(--md-sys-elevation-level5);
+}
+
+/* ============================================
+   MD3 Color Utility Classes
+   ============================================ */
+
+/* Background colors */
+.bg-background { background-color: var(--md-sys-color-background); }
+.bg-surface { background-color: var(--md-sys-color-surface); }
+.bg-surface-variant { background-color: var(--md-sys-color-surface-variant); }
+.bg-surface-container-lowest { background-color: var(--md-sys-color-surface-container-lowest); }
+.bg-surface-container-low { background-color: var(--md-sys-color-surface-container-low); }
+.bg-surface-container { background-color: var(--md-sys-color-surface-container); }
+.bg-surface-container-high { background-color: var(--md-sys-color-surface-container-high); }
+.bg-surface-container-highest { background-color: var(--md-sys-color-surface-container-highest); }
+.bg-primary { background-color: var(--md-sys-color-primary); }
+.bg-primary-container { background-color: var(--md-sys-color-primary-container); }
+.bg-secondary { background-color: var(--md-sys-color-secondary); }
+.bg-secondary-container { background-color: var(--md-sys-color-secondary-container); }
+.bg-tertiary { background-color: var(--md-sys-color-tertiary); }
+.bg-tertiary-container { background-color: var(--md-sys-color-tertiary-container); }
+.bg-error { background-color: var(--md-sys-color-error); }
+.bg-error-container { background-color: var(--md-sys-color-error-container); }
+.bg-success { background-color: var(--md-sys-color-success); }
+.bg-success-container { background-color: var(--md-sys-color-success-container); }
+.bg-warning { background-color: var(--md-sys-color-warning); }
+.bg-warning-container { background-color: var(--md-sys-color-warning-container); }
+
+/* Text colors */
+.text-on-background { color: var(--md-sys-color-on-background); }
+.text-on-surface { color: var(--md-sys-color-on-surface); }
+.text-on-surface-variant { color: var(--md-sys-color-on-surface-variant); }
+.text-primary { color: var(--md-sys-color-primary); }
+.text-on-primary { color: var(--md-sys-color-on-primary); }
+.text-on-primary-container { color: var(--md-sys-color-on-primary-container); }
+.text-secondary { color: var(--md-sys-color-secondary); }
+.text-on-secondary { color: var(--md-sys-color-on-secondary); }
+.text-on-secondary-container { color: var(--md-sys-color-on-secondary-container); }
+.text-tertiary { color: var(--md-sys-color-tertiary); }
+.text-on-tertiary { color: var(--md-sys-color-on-tertiary); }
+.text-on-tertiary-container { color: var(--md-sys-color-on-tertiary-container); }
+.text-error { color: var(--md-sys-color-error); }
+.text-on-error { color: var(--md-sys-color-on-error); }
+.text-on-error-container { color: var(--md-sys-color-on-error-container); }
+.text-success { color: var(--md-sys-color-success); }
+.text-on-success { color: var(--md-sys-color-on-success); }
+.text-on-success-container { color: var(--md-sys-color-on-success-container); }
+.text-warning { color: var(--md-sys-color-warning); }
+.text-on-warning { color: var(--md-sys-color-on-warning); }
+.text-on-warning-container { color: var(--md-sys-color-on-warning-container); }
+.text-outline { color: var(--md-sys-color-outline); }
+.text-outline-variant { color: var(--md-sys-color-outline-variant); }
+
+/* Border colors */
+.border-outline { border-color: var(--md-sys-color-outline); }
+.border-outline-variant { border-color: var(--md-sys-color-outline-variant); }
+.border-primary { border-color: var(--md-sys-color-primary); }
+.border-error { border-color: var(--md-sys-color-error); }
+
+/* ============================================
+   MD3 Shape Utility Classes
+   ============================================ */
+
+.rounded-none { border-radius: var(--md-sys-shape-corner-none); }
+.rounded-xs { border-radius: var(--md-sys-shape-corner-extra-small); }
+.rounded-sm { border-radius: var(--md-sys-shape-corner-small); }
+.rounded-md { border-radius: var(--md-sys-shape-corner-medium); }
+.rounded-lg { border-radius: var(--md-sys-shape-corner-large); }
+.rounded-xl { border-radius: var(--md-sys-shape-corner-extra-large); }
+.rounded-full { border-radius: var(--md-sys-shape-corner-full); }
+
+/* ============================================
+   MD3 Transition Utility Classes
+   ============================================ */
+
+.transition-short1 { transition-duration: var(--md-sys-motion-duration-short1); }
+.transition-short2 { transition-duration: var(--md-sys-motion-duration-short2); }
+.transition-short3 { transition-duration: var(--md-sys-motion-duration-short3); }
+.transition-short4 { transition-duration: var(--md-sys-motion-duration-short4); }
+.transition-medium1 { transition-duration: var(--md-sys-motion-duration-medium1); }
+.transition-medium2 { transition-duration: var(--md-sys-motion-duration-medium2); }
+.transition-medium3 { transition-duration: var(--md-sys-motion-duration-medium3); }
+.transition-medium4 { transition-duration: var(--md-sys-motion-duration-medium4); }
+
+.ease-emphasized { transition-timing-function: var(--md-sys-motion-easing-emphasized); }
+.ease-emphasized-decelerate { transition-timing-function: var(--md-sys-motion-easing-emphasized-decelerate); }
+.ease-emphasized-accelerate { transition-timing-function: var(--md-sys-motion-easing-emphasized-accelerate); }
+.ease-standard { transition-timing-function: var(--md-sys-motion-easing-standard); }
+.ease-standard-decelerate { transition-timing-function: var(--md-sys-motion-easing-standard-decelerate); }
+.ease-standard-accelerate { transition-timing-function: var(--md-sys-motion-easing-standard-accelerate); }
+
+/* ============================================
+   Focus Visible Styling
+   ============================================ */
+
+.focus-visible-primary:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   Scrollbar Styling
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--md-sys-color-surface-container);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-corner-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--md-sys-color-on-surface-variant);
+}

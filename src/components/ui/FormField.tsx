@@ -11,7 +11,7 @@ export interface FormFieldProps {
 }
 
 /**
- * Обёртка для полей формы с label, ошибкой и подсказкой.
+ * MD3 Form Field wrapper with label, error, and supporting text.
  *
  * @example
  * <FormField label="Название" required error={errors.title}>
@@ -32,18 +32,18 @@ export const FormField: React.FC<FormFieldProps> = ({
       {label && (
         <label
           htmlFor={htmlFor}
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+          className="block md3-body-medium font-medium text-on-surface mb-2"
         >
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span className="text-error ml-1">*</span>}
         </label>
       )}
       {children}
       {error && (
-        <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>
+        <p className="mt-1 md3-body-small text-error">{error}</p>
       )}
       {hint && !error && (
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{hint}</p>
+        <p className="mt-1 md3-body-small text-on-surface-variant">{hint}</p>
       )}
     </div>
   );

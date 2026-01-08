@@ -13,6 +13,9 @@ interface DealershipSelectorProps {
   allOptionLabel?: string;
 }
 
+/**
+ * MD3 Dealership Selector dropdown with proper styling.
+ */
 export const DealershipSelector: React.FC<DealershipSelectorProps> = ({
   value,
   onChange,
@@ -45,11 +48,28 @@ export const DealershipSelector: React.FC<DealershipSelectorProps> = ({
 
   if (error) {
     return (
-      <div className={`text-red-600 text-sm ${className}`}>
+      <div className={`md3-body-small text-error ${className}`}>
         Ошибка загрузки автосалонов
       </div>
     );
   }
+
+  const selectClasses = [
+    // Base styles
+    'block w-full h-14 px-4 pt-4 pb-2',
+    // MD3 outlined variant styling
+    'bg-transparent',
+    'border border-outline rounded-xs',
+    'text-on-surface md3-body-large',
+    // Focus styles
+    'focus:outline-none focus:border-primary focus:border-2',
+    // Transition
+    'transition-all duration-short3 ease-standard',
+    // Disabled state
+    'disabled:bg-on-surface/[0.04] disabled:border-on-surface/[0.12] disabled:text-on-surface/[0.38] disabled:cursor-not-allowed',
+    // Custom className
+    className,
+  ].filter(Boolean).join(' ');
 
   return (
     <select
@@ -57,7 +77,7 @@ export const DealershipSelector: React.FC<DealershipSelectorProps> = ({
       onChange={handleChange}
       disabled={disabled || isLoading}
       required={required}
-      className={`block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border disabled:bg-gray-100 disabled:cursor-not-allowed bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors ${className}`}
+      className={selectClasses}
     >
       {isDataLoading ? (
         <option value="">Загрузка...</option>

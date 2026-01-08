@@ -22,7 +22,7 @@ export interface ActionButtonsProps {
 }
 
 /**
- * Группа кнопок действий для карточек (редактировать, удалить, дублировать, просмотр).
+ * MD3 Action Buttons group for cards (edit, delete, duplicate, view).
  *
  * @example
  * <ActionButtons
@@ -50,7 +50,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       {showView && onView && (
         <IconButton
           icon={<EyeIcon />}
-          variant="default"
+          variant="standard"
           size={size}
           onClick={onView}
           tooltip="Просмотр"
@@ -59,7 +59,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       {showEdit && onEdit && (
         <IconButton
           icon={<PencilIcon />}
-          variant="default"
+          variant="standard"
           size={size}
           onClick={onEdit}
           tooltip="Редактировать"
@@ -68,7 +68,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       {showDuplicate && onDuplicate && (
         <IconButton
           icon={<DocumentDuplicateIcon />}
-          variant="primary"
+          variant="tonal"
           size={size}
           onClick={onDuplicate}
           tooltip="Дублировать"
@@ -77,12 +77,13 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       {showDelete && onDelete && (
         <IconButton
           icon={<TrashIcon />}
-          variant="danger"
+          variant="standard"
           size={size}
           onClick={onDelete}
           disabled={isDeleting}
           isLoading={isDeleting}
           tooltip="Удалить"
+          className="text-error hover:bg-error/[0.08]"
         />
       )}
     </div>

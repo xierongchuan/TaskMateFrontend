@@ -9,7 +9,7 @@ export interface EmptyStateProps {
 }
 
 /**
- * Компонент для отображения пустого состояния.
+ * MD3 Empty State component with proper surface styling.
  *
  * @example
  * <EmptyState
@@ -27,7 +27,9 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   className = '',
 }) => {
   const containerClasses = [
-    'bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center transition-colors',
+    'bg-surface-container rounded-xl shadow-elevation-1 border border-outline-variant',
+    'p-12 text-center',
+    'transition-colors duration-medium2',
     className,
   ].filter(Boolean).join(' ');
 
@@ -36,7 +38,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   const renderIcon = (iconElement: React.ReactNode) => {
     if (React.isValidElement<{ className?: string }>(iconElement)) {
       return React.cloneElement(iconElement, {
-        className: `${iconClasses} mx-auto text-gray-300 dark:text-gray-600 mb-4 ${iconElement.props.className || ''}`.trim(),
+        className: `${iconClasses} mx-auto text-on-surface-variant/50 mb-6 ${iconElement.props.className || ''}`.trim(),
       });
     }
     return iconElement;
@@ -45,16 +47,16 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   return (
     <div className={containerClasses}>
       {icon && renderIcon(icon)}
-      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+      <h3 className="md3-headline-small text-on-surface mb-2">
         {title}
       </h3>
       {description && (
-        <p className="text-gray-500 dark:text-gray-400 mb-4">
+        <p className="md3-body-medium text-on-surface-variant mb-6 max-w-md mx-auto">
           {description}
         </p>
       )}
       {action && (
-        <div className="mt-4">
+        <div className="mt-6">
           {action}
         </div>
       )}

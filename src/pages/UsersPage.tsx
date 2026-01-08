@@ -9,7 +9,7 @@ import { UserModal } from '../components/users/UserModal';
 import { formatPhoneNumber } from '../utils/phoneFormatter';
 import type { User } from '../types/user';
 import type { Dealership } from '../types/dealership';
-import { roleLabels, roleDescriptions } from '../utils/roleTranslations';
+// Note: roleLabels and roleDescriptions are defined locally in RoleBadge component
 import {
   PlusIcon,
   UserIcon,
@@ -172,7 +172,7 @@ export const UsersPage: React.FC = () => {
             {!isMobile && (
               <ViewModeToggle
                 mode={viewMode}
-                onChange={setViewMode}
+                onChange={(mode) => setViewMode(mode as 'list' | 'cards')}
                 options={[
                   { value: 'list', icon: <ListBulletIcon />, label: 'Список' },
                   { value: 'cards', icon: <Squares2X2Icon />, label: 'Карточки' },
@@ -181,7 +181,7 @@ export const UsersPage: React.FC = () => {
             )}
             {permissions.canCreateUsers && (
               <Button
-                variant="primary"
+                variant="filled"
                 icon={<PlusIcon />}
                 onClick={handleCreate}
                 fullWidth={isMobile}
@@ -251,7 +251,7 @@ export const UsersPage: React.FC = () => {
             ? 'Попробуйте изменить фильтры для поиска сотрудников'
             : 'Добавьте первого сотрудника для начала работы'}
           action={permissions.canCreateUsers && !hasActiveFilters ? (
-            <Button variant="primary" icon={<PlusIcon />} onClick={handleCreate}>
+            <Button variant="filled" icon={<PlusIcon />} onClick={handleCreate}>
               Добавить сотрудника
             </Button>
           ) : undefined}

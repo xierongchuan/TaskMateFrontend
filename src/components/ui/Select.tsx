@@ -1,6 +1,7 @@
 import React from 'react';
 
 export type SelectSize = 'sm' | 'md' | 'lg';
+export type SelectVariant = 'filled' | 'outlined';
 
 export interface SelectOption {
   value: string | number;
@@ -15,17 +16,19 @@ export interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectE
   options: SelectOption[];
   placeholder?: string;
   selectSize?: SelectSize;
+  variant?: SelectVariant;
   fullWidth?: boolean;
 }
 
 const sizeClasses: Record<SelectSize, string> = {
-  sm: 'px-3 py-1.5 text-xs',
-  md: 'px-3 py-2 text-sm',
-  lg: 'px-4 py-3 text-base',
+  sm: 'h-10 px-3 text-sm',
+  md: 'h-12 px-4 text-base',
+  lg: 'h-14 px-4 text-base',
 };
 
 /**
- * Универсальный компонент выпадающего списка.
+ * Material Design 3 Select/Dropdown component.
+ * Supports filled and outlined variants per MD3 spec.
  *
  * @example
  * <Select
@@ -44,6 +47,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({
   options,
   placeholder,
   selectSize = 'md',
+  variant = 'outlined',
   fullWidth = true,
   className = '',
   id,
@@ -51,29 +55,52 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({
 }, ref) => {
   const selectId = id || `select-${Math.random().toString(36).substr(2, 9)}`;
 
-  const baseClasses = 'block rounded-lg border shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed';
+  const baseClasses = `
+    block transition-all duration-short3 ease-standard
+    focus:outline-none
+    disabled:opacity-38 disabled:cursor-not-allowed
+    appearance-none cursor-pointer
+    bg-no-repeat bg-right
+  `;
 
-  const stateClasses = error
-    ? 'border-red-300 dark:border-red-600 focus:ring-red-500 focus:border-red-500'
-    : 'border-gray-300 dark:border-gray-600';
+  // Dropdown arrow using CSS
+  const arrowStyles = `
+    bg-[url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2379747e'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")]
+    bg-[length:20px_20px]
+    bg-[position:right_12px_center]
+    pr-10
+  `;
 
-  const colorClasses = 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white';
+  const variantClasses = variant === 'filled'
+    ? `
+      bg-surface-container-highest border-b-2 border-on-surface-variant rounded-t-xs rounded-b-none
+      focus:border-primary focus:bg-surface-container-high
+      ${error ? 'border-error focus:border-error' : ''}
+    `
+    : `
+      bg-transparent border border-outline rounded-xs
+      focus:border-2 focus:border-primary
+      ${error ? 'border-error focus:border-error' : ''}
+    `;
+
+  const colorClasses = 'text-on-surface';
 
   const selectClasses = [
     baseClasses,
     sizeClasses[selectSize],
-    stateClasses,
+    variantClasses,
     colorClasses,
+    arrowStyles,
     fullWidth ? 'w-full' : '',
     className,
-  ].filter(Boolean).join(' ');
+  ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
 
   return (
     <div className={fullWidth ? 'w-full' : ''}>
       {label && (
         <label
           htmlFor={selectId}
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+          className={`block md3-body-small font-medium mb-1 ${error ? 'text-error' : 'text-on-surface-variant'}`}
         >
           {label}
         </label>
@@ -100,10 +127,10 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({
         ))}
       </select>
       {error && (
-        <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>
+        <p className="mt-1 md3-body-small text-error">{error}</p>
       )}
       {hint && !error && (
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{hint}</p>
+        <p className="mt-1 md3-body-small text-on-surface-variant">{hint}</p>
       )}
     </div>
   );

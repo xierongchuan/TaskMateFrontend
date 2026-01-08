@@ -1,6 +1,15 @@
 import React from 'react';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'outline';
+/**
+ * MD3 Button variants:
+ * - filled: High emphasis, primary actions
+ * - outlined: Medium emphasis, secondary actions
+ * - text: Low emphasis, tertiary actions
+ * - elevated: Medium emphasis with elevation
+ * - tonal: Medium-low emphasis with container color
+ * - danger: High emphasis for destructive actions (custom extension)
+ */
+export type ButtonVariant = 'filled' | 'outlined' | 'text' | 'elevated' | 'tonal' | 'danger';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -14,35 +23,67 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: 'bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 border-transparent shadow-sm',
-  secondary: 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 border-transparent',
-  danger: 'bg-red-600 text-white hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-500 border-transparent shadow-sm',
-  ghost: 'bg-transparent text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 border-transparent',
-  outline: 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 border-gray-300 dark:border-gray-600 shadow-sm',
+  filled: `
+    bg-primary text-on-primary
+    hover:shadow-elevation-1
+    active:shadow-elevation-0
+    disabled:bg-on-surface/[0.12] disabled:text-on-surface/[0.38]
+  `,
+  outlined: `
+    bg-transparent text-primary border border-outline
+    hover:bg-primary/[0.08]
+    active:bg-primary/[0.12]
+    disabled:border-on-surface/[0.12] disabled:text-on-surface/[0.38]
+  `,
+  text: `
+    bg-transparent text-primary
+    hover:bg-primary/[0.08]
+    active:bg-primary/[0.12]
+    disabled:text-on-surface/[0.38]
+  `,
+  elevated: `
+    bg-surface-container-low text-primary shadow-elevation-1
+    hover:shadow-elevation-2
+    active:shadow-elevation-1
+    disabled:bg-on-surface/[0.12] disabled:text-on-surface/[0.38] disabled:shadow-elevation-0
+  `,
+  tonal: `
+    bg-secondary-container text-on-secondary-container
+    hover:shadow-elevation-1
+    active:shadow-elevation-0
+    disabled:bg-on-surface/[0.12] disabled:text-on-surface/[0.38]
+  `,
+  danger: `
+    bg-error text-on-error
+    hover:shadow-elevation-1
+    active:shadow-elevation-0
+    disabled:bg-on-surface/[0.12] disabled:text-on-surface/[0.38]
+  `,
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
-  sm: 'px-3 py-1.5 text-xs',
-  md: 'px-4 py-2 text-sm',
-  lg: 'px-6 py-3 text-base',
+  sm: 'h-8 px-4 text-xs gap-1.5',
+  md: 'h-10 px-6 text-sm gap-2',
+  lg: 'h-12 px-8 text-base gap-2.5',
 };
 
 const iconSizeClasses: Record<ButtonSize, string> = {
-  sm: 'w-3.5 h-3.5',
-  md: 'w-4 h-4',
+  sm: 'w-4 h-4',
+  md: 'w-[18px] h-[18px]',
   lg: 'w-5 h-5',
 };
 
 /**
- * Универсальный компонент кнопки.
+ * Material Design 3 Button component.
+ * Supports filled, outlined, text, elevated, tonal, and danger variants.
  *
  * @example
- * <Button variant="primary" size="md" icon={<PlusIcon />}>
+ * <Button variant="filled" size="md" icon={<PlusIcon />}>
  *   Создать задачу
  * </Button>
  */
 export const Button: React.FC<ButtonProps> = ({
-  variant = 'primary',
+  variant = 'filled',
   size = 'md',
   icon,
   iconPosition = 'left',
@@ -53,7 +94,14 @@ export const Button: React.FC<ButtonProps> = ({
   children,
   ...props
 }) => {
-  const baseClasses = 'inline-flex items-center justify-center font-medium rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed';
+  const baseClasses = `
+    inline-flex items-center justify-center
+    font-medium rounded-full
+    transition-all duration-short3 ease-standard
+    focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
+    disabled:cursor-not-allowed
+    md3-state-layer md3-ripple
+  `;
 
   const classes = [
     baseClasses,
@@ -61,7 +109,7 @@ export const Button: React.FC<ButtonProps> = ({
     sizeClasses[size],
     fullWidth ? 'w-full' : '',
     className,
-  ].filter(Boolean).join(' ');
+  ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
 
   const iconClasses = iconSizeClasses[size];
 
@@ -82,7 +130,7 @@ export const Button: React.FC<ButtonProps> = ({
     >
       {isLoading && (
         <svg
-          className={`animate-spin ${iconClasses} ${children ? 'mr-2' : ''}`}
+          className={`animate-spin ${iconClasses}`}
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
@@ -102,17 +150,9 @@ export const Button: React.FC<ButtonProps> = ({
           />
         </svg>
       )}
-      {!isLoading && icon && iconPosition === 'left' && (
-        <span className={children ? 'mr-2' : ''}>
-          {renderIcon(icon)}
-        </span>
-      )}
+      {!isLoading && icon && iconPosition === 'left' && renderIcon(icon)}
       {children}
-      {!isLoading && icon && iconPosition === 'right' && (
-        <span className={children ? 'ml-2' : ''}>
-          {renderIcon(icon)}
-        </span>
-      )}
+      {!isLoading && icon && iconPosition === 'right' && renderIcon(icon)}
     </button>
   );
 };

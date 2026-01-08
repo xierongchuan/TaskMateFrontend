@@ -1,5 +1,5 @@
 import React from 'react';
-import { FunnelIcon } from '@heroicons/react/24/outline';
+import { FunnelIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 import { Button } from './Button';
 
 export interface FilterPanelProps {
@@ -13,7 +13,7 @@ export interface FilterPanelProps {
 }
 
 /**
- * Сворачиваемая панель фильтров.
+ * MD3 Collapsible Filter Panel with surface container styling.
  *
  * @example
  * <FilterPanel
@@ -39,31 +39,39 @@ export const FilterPanel: React.FC<FilterPanelProps> & {
   clearButtonText = 'Сбросить фильтры',
 }) => {
     const containerClasses = [
-      'bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 transition-colors',
+      'bg-surface-container rounded-xl shadow-elevation-1 border border-outline-variant',
+      'transition-all duration-medium2',
       className,
     ].filter(Boolean).join(' ');
 
     return (
       <div className={containerClasses}>
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700 transition-colors">
-          <button
-            type="button"
-            onClick={onToggle}
-            className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors"
-          >
-            <FunnelIcon className="w-4 h-4 mr-2" />
-            {title} {isOpen ? 'Скрыть' : 'Показать'}
-          </button>
-        </div>
+        {/* Header */}
+        <button
+          type="button"
+          onClick={onToggle}
+          className="w-full p-4 flex items-center justify-between text-on-surface transition-colors duration-short3 hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12] rounded-t-xl md3-state-layer"
+        >
+          <div className="flex items-center gap-3">
+            <FunnelIcon className="w-5 h-5 text-on-surface-variant" />
+            <span className="md3-title-small font-medium">{title}</span>
+          </div>
+          {isOpen ? (
+            <ChevronUpIcon className="w-5 h-5 text-on-surface-variant" />
+          ) : (
+            <ChevronDownIcon className="w-5 h-5 text-on-surface-variant" />
+          )}
+        </button>
 
+        {/* Content */}
         {isOpen && (
-          <div className="p-6">
+          <div className="p-6 pt-2 border-t border-outline-variant md3-animate-fade-in">
             {children}
 
             {onClear && (
-              <div className="mt-4 flex justify-end">
+              <div className="mt-6 flex justify-end">
                 <Button
-                  variant="secondary"
+                  variant="text"
                   size="sm"
                   onClick={onClear}
                 >
@@ -77,7 +85,7 @@ export const FilterPanel: React.FC<FilterPanelProps> & {
     );
   };
 
-// Подкомпонент для сетки фильтров
+// Subcomponent for filter grid
 interface FilterGridProps {
   children: React.ReactNode;
   columns?: 1 | 2 | 3 | 4 | 5;

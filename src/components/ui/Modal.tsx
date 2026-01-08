@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import { IconButton } from './IconButton';
 
 export type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
 
@@ -35,7 +36,8 @@ const sizeClasses: Record<ModalSize, string> = {
 };
 
 /**
- * Универсальный компонент модального окна.
+ * Material Design 3 Dialog component.
+ * Features MD3 styling with proper animations, scrim, and elevation.
  *
  * @example
  * <Modal isOpen={isOpen} onClose={onClose} title="Создать задачу" size="lg">
@@ -43,8 +45,8 @@ const sizeClasses: Record<ModalSize, string> = {
  *     <form>...</form>
  *   </Modal.Body>
  *   <Modal.Footer>
- *     <Button variant="secondary" onClick={onClose}>Отмена</Button>
- *     <Button variant="primary">Сохранить</Button>
+ *     <Button variant="text" onClick={onClose}>Отмена</Button>
+ *     <Button variant="filled">Сохранить</Button>
  *   </Modal.Footer>
  * </Modal>
  */
@@ -90,7 +92,7 @@ export const Modal: React.FC<ModalProps> & {
     };
 
     const modalClasses = [
-      'inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:w-full',
+      'inline-block align-bottom bg-surface-container-high rounded-xl text-left overflow-hidden shadow-elevation-3 transform transition-all sm:my-8 sm:align-middle sm:w-full md3-animate-scale-in',
       sizeClasses[size],
       className,
     ].filter(Boolean).join(' ');
@@ -98,9 +100,9 @@ export const Modal: React.FC<ModalProps> & {
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto">
         <div className="flex min-h-screen items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-          {/* Overlay */}
+          {/* Scrim */}
           <div
-            className="fixed inset-0 bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75 transition-opacity"
+            className="fixed inset-0 bg-scrim/32 backdrop-blur-[1px] transition-opacity md3-animate-fade-in"
             onClick={handleOverlayClick}
             aria-hidden="true"
           />
@@ -110,23 +112,25 @@ export const Modal: React.FC<ModalProps> & {
             &#8203;
           </span>
 
-          {/* Modal */}
+          {/* Dialog */}
           <div className={modalClasses} onClick={(e) => e.stopPropagation()}>
             {/* Header */}
             {(title || showCloseButton) && (
-              <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between p-6">
                 {title && (
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <h3 className="md3-headline-small text-on-surface">
                     {title}
                   </h3>
                 )}
                 {showCloseButton && (
-                  <button
+                  <IconButton
+                    icon={<XMarkIcon />}
+                    variant="standard"
+                    size="sm"
                     onClick={onClose}
-                    className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    <XMarkIcon className="w-5 h-5" />
-                  </button>
+                    tooltip="Закрыть"
+                    className="-mr-2"
+                  />
                 )}
               </div>
             )}
@@ -142,7 +146,7 @@ const ModalBody: React.FC<ModalBodyProps> = ({
   children,
   className = '',
 }) => {
-  const bodyClasses = ['p-4 sm:p-6', className].filter(Boolean).join(' ');
+  const bodyClasses = ['px-6 pb-6', className].filter(Boolean).join(' ');
   return <div className={bodyClasses}>{children}</div>;
 };
 
@@ -151,7 +155,7 @@ const ModalFooter: React.FC<ModalFooterProps> = ({
   className = '',
 }) => {
   const footerClasses = [
-    'bg-gray-50 dark:bg-gray-700/50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse sm:gap-3',
+    'px-6 py-4 flex justify-end gap-2',
     className,
   ].filter(Boolean).join(' ');
 
