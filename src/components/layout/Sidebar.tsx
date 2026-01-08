@@ -62,11 +62,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         className="
           fixed lg:static top-0 left-0 z-50 h-screen
           w-64 flex-shrink-0 flex flex-col
-          bg-gray-50/80 dark:bg-gray-900/95 backdrop-blur-sm
+          bg-white dark:bg-gray-900
+          lg:bg-gray-50/80 lg:dark:bg-gray-900/95 lg:backdrop-blur-sm
           border-r border-gray-200 dark:border-gray-800
           transition-colors duration-200
         "
       >
+        {/* Mobile Header / Logo area */}
+        <div className="h-16 flex items-center px-6 border-b border-gray-100 dark:border-gray-800 lg:hidden shrink-0">
+          <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">TaskMate</span>
+        </div>
+
         {/* Navigation */}
         <nav className="flex-1 p-4 overflow-y-auto">
           <ul className="space-y-1">
