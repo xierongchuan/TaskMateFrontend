@@ -75,12 +75,12 @@ export const ReportsPage: React.FC = () => {
     }
   };
 
-  const getStatusBadgeVariant = (status: string): 'success' | 'danger' | 'info' | 'gray' => {
+  const getStatusBadgeVariant = (status: string): 'success' | 'error' | 'tertiary' | 'secondary' => {
     switch (status) {
       case 'completed': return 'success';
-      case 'overdue': return 'danger';
-      case 'active': return 'info';
-      default: return 'gray';
+      case 'overdue': return 'error';
+      case 'active': return 'tertiary';
+      default: return 'secondary';
     }
   };
 
@@ -133,14 +133,14 @@ export const ReportsPage: React.FC = () => {
               fullWidth={false}
             />
             <Button
-              variant="secondary"
+              variant="tonal"
               icon={<ArrowPathIcon />}
               onClick={() => refetch()}
             >
               Обновить
             </Button>
             <Button
-              variant="primary"
+              variant="filled"
               icon={<ArrowDownTrayIcon />}
               onClick={handleExport}
               disabled={!reportData}
@@ -160,14 +160,14 @@ export const ReportsPage: React.FC = () => {
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:block">Период:</span>
               <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                 <Button
-                  variant={selectedPeriod === 'week' ? 'primary' : 'secondary'}
+                  variant={selectedPeriod === 'week' ? 'filled' : 'tonal'}
                   onClick={() => handlePeriodChange('week')}
                   fullWidth={false}
                 >
                   Эта неделя
                 </Button>
                 <Button
-                  variant={selectedPeriod === 'month' ? 'primary' : 'secondary'}
+                  variant={selectedPeriod === 'month' ? 'filled' : 'tonal'}
                   onClick={() => handlePeriodChange('month')}
                   fullWidth={false}
                 >

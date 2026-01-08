@@ -206,7 +206,7 @@ export const LinksPage: React.FC = () => {
             )}
             {permissions.canManageTasks && (
               <Button
-                variant="primary"
+                variant="filled"
                 icon={<PlusIcon />}
                 onClick={handleCreate}
               >
@@ -245,7 +245,7 @@ export const LinksPage: React.FC = () => {
           title={searchTerm ? 'Ссылки не найдены' : 'Нет ссылок'}
           description={searchTerm ? 'Попробуйте изменить поисковый запрос' : 'Добавьте первые ссылки для быстрого доступа'}
           action={permissions.canManageTasks && !searchTerm ? (
-            <Button variant="primary" icon={<PlusIcon />} onClick={handleCreate}>
+            <Button variant="filled" icon={<PlusIcon />} onClick={handleCreate}>
               Добавить ссылку
             </Button>
           ) : undefined}
@@ -264,7 +264,7 @@ export const LinksPage: React.FC = () => {
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                       {getCategoryLabel(category)}
                     </h2>
-                    <Badge variant="gray" className="ml-3">
+                    <Badge variant="secondary" className="ml-3">
                       {(categoryLinks as Link[]).length} ссылок
                     </Badge>
                   </div>
@@ -303,11 +303,11 @@ export const LinksPage: React.FC = () => {
                             </p>
                           )}
                           <Button
-                            variant="ghost"
+                            variant="text"
                             icon={<ArrowTopRightOnSquareIcon />}
                             onClick={() => openLink(link.url)}
                             fullWidth
-                            className="bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50"
+                            className="bg-primary-container text-on-primary-container hover:bg-primary-container/80"
                           >
                             Открыть
                           </Button>
@@ -336,7 +336,7 @@ export const LinksPage: React.FC = () => {
                             <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
                               {link.title}
                             </h3>
-                            <Badge variant="gray">
+                            <Badge variant="secondary">
                               {getCategoryLabel((link as any).category || 'general')}
                             </Badge>
                           </div>
@@ -350,10 +350,10 @@ export const LinksPage: React.FC = () => {
                       </div>
                       <div className="flex items-center space-x-3">
                         <Button
-                          variant="ghost"
+                          variant="text"
                           icon={<EyeIcon />}
                           onClick={() => openLink(link.url)}
-                          className="bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50"
+                          className="bg-primary-container text-on-primary-container hover:bg-primary-container/80"
                         >
                           Открыть
                         </Button>
@@ -436,14 +436,14 @@ export const LinksPage: React.FC = () => {
           <Modal.Footer>
             <Button
               type="submit"
-              variant="primary"
+              variant="filled"
               isLoading={createMutation.isPending || updateMutation.isPending}
             >
               {selectedLink ? 'Сохранить' : 'Создать'}
             </Button>
             <Button
               type="button"
-              variant="secondary"
+              variant="tonal"
               onClick={() => setIsModalOpen(false)}
             >
               Отмена

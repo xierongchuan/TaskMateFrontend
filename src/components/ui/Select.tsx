@@ -1,5 +1,6 @@
 import React from 'react';
 
+export type SelectVariant = 'filled' | 'outlined';
 export type SelectSize = 'sm' | 'md' | 'lg';
 
 export interface SelectOption {
@@ -15,28 +16,22 @@ export interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectE
   options: SelectOption[];
   placeholder?: string;
   selectSize?: SelectSize;
+  variant?: SelectVariant;
   fullWidth?: boolean;
 }
 
 const sizeClasses: Record<SelectSize, string> = {
-  sm: 'px-3 py-1.5 text-xs',
-  md: 'px-3 py-2 text-sm',
-  lg: 'px-4 py-3 text-base',
+  sm: 'h-10 text-sm',
+  md: 'h-14 text-base',
+  lg: 'h-16 text-lg',
 };
 
-/**
- * Универсальный компонент выпадающего списка.
- *
- * @example
- * <Select
- *   label="Статус"
- *   options={[
- *     { value: '', label: 'Все статусы' },
- *     { value: 'pending', label: 'Ожидает' },
- *     { value: 'completed', label: 'Выполнено' },
- *   ]}
- * />
- */
+const labelSizeClasses: Record<SelectSize, string> = {
+  sm: 'text-xs',
+  md: 'text-sm',
+  lg: 'text-base',
+};
+
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({
   label,
   error,
@@ -44,66 +39,88 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({
   options,
   placeholder,
   selectSize = 'md',
+  variant = 'outlined',
   fullWidth = true,
   className = '',
   id,
+  disabled,
   ...props
 }, ref) => {
   const selectId = id || `select-${Math.random().toString(36).substr(2, 9)}`;
 
-  const baseClasses = 'block rounded-lg border shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed';
-
-  const stateClasses = error
-    ? 'border-red-300 dark:border-red-600 focus:ring-red-500 focus:border-red-500'
-    : 'border-gray-300 dark:border-gray-600';
-
-  const colorClasses = 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white';
-
-  const selectClasses = [
-    baseClasses,
+  const selectBaseClasses = [
+    'w-full rounded-xs appearance-none cursor-pointer',
+    'px-4 pr-10',
+    'text-on-surface',
+    'transition-all duration-short3 ease-standard',
+    'focus:outline-none',
+    'disabled:opacity-[0.38] disabled:cursor-not-allowed',
     sizeClasses[selectSize],
-    stateClasses,
-    colorClasses,
-    fullWidth ? 'w-full' : '',
-    className,
-  ].filter(Boolean).join(' ');
+  ].join(' ');
+
+  const variantClasses = variant === 'filled'
+    ? [
+      'bg-surface-container-highest',
+      'border-b-2 border-on-surface-variant',
+      'rounded-t-xs rounded-b-none',
+      'focus:border-primary',
+      error ? 'border-error focus:border-error' : '',
+    ].join(' ')
+    : [
+      'bg-transparent',
+      'border border-outline',
+      'rounded-xs',
+      'focus:border-2 focus:border-primary focus:-m-px',
+      error ? 'border-error focus:border-error' : '',
+    ].join(' ');
+
+  const labelClasses = [
+    'block mb-2 font-medium',
+    labelSizeClasses[selectSize],
+    error ? 'text-error' : 'text-on-surface-variant',
+  ].join(' ');
 
   return (
-    <div className={fullWidth ? 'w-full' : ''}>
+    <div className={`${fullWidth ? 'w-full' : ''} ${className}`}>
       {label && (
-        <label
-          htmlFor={selectId}
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-        >
+        <label htmlFor={selectId} className={labelClasses}>
           {label}
         </label>
       )}
-      <select
-        ref={ref}
-        id={selectId}
-        className={selectClasses}
-        {...props}
-      >
-        {placeholder && (
-          <option value="" disabled>
-            {placeholder}
-          </option>
-        )}
-        {options.map((option) => (
-          <option
-            key={option.value}
-            value={option.value}
-            disabled={option.disabled}
-          >
-            {option.label}
-          </option>
-        ))}
-      </select>
+      <div className="relative">
+        <select
+          ref={ref}
+          id={selectId}
+          disabled={disabled}
+          className={`${selectBaseClasses} ${variantClasses}`}
+          {...props}
+        >
+          {placeholder && (
+            <option value="" disabled>
+              {placeholder}
+            </option>
+          )}
+          {options.map((option) => (
+            <option
+              key={option.value}
+              value={option.value}
+              disabled={option.disabled}
+            >
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </div>
       {error && (
-        <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>
+        <p className="mt-1.5 text-xs text-error">{error}</p>
       )}
       {hint && !error && (
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{hint}</p>
+        <p className="mt-1.5 text-xs text-on-surface-variant">{hint}</p>
       )}
     </div>
   );

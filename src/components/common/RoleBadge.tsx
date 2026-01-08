@@ -18,19 +18,19 @@ export interface RoleBadgeProps {
 const roleConfig: Record<UserRole, {
   label: string;
   description: string;
-  variant: 'info' | 'purple' | 'success' | 'danger';
+  variant: 'tertiary' | 'secondary' | 'success' | 'error';
   icon: React.ElementType
 }> = {
   employee: {
     label: 'Сотрудник',
     description: 'Базовый доступ',
-    variant: 'info',
+    variant: 'tertiary',
     icon: UserIcon
   },
   observer: {
     label: 'Наблюдатель',
     description: 'Только просмотр',
-    variant: 'purple',
+    variant: 'secondary',
     icon: EyeIcon
   },
   manager: {
@@ -42,7 +42,7 @@ const roleConfig: Record<UserRole, {
   owner: {
     label: 'Владелец',
     description: 'Полный доступ',
-    variant: 'danger',
+    variant: 'error',
     icon: ShieldCheckIcon
   },
 };
@@ -62,7 +62,7 @@ export const RoleBadge: React.FC<RoleBadgeProps> = ({
   const config = roleConfig[role as UserRole] || {
     label: role,
     description: '',
-    variant: 'gray' as const,
+    variant: 'secondary' as const,
     icon: UserIcon
   };
   const Icon = config.icon;
@@ -73,7 +73,7 @@ export const RoleBadge: React.FC<RoleBadgeProps> = ({
         {config.label}
       </Badge>
       {showDescription && config.description && (
-        <span className="text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">
+        <span className="text-xs text-on-surface-variant hidden sm:inline">
           {config.description}
         </span>
       )}

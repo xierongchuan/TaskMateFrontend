@@ -10,10 +10,10 @@ export interface PriorityBadgeProps {
   className?: string;
 }
 
-const priorityConfig: Record<Priority, { label: string; variant: 'success' | 'warning' | 'danger' }> = {
+const priorityConfig: Record<Priority, { label: string; variant: 'success' | 'warning' | 'error' }> = {
   low: { label: 'Низкий', variant: 'success' },
   medium: { label: 'Средний', variant: 'warning' },
-  high: { label: 'Высокий', variant: 'danger' },
+  high: { label: 'Высокий', variant: 'error' },
 };
 
 /**

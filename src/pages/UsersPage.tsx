@@ -9,7 +9,6 @@ import { UserModal } from '../components/users/UserModal';
 import { formatPhoneNumber } from '../utils/phoneFormatter';
 import type { User } from '../types/user';
 import type { Dealership } from '../types/dealership';
-import { roleLabels, roleDescriptions } from '../utils/roleTranslations';
 import {
   PlusIcon,
   UserIcon,
@@ -181,7 +180,7 @@ export const UsersPage: React.FC = () => {
             )}
             {permissions.canCreateUsers && (
               <Button
-                variant="primary"
+                variant="filled"
                 icon={<PlusIcon />}
                 onClick={handleCreate}
                 fullWidth={isMobile}
@@ -251,7 +250,7 @@ export const UsersPage: React.FC = () => {
             ? 'Попробуйте изменить фильтры для поиска сотрудников'
             : 'Добавьте первого сотрудника для начала работы'}
           action={permissions.canCreateUsers && !hasActiveFilters ? (
-            <Button variant="primary" icon={<PlusIcon />} onClick={handleCreate}>
+            <Button variant="filled" icon={<PlusIcon />} onClick={handleCreate}>
               Добавить сотрудника
             </Button>
           ) : undefined}
