@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { linksApi } from '../api/links';
 import { usePermissions } from '../hooks/usePermissions';
@@ -8,21 +8,36 @@ import type { Link, CreateLinkRequest } from '../types/link';
 import {
   PlusIcon,
   LinkIcon,
-  PencilIcon,
-  TrashIcon,
   Squares2X2Icon,
   ListBulletIcon,
-  MagnifyingGlassIcon,
-  EyeIcon,
   ArrowTopRightOnSquareIcon,
   GlobeAltIcon,
   DocumentTextIcon,
   ChartBarIcon,
   UserGroupIcon,
-  XCircleIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon
+  EyeIcon,
 } from '@heroicons/react/24/outline';
+
+// Унифицированные компоненты
+import {
+  Button,
+  Badge,
+  Input,
+  Select,
+  Textarea,
+  ViewModeToggle,
+  SearchInput,
+  Pagination,
+  Skeleton,
+  EmptyState,
+  ErrorState,
+  PageContainer,
+  Card,
+  Modal,
+  ConfirmDialog,
+  FormField,
+} from '../components/ui';
+import { ActionButtons } from '../components/common';
 
 export const LinksPage: React.FC = () => {
   const permissions = usePermissions();
@@ -32,8 +47,8 @@ export const LinksPage: React.FC = () => {
   const [selectedLink, setSelectedLink] = useState<Link | null>(null);
   const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('grid', 'grid');
   const [searchTerm, setSearchTerm] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(1);
+  const [confirmDelete, setConfirmDelete] = useState<Link | null>(null);
   const [formData, setFormData] = useState<CreateLinkRequest>({
     title: '',
     url: '',
@@ -41,21 +56,18 @@ export const LinksPage: React.FC = () => {
     category: 'general',
   });
 
-  // Debounce search
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchTerm);
-      setPage(1); // Reset to page 1 on search
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
+  // Reset page on search change
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setPage(1);
+  };
 
-  const { data: linksData, isLoading, error } = useQuery({
-    queryKey: ['links', page, limit, debouncedSearch],
+  const { data: linksData, isLoading, error, refetch } = useQuery({
+    queryKey: ['links', page, limit, searchTerm],
     queryFn: () => linksApi.getLinks({
       page,
       per_page: limit,
-      search: debouncedSearch
+      search: searchTerm
     }),
   });
 
@@ -82,6 +94,7 @@ export const LinksPage: React.FC = () => {
     mutationFn: (id: number) => linksApi.deleteLink(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['links'] });
+      setConfirmDelete(null);
     },
   });
 
@@ -120,8 +133,7 @@ export const LinksPage: React.FC = () => {
     }
   };
 
-  // Grouping logic (simplified for paginated data)
-  // Note: Grouping happens only for current page data
+  // Grouping logic
   const groupedLinks = (linksData?.data || []).reduce((acc, link) => {
     const category = link.category || 'general';
     if (!acc[category]) acc[category] = [];
@@ -146,9 +158,7 @@ export const LinksPage: React.FC = () => {
   };
 
   const handleDelete = (link: Link) => {
-    if (window.confirm(`Удалить ссылку "${link.title}"?`)) {
-      deleteMutation.mutate(link.id);
-    }
+    setConfirmDelete(link);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -164,8 +174,16 @@ export const LinksPage: React.FC = () => {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
+  const categoryOptions = [
+    { value: 'general', label: 'Общее' },
+    { value: 'crm', label: 'CRM' },
+    { value: 'documents', label: 'Документы' },
+    { value: 'analytics', label: 'Аналитика' },
+    { value: 'tools', label: 'Инструменты' },
+  ];
+
   return (
-    <div className="px-4 py-6 sm:px-0 max-w-7xl mx-auto">
+    <PageContainer>
       {/* Header */}
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -177,35 +195,23 @@ export const LinksPage: React.FC = () => {
           </div>
           <div className="flex items-center space-x-3">
             {!isMobile && (
-              <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`px-3 py-2 text-sm font-medium rounded-l-lg ${viewMode === 'grid'
-                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-                    }`}
-                >
-                  <Squares2X2Icon className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`px-3 py-2 text-sm font-medium rounded-r-lg ${viewMode === 'list'
-                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-                    }`}
-                >
-                  <ListBulletIcon className="w-4 h-4" />
-                </button>
-              </div>
+              <ViewModeToggle
+                mode={viewMode}
+                onChange={setViewMode}
+                options={[
+                  { value: 'grid', icon: <Squares2X2Icon />, label: 'Сетка' },
+                  { value: 'list', icon: <ListBulletIcon />, label: 'Список' },
+                ]}
+              />
             )}
             {permissions.canManageTasks && (
-              <button
+              <Button
+                variant="primary"
+                icon={<PlusIcon />}
                 onClick={handleCreate}
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
               >
-                <PlusIcon className="w-4 h-4 mr-2" />
                 Добавить ссылку
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -213,43 +219,37 @@ export const LinksPage: React.FC = () => {
 
       {/* Search */}
       <div className="mb-6">
-        <div className="relative">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-          <input
-            type="text"
-            placeholder="Поиск ссылок..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="block w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-          />
-        </div>
+        <SearchInput
+          value={searchTerm}
+          onChange={handleSearchChange}
+          placeholder="Поиск ссылок..."
+          debounceMs={500}
+        />
       </div>
 
+      {/* Content */}
       {isLoading ? (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
-          <div className="animate-pulse space-y-4">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-32 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
-            ))}
-          </div>
-        </div>
+        <Card>
+          <Card.Body>
+            <Skeleton variant="card" count={6} />
+          </Card.Body>
+        </Card>
       ) : error ? (
-        <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-xl p-6">
-          <div className="flex items-center">
-            <XCircleIcon className="w-5 h-5 text-red-500 mr-2" />
-            <p className="text-red-800 dark:text-red-300">Ошибка загрузки ссылок</p>
-          </div>
-        </div>
+        <ErrorState
+          title="Ошибка загрузки ссылок"
+          onRetry={() => refetch()}
+        />
       ) : linksData?.data.length === 0 ? (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
-          <LinkIcon className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            {searchTerm ? 'Ссылки не найдены' : 'Нет ссылок'}
-          </h3>
-          <p className="text-gray-500 dark:text-gray-400">
-            {searchTerm ? 'Попробуйте изменить поисковый запрос' : 'Добавьте первые ссылки для быстрого доступа'}
-          </p>
-        </div>
+        <EmptyState
+          icon={<LinkIcon />}
+          title={searchTerm ? 'Ссылки не найдены' : 'Нет ссылок'}
+          description={searchTerm ? 'Попробуйте изменить поисковый запрос' : 'Добавьте первые ссылки для быстрого доступа'}
+          action={permissions.canManageTasks && !searchTerm ? (
+            <Button variant="primary" icon={<PlusIcon />} onClick={handleCreate}>
+              Добавить ссылку
+            </Button>
+          ) : undefined}
+        />
       ) : (
         <>
           {/* Grid View with Categories */}
@@ -264,62 +264,55 @@ export const LinksPage: React.FC = () => {
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                       {getCategoryLabel(category)}
                     </h2>
-                    <span className="ml-3 text-sm text-gray-500 dark:text-gray-400">
+                    <Badge variant="gray" className="ml-3">
                       {(categoryLinks as Link[]).length} ссылок
-                    </span>
+                    </Badge>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {(categoryLinks as Link[]).map((link) => (
-                      <div
-                        key={link.id}
-                        className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-500 group"
-                      >
-                        <div className="flex justify-between items-start mb-3">
-                          <div className="flex items-center">
-                            <div className={`${getCategoryColor((link as any).category || 'general')} rounded-lg p-2 mr-3 text-white`}>
-                              {getCategoryIcon((link as any).category || 'general')}
+                      <Card key={link.id} hover className="group">
+                        <Card.Body>
+                          <div className="flex justify-between items-start mb-3">
+                            <div className="flex items-center">
+                              <div className={`${getCategoryColor((link as any).category || 'general')} rounded-lg p-2 mr-3 text-white`}>
+                                {getCategoryIcon((link as any).category || 'general')}
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                  {link.title}
+                                </h3>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[150px]">
+                                  {new URL(link.url).hostname}
+                                </p>
+                              </div>
                             </div>
-                            <div>
-                              <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                {link.title}
-                              </h3>
-                              <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[150px]">
-                                {new URL(link.url).hostname}
-                              </p>
-                            </div>
+                            {permissions.canManageTasks && (
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                <ActionButtons
+                                  onEdit={() => handleEdit(link)}
+                                  onDelete={() => handleDelete(link)}
+                                  showDuplicate={false}
+                                  size="sm"
+                                />
+                              </div>
+                            )}
                           </div>
-                          {permissions.canManageTasks && (
-                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button
-                                onClick={() => handleEdit(link)}
-                                className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
-                                title="Редактировать"
-                              >
-                                <PencilIcon className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => handleDelete(link)}
-                                className="p-1 text-gray-400 hover:text-red-600 transition-colors"
-                                title="Удалить"
-                              >
-                                <TrashIcon className="w-4 h-4" />
-                              </button>
-                            </div>
+                          {link.description && (
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                              {link.description}
+                            </p>
                           )}
-                        </div>
-                        {link.description && (
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-                            {link.description}
-                          </p>
-                        )}
-                        <button
-                          onClick={() => openLink(link.url)}
-                          className="w-full inline-flex items-center justify-center px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50"
-                        >
-                          <ArrowTopRightOnSquareIcon className="w-4 h-4 mr-2" />
-                          Открыть
-                        </button>
-                      </div>
+                          <Button
+                            variant="ghost"
+                            icon={<ArrowTopRightOnSquareIcon />}
+                            onClick={() => openLink(link.url)}
+                            fullWidth
+                            className="bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50"
+                          >
+                            Открыть
+                          </Button>
+                        </Card.Body>
+                      </Card>
                     ))}
                   </div>
                 </div>
@@ -329,8 +322,8 @@ export const LinksPage: React.FC = () => {
 
           {/* List View */}
           {viewMode === 'list' && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-              <div className="space-y-4">
+            <Card>
+              <Card.Body className="space-y-4">
                 {linksData?.data.map((link) => (
                   <div key={link.id} className="p-5 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-sm hover:border-blue-200 dark:hover:border-blue-500 transition-all">
                     <div className="flex items-center justify-between">
@@ -343,9 +336,9 @@ export const LinksPage: React.FC = () => {
                             <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
                               {link.title}
                             </h3>
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                            <Badge variant="gray">
                               {getCategoryLabel((link as any).category || 'general')}
-                            </span>
+                            </Badge>
                           </div>
                           {link.description && (
                             <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{link.description}</p>
@@ -356,200 +349,121 @@ export const LinksPage: React.FC = () => {
                         </div>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <button
+                        <Button
+                          variant="ghost"
+                          icon={<EyeIcon />}
                           onClick={() => openLink(link.url)}
-                          className="inline-flex items-center px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50"
+                          className="bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50"
                         >
-                          <EyeIcon className="w-4 h-4 mr-2" />
                           Открыть
-                        </button>
+                        </Button>
                         {permissions.canManageTasks && (
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() => handleEdit(link)}
-                              className="p-2 text-gray-400 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50"
-                              title="Редактировать"
-                            >
-                              <PencilIcon className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(link)}
-                              className="p-2 text-gray-400 hover:text-red-600 transition-colors rounded-lg hover:bg-red-50"
-                              title="Удалить"
-                            >
-                              <TrashIcon className="w-4 h-4" />
-                            </button>
-                          </div>
+                          <ActionButtons
+                            onEdit={() => handleEdit(link)}
+                            onDelete={() => handleDelete(link)}
+                            showDuplicate={false}
+                          />
                         )}
                       </div>
                     </div>
                   </div>
                 ))}
-              </div>
-            </div>
+              </Card.Body>
+            </Card>
           )}
 
           {/* Pagination */}
           {linksData && linksData.last_page > 1 && (
-            <div className="mt-8 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-6">
-              <div className="flex-1 flex justify-between sm:hidden">
-                <button
-                  onClick={() => setPage(page - 1)}
-                  disabled={page === 1}
-                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-                >
-                  Назад
-                </button>
-                <button
-                  onClick={() => setPage(page + 1)}
-                  disabled={page === linksData.last_page}
-                  className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-                >
-                  Вперед
-                </button>
-              </div>
-              <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">
-                    Показано <span className="font-medium">{(page - 1) * limit + 1}</span> - <span className="font-medium">{Math.min(page * limit, linksData.total)}</span> из <span className="font-medium">{linksData.total}</span> результатов
-                  </p>
-                </div>
-                <div>
-                  <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                    <button
-                      onClick={() => setPage(page - 1)}
-                      disabled={page === 1}
-                      className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
-                    >
-                      <span className="sr-only">Previous</span>
-                      <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
-                    </button>
-                    {/* Simple page numbers */}
-                    {[...Array(linksData.last_page)].map((_, i) => (
-                      <button
-                        key={i + 1}
-                        onClick={() => setPage(i + 1)}
-                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${page === i + 1
-                          ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600 dark:bg-blue-900/30 dark:border-blue-500 dark:text-blue-300'
-                          : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700'
-                          }`}
-                      >
-                        {i + 1}
-                      </button>
-                    ))}
-                    <button
-                      onClick={() => setPage(page + 1)}
-                      disabled={page === linksData.last_page}
-                      className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
-                    >
-                      <span className="sr-only">Next</span>
-                      <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
-                    </button>
-                  </nav>
-                </div>
-              </div>
-            </div>
+            <Pagination
+              currentPage={page}
+              totalPages={linksData.last_page}
+              onPageChange={setPage}
+              total={linksData.total}
+              perPage={limit}
+              showInfo
+              className="mt-8"
+            />
           )}
         </>
       )}
 
-      {/* Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-10 overflow-y-auto">
-          <div className="flex min-h-screen items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-            <div
-              className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-              onClick={() => setIsModalOpen(false)}
-            ></div>
+      {/* Create/Edit Modal */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={selectedLink ? 'Редактировать ссылку' : 'Добавить ссылку'}
+        size="lg"
+      >
+        <form onSubmit={handleSubmit}>
+          <Modal.Body>
+            <div className="space-y-4">
+              <FormField label="Название" required>
+                <Input
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  required
+                />
+              </FormField>
 
-            <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <form onSubmit={handleSubmit}>
-                <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                  <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
-                    {selectedLink ? 'Редактировать ссылку' : 'Добавить ссылку'}
-                  </h3>
+              <FormField label="URL" required>
+                <Input
+                  type="url"
+                  value={formData.url}
+                  onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+                  placeholder="https://example.com"
+                  required
+                />
+              </FormField>
 
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Название *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.title}
-                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                        className="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      />
-                    </div>
+              <FormField label="Категория">
+                <Select
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  options={categoryOptions}
+                />
+              </FormField>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">URL *</label>
-                      <input
-                        type="url"
-                        required
-                        value={formData.url}
-                        onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                        placeholder="https://example.com"
-                        className="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Категория
-                      </label>
-                      <select
-                        value={formData.category}
-                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                        className="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      >
-                        <option value="general">Общее</option>
-                        <option value="crm">CRM</option>
-                        <option value="documents">Документы</option>
-                        <option value="analytics">Аналитика</option>
-                        <option value="tools">Инструменты</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Описание
-                      </label>
-                      <textarea
-                        rows={3}
-                        value={formData.description}
-                        onChange={(e) =>
-                          setFormData({ ...formData, description: e.target.value })
-                        }
-                        className="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        placeholder="Краткое описание ссылки..."
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gray-50 dark:bg-gray-700/50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                  <button
-                    type="submit"
-                    disabled={createMutation.isPending || updateMutation.isPending}
-                    className="inline-flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
-                  >
-                    {selectedLink ? 'Сохранить' : 'Создать'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-base font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                  >
-                    Отмена
-                  </button>
-                </div>
-              </form>
+              <FormField label="Описание">
+                <Textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Краткое описание ссылки..."
+                  rows={3}
+                />
+              </FormField>
             </div>
-          </div>
-        </div>
-      )}
-    </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              type="submit"
+              variant="primary"
+              isLoading={createMutation.isPending || updateMutation.isPending}
+            >
+              {selectedLink ? 'Сохранить' : 'Создать'}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setIsModalOpen(false)}
+            >
+              Отмена
+            </Button>
+          </Modal.Footer>
+        </form>
+      </Modal>
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        isOpen={!!confirmDelete}
+        title={`Удалить ссылку "${confirmDelete?.title}"?`}
+        message="Это действие нельзя отменить"
+        variant="danger"
+        confirmText="Удалить"
+        cancelText="Отмена"
+        onConfirm={() => confirmDelete && deleteMutation.mutate(confirmDelete.id)}
+        onCancel={() => setConfirmDelete(null)}
+        isLoading={deleteMutation.isPending}
+      />
+    </PageContainer>
   );
 };
