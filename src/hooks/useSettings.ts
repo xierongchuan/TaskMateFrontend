@@ -12,6 +12,7 @@ export const useSettings = (dealershipId?: number) => {
   return useQuery({
     queryKey: ['settings', dealershipId],
     queryFn: () => settingsApi.getSettings(dealershipId),
+    placeholderData: (prev) => prev,
   });
 };
 
@@ -21,6 +22,7 @@ export const useSetting = (key: string) => {
     queryKey: ['setting', key],
     queryFn: () => settingsApi.getSettingByKey(key),
     enabled: !!key,
+    placeholderData: (prev) => prev,
   });
 };
 
@@ -29,6 +31,7 @@ export const useShiftConfig = (dealershipId?: number) => {
   return useQuery({
     queryKey: ['settings', 'shift-config', dealershipId],
     queryFn: () => settingsApi.getShiftConfig(dealershipId),
+    placeholderData: (prev) => prev,
   });
 };
 
@@ -37,6 +40,7 @@ export const useBotConfig = (dealershipId?: number) => {
   return useQuery({
     queryKey: ['settings', 'bot-config', dealershipId],
     queryFn: () => settingsApi.getBotConfig(dealershipId),
+    placeholderData: (prev) => prev,
   });
 };
 
@@ -46,6 +50,7 @@ export const useDealershipSettings = (dealershipId: number) => {
     queryKey: ['settings', 'dealership', dealershipId],
     queryFn: () => settingsApi.getDealershipBotConfig(dealershipId),
     enabled: !!dealershipId,
+    placeholderData: (prev) => prev,
   });
 };
 

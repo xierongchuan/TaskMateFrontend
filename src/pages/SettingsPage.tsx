@@ -465,6 +465,7 @@ export const SettingsPage: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Центр уведомлений</h2>
                       <Button
+                        type="button"
                         variant="ghost"
                         size="sm"
                         onClick={() => setShowDetailedNotifications(!showDetailedNotifications)}
