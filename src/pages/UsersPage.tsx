@@ -9,24 +9,32 @@ import { UserModal } from '../components/users/UserModal';
 import { formatPhoneNumber } from '../utils/phoneFormatter';
 import type { User } from '../types/user';
 import type { Dealership } from '../types/dealership';
-import { XCircleIcon } from '@heroicons/react/24/outline';
 import { roleLabels, roleDescriptions } from '../utils/roleTranslations';
 import {
   PlusIcon,
-  MagnifyingGlassIcon,
-  FunnelIcon,
   UserIcon,
   BuildingOfficeIcon,
   PhoneIcon,
   ChatBubbleLeftRightIcon,
-  PencilIcon,
-  TrashIcon,
-  ShieldCheckIcon,
-  EyeIcon,
-  UserGroupIcon,
   ListBulletIcon,
   Squares2X2Icon
 } from '@heroicons/react/24/outline';
+
+// Унифицированные компоненты
+import {
+  Button,
+  Input,
+  Select,
+  ViewModeToggle,
+  FilterPanel,
+  Skeleton,
+  EmptyState,
+  ErrorState,
+  PageContainer,
+  Card,
+  ConfirmDialog,
+} from '../components/ui';
+import { RoleBadge, ActionButtons } from '../components/common';
 
 export const UsersPage: React.FC = () => {
   const permissions = usePermissions();
@@ -37,6 +45,7 @@ export const UsersPage: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'cards');
   const [showFilters, setShowFilters] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<User | null>(null);
   const [filters, setFilters] = useState<{
     search: string;
     role: string;
@@ -55,7 +64,7 @@ export const UsersPage: React.FC = () => {
     queryFn: () => usersApi.getDealerships(),
   });
 
-  const { data: usersData, isLoading, error } = useQuery({
+  const { data: usersData, isLoading, error, refetch } = useQuery({
     queryKey: ['users', filters, limit],
     queryFn: () => usersApi.getUsers({ ...filters, per_page: limit }),
   });
@@ -65,6 +74,7 @@ export const UsersPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      setConfirmDelete(null);
     },
   });
 
@@ -79,9 +89,7 @@ export const UsersPage: React.FC = () => {
   };
 
   const handleDelete = (user: User) => {
-    if (window.confirm(`Вы уверены, что хотите удалить пользователя "${user.full_name}"?`)) {
-      deleteMutation.mutate(user.id);
-    }
+    setConfirmDelete(user);
   };
 
   const handleRoleChange = (user: User, newRole: string) => {
@@ -90,7 +98,6 @@ export const UsersPage: React.FC = () => {
     });
   };
 
-
   const clearFilters = () => {
     setFilters({
       search: '',
@@ -98,38 +105,6 @@ export const UsersPage: React.FC = () => {
       dealership_id: undefined,
       has_telegram: '',
     });
-  };
-
-  const getRoleBadge = (role: string) => {
-    const badges = {
-      employee: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700',
-      observer: 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700',
-      manager: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700',
-      owner: 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700',
-    };
-
-    const icons = {
-      employee: <UserIcon className="w-3 h-3" />,
-      observer: <EyeIcon className="w-3 h-3" />,
-      manager: <UserGroupIcon className="w-3 h-3" />,
-      owner: <ShieldCheckIcon className="w-3 h-3" />,
-    };
-
-    const labels = roleLabels;
-
-    const descriptions = roleDescriptions;
-
-    return (
-      <div className="flex items-center space-x-2">
-        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${badges[role as keyof typeof badges] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600'}`}>
-          {icons[role as keyof typeof icons]}
-          <span className="ml-1">{labels[role as keyof typeof labels] || role}</span>
-        </span>
-        <span className="text-xs text-gray-500 hidden sm:inline">
-          {descriptions[role as keyof typeof descriptions]}
-        </span>
-      </div>
-    );
   };
 
   const getUserCardClass = (user: User) => {
@@ -149,8 +124,41 @@ export const UsersPage: React.FC = () => {
     return user.dealership?.name || 'Не привязан';
   };
 
+  const getAvatarColor = (role: string) => {
+    switch (role) {
+      case 'owner': return 'bg-red-500';
+      case 'manager': return 'bg-green-500';
+      case 'observer': return 'bg-purple-500';
+      default: return 'bg-blue-500';
+    }
+  };
+
+  const roleOptions = [
+    { value: '', label: 'Все роли' },
+    { value: 'employee', label: 'Сотрудник' },
+    { value: 'observer', label: 'Наблюдатель' },
+    { value: 'manager', label: 'Управляющий' },
+    { value: 'owner', label: 'Владелец' },
+  ];
+
+  const telegramOptions = [
+    { value: '', label: 'Все' },
+    { value: 'connected', label: 'Подключен' },
+    { value: 'not_connected', label: 'Не подключен' },
+  ];
+
+  const dealershipOptions = [
+    { value: '', label: 'Все салоны' },
+    ...(dealershipsData?.data || []).map((d: Dealership) => ({
+      value: d.id.toString(),
+      label: d.name,
+    })),
+  ];
+
+  const hasActiveFilters = filters.search || filters.role || filters.dealership_id || filters.has_telegram;
+
   return (
-    <div className="px-4 py-6 sm:px-0 max-w-7xl mx-auto">
+    <PageContainer>
       {/* Header */}
       <div className="mb-8">
         <div className="flex flex-col gap-4">
@@ -162,169 +170,105 @@ export const UsersPage: React.FC = () => {
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             {!isMobile && (
-              <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 w-full sm:w-auto">
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`flex-1 sm:flex-initial px-3 py-2 text-sm font-medium rounded-l-lg ${viewMode === 'list'
-                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-                    }`}
-                  title="Список"
-                >
-                  <ListBulletIcon className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setViewMode('cards')}
-                  className={`flex-1 sm:flex-initial px-3 py-2 text-sm font-medium rounded-r-lg ${viewMode === 'cards'
-                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-                    }`}
-                  title="Карточки"
-                >
-                  <Squares2X2Icon className="w-4 h-4" />
-                </button>
-              </div>
+              <ViewModeToggle
+                mode={viewMode}
+                onChange={setViewMode}
+                options={[
+                  { value: 'list', icon: <ListBulletIcon />, label: 'Список' },
+                  { value: 'cards', icon: <Squares2X2Icon />, label: 'Карточки' },
+                ]}
+              />
             )}
             {permissions.canCreateUsers && (
-              <button
+              <Button
+                variant="primary"
+                icon={<PlusIcon />}
                 onClick={handleCreate}
-                className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors min-h-[44px]"
+                fullWidth={isMobile}
               >
-                <PlusIcon className="w-4 h-4 mr-2" />
                 Добавить сотрудника
-              </button>
+              </Button>
             )}
           </div>
         </div>
       </div>
 
-      {/* Advanced Filters */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-          >
-            <FunnelIcon className="w-4 h-4 mr-2" />
-            Фильтры {showFilters ? 'Скрыть' : 'Показать'}
-          </button>
-        </div>
+      {/* Filters */}
+      <FilterPanel
+        isOpen={showFilters}
+        onToggle={() => setShowFilters(!showFilters)}
+        onClear={hasActiveFilters ? clearFilters : undefined}
+        className="mb-6"
+      >
+        <FilterPanel.Grid columns={5}>
+          <Input
+            label="Поиск"
+            placeholder="Имя, логин..."
+            value={filters.search}
+            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+          />
 
-        {showFilters && (
-          <div className="p-4 sm:p-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <MagnifyingGlassIcon className="w-4 h-4 inline mr-1" />
-                  Поиск
-                </label>
-                <input
-                  type="text"
-                  placeholder="Имя, логин..."
-                  value={filters.search}
-                  onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                  className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
+          <Select
+            label="Роль"
+            value={filters.role}
+            onChange={(e) => setFilters({ ...filters, role: e.target.value })}
+            options={roleOptions}
+          />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Роль</label>
-                <select
-                  value={filters.role}
-                  onChange={(e) => setFilters({ ...filters, role: e.target.value })}
-                  className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  <option value="">Все роли</option>
-                  <option value="employee">Сотрудник</option>
-                  <option value="observer">Наблюдатель</option>
-                  <option value="manager">Управляющий</option>
-                  <option value="owner">Владелец</option>
-                </select>
-              </div>
+          <Select
+            label="Автосалон"
+            value={filters.dealership_id?.toString() || ''}
+            onChange={(e) => setFilters({ ...filters, dealership_id: e.target.value ? Number(e.target.value) : undefined })}
+            options={dealershipOptions}
+          />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Автосалон</label>
-                <select
-                  value={filters.dealership_id || ''}
-                  onChange={(e) => setFilters({ ...filters, dealership_id: e.target.value ? Number(e.target.value) : undefined })}
-                  className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  <option value="">Все салоны</option>
-                  {dealershipsData?.data.map((dealership: Dealership) => (
-                    <option key={dealership.id} value={dealership.id}>
-                      {dealership.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+          <Select
+            label="Telegram"
+            value={filters.has_telegram}
+            onChange={(e) => setFilters({ ...filters, has_telegram: e.target.value })}
+            options={telegramOptions}
+          />
+        </FilterPanel.Grid>
+      </FilterPanel>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Telegram</label>
-                <select
-                  value={filters.has_telegram}
-                  onChange={(e) => setFilters({ ...filters, has_telegram: e.target.value })}
-                  className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  <option value="">Все</option>
-                  <option value="connected">Подключен</option>
-                  <option value="not_connected">Не подключен</option>
-                </select>
-              </div>
-
-              <div className="flex items-end">
-                <button
-                  onClick={clearFilters}
-                  className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                >
-                  Сбросить
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
+      {/* Content */}
       {isLoading ? (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
-          <div className="animate-pulse space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-24 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
-            ))}
-          </div>
-        </div>
+        <Card>
+          <Card.Body>
+            <Skeleton variant="list" count={5} />
+          </Card.Body>
+        </Card>
       ) : error ? (
-        <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-xl p-6">
-          <div className="flex items-center">
-            <XCircleIcon className="w-5 h-5 text-red-500 mr-2" />
-            <p className="text-red-800 dark:text-red-300">Ошибка загрузки сотрудников</p>
-          </div>
-        </div>
+        <ErrorState
+          title="Ошибка загрузки сотрудников"
+          onRetry={() => refetch()}
+        />
       ) : usersData?.data.length === 0 ? (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
-          <UserIcon className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Сотрудники не найдены</h3>
-          <p className="text-gray-500 dark:text-gray-400">
-            {filters.search || filters.role || filters.dealership_id ?
-              'Попробуйте изменить фильтры для поиска сотрудников' :
-              'Добавьте первого сотрудника для начала работы'}
-          </p>
-        </div>
+        <EmptyState
+          icon={<UserIcon />}
+          title="Сотрудники не найдены"
+          description={hasActiveFilters
+            ? 'Попробуйте изменить фильтры для поиска сотрудников'
+            : 'Добавьте первого сотрудника для начала работы'}
+          action={permissions.canCreateUsers && !hasActiveFilters ? (
+            <Button variant="primary" icon={<PlusIcon />} onClick={handleCreate}>
+              Добавить сотрудника
+            </Button>
+          ) : undefined}
+        />
       ) : (
         <>
           {/* List View */}
           {viewMode === 'list' && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-              <div className="space-y-4">
+            <Card>
+              <Card.Body className="space-y-4">
                 {usersData?.data.map((user) => (
                   <div key={user.id} className={`p-4 sm:p-5 rounded-lg border hover:shadow-sm transition-all ${getUserCardClass(user)}`}>
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-3 mb-3">
                           <div className="flex items-center">
-                            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white font-semibold ${user.role === 'owner' ? 'bg-red-500' :
-                              user.role === 'manager' ? 'bg-green-500' :
-                                user.role === 'observer' ? 'bg-purple-500' : 'bg-blue-500'
-                              }`}>
+                            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white font-semibold ${getAvatarColor(user.role)}`}>
                               {user.full_name.charAt(0).toUpperCase()}
                             </div>
                             {!user.telegram_id && (
@@ -339,7 +283,7 @@ export const UsersPage: React.FC = () => {
                           </div>
                         </div>
 
-                        {getRoleBadge(user.role)}
+                        <RoleBadge role={user.role} showDescription />
 
                         <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
                           <div className="flex items-center text-gray-500 dark:text-gray-400">
@@ -363,48 +307,33 @@ export const UsersPage: React.FC = () => {
 
                       {permissions.canCreateUsers && (
                         <div className="flex flex-col gap-2">
-                          <div className="flex flex-row sm:flex-col gap-2">
-                            {(!permissions.isOwner && user.role === 'owner') ? null : (
-                              <>
-                                <button
-                                  onClick={() => handleEdit(user)}
-                                  className="inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors min-h-[44px] min-w-[44px] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
-                                >
-                                  <PencilIcon className="w-4 h-4 mr-1 sm:mr-0" />
-                                  <span className="hidden sm:inline">Изменить</span>
-                                </button>
-                                <button
-                                  onClick={() => handleDelete(user)}
-                                  disabled={deleteMutation.isPending}
-                                  className="inline-flex items-center justify-center px-3 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-lg text-red-700 bg-white hover:bg-red-50 transition-colors disabled:opacity-50 min-h-[44px] min-w-[44px] dark:bg-gray-800 dark:border-red-800 dark:text-red-300 dark:hover:bg-red-900/20"
-                                >
-                                  <TrashIcon className="w-4 h-4 mr-1 sm:mr-0" />
-                                  <span className="hidden sm:inline">Удалить</span>
-                                </button>
-                              </>
-                            )}
-                          </div>
+                          {(!permissions.isOwner && user.role === 'owner') ? null : (
+                            <ActionButtons
+                              onEdit={() => handleEdit(user)}
+                              onDelete={() => handleDelete(user)}
+                              isDeleting={deleteMutation.isPending}
+                              showDuplicate={false}
+                            />
+                          )}
 
                           {/* Quick Role Change */}
                           {currentUser?.role === 'owner' && (
-                            <select
+                            <Select
                               value={user.role}
                               onChange={(e) => handleRoleChange(user, e.target.value)}
-                              className="w-full sm:w-auto text-sm px-2 py-2 border border-gray-300 rounded focus:border-blue-500 focus:ring-blue-500 min-h-[44px] bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            >
-                              <option value="employee">Сотрудник</option>
-                              <option value="observer">Наблюдатель</option>
-                              <option value="manager">Управляющий</option>
-                              <option value="owner">Владелец</option>
-                            </select>
+                              options={roleOptions.filter(r => r.value !== '')}
+                              selectSize="sm"
+                              fullWidth={false}
+                              className="min-w-[130px]"
+                            />
                           )}
                         </div>
                       )}
                     </div>
                   </div>
                 ))}
-              </div>
-            </div>
+              </Card.Body>
+            </Card>
           )}
 
           {/* Cards View */}
@@ -414,39 +343,26 @@ export const UsersPage: React.FC = () => {
                 <div key={user.id} className={`p-4 sm:p-6 ${getUserCardClass(user)}`}>
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-lg ${user.role === 'owner' ? 'bg-red-500' :
-                        user.role === 'manager' ? 'bg-green-500' :
-                          user.role === 'observer' ? 'bg-purple-500' : 'bg-blue-500'
-                        }`}>
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-lg ${getAvatarColor(user.role)}`}>
                         {user.full_name.charAt(0).toUpperCase()}
                       </div>
                       {!user.telegram_id && (
                         <div className="ml-2 -mt-1 w-3 h-3 bg-orange-500 rounded-full border-2 border-white" title="Нет Telegram"></div>
                       )}
                     </div>
-                    <div className="flex space-x-1">
-                      {permissions.canCreateUsers && (
-                        <>
-                          {(!permissions.isOwner && user.role === 'owner') ? null : (
-                            <>
-                              <button
-                                onClick={() => handleEdit(user)}
-                                className="p-2 text-gray-400 hover:text-gray-600 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center dark:hover:text-gray-200"
-                              >
-                                <PencilIcon className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => handleDelete(user)}
-                                disabled={deleteMutation.isPending}
-                                className="p-2 text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50 min-h-[44px] min-w-[44px] flex items-center justify-center dark:hover:text-red-400"
-                              >
-                                <TrashIcon className="w-4 h-4" />
-                              </button>
-                            </>
-                          )}
-                        </>
-                      )}
-                    </div>
+                    {permissions.canCreateUsers && (
+                      <>
+                        {(!permissions.isOwner && user.role === 'owner') ? null : (
+                          <ActionButtons
+                            onEdit={() => handleEdit(user)}
+                            onDelete={() => handleDelete(user)}
+                            isDeleting={deleteMutation.isPending}
+                            showDuplicate={false}
+                            size="sm"
+                          />
+                        )}
+                      </>
+                    )}
                   </div>
 
                   <div className="mb-3">
@@ -457,7 +373,7 @@ export const UsersPage: React.FC = () => {
                   </div>
 
                   <div className="mb-4">
-                    {getRoleBadge(user.role)}
+                    <RoleBadge role={user.role} />
                   </div>
 
                   <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
@@ -483,14 +399,26 @@ export const UsersPage: React.FC = () => {
             </div>
           )}
         </>
-      )
-      }
+      )}
 
       <UserModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         user={selectedUser}
       />
-    </div >
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        isOpen={!!confirmDelete}
+        title={`Удалить пользователя "${confirmDelete?.full_name}"?`}
+        message="Это действие нельзя отменить"
+        variant="danger"
+        confirmText="Удалить"
+        cancelText="Отмена"
+        onConfirm={() => confirmDelete && deleteMutation.mutate(confirmDelete.id)}
+        onCancel={() => setConfirmDelete(null)}
+        isLoading={deleteMutation.isPending}
+      />
+    </PageContainer>
   );
 };
