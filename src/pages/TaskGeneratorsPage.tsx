@@ -5,6 +5,7 @@ import { usePermissions } from '../hooks/usePermissions';
 import { usePagination } from '../hooks/usePagination';
 import { useResponsiveViewMode } from '../hooks/useResponsiveViewMode';
 import { TaskGeneratorModal } from '../components/generators/TaskGeneratorModal';
+import { GeneratorDetailsModal } from '../components/generators/GeneratorDetailsModal';
 import { DealershipSelector } from '../components/common/DealershipSelector';
 import type { TaskGenerator, TaskGeneratorFilters } from '../types/taskGenerator';
 import { format } from 'date-fns';
@@ -58,6 +59,7 @@ export const TaskGeneratorsPage: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState<TaskGenerator | null>(null);
+  const [detailsGenerator, setDetailsGenerator] = useState<TaskGenerator | null>(null);
   const [filters, setFilters] = useState<TaskGeneratorFilters>({
     search: '',
     is_active: undefined,
@@ -308,8 +310,9 @@ export const TaskGeneratorsPage: React.FC = () => {
                 {generators.map((generator) => (
                   <div
                     key={generator.id}
-                    className={`p-5 rounded-lg border transition-all ${generator.is_active
-                      ? 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-sm'
+                    onClick={() => setDetailsGenerator(generator)}
+                    className={`p-5 rounded-lg border transition-all cursor-pointer ${generator.is_active
+                      ? 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-md'
                       : 'bg-gray-50 dark:bg-gray-900/50 border-gray-300 dark:border-gray-600 opacity-75'
                       }`}
                   >
@@ -517,6 +520,17 @@ export const TaskGeneratorsPage: React.FC = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         generator={selectedGenerator}
+      />
+
+      {/* Generator Details Modal */}
+      <GeneratorDetailsModal
+        isOpen={!!detailsGenerator}
+        onClose={() => setDetailsGenerator(null)}
+        generator={detailsGenerator}
+        onEdit={(gen) => {
+          setDetailsGenerator(null);
+          handleEdit(gen);
+        }}
       />
 
       {/* Delete Confirmation */}

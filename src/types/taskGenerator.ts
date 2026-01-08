@@ -48,13 +48,23 @@ export interface TaskGenerator {
   }[];
 }
 
-export interface TaskGeneratorStatistics {
-  generator_id: number;
+export interface PeriodStats {
   total_generated: number;
   completed_count: number;
   expired_count: number;
   pending_count: number;
+  on_time_count: number;
   completion_rate: number;
+  on_time_rate: number;
+}
+
+export interface TaskGeneratorStatistics {
+  generator_id: number;
+  all_time: PeriodStats;
+  week: PeriodStats;
+  month: PeriodStats;
+  year: PeriodStats;
+  average_completion_time_minutes: number | null;
 }
 
 export interface CreateTaskGeneratorRequest {

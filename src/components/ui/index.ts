@@ -65,3 +65,7 @@ export type { ConfirmDialogProps, ConfirmDialogVariant } from './ConfirmDialog';
 
 export { FormField } from './FormField';
 export type { FormFieldProps } from './FormField';
+
+// Визуализация данных
+export { DonutChart, DonutChartLegend } from './DonutChart';
+export { StatCard } from './StatCard';
