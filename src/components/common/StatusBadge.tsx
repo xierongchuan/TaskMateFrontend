@@ -4,9 +4,10 @@ import {
   ClockIcon,
   CheckCircleIcon,
   XCircleIcon,
+  EyeIcon,
 } from '@heroicons/react/24/outline';
 
-export type TaskStatus = 'pending' | 'completed' | 'overdue' | 'acknowledged';
+export type TaskStatus = 'pending' | 'completed' | 'overdue' | 'acknowledged' | 'pending_review';
 export type ShiftStatus = 'open' | 'closed' | 'late' | 'replaced';
 
 export interface StatusBadgeProps {
@@ -17,6 +18,7 @@ export interface StatusBadgeProps {
 
 const taskStatusConfig: Record<TaskStatus, { label: string; variant: 'warning' | 'success' | 'danger' | 'info'; icon: React.ElementType }> = {
   pending: { label: 'Ожидает', variant: 'warning', icon: ClockIcon },
+  pending_review: { label: 'На проверке', variant: 'info', icon: EyeIcon },
   completed: { label: 'Выполнено', variant: 'success', icon: CheckCircleIcon },
   overdue: { label: 'Просрочено', variant: 'danger', icon: XCircleIcon },
   acknowledged: { label: 'Принято', variant: 'info', icon: CheckCircleIcon },

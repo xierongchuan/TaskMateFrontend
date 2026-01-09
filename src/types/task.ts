@@ -1,5 +1,5 @@
 export type TaskRecurrence = 'none' | 'daily' | 'weekly' | 'monthly';
-export type TaskStatus = 'pending' | 'acknowledged' | 'completed' | 'overdue';
+export type TaskStatus = 'pending' | 'acknowledged' | 'pending_review' | 'completed' | 'overdue';
 export type TaskType = 'individual' | 'group';
 export type ResponseType = 'acknowledge' | 'complete';
 export type TaskPriority = 'low' | 'medium' | 'high';

@@ -141,11 +141,39 @@ export const TasksPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleStatusChange = (task: Task, newStatus: string) => {
-    tasksApi.updateTaskStatus(task.id, newStatus).then(() => {
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ taskId, status }: { taskId: number; status: string }) =>
+      tasksApi.updateTaskStatus(taskId, status),
+    onMutate: async ({ taskId, status }) => {
+      await queryClient.cancelQueries({ queryKey: ['tasks', filters, page, limit] });
+      const previousTasks = queryClient.getQueryData(['tasks', filters, page, limit]);
+      // Оптимистично обновляем кэш
+      queryClient.setQueryData(['tasks', filters, page, limit], (old: unknown) => {
+        if (!old || typeof old !== 'object') return old;
+        const oldData = old as { data: Task[] };
+        return {
+          ...oldData,
+          data: oldData.data.map((task: Task) =>
+            task.id === taskId ? { ...task, status } : task
+          ),
+        };
+      });
+      return { previousTasks };
+    },
+    onError: (_err, _variables, context) => {
+      // Откат при ошибке
+      if (context?.previousTasks) {
+        queryClient.setQueryData(['tasks', filters, page, limit], context.previousTasks);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
-    });
+    },
+  });
+
+  const handleStatusChange = (task: Task, newStatus: string) => {
+    updateStatusMutation.mutate({ taskId: task.id, status: newStatus });
   };
 
   const clearFilters = () => {
@@ -190,6 +218,7 @@ export const TasksPage: React.FC = () => {
   const statusOptions = [
     { value: '', label: 'Все статусы' },
     { value: 'pending', label: 'Ожидает' },
+    { value: 'pending_review', label: 'На проверке' },
     { value: 'completed', label: 'Выполнено' },
     { value: 'overdue', label: 'Просрочено' },
   ];
@@ -222,6 +251,7 @@ export const TasksPage: React.FC = () => {
 
   const statusChangeOptions = [
     { value: 'pending', label: 'Ожидает' },
+    { value: 'pending_review', label: 'На проверке' },
     { value: 'completed', label: 'Выполнено' },
   ];
 
