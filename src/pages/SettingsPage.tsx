@@ -336,35 +336,77 @@ export const SettingsPage: React.FC = () => {
                     <div>
                       <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Настройки Задач</h2>
 
-                      <Card>
-                        <Card.Body>
-                          <div className="flex items-start mb-6">
-                            <ArrowPathIcon className="w-6 h-6 text-green-500 mr-4 mt-1" />
-                            <div className="flex-1">
-                              <label className="block text-base font-medium text-gray-900 dark:text-white mb-1">Автоматическая архивация</label>
-                              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                                Выполненные задачи будут автоматически переноситься в архив в выбранный день недели.
-                              </p>
-
-                              <Select
-                                value={String(botConfig.auto_archive_day_of_week || 0)}
+                      <div className="space-y-6">
+                        <Card>
+                          <Card.Body>
+                            <h4 className="font-medium text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                              <CheckCircleIcon className="w-5 h-5 text-green-500" />
+                              Архивация выполненных задач
+                            </h4>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                              Выполненные задачи будут автоматически переноситься в архив <strong>ежедневно</strong> в указанное время.
+                            </p>
+                            <div className="flex items-center gap-4">
+                              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Время запуска:</label>
+                              <Input
+                                type="time"
+                                value={botConfig.archive_completed_time || '03:00'}
                                 onChange={(e) => setBotConfig({
                                   ...botConfig,
-                                  auto_archive_day_of_week: parseInt(e.target.value) || 0
+                                  archive_completed_time: e.target.value
                                 })}
-                                options={archiveDayOptions}
+                                className="w-32"
                               />
                             </div>
-                          </div>
+                          </Card.Body>
+                        </Card>
 
-                          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-100 dark:border-blue-900/30 flex gap-3">
-                            <InformationCircleIcon className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-                            <p className="text-sm text-blue-700 dark:text-blue-300">
-                              Архивированные задачи пропадают из активного списка, но доступны через фильтр "Архив".
+                        <Card>
+                          <Card.Body>
+                            <h4 className="font-medium text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                              <ClockIcon className="w-5 h-5 text-orange-500" />
+                              Архивация просроченных задач
+                            </h4>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                              Просроченные задачи будут переноситься в архив по выбранному расписанию.
                             </p>
-                          </div>
-                        </Card.Body>
-                      </Card>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">День недели</label>
+                                <Select
+                                  value={String(botConfig.archive_overdue_day_of_week || 0)}
+                                  onChange={(e) => setBotConfig({
+                                    ...botConfig,
+                                    archive_overdue_day_of_week: parseInt(e.target.value) || 0
+                                  })}
+                                  options={archiveDayOptions}
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Время запуска</label>
+                                <Input
+                                  type="time"
+                                  value={botConfig.archive_overdue_time || '03:00'}
+                                  onChange={(e) => setBotConfig({
+                                    ...botConfig,
+                                    archive_overdue_time: e.target.value
+                                  })}
+                                  className="w-full"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="mt-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 border border-orange-100 dark:border-orange-900/30 text-xs text-orange-800 dark:text-orange-300 flex items-start">
+                              <InformationCircleIcon className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
+                              <p>
+                                Задачи считаются просроченными, если их дедлайн истёк более 24 часов назад.
+                              </p>
+                            </div>
+                          </Card.Body>
+                        </Card>
+                      </div>
                     </div>
                   </div>
                 )}

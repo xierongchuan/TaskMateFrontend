@@ -75,11 +75,12 @@ export const ReportsPage: React.FC = () => {
     }
   };
 
-  const getStatusBadgeVariant = (status: string): 'success' | 'danger' | 'info' | 'gray' => {
+  const getStatusBadgeVariant = (status: string): 'success' | 'danger' | 'info' | 'warning' | 'gray' => {
     switch (status) {
       case 'completed': return 'success';
       case 'overdue': return 'danger';
       case 'active': return 'info';
+      case 'pending_review': return 'warning';
       default: return 'gray';
     }
   };
@@ -89,6 +90,7 @@ export const ReportsPage: React.FC = () => {
       case 'completed': return 'Выполнено';
       case 'overdue': return 'Просрочено';
       case 'active': return 'В работе';
+      case 'pending_review': return 'На проверке';
       default: return status;
     }
   };
@@ -104,6 +106,7 @@ export const ReportsPage: React.FC = () => {
       case 'completed': return 'bg-green-500';
       case 'overdue': return 'bg-red-500';
       case 'active': return 'bg-blue-500';
+      case 'pending_review': return 'bg-yellow-500';
       default: return 'bg-gray-500';
     }
   };

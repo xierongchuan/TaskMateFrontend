@@ -46,6 +46,7 @@ import {
   ListBulletIcon,
   Squares2X2Icon,
   UserGroupIcon,
+  StopCircleIcon,
 } from '@heroicons/react/24/outline';
 
 export const TaskGeneratorsPage: React.FC = () => {
@@ -59,6 +60,7 @@ export const TaskGeneratorsPage: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState<TaskGenerator | null>(null);
+  const [confirmPauseAll, setConfirmPauseAll] = useState(false);
   const [detailsGenerator, setDetailsGenerator] = useState<TaskGenerator | null>(null);
   const [filters, setFilters] = useState<TaskGeneratorFilters>({
     search: '',
@@ -117,6 +119,30 @@ export const TaskGeneratorsPage: React.FC = () => {
     },
     onError: () => {
       showToast({ type: 'error', message: 'Ошибка запуска генератора' });
+    },
+  });
+
+  const pauseAllMutation = useMutation({
+    mutationFn: () => taskGeneratorsApi.pauseAll(),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['task-generators'] });
+      showToast({ type: 'success', message: data.message });
+      setConfirmPauseAll(false);
+    },
+    onError: () => {
+      showToast({ type: 'error', message: 'Ошибка при остановке генераторов' });
+    },
+  });
+
+  const resumeAllMutation = useMutation({
+    mutationFn: () => taskGeneratorsApi.resumeAll(),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['task-generators'] });
+      showToast({ type: 'success', message: data.message });
+      setConfirmPauseAll(false);
+    },
+    onError: () => {
+      showToast({ type: 'error', message: 'Ошибка при запуске генераторов' });
     },
   });
 
@@ -202,6 +228,7 @@ export const TaskGeneratorsPage: React.FC = () => {
   };
 
   const generators = generatorsData?.data || [];
+  const allPaused = generators.length > 0 && generators.every(g => !g.is_active);
 
   return (
     <PageContainer>
@@ -223,6 +250,16 @@ export const TaskGeneratorsPage: React.FC = () => {
                 { value: 'cards', icon: <Squares2X2Icon className="w-4 h-4" /> },
               ]}
             />
+          )}
+          {permissions.isOwner && generators.length > 0 && (
+            <Button
+              variant={allPaused ? 'primary' : 'danger'}
+              icon={allPaused ? <PlayIcon /> : <StopCircleIcon />}
+              onClick={() => setConfirmPauseAll(true)}
+              disabled={pauseAllMutation.isPending || resumeAllMutation.isPending}
+            >
+              {allPaused ? 'Запустить все' : 'Остановить все'}
+            </Button>
           )}
           {permissions.canManageTasks && (
             <Button
@@ -384,7 +421,10 @@ export const TaskGeneratorsPage: React.FC = () => {
                             variant="outline"
                             size="sm"
                             icon={generator.is_active ? <PauseIcon /> : <PlayIcon />}
-                            onClick={() => handlePauseResume(generator)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlePauseResume(generator);
+                            }}
                             disabled={pauseMutation.isPending || resumeMutation.isPending}
                             className={generator.is_active
                               ? 'text-yellow-600 border-yellow-300 hover:bg-yellow-50 dark:text-yellow-400 dark:border-yellow-700'
@@ -397,7 +437,10 @@ export const TaskGeneratorsPage: React.FC = () => {
                             variant="outline"
                             size="sm"
                             icon={<PencilIcon />}
-                            onClick={() => handleEdit(generator)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEdit(generator);
+                            }}
                           >
                             Изменить
                           </Button>
@@ -405,7 +448,10 @@ export const TaskGeneratorsPage: React.FC = () => {
                             variant="outline"
                             size="sm"
                             icon={<TrashIcon />}
-                            onClick={() => handleDelete(generator)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(generator);
+                            }}
                             disabled={deleteMutation.isPending}
                             className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700"
                           />
@@ -544,6 +590,22 @@ export const TaskGeneratorsPage: React.FC = () => {
         onConfirm={() => confirmDelete && deleteMutation.mutate(confirmDelete.id)}
         onCancel={() => setConfirmDelete(null)}
         isLoading={deleteMutation.isPending}
+      />
+
+      {/* Pause/Resume All Confirmation */}
+      <ConfirmDialog
+        isOpen={confirmPauseAll}
+        title={allPaused ? 'Запустить все генераторы?' : 'Остановить все генераторы?'}
+        message={allPaused
+          ? 'Все генераторы задач будут запущены.'
+          : 'Все активные генераторы задач будут приостановлены. Вы сможете запустить их снова вручную.'
+        }
+        variant={allPaused ? 'info' : 'danger'}
+        confirmText={allPaused ? 'Запустить все' : 'Остановить все'}
+        cancelText="Отмена"
+        onConfirm={() => allPaused ? resumeAllMutation.mutate() : pauseAllMutation.mutate()}
+        onCancel={() => setConfirmPauseAll(false)}
+        isLoading={pauseAllMutation.isPending || resumeAllMutation.isPending}
       />
     </PageContainer>
   );

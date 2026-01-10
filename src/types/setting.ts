@@ -41,6 +41,10 @@ export interface BotConfig {
   late_tolerance_minutes?: number;
   rows_per_page?: number;
   auto_archive_day_of_week?: number; // 0 = disabled, 1-7 = Monday-Sunday
+  // New archive settings
+  archive_completed_time?: string;
+  archive_overdue_day_of_week?: number; // 0 = disabled, 1-7 = Monday-Sunday
+  archive_overdue_time?: string;
   notification_types?: {
     task_overdue?: boolean;
     shift_late?: boolean;
@@ -50,47 +54,7 @@ export interface BotConfig {
   bot_token?: string;
 }
 
-// Dealership-specific settings
-export interface DealershipBotConfig {
-  dealership_id?: number;
-  shift_1_start_time?: string;
-  shift_1_end_time?: string;
-  shift_2_start_time?: string;
-  shift_2_end_time?: string;
-  late_tolerance_minutes?: number;
-}
-
-// Response type for dealership settings with fallback
-export interface DealershipSettingsResponse {
-  dealership_id: number;
-  settings: DealershipBotConfig;
-  global_settings: BotConfig;
-  inherited_fields: (keyof DealershipBotConfig)[];
-}
-
-// Request types for API
-export interface CreateSettingRequest {
-  key: string;
-  value: string | number | boolean | object;
-  type: SettingType;
-  description?: string;
-  dealership_id?: number;
-}
-
-export interface UpdateSettingRequest {
-  value: string | number | boolean | object;
-  type?: SettingType;
-  description?: string;
-}
-
-export interface UpdateShiftConfigRequest {
-  shift_1_start_time?: string;
-  shift_1_end_time?: string;
-  shift_2_start_time?: string;
-  shift_2_end_time?: string;
-  late_tolerance_minutes?: number;
-  dealership_id?: number;
-}
+// ... intervening code ...
 
 export interface UpdateBotConfigRequest {
   telegram_bot_id?: string;
@@ -102,6 +66,9 @@ export interface UpdateBotConfigRequest {
   maintenance_mode?: boolean;
   rows_per_page?: number;
   auto_archive_day_of_week?: number;
+  archive_completed_time?: string;
+  archive_overdue_day_of_week?: number;
+  archive_overdue_time?: string;
   dealership_id?: number;
   notification_types?: {
     task_overdue?: boolean;

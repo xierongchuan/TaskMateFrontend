@@ -83,4 +83,20 @@ export const taskGeneratorsApi = {
     const response = await apiClient.get<{ success: boolean; data: TaskGeneratorStatistics }>(`/task-generators/${id}/stats`);
     return response.data;
   },
+
+  /**
+   * Pause all active task generators (Owner only)
+   */
+  pauseAll: async (): Promise<{ success: boolean; message: string; paused_count: number }> => {
+    const response = await apiClient.post<{ success: boolean; message: string; paused_count: number }>('/task-generators/pause-all');
+    return response.data;
+  },
+
+  /**
+   * Resume all paused task generators (Owner only)
+   */
+  resumeAll: async (): Promise<{ success: boolean; message: string; resumed_count: number }> => {
+    const response = await apiClient.post<{ success: boolean; message: string; resumed_count: number }>('/task-generators/resume-all');
+    return response.data;
+  },
 };

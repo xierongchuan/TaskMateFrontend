@@ -373,6 +373,7 @@ export const ArchivedTasksPage: React.FC = () => {
               currentPage={page}
               totalPages={tasksData.last_page}
               total={tasksData.total}
+              perPage={tasksData.per_page}
               onPageChange={setPage}
               className="mt-8"
             />

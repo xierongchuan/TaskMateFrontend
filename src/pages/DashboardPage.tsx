@@ -114,11 +114,11 @@ export const DashboardPage: React.FC = () => {
     },
     {
       name: 'Генераторы',
-      value: dashboardData?.active_generators || 0,
+      value: dashboardData?.total_generators || 0,
       icon: <ArrowPathIcon className="w-6 h-6" />,
       color: 'bg-purple-500',
       textColor: 'text-purple-600',
-      description: `Сегодня: ${dashboardData?.tasks_generated_today || 0} задач`,
+      description: `Активных: ${dashboardData?.active_generators || 0}`,
       link: '/task-generators'
     },
   ];
