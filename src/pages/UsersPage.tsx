@@ -309,7 +309,7 @@ export const UsersPage: React.FC = () => {
 
                       {permissions.canCreateUsers && (
                         <div className="flex flex-col gap-2">
-                          {(!permissions.isOwner && user.role === 'owner') ? null : (
+                          {(!permissions.isOwner && user.role === 'owner') || user.id === currentUser?.id ? null : (
                             <ActionButtons
                               onEdit={() => handleEdit(user)}
                               onDelete={() => handleDelete(user)}
@@ -318,8 +318,8 @@ export const UsersPage: React.FC = () => {
                             />
                           )}
 
-                          {/* Quick Role Change */}
-                          {currentUser?.role === 'owner' && (
+                          {/* Quick Role Change - Prevent for self */}
+                          {currentUser?.role === 'owner' && user.id !== currentUser?.id && (
                             <Select
                               value={user.role}
                               onChange={(e) => handleRoleChange(user, e.target.value)}
@@ -354,7 +354,7 @@ export const UsersPage: React.FC = () => {
                     </div>
                     {permissions.canCreateUsers && (
                       <>
-                        {(!permissions.isOwner && user.role === 'owner') ? null : (
+                        {(!permissions.isOwner && user.role === 'owner') || user.id === currentUser?.id ? null : (
                           <ActionButtons
                             onEdit={() => handleEdit(user)}
                             onDelete={() => handleDelete(user)}

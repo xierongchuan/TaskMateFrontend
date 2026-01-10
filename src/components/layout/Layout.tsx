@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { Outlet, Link, useNavigate } from 'react-router-dom';
+import { Outlet, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useMyCurrentShift } from '../../hooks/useShifts';
 import { Sidebar } from './Sidebar';
@@ -8,8 +9,7 @@ import { ru } from 'date-fns/locale';
 import { ClockIcon, Bars3Icon } from '@heroicons/react/24/outline';
 
 export const Layout: React.FC = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     if (typeof window !== 'undefined') {
       return window.innerWidth >= 1024;
@@ -18,11 +18,6 @@ export const Layout: React.FC = () => {
   });
   const { data: currentShiftData } = useMyCurrentShift();
   const currentShift = currentShiftData?.data;
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
 
   return (
     <div className="h-screen bg-gray-100 dark:bg-gray-900 flex overflow-hidden transition-colors duration-200">
@@ -63,21 +58,21 @@ export const Layout: React.FC = () => {
               </div>
             )}
 
-            <div className="hidden sm:flex items-center space-x-3">
-              <span className="text-sm text-gray-700 dark:text-gray-200 truncate max-w-[150px]">
-                {user?.full_name}
-              </span>
-              <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                {user?.role}
-              </span>
-            </div>
+            <Link to="/profile" className="flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 p-2 rounded-lg transition-colors">
+              <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-medium shadow-sm">
+                {user?.full_name?.charAt(0).toUpperCase()}
+              </div>
+              <div className="hidden sm:flex items-center gap-3">
+                <span className="text-sm text-gray-700 dark:text-gray-200 truncate max-w-[150px]">
+                  {user?.full_name}
+                </span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                  {user?.role}
+                </span>
+              </div>
+            </Link>
 
-            <button
-              onClick={handleLogout}
-              className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-            >
-              Выйти
-            </button>
+            {/* Logout button moved to Profile page */}
           </div>
         </header>
 

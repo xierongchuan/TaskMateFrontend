@@ -16,6 +16,7 @@ import { SettingsPage } from './pages/SettingsPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { DealershipsPage } from './pages/DealershipsPage';
 import { NotificationSettingsPage } from './pages/NotificationSettingsPage';
+import { ProfilePage } from './pages/ProfilePage';
 import { debugAuth } from './utils/debug';
 import './index.css';
 
@@ -90,6 +91,7 @@ function App() {
               >
                 <Route index element={<Navigate to="/dashboard" replace />} />
                 <Route path="dashboard" element={<DashboardPage />} />
+                <Route path="profile" element={<ProfilePage />} />
                 <Route path="tasks" element={<TasksPage />} />
                 <Route
                   path="task-generators"

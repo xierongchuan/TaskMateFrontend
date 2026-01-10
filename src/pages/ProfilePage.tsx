@@ -1,0 +1,479 @@
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../hooks/useAuth';
+import { usersApi } from '../api/users';
+import { shiftsApi } from '../api/shifts';
+import {
+  PageContainer,
+  PageHeader,
+  Card,
+  Button,
+  Input,
+  useToast, // Use our custom hook
+} from '../components/ui';
+import type { UpdateUserRequest } from '../types/user'; // Import type
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+// import { toast } from 'react-hot-toast'; // Removed
+import {
+  UserIcon,
+  KeyIcon,
+  ChartBarIcon,
+  ArrowRightOnRectangleIcon,
+  PhoneIcon,
+  ChatBubbleLeftRightIcon,
+  BriefcaseIcon,
+  CalendarDaysIcon,
+  ClockIcon,
+  CheckCircleIcon
+} from '@heroicons/react/24/outline';
+import { RoleBadge } from '../components/common';
+// import { formatPhoneNumber } from '../utils/phoneFormatter'; // Removed unused
+import { DealershipSelector } from '../components/common/DealershipSelector';
+import { DonutChart, DonutChartLegend } from '../components/ui/DonutChart';
+import { reportsApi } from '../api/reports';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
+
+export const ProfilePage: React.FC = () => {
+  const { user, refreshUser, logout } = useAuth();
+  const { showToast } = useToast(); // Destructure showToast
+  const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState<'info' | 'security' | 'stats'>('info');
+
+  // Personal Info Form State
+  const [formData, setFormData] = useState({
+    full_name: '',
+    phone: '',
+    telegram_id: '',
+    dealership_id: undefined as number | undefined,
+    dealership_ids: [] as number[],
+  });
+
+  // Password Form State
+  const [passwordData, setPasswordData] = useState({
+    password: '',
+    confirm_password: '',
+  });
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        full_name: user.full_name,
+        phone: user.phone || user.phone_number || '',
+        telegram_id: user.telegram_id?.toString() || '',
+        dealership_id: user.dealership_id || undefined,
+        dealership_ids: user.dealerships?.map(d => d.id) || [],
+      });
+    }
+  }, [user]);
+
+  // Fetch shifts stats (Total)
+  const { data: shiftsData } = useQuery({
+    queryKey: ['my-shifts-count'],
+    queryFn: () => shiftsApi.getMyShifts({ per_page: 1 }),
+  });
+
+  // Fetch comprehensive report stats for current month
+  const { data: reportData } = useQuery({
+    queryKey: ['my-report-stats', user?.id],
+    queryFn: async () => {
+      const now = new Date();
+      const from = format(startOfMonth(now), 'yyyy-MM-dd');
+      const to = format(endOfMonth(now), 'yyyy-MM-dd');
+      return reportsApi.getReport(from, to);
+    },
+    enabled: !!user,
+  });
+
+  const myStats = reportData?.employees_performance?.find(e => e.employee_id === user?.id);
+  const hasTaskActivity = myStats && (myStats.completed_tasks > 0 || myStats.overdue_tasks > 0);
+  const showTaskStats = user?.role === 'employee' || hasTaskActivity;
+
+  const updateProfileMutation = useMutation({
+    mutationFn: (data: UpdateUserRequest) => usersApi.updateUser(user!.id, data),
+    onSuccess: async () => {
+      showToast({ type: 'success', message: 'Профиль обновлен' });
+      await refreshUser();
+      queryClient.invalidateQueries({ queryKey: ['users', user?.id] });
+    },
+    onError: (error: unknown) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const message = (error as any)?.response?.data?.message || (error as Error)?.message || 'Ошибка обновления профиля';
+      showToast({ type: 'error', message });
+    }
+  });
+
+  const handleUpdateProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateProfileMutation.mutate({
+      full_name: formData.full_name,
+      phone: formData.phone,
+      telegram_id: formData.telegram_id ? Number(formData.telegram_id) : undefined,
+      // Only include dealership info if user has permission to change it (e.g. manager)
+      // For now, we allow sending it if it's in the state, backend should validate permissions
+      dealership_id: formData.dealership_id,
+      dealership_ids: formData.dealership_ids,
+    });
+  };
+
+  const handleUpdatePassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordData.password !== passwordData.confirm_password) {
+      showToast({ type: 'error', message: 'Пароли не совпадают' });
+      return;
+    }
+    if (passwordData.password.length < 6) {
+      showToast({ type: 'error', message: 'Пароль должен быть не менее 6 символов' });
+      return;
+    }
+
+    updateProfileMutation.mutate({
+      password: passwordData.password,
+    });
+    setPasswordData({ password: '', confirm_password: '' });
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    // Navigate is handled by ProtectedRoute/Layout usually, or App router
+    window.location.href = '/login'; // Fallback force reload/redirect
+  };
+
+  if (!user) return null;
+
+  const tabs = [
+    { id: 'info', label: 'Личные данные', icon: UserIcon },
+    { id: 'security', label: 'Безопасность', icon: KeyIcon },
+    { id: 'stats', label: 'Статистика', icon: ChartBarIcon },
+  ];
+
+  return (
+    <PageContainer>
+      <PageHeader
+        title="Мой профиль"
+        description="Управление аккаунтом и личными данными"
+      />
+
+      <div className="flex flex-col lg:flex-row gap-6 mt-6">
+        {/* User Card */}
+        <div className="w-full lg:w-1/3 space-y-6">
+          <Card>
+            <Card.Body className="flex flex-col items-center text-center p-6">
+              <div className={`w-24 h-24 rounded-full flex items-center justify-center text-white text-3xl font-bold mb-4 ${user.role === 'owner' ? 'bg-red-500' :
+                user.role === 'manager' ? 'bg-green-500' :
+                  user.role === 'observer' ? 'bg-purple-500' : 'bg-blue-500'
+                }`}>
+                {user.full_name.charAt(0).toUpperCase()}
+              </div>
+
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+                {user.full_name}
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                @{user.login}
+              </p>
+
+              <div className="flex flex-wrap gap-2 justify-center mb-6">
+                <RoleBadge role={user.role} />
+              </div>
+
+              <div className="w-full border-t border-gray-100 dark:border-gray-700 pt-6">
+                <div className="grid grid-cols-2 gap-4 text-center">
+                  <div>
+                    <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                      {shiftsData?.total || 0}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-1">
+                      Смен
+                    </div>
+                  </div>
+                  <div>
+                    <div className={`text-2xl font-bold ${user.telegram_id ? 'text-green-600' : 'text-orange-500'}`}>
+                      {user.telegram_id ? 'ON' : 'OFF'}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-1">
+                      Telegram
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                variant="danger"
+                className="w-full mt-6 flex justify-center items-center gap-2"
+                onClick={handleLogout}
+              >
+                <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                Выйти из аккаунта
+              </Button>
+            </Card.Body>
+          </Card>
+        </div>
+
+        {/* content */}
+        <div className="w-full lg:w-2/3">
+          {/* Tabs Navigation */}
+          <div className="bg-gray-100 dark:bg-gray-800 p-1 rounded-xl mb-6">
+            <div className="flex gap-1 overflow-x-auto">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as 'info' | 'security' | 'stats')}
+                    className={`
+                      flex-1 flex items-center justify-center gap-2 py-2.5 px-3 sm:px-4 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap
+                      ${isActive
+                        ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm ring-1 ring-black/5 dark:ring-white/5'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/50 dark:hover:bg-gray-700/50'
+                      }
+                    `}
+                    title={tab.label}
+                  >
+                    <Icon className={`w-5 h-5 ${isActive ? 'text-indigo-500 dark:text-indigo-400' : 'opacity-70'}`} />
+                    <span className="hidden sm:inline">{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <Card>
+            <Card.Body className="p-6">
+              {activeTab === 'info' && (
+                <form onSubmit={handleUpdateProfile} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Input
+                      label="Мой Логин"
+                      value={user.login}
+                      disabled
+                      className="bg-gray-50 dark:bg-gray-700/50"
+                    />
+
+                    <Input
+                      label="Полное имя"
+                      value={formData.full_name}
+                      onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                      required
+                    />
+
+                    <Input
+                      label="Телефон"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      type="tel"
+                      icon={<PhoneIcon className="w-5 h-5 text-gray-400" />}
+                      required
+                    />
+
+                    <Input
+                      label="Telegram ID"
+                      value={formData.telegram_id}
+                      onChange={(e) => setFormData({ ...formData, telegram_id: e.target.value })}
+                      type="number"
+                      icon={<ChatBubbleLeftRightIcon className="w-5 h-5 text-gray-400" />}
+                    />
+                  </div>
+
+                  {/* Dealership Info (Read Only or Editable depending on role, mimicking UserModal) */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Автосалон
+                    </label>
+                    {user.role === 'manager' ? (
+                      <DealershipSelector
+                        value={formData.dealership_id}
+                        onChange={(id) => setFormData({ ...formData, dealership_id: id || undefined })}
+                        placeholder="Выберите основной салон"
+                      />
+                    ) : (
+                      <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-md border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 flex items-center gap-2">
+                        <BriefcaseIcon className="w-5 h-5" />
+                        {user.dealership?.name || 'Не привязан'}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex justify-end pt-4 border-t border-gray-100 dark:border-gray-700">
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      isLoading={updateProfileMutation.isPending}
+                    >
+                      Сохранить изменения
+                    </Button>
+                  </div>
+                </form>
+              )}
+
+              {activeTab === 'security' && (
+                <form onSubmit={handleUpdatePassword} className="space-y-6">
+                  <div className="alert bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-6">
+                    <div className="flex gap-3">
+                      <KeyIcon className="w-5 h-5 text-yellow-600 dark:text-yellow-500 shrink-0" />
+                      <div className="text-sm text-yellow-800 dark:text-yellow-200">
+                        Используйте надежный пароль. После смены пароля вам может потребоваться выполнить вход заново.
+                      </div>
+                    </div>
+                  </div>
+
+                  <Input
+                    label="Новый пароль"
+                    type="password"
+                    value={passwordData.password}
+                    onChange={(e) => setPasswordData({ ...passwordData, password: e.target.value })}
+                    required
+                    placeholder="••••••••"
+                  />
+
+                  <Input
+                    label="Подтверждение пароля"
+                    type="password"
+                    value={passwordData.confirm_password}
+                    onChange={(e) => setPasswordData({ ...passwordData, confirm_password: e.target.value })}
+                    required
+                    placeholder="••••••••"
+                  />
+
+                  <div className="flex justify-end pt-4">
+                    <Button
+                      type="submit"
+                      variant="warning"
+                      isLoading={updateProfileMutation.isPending}
+                      disabled={!passwordData.password}
+                    >
+                      Обновить пароль
+                    </Button>
+                  </div>
+                </form>
+              )}
+
+              {activeTab === 'stats' && (
+                <div className="space-y-8">
+                  {/* Key Metrics Grid */}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+                    {/* Total Shifts */}
+                    <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+                      <div className="absolute bottom-0 right-0 p-3 opacity-10">
+                        <CalendarDaysIcon className="w-16 h-16 text-indigo-600 dark:text-indigo-400" />
+                      </div>
+                      <div className="flex flex-col items-start gap-3 mb-2 relative z-10">
+                        <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl text-indigo-600 dark:text-indigo-400">
+                          <CalendarDaysIcon className="w-6 h-6" />
+                        </div>
+                        <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Всего смен</div>
+                      </div>
+                      <div className="text-3xl font-extrabold text-gray-900 dark:text-white pl-1 relative z-10">
+                        {shiftsData?.total || 0}
+                      </div>
+                    </div>
+
+                    {/* Role */}
+                    <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+                      <div className="absolute bottom-0 right-0 p-3 opacity-10">
+                        <BriefcaseIcon className="w-16 h-16 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div className="flex flex-col items-start gap-3 mb-2 relative z-10">
+                        <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-blue-600 dark:text-blue-400">
+                          <BriefcaseIcon className="w-6 h-6" />
+                        </div>
+                        <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Роль</div>
+                      </div>
+                      <div className="text-xl font-bold text-gray-900 dark:text-white pl-1 capitalize truncate relative z-10">
+                        {user.role}
+                      </div>
+                    </div>
+
+                    {/* Late Shifts (Always Visible) */}
+                    <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+                      <div className="absolute bottom-0 right-0 p-3 opacity-10">
+                        <ClockIcon className="w-16 h-16 text-yellow-600 dark:text-yellow-400" />
+                      </div>
+                      <div className="flex flex-col items-start gap-3 mb-2 relative z-10">
+                        <div className="p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl text-yellow-600 dark:text-yellow-400">
+                          <ClockIcon className="w-6 h-6" />
+                        </div>
+                        <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Опоздания</div>
+                      </div>
+                      <div className="text-3xl font-extrabold text-gray-900 dark:text-white pl-1 relative z-10">
+                        {myStats?.late_shifts ?? 0}
+                      </div>
+                      <div className="text-xs text-gray-400 mt-1 pl-1 relative z-10">за текущий месяц</div>
+                    </div>
+
+                    {/* Efficiency (Always Visible) */}
+                    <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+                      <div className="absolute bottom-0 right-0 p-3 opacity-10">
+                        <CheckCircleIcon className={`w-16 h-16 ${(myStats?.performance_score ?? 100) >= 80 ? 'text-green-600' : 'text-orange-600'}`} />
+                      </div>
+                      <div className="flex flex-col items-start gap-3 mb-2 relative z-10">
+                        <div className={`p-2 rounded-xl ${(myStats?.performance_score ?? 100) >= 80
+                          ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400'
+                          : 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400'
+                          }`}>
+                          <CheckCircleIcon className="w-6 h-6" />
+                        </div>
+                        <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Эффективность</div>
+                      </div>
+                      <div className="text-3xl font-extrabold text-gray-900 dark:text-white pl-1 relative z-10">
+                        {myStats?.performance_score ?? 100}%
+                      </div>
+                      <div className="text-xs text-gray-400 mt-1 pl-1 relative z-10">средний показатель</div>
+                    </div>
+                  </div>
+
+                  {/* Task Statistics Chart - Only if relevant */}
+                  {showTaskStats && myStats && (
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+                      <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Статистика задач (текущий месяц)</h3>
+                      </div>
+                      <div className="p-6">
+                        <div className="flex flex-col md:flex-row items-center justify-around gap-8">
+                          <DonutChart
+                            size={200}
+                            strokeWidth={20}
+                            centerValue={myStats.completed_tasks + myStats.overdue_tasks}
+                            centerLabel="Всего задач"
+                            segments={[
+                              { value: myStats.completed_tasks, color: '#22c55e', label: 'Выполнено' },
+                              { value: myStats.overdue_tasks, color: '#ef4444', label: 'Просрочено' },
+                            ]}
+                          />
+                          <div className="w-full max-w-xs">
+                            <DonutChartLegend
+                              segments={[
+                                { value: myStats.completed_tasks, color: '#22c55e', label: 'Выполнено' },
+                                { value: myStats.overdue_tasks, color: '#ef4444', label: 'Просрочено' },
+                              ]}
+                            />
+                            <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                              <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Примечание</div>
+                              <p className="text-xs text-gray-600 dark:text-gray-300">
+                                Статистика отображается за текущий календарный месяц. Для просмотра полной истории используйте раздел "Отчеты".
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {!showTaskStats && (
+                    <div className="flex flex-col items-center justify-center p-8 text-center bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
+                      <BriefcaseIcon className="w-12 h-12 text-gray-300 dark:text-gray-600 mb-3" />
+                      <h4 className="text-base font-medium text-gray-900 dark:text-white">Нет активных задач</h4>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 max-w-sm mt-1">
+                        Для вашей роли статистика задач не отображается, так как вы не выполняли задач в этом месяце.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </Card.Body>
+          </Card>
+        </div>
+      </div>
+    </PageContainer>
+  );
+};
