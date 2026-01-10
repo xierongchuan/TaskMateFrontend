@@ -31,6 +31,7 @@ import {
   PageContainer,
   Card,
   Section,
+  PageHeader,
 } from '../components/ui';
 import { StatusBadge } from '../components/common';
 
@@ -126,27 +127,24 @@ export const DashboardPage: React.FC = () => {
   return (
     <PageContainer>
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-              Панель управления
-            </h1>
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-              Добро пожаловать, {user?.full_name}! • Роль: <span className="font-medium">{user?.role}</span>
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row items-center gap-2">
-            <Badge variant="success" className="animate-pulse">
-              <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-              Live обновления
-            </Badge>
-            <span className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
-              {format(new Date(), 'HH:mm:ss', { locale: ru })}
-            </span>
-          </div>
+      <PageHeader
+        title="Панель управления"
+        description={
+          <span>
+            Добро пожаловать, {user?.full_name}! • Роль: <span className="font-medium">{user?.role}</span>
+          </span>
+        }
+      >
+        <div className="flex flex-col sm:flex-row items-center gap-2">
+          <Badge variant="success" className="animate-pulse">
+            <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+            Live обновления
+          </Badge>
+          <span className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
+            {format(new Date(), 'HH:mm:ss', { locale: ru })}
+          </span>
         </div>
-      </div>
+      </PageHeader>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">

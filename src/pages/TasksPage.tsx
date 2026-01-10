@@ -38,6 +38,7 @@ import {
   Card,
   Pagination,
   ConfirmDialog,
+  PageHeader,
 } from '../components/ui';
 import { StatusBadge, PriorityBadge, ActionButtons } from '../components/common';
 
@@ -268,37 +269,30 @@ export const TasksPage: React.FC = () => {
   return (
     <PageContainer>
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Задачи</h1>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              Управление задачами и отслеживание выполнения
-            </p>
-          </div>
-          <div className="flex items-center space-x-3">
-            {!isMobile && (
-              <ViewModeToggle
-                mode={viewMode}
-                onChange={(mode) => setViewMode(mode as 'list' | 'grid')}
-                options={[
-                  { value: 'list', icon: <ListBulletIcon />, label: 'Список' },
-                  { value: 'grid', icon: <Squares2X2Icon />, label: 'Карточки' },
-                ]}
-              />
-            )}
-            {permissions.canManageTasks && (
-              <Button
-                variant="primary"
-                icon={<PlusIcon />}
-                onClick={handleCreate}
-              >
-                Создать задачу
-              </Button>
-            )}
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title="Задачи"
+        description="Управление задачами и отслеживание выполнения"
+      >
+        {!isMobile && (
+          <ViewModeToggle
+            mode={viewMode}
+            onChange={(mode) => setViewMode(mode as 'list' | 'grid')}
+            options={[
+              { value: 'list', icon: <ListBulletIcon />, label: 'Список' },
+              { value: 'grid', icon: <Squares2X2Icon />, label: 'Карточки' },
+            ]}
+          />
+        )}
+        {permissions.canManageTasks && (
+          <Button
+            variant="primary"
+            icon={<PlusIcon />}
+            onClick={handleCreate}
+          >
+            Создать задачу
+          </Button>
+        )}
+      </PageHeader>
 
       {/* Filters */}
       <FilterPanel

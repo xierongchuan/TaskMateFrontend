@@ -22,6 +22,7 @@ import {
   PageContainer,
   Card,
   Section,
+  PageHeader,
 } from '../components/ui';
 
 export const ReportsPage: React.FC = () => {
@@ -119,40 +120,35 @@ export const ReportsPage: React.FC = () => {
   return (
     <PageContainer>
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Отчетность</h1>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              Еженедельные и ежемесячные отчеты по системе управления задачами
-            </p>
-          </div>
-          <div className="flex items-center space-x-3">
-            <Select
-              value={reportFormat}
-              onChange={(e) => setReportFormat(e.target.value as 'json' | 'pdf')}
-              options={formatOptions}
-              selectSize="sm"
-              fullWidth={false}
-            />
-            <Button
-              variant="secondary"
-              icon={<ArrowPathIcon />}
-              onClick={() => refetch()}
-            >
-              Обновить
-            </Button>
-            <Button
-              variant="primary"
-              icon={<ArrowDownTrayIcon />}
-              onClick={handleExport}
-              disabled={!reportData}
-            >
-              Экспорт
-            </Button>
-          </div>
+      <PageHeader
+        title="Отчетность"
+        description="Еженедельные и ежемесячные отчеты по системе управления задачами"
+      >
+        <div className="flex items-center space-x-3">
+          <Select
+            value={reportFormat}
+            onChange={(e) => setReportFormat(e.target.value as 'json' | 'pdf')}
+            options={formatOptions}
+            selectSize="sm"
+            fullWidth={false}
+          />
+          <Button
+            variant="secondary"
+            icon={<ArrowPathIcon />}
+            onClick={() => refetch()}
+          >
+            Обновить
+          </Button>
+          <Button
+            variant="primary"
+            icon={<ArrowDownTrayIcon />}
+            onClick={handleExport}
+            disabled={!reportData}
+          >
+            Экспорт
+          </Button>
         </div>
-      </div>
+      </PageHeader>
 
       {/* Period Selector */}
       <Card className="mb-6">

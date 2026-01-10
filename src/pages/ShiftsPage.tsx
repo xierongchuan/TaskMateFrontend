@@ -16,6 +16,12 @@ import {
 
 import { useSearchParams } from 'react-router-dom';
 
+import {
+  PageContainer,
+  PageHeader,
+  ViewModeToggle,
+} from '../components/ui';
+
 export const ShiftsPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'cards', 768, 'view_mode_shifts');
@@ -27,7 +33,7 @@ export const ShiftsPage: React.FC = () => {
 
   const { data: shiftsData, isLoading, error } = useShifts({ ...filters, per_page: limit });
   const { data: currentShiftsData } = useCurrentShifts();
-  const currentShifts = currentShiftsData?.data || [];
+  const currentShifts = React.useMemo(() => currentShiftsData?.data || [], [currentShiftsData]);
 
   // Extract unique dealerships with active shifts
   const activeShiftDealerships = React.useMemo(() => {
@@ -109,29 +115,22 @@ export const ShiftsPage: React.FC = () => {
   };
 
   return (
-    <div className="px-4 py-6 sm:px-0">
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Смены</h1>
-          <p className="mt-2 text-sm text-gray-700 dark:text-gray-400">Отслеживание смен сотрудников в реальном времени</p>
-        </div>
+    <PageContainer>
+      <PageHeader
+        title="Смены"
+        description="Отслеживание смен сотрудников в реальном времени"
+      >
         {!isMobile && (
-          <div className="flex border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
-            <button
-              onClick={() => setViewMode('list')}
-              className={`p-2 ${viewMode === 'list' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600'}`}
-            >
-              <ListBulletIcon className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => setViewMode('cards')}
-              className={`p-2 ${viewMode === 'cards' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600'}`}
-            >
-              <Squares2X2Icon className="w-5 h-5" />
-            </button>
-          </div>
+          <ViewModeToggle
+            mode={viewMode}
+            onChange={(mode) => setViewMode(mode as 'list' | 'cards')}
+            options={[
+              { value: 'list', icon: <ListBulletIcon />, label: 'Список' },
+              { value: 'cards', icon: <Squares2X2Icon />, label: 'Карточки' },
+            ]}
+          />
         )}
-      </div>
+      </PageHeader>
 
       {/* Shift Control Component */}
       {/* Active Dealerships Plaques */}
@@ -331,6 +330,6 @@ export const ShiftsPage: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 };

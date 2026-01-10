@@ -16,6 +16,7 @@ import {
   Input,
   Skeleton,
   ErrorState,
+  PageHeader,
 } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
 
@@ -162,13 +163,10 @@ export const SettingsPage: React.FC = () => {
   return (
     <PageContainer>
       {/* Header */}
-      <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Настройки</h1>
-          <p className="mt-2 text-gray-500 dark:text-gray-400">Управление параметрами системы, интерфейса и автоматизации</p>
-        </div>
-
-        {/* Dealership Selector */}
+      <PageHeader
+        title="Настройки"
+        description="Управление параметрами системы, интерфейса и автоматизации"
+      >
         {permissions.canManageDealershipSettings && (
           <div className="w-full md:w-72 bg-white dark:bg-gray-800 p-1 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
             <DealershipSelector
@@ -181,7 +179,7 @@ export const SettingsPage: React.FC = () => {
             />
           </div>
         )}
-      </div>
+      </PageHeader>
 
       {isLoading ? (
         <Card>

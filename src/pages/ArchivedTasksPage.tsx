@@ -23,6 +23,7 @@ import {
   FilterPanel,
   Pagination,
   ViewModeToggle,
+  PageHeader,
 } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
 
@@ -142,13 +143,10 @@ export const ArchivedTasksPage: React.FC = () => {
   return (
     <PageContainer>
       {/* Header */}
-      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Архив задач</h1>
-          <p className="mt-2 text-gray-500 dark:text-gray-400">
-            История выполненных и просроченных задач
-          </p>
-        </div>
+      <PageHeader
+        title="Архив задач"
+        description="История выполненных и просроченных задач"
+      >
         <div className="flex items-center gap-3">
           {!isMobile && (
             <ViewModeToggle
@@ -168,7 +166,7 @@ export const ArchivedTasksPage: React.FC = () => {
             Экспорт CSV
           </Button>
         </div>
-      </div>
+      </PageHeader>
 
       {/* Filters */}
       <FilterPanel

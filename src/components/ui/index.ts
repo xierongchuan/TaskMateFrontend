@@ -50,6 +50,9 @@ export type { Toast, ToastType } from './Toast';
 export { PageContainer } from './PageContainer';
 export type { PageContainerProps, PageContainerMaxWidth } from './PageContainer';
 
+export { PageHeader } from './PageHeader';
+export type { PageHeaderProps } from './PageHeader';
+
 export { Card } from './Card';
 export type { CardProps, CardHeaderProps, CardBodyProps, CardFooterProps } from './Card';
 

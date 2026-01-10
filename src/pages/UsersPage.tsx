@@ -33,6 +33,7 @@ import {
   Card,
   ConfirmDialog,
   Pagination,
+  PageHeader,
 } from '../components/ui';
 import { RoleBadge, ActionButtons } from '../components/common';
 
@@ -168,38 +169,31 @@ export const UsersPage: React.FC = () => {
   return (
     <PageContainer>
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex flex-col gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Сотрудники</h1>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              Управление сотрудниками, ролями и доступом к салонам
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            {!isMobile && (
-              <ViewModeToggle
-                mode={viewMode}
-                onChange={(mode) => setViewMode(mode as 'list' | 'cards')}
-                options={[
-                  { value: 'list', icon: <ListBulletIcon />, label: 'Список' },
-                  { value: 'cards', icon: <Squares2X2Icon />, label: 'Карточки' },
-                ]}
-              />
-            )}
-            {permissions.canCreateUsers && (
-              <Button
-                variant="primary"
-                icon={<PlusIcon />}
-                onClick={handleCreate}
-                fullWidth={isMobile}
-              >
-                Добавить сотрудника
-              </Button>
-            )}
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title="Сотрудники"
+        description="Управление сотрудниками, ролями и доступом к салонам"
+      >
+        {!isMobile && (
+          <ViewModeToggle
+            mode={viewMode}
+            onChange={(mode) => setViewMode(mode as 'list' | 'cards')}
+            options={[
+              { value: 'list', icon: <ListBulletIcon />, label: 'Список' },
+              { value: 'cards', icon: <Squares2X2Icon />, label: 'Карточки' },
+            ]}
+          />
+        )}
+        {permissions.canCreateUsers && (
+          <Button
+            variant="primary"
+            icon={<PlusIcon />}
+            onClick={handleCreate}
+            fullWidth={isMobile}
+          >
+            Добавить сотрудника
+          </Button>
+        )}
+      </PageHeader>
 
       {/* Filters */}
       <FilterPanel

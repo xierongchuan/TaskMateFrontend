@@ -32,6 +32,7 @@ import {
   EmptyState,
   ErrorState,
   PageContainer,
+  PageHeader,
   Card,
   Modal,
   ConfirmDialog,
@@ -185,37 +186,30 @@ export const LinksPage: React.FC = () => {
   return (
     <PageContainer>
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Ссылки</h1>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              Важные ссылки для быстрого доступа к рабочим инструментам
-            </p>
-          </div>
-          <div className="flex items-center space-x-3">
-            {!isMobile && (
-              <ViewModeToggle
-                mode={viewMode}
-                onChange={(mode) => setViewMode(mode as 'grid' | 'list')}
-                options={[
-                  { value: 'grid', icon: <Squares2X2Icon />, label: 'Сетка' },
-                  { value: 'list', icon: <ListBulletIcon />, label: 'Список' },
-                ]}
-              />
-            )}
-            {permissions.canManageTasks && (
-              <Button
-                variant="primary"
-                icon={<PlusIcon />}
-                onClick={handleCreate}
-              >
-                Добавить ссылку
-              </Button>
-            )}
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title="Ссылки"
+        description="Важные ссылки для быстрого доступа к рабочим инструментам"
+      >
+        {!isMobile && (
+          <ViewModeToggle
+            mode={viewMode}
+            onChange={(mode) => setViewMode(mode as 'grid' | 'list')}
+            options={[
+              { value: 'grid', icon: <Squares2X2Icon />, label: 'Сетка' },
+              { value: 'list', icon: <ListBulletIcon />, label: 'Список' },
+            ]}
+          />
+        )}
+        {permissions.canManageTasks && (
+          <Button
+            variant="primary"
+            icon={<PlusIcon />}
+            onClick={handleCreate}
+          >
+            Добавить ссылку
+          </Button>
+        )}
+      </PageHeader>
 
       {/* Search */}
       <div className="mb-6">

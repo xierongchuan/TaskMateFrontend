@@ -14,6 +14,7 @@ import { ru } from 'date-fns/locale';
 // UI Components
 import {
   PageContainer,
+  PageHeader,
   Card,
   Button,
   Input,
@@ -233,45 +234,40 @@ export const TaskGeneratorsPage: React.FC = () => {
   return (
     <PageContainer>
       {/* Header */}
-      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Генераторы задач</h1>
-          <p className="mt-2 text-gray-500 dark:text-gray-400">
-            Автоматическое создание периодических задач
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          {!isMobile && (
-            <ViewModeToggle
-              mode={viewMode}
-              onChange={(mode) => setViewMode(mode as 'list' | 'cards')}
-              options={[
-                { value: 'list', icon: <ListBulletIcon className="w-4 h-4" /> },
-                { value: 'cards', icon: <Squares2X2Icon className="w-4 h-4" /> },
-              ]}
-            />
-          )}
-          {permissions.isOwner && generators.length > 0 && (
-            <Button
-              variant={allPaused ? 'primary' : 'danger'}
-              icon={allPaused ? <PlayIcon /> : <StopCircleIcon />}
-              onClick={() => setConfirmPauseAll(true)}
-              disabled={pauseAllMutation.isPending || resumeAllMutation.isPending}
-            >
-              {allPaused ? 'Запустить все' : 'Остановить все'}
-            </Button>
-          )}
-          {permissions.canManageTasks && (
-            <Button
-              variant="primary"
-              icon={<PlusIcon />}
-              onClick={handleCreate}
-            >
-              Создать генератор
-            </Button>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        title="Генераторы задач"
+        description="Автоматическое создание периодических задач"
+      >
+        {!isMobile && (
+          <ViewModeToggle
+            mode={viewMode}
+            onChange={(mode) => setViewMode(mode as 'list' | 'cards')}
+            options={[
+              { value: 'list', icon: <ListBulletIcon className="w-4 h-4" /> },
+              { value: 'cards', icon: <Squares2X2Icon className="w-4 h-4" /> },
+            ]}
+          />
+        )}
+        {permissions.isOwner && generators.length > 0 && (
+          <Button
+            variant={allPaused ? 'primary' : 'danger'}
+            icon={allPaused ? <PlayIcon /> : <StopCircleIcon />}
+            onClick={() => setConfirmPauseAll(true)}
+            disabled={pauseAllMutation.isPending || resumeAllMutation.isPending}
+          >
+            {allPaused ? 'Запустить все' : 'Остановить все'}
+          </Button>
+        )}
+        {permissions.canManageTasks && (
+          <Button
+            variant="primary"
+            icon={<PlusIcon />}
+            onClick={handleCreate}
+          >
+            Создать генератор
+          </Button>
+        )}
+      </PageHeader>
 
       {/* Filters */}
       <FilterPanel

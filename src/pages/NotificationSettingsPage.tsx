@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { notificationSettingsApi } from '../api/notification-settings';
-import { BellIcon, InformationCircleIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { InformationCircleIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { NotificationSettingsContent } from '../components/notifications/NotificationSettingsContent';
 import { useAuth } from '../hooks/useAuth';
-import { PageContainer, Button, ConfirmDialog, Card } from '../components/ui';
+import { PageContainer, Button, ConfirmDialog, Card, PageHeader } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
 
 export const NotificationSettingsPage: React.FC = () => {
@@ -39,21 +39,10 @@ export const NotificationSettingsPage: React.FC = () => {
   return (
     <PageContainer>
       {/* Header */}
-      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
-              <BellIcon className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Настройки уведомлений</h1>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Управляйте каналами уведомлений для вашего автосалона
-              </p>
-            </div>
-          </div>
-        </div>
-
+      <PageHeader
+        title="Настройки уведомлений"
+        description="Управляйте каналами уведомлений для вашего автосалона"
+      >
         <Button
           variant="outline"
           onClick={handleResetToDefaults}
@@ -62,7 +51,7 @@ export const NotificationSettingsPage: React.FC = () => {
         >
           Сбросить
         </Button>
-      </div>
+      </PageHeader>
 
       {/* Notification Settings Content */}
       <div className="space-y-6">

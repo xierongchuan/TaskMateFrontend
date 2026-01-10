@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import type { Dealership } from '../types/dealership';
 import { DealershipForm } from '../components/dealerships/DealershipForm';
 import { DealershipList } from '../components/dealerships/DealershipList';
-import { PlusIcon, XMarkIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { usePermissions } from '../hooks/usePermissions';
 
 // UI Components
-import { PageContainer, Card, Button } from '../components/ui';
+import { PageContainer, PageHeader, Card, Button } from '../components/ui';
 
 export const DealershipsPage: React.FC = () => {
   const { canManageDealerships } = usePermissions();
@@ -36,18 +36,10 @@ export const DealershipsPage: React.FC = () => {
   return (
     <PageContainer>
       {/* Page Header */}
-      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex-shrink-0 w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-            <BuildingOfficeIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Автосалоны</h1>
-            <p className="text-gray-500 dark:text-gray-400">
-              Управление автосалонами вашей компании
-            </p>
-          </div>
-        </div>
+      <PageHeader
+        title="Автосалоны"
+        description="Управление автосалонами вашей компании"
+      >
         {canManageDealerships && (
           <Button
             variant="primary"
@@ -57,7 +49,7 @@ export const DealershipsPage: React.FC = () => {
             Создать автосалон
           </Button>
         )}
-      </div>
+      </PageHeader>
 
       {/* Form View */}
       {isFormOpen && (
