@@ -56,7 +56,9 @@ apiClient.interceptors.response.use(
       const isLogoutAttempt = requestUrl?.includes('/session') && requestMethod === 'DELETE';
 
       if (isSessionValidation || isLogoutAttempt) {
-        debugAuth.log('401 error on session validation/logout, clearing auth state');
+        debugAuth.log('401 error on session validation/logout, clearing auth state. URL:', requestUrl);
+        // Log to console for user visibility
+        console.error('Session expired or invalid. Server returned 401 for:', requestUrl);
         clearAuth?.();
         // Only redirect if not already on login page
         if (!window.location.pathname.includes('/login')) {
