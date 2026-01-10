@@ -121,12 +121,12 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
 
                 {user && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Новый пароль (оставьте пустым, чтобы не менять)</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Новый пароль (оставьте пустым, чтобы не менять)</label>
                     <input
                       type="password"
                       value={formData.password || ''}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px]"
+                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
                   </div>
                 )}
@@ -246,8 +246,8 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
 
             {(createMutation.isError || updateMutation.isError) && (
               <div className="px-4 pb-4">
-                <div className="rounded-md bg-red-50 p-4">
-                  <div className="text-sm text-red-700">
+                <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
+                  <div className="text-sm text-red-700 dark:text-red-400">
                     <p className="font-medium">
                       {(createMutation.error as any)?.response?.data?.message || (updateMutation.error as any)?.response?.data?.message || 'Произошла ошибка'}
                     </p>
