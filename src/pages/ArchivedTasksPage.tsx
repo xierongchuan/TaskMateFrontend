@@ -46,7 +46,7 @@ export const ArchivedTasksPage: React.FC = () => {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
   const { limit } = usePagination();
-  const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'cards');
+  const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'cards', 768, 'view_mode_archived_tasks');
   const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<ArchivedTaskFilters>({

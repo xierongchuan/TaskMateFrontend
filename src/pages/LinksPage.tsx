@@ -45,7 +45,7 @@ export const LinksPage: React.FC = () => {
   const { limit } = usePagination();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLink, setSelectedLink] = useState<Link | null>(null);
-  const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('grid', 'grid');
+  const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('grid', 'grid', 768, 'view_mode_links');
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState<Link | null>(null);

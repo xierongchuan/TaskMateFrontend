@@ -43,7 +43,7 @@ export const UsersPage: React.FC = () => {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'cards');
+  const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'cards', 768, 'view_mode_users');
   const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState<User | null>(null);

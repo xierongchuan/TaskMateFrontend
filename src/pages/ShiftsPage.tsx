@@ -18,7 +18,7 @@ import { useSearchParams } from 'react-router-dom';
 
 export const ShiftsPage: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'cards');
+  const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'cards', 768, 'view_mode_shifts');
   const { limit } = usePagination();
   const [filters, setFilters] = useState<ShiftsFilters>({
     status: searchParams.get('status') || '',

@@ -49,7 +49,7 @@ export const TasksPage: React.FC = () => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'grid');
+  const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'grid', 768, 'view_mode_tasks');
   const [page, setPage] = useState(1);
   const { limit } = usePagination();
   const [confirmDelete, setConfirmDelete] = useState<Task | null>(null);
