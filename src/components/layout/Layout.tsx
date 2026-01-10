@@ -10,7 +10,12 @@ import { ClockIcon, Bars3Icon } from '@heroicons/react/24/outline';
 export const Layout: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(true); // Default open on desktop
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 1024;
+    }
+    return true;
+  });
   const { data: currentShiftData } = useMyCurrentShift();
   const currentShift = currentShiftData?.data;
 
