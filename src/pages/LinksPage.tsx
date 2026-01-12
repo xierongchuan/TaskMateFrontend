@@ -195,8 +195,8 @@ export const LinksPage: React.FC = () => {
             mode={viewMode}
             onChange={(mode) => setViewMode(mode as 'grid' | 'list')}
             options={[
-              { value: 'grid', icon: <Squares2X2Icon />, label: 'Сетка' },
               { value: 'list', icon: <ListBulletIcon />, label: 'Список' },
+              { value: 'grid', icon: <Squares2X2Icon />, label: 'Карточки' },
             ]}
           />
         )}
