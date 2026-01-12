@@ -239,8 +239,8 @@ export const ShiftControl: React.FC = () => {
       {notification.type && (
         <div className="fixed bottom-8 right-8 z-[100] animate-slide-in-up">
           <div className={`flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl border ${notification.type === 'success'
-              ? 'bg-green-600 border-green-500 text-white'
-              : 'bg-red-600 border-red-500 text-white'
+            ? 'bg-green-600 border-green-500 text-white'
+            : 'bg-red-600 border-red-500 text-white'
             }`}>
             {notification.type === 'success' ? (
               <CheckCircleIcon className="w-6 h-6" />

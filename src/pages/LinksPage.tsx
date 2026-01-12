@@ -153,7 +153,7 @@ export const LinksPage: React.FC = () => {
       title: link.title,
       url: link.url,
       description: link.description || '',
-      category: (link as any).category || 'general',
+      category: link.category || 'general',
     });
     setIsModalOpen(true);
   };
@@ -268,8 +268,8 @@ export const LinksPage: React.FC = () => {
                         <Card.Body>
                           <div className="flex justify-between items-start mb-3">
                             <div className="flex items-center">
-                              <div className={`${getCategoryColor((link as any).category || 'general')} rounded-lg p-2 mr-3 text-white`}>
-                                {getCategoryIcon((link as any).category || 'general')}
+                              <div className={`${getCategoryColor(link.category || 'general')} rounded-lg p-2 mr-3 text-white`}>
+                                {getCategoryIcon(link.category || 'general')}
                               </div>
                               <div>
                                 <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
@@ -322,8 +322,8 @@ export const LinksPage: React.FC = () => {
                   <div key={link.id} className="p-5 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-sm hover:border-blue-200 dark:hover:border-blue-500 transition-all">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center flex-1 min-w-0 pr-4">
-                        <div className={`${getCategoryColor((link as any).category || 'general')} rounded-lg p-3 mr-4 text-white flex-shrink-0`}>
-                          {getCategoryIcon((link as any).category || 'general')}
+                        <div className={`${getCategoryColor(link.category || 'general')} rounded-lg p-3 mr-4 text-white flex-shrink-0`}>
+                          {getCategoryIcon(link.category || 'general')}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-3 mb-1">
@@ -331,7 +331,7 @@ export const LinksPage: React.FC = () => {
                               {link.title}
                             </h3>
                             <Badge variant="gray">
-                              {getCategoryLabel((link as any).category || 'general')}
+                              {getCategoryLabel(link.category || 'general')}
                             </Badge>
                           </div>
                           {link.description && (

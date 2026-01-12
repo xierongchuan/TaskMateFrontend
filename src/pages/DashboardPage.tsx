@@ -18,6 +18,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 import type { Task } from '../types/task';
+
 import { TaskModal } from '../components/tasks/TaskModal';
 import { TaskDetailsModal } from '../components/tasks/TaskDetailsModal';
 
@@ -182,7 +183,7 @@ export const DashboardPage: React.FC = () => {
         >
           {dashboardData?.active_shifts && dashboardData.active_shifts.length > 0 ? (
             <div className="space-y-3 sm:space-y-4">
-              {dashboardData.active_shifts.map((shift: any) => (
+              {dashboardData.active_shifts.map((shift) => (
                 <div key={shift.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
                   <div className="flex items-center space-x-3">
                     <div className={`w-3 h-3 rounded-full flex-shrink-0 ${shift.status === 'open' ? 'bg-green-500' : 'bg-gray-400'}`}></div>

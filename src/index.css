@@ -31,3 +31,27 @@ code {
   animation: slideInUp 0.3s ease-out forwards;
 }
 
+@media print {
+  html,
+  body,
+  #root {
+    height: auto !important;
+    overflow: visible !important;
+    background-color: white !important;
+  }
+
+  /* Reset background colors for better printing */
+  .bg-gray-100, .dark .bg-gray-900 {
+    background-color: white !important;
+  }
+
+  /* Ensure text is black */
+  .text-gray-900, .dark .text-white {
+    color: black !important;
+  }
+
+  /* Avoid breaking inside cards */
+  .card, .p-6, .mb-6 {
+    break-inside: avoid;
+  }
+}

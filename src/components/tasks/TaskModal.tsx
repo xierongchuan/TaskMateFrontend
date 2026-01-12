@@ -1,33 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useForm, Controller, type SubmitHandler } from 'react-hook-form';
+import { format } from 'date-fns';
 import { tasksApi } from '../../api/tasks';
 import { usersApi } from '../../api/users';
 import { DealershipSelector } from '../common/DealershipSelector';
 import { TaskNotificationSettings } from './TaskNotificationSettings';
 import { getRoleLabel } from '../../utils/roleTranslations';
-import type { Task, CreateTaskRequest, TaskType, ResponseType, TaskPriority } from '../../types/task';
-
-/**
- * Convert ISO 8601 date string (with timezone) to datetime-local format (YYYY-MM-DDTHH:mm)
- * datetime-local input requires format without seconds and timezone
- */
-const toDateTimeLocalFormat = (isoString: string | null | undefined): string | undefined => {
-  if (!isoString) return undefined;
-  try {
-    const date = new Date(isoString);
-    if (isNaN(date.getTime())) return undefined;
-
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-  } catch {
-    return undefined;
-  }
-};
+import {
+  TASK_PRIORITIES,
+  TASK_TYPES,
+  RESPONSE_TYPES,
+  TASK_PRIORITY_LABELS,
+  TASK_TYPE_LABELS,
+  RESPONSE_TYPE_LABELS
+} from '../../constants/tasks';
+import type { Task, CreateTaskRequest } from '../../types/task';
 
 interface TaskModalProps {
   isOpen: boolean;
@@ -37,73 +25,98 @@ interface TaskModalProps {
 
 export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) => {
   const queryClient = useQueryClient();
-  const [formData, setFormData] = useState<Partial<CreateTaskRequest>>({
-    title: '',
-    description: '',
-    comment: '',
-    task_type: 'individual',
-    response_type: 'acknowledge',
-    dealership_id: undefined,
-    assignments: [],
-    priority: 'medium',
-  });
   const [serverError, setServerError] = useState<string | null>(null);
 
-  const [tagsInput, setTagsInput] = useState('');
-
-  const { data: usersData, isLoading: isLoadingUsers, error: usersError } = useQuery({
-    queryKey: ['task-modal-users', formData.dealership_id],
-    queryFn: () => {
-      console.log('[TaskModal] Fetching users for dealership_id:', formData.dealership_id);
-      return usersApi.getUsers({
-        per_page: 100,
-        dealership_id: formData.dealership_id
-      });
-    },
-    enabled: !!formData.dealership_id,
-    staleTime: 0,
+  // Use React Hook Form
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    watch,
+    setValue,
+    formState: { errors }
+  } = useForm<CreateTaskRequest>({
+    defaultValues: {
+      title: '',
+      description: '',
+      comment: '',
+      task_type: TASK_TYPES.INDIVIDUAL,
+      response_type: RESPONSE_TYPES.ACKNOWLEDGE,
+      dealership_id: undefined,
+      assignments: [],
+      priority: TASK_PRIORITIES.MEDIUM,
+      tags: [],
+      appear_date: undefined,
+      deadline: undefined
+    }
   });
 
-  // Debug: Log when dealership changes
-  useEffect(() => {
-    console.log('[TaskModal] dealership_id changed:', formData.dealership_id, 'type:', typeof formData.dealership_id);
-    console.log('[TaskModal] usersData:', usersData);
-    console.log('[TaskModal] isLoadingUsers:', isLoadingUsers);
-    console.log('[TaskModal] usersError:', usersError);
-  }, [formData.dealership_id, usersData, isLoadingUsers, usersError]);
+  // Watch dealership_id to fetch users
+  const dealershipId = watch('dealership_id');
+  const assignments = watch('assignments') || []; // Ensure array
 
+  // Local state for tags input string
+  const [tagsInput, setTagsInput] = useState('');
+
+  // Fetch users for the selected dealership
+  const { data: usersData, isLoading: isLoadingUsers } = useQuery({
+    queryKey: ['task-modal-users', dealershipId],
+    queryFn: () => usersApi.getUsers({
+      per_page: 100, // Fetch all users (reasonably)
+      dealership_id: dealershipId
+    }),
+    enabled: !!dealershipId,
+    staleTime: 1000 * 60, // 1 minute cache
+  });
+
+  // Reset form when task prop changes or modal opens
   useEffect(() => {
-    if (task) {
-      setFormData({
-        title: task.title,
-        description: task.description || '',
-        comment: task.comment || '',
-        task_type: task.task_type,
-        response_type: task.response_type,
-        appear_date: toDateTimeLocalFormat(task.appear_date),
-        deadline: toDateTimeLocalFormat(task.deadline),
-        dealership_id: task.dealership_id,
-        tags: task.tags,
-        assignments: task.assignments?.map(a => a.user.id) || [],
-        notification_settings: task.notification_settings,
-        priority: task.priority,
-      });
-      setTagsInput(task.tags && Array.isArray(task.tags) ? task.tags.join(', ') : '');
-    } else {
-      setFormData({
-        title: '',
-        description: '',
-        comment: '',
-        task_type: 'individual',
-        response_type: 'acknowledge',
-        dealership_id: undefined,
-        assignments: [],
-        notification_settings: undefined,
-        priority: 'medium',
-      });
-      setTagsInput('');
+    if (isOpen) {
+      if (task) {
+        // Edit mode
+        reset({
+          title: task.title,
+          description: task.description || '',
+          comment: task.comment || '',
+          task_type: task.task_type,
+          response_type: task.response_type,
+          // Format dates for datetime-local input
+          appear_date: task.appear_date ? format(new Date(task.appear_date), "yyyy-MM-dd'T'HH:mm") : undefined,
+          deadline: task.deadline ? format(new Date(task.deadline), "yyyy-MM-dd'T'HH:mm") : undefined,
+          dealership_id: task.dealership_id,
+          assignments: task.assignments?.map(a => a.user.id) || [],
+          notification_settings: task.notification_settings,
+          priority: task.priority,
+          tags: task.tags || []
+        });
+        setTagsInput(task.tags ? task.tags.join(', ') : '');
+      } else {
+        // Create mode
+        reset({
+          title: '',
+          description: '',
+          comment: '',
+          task_type: TASK_TYPES.INDIVIDUAL,
+          response_type: RESPONSE_TYPES.ACKNOWLEDGE,
+          dealership_id: undefined,
+          assignments: [],
+          notification_settings: {},
+          priority: TASK_PRIORITIES.MEDIUM,
+          tags: [],
+          appear_date: undefined,
+          deadline: undefined
+        });
+        setTagsInput('');
+      }
+      setServerError(null);
     }
-  }, [task]);
+  }, [isOpen, task, reset]);
+
+  // Handle dealership change side effects
+  // We use a useEffect to detect change if we wanted to clear assignments,
+  // BUT be careful not to clear on initial load.
+  // Better approach: In the Controller onChange for dealership, clear assignments there.
 
   const createMutation = useMutation({
     mutationFn: (data: CreateTaskRequest) => tasksApi.createTask(data),
@@ -129,33 +142,32 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit: SubmitHandler<CreateTaskRequest> = (data) => {
     setServerError(null);
 
-    const dataToSubmit = { ...formData };
+    // Process tags
+    const processedTags = tagsInput
+      .split(',')
+      .map(t => t.trim())
+      .filter(Boolean);
 
-    // Parse tags
-    if (tagsInput) {
-      dataToSubmit.tags = tagsInput.split(',').map(t => t.trim()).filter(Boolean);
-    } else {
-      dataToSubmit.tags = [];
-    }
+    const finalData = {
+      ...data,
+      tags: processedTags
+    };
 
     if (task?.id) {
-      updateMutation.mutate(dataToSubmit as Partial<CreateTaskRequest>);
+      updateMutation.mutate(finalData);
     } else {
-      createMutation.mutate(dataToSubmit as CreateTaskRequest);
+      createMutation.mutate(finalData);
     }
   };
 
-  const handleUserSelection = (userId: number, checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      assignments: checked
-        ? [...(prev.assignments || []), userId]
-        : (prev.assignments || []).filter(id => id !== userId),
-    }));
+  const handleUserToggle = (userId: number, currentAssignments: number[]) => {
+    const newAssignments = currentAssignments.includes(userId)
+      ? currentAssignments.filter(id => id !== userId)
+      : [...currentAssignments, userId];
+    setValue('assignments', newAssignments, { shouldValidate: true });
   };
 
   if (!isOpen) return null;
@@ -166,7 +178,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={onClose}></div>
 
         <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
               <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
                 {task?.id ? 'Редактировать задачу' : 'Создать задачу'}
@@ -179,37 +191,38 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
               )}
 
               <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+                {/* Title */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Название *</label>
                   <input
                     type="text"
-                    required
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    {...register('title', { required: 'Название обязательно' })}
                     className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
+                  {errors.title && <span className="text-red-500 text-xs">{errors.title.message}</span>}
                 </div>
 
+                {/* Description */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Описание</label>
                   <textarea
                     rows={3}
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    {...register('description')}
                     className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
 
+                {/* Comment */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Комментарий</label>
                   <textarea
                     rows={2}
-                    value={formData.comment}
-                    onChange={(e) => setFormData({ ...formData, comment: e.target.value })}
+                    {...register('comment')}
                     className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
 
+                {/* Tags */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Теги (через запятую)</label>
                   <input
@@ -221,69 +234,76 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
                   />
                 </div>
 
+                {/* Priority */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Приоритет</label>
                   <select
-                    value={formData.priority || 'medium'}
-                    onChange={(e) => setFormData({ ...formData, priority: e.target.value as TaskPriority })}
+                    {...register('priority')}
                     className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
-                    <option value="low">Низкий</option>
-                    <option value="medium">Средний</option>
-                    <option value="high">Высокий</option>
+                    {Object.entries(TASK_PRIORITY_LABELS).map(([value, label]) => (
+                      <option key={value} value={value}>{label}</option>
+                    ))}
                   </select>
                 </div>
 
+                {/* Task Type and Response Type */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Тип задачи</label>
                     <select
-                      value={formData.task_type}
-                      onChange={(e) => setFormData({ ...formData, task_type: e.target.value as TaskType })}
+                      {...register('task_type')}
                       className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     >
-                      <option value="individual">Индивидуальная</option>
-                      <option value="group">Групповая</option>
+                      {Object.entries(TASK_TYPE_LABELS).map(([value, label]) => (
+                        <option key={value} value={value}>{label}</option>
+                      ))}
                     </select>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Тип ответа</label>
                     <select
-                      value={formData.response_type}
-                      onChange={(e) => setFormData({ ...formData, response_type: e.target.value as ResponseType })}
+                      {...register('response_type')}
                       className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     >
-                      <option value="acknowledge">Уведомление (ОК)</option>
-                      <option value="complete">Выполнение</option>
+                      {Object.entries(RESPONSE_TYPE_LABELS).map(([value, label]) => (
+                        <option key={value} value={value}>{label}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
 
+                {/* Dealership */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Автосалон *</label>
-                  <DealershipSelector
-                    value={formData.dealership_id}
-                    onChange={(dealershipId) => {
-                      console.log('[TaskModal] DealershipSelector onChange:', dealershipId, 'converted to:', dealershipId || undefined);
-                      setFormData({
-                        ...formData,
-                        dealership_id: dealershipId || undefined,
-                        assignments: [] // Clear assignments when dealership changes
-                      });
-                    }}
-                    placeholder="Выберите автосалон"
-                    required={true}
+                  <Controller
+                    name="dealership_id"
+                    control={control}
+                    rules={{ required: 'Автосалон обязателен' }}
+                    render={({ field }) => (
+                      <DealershipSelector
+                        value={field.value}
+                        onChange={(value) => {
+                          field.onChange(value);
+                          // Clear assignments when dealership changes
+                          setValue('assignments', []);
+                        }}
+                        placeholder="Выберите автосалон"
+                        required={true}
+                      />
+                    )}
                   />
+                  {errors.dealership_id && <span className="text-red-500 text-xs">{errors.dealership_id.message}</span>}
                 </div>
 
+                {/* Dates */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Дата появления</label>
                     <input
                       type="datetime-local"
-                      value={formData.appear_date || ''}
-                      onChange={(e) => setFormData({ ...formData, appear_date: e.target.value })}
+                      {...register('appear_date')}
                       className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
                   </div>
@@ -292,8 +312,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Дедлайн</label>
                     <input
                       type="datetime-local"
-                      value={formData.deadline || ''}
-                      onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+                      {...register('deadline')}
                       className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
                   </div>
@@ -301,16 +320,23 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
 
                 {/* Notification Settings */}
                 <div>
-                  <TaskNotificationSettings
-                    value={formData.notification_settings || {}}
-                    onChange={(settings) => setFormData({ ...formData, notification_settings: settings })}
+                  <Controller
+                    name="notification_settings"
+                    control={control}
+                    render={({ field }) => (
+                      <TaskNotificationSettings
+                        value={field.value || {}}
+                        onChange={field.onChange}
+                      />
+                    )}
                   />
                 </div>
 
+                {/* Assignments */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Получатели</label>
                   <div className="border border-gray-300 dark:border-gray-600 rounded-md p-3 max-h-48 overflow-y-auto bg-white dark:bg-gray-700">
-                    {!formData.dealership_id ? (
+                    {!dealershipId ? (
                       <p className="text-sm text-gray-500 text-center py-2">
                         Сначала выберите автосалон
                       </p>
@@ -328,11 +354,11 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
                           <input
                             type="checkbox"
                             id={`user-${user.id}`}
-                            checked={formData.assignments?.includes(user.id)}
-                            onChange={(e) => handleUserSelection(user.id, e.target.checked)}
+                            checked={assignments.includes(user.id)}
+                            onChange={() => handleUserToggle(user.id, assignments as number[])}
                             className="h-4 w-4 rounded border-gray-300 dark:border-gray-500 text-indigo-600 focus:ring-indigo-500 bg-white dark:bg-gray-600"
                           />
-                          <label htmlFor={`user-${user.id}`} className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                          <label htmlFor={`user-${user.id}`} className="ml-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
                             {user.full_name} ({getRoleLabel(user.role)})
                           </label>
                         </div>
@@ -359,16 +385,6 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
                 Отмена
               </button>
             </div>
-
-            {(createMutation.isError || updateMutation.isError) && (
-              <div className="px-4 pb-4">
-                <div className="rounded-md bg-red-50 p-4">
-                  <p className="text-sm text-red-700">
-                    Ошибка: {(createMutation.error as any)?.response?.data?.message || 'Неизвестная ошибка'}
-                  </p>
-                </div>
-              </div>
-            )}
           </form>
         </div>
       </div>

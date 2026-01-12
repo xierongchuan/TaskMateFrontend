@@ -124,7 +124,7 @@ export const ReportsPage: React.FC = () => {
         title="Отчетность"
         description="Еженедельные и ежемесячные отчеты по системе управления задачами"
       >
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3 print:hidden">
           <Select
             value={reportFormat}
             onChange={(e) => setReportFormat(e.target.value as 'json' | 'pdf')}

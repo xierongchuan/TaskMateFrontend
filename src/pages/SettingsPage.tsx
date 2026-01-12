@@ -529,11 +529,11 @@ export const SettingsPage: React.FC = () => {
                                 <div className="text-sm text-gray-500 dark:text-gray-400">{item.desc}</div>
                               </div>
                               <Checkbox
-                                checked={((botConfig as any).notification_types?.[item.key]) || false}
+                                checked={botConfig.notification_types?.[item.key as keyof typeof botConfig.notification_types] || false}
                                 onChange={(e) => setBotConfig({
                                   ...botConfig,
                                   notification_types: {
-                                    ...(botConfig as any).notification_types,
+                                    ...botConfig.notification_types,
                                     [item.key]: e.target.checked
                                   }
                                 })}
@@ -583,7 +583,7 @@ export const SettingsPage: React.FC = () => {
                             <h4 className="font-medium text-red-900 dark:text-red-300">Режим обслуживания</h4>
                             <p className="text-sm text-red-700 dark:text-red-400 mb-2">Временно заблокировать доступ для всех пользователей кроме администраторов.</p>
                             <Checkbox
-                              checked={(botConfig as any).maintenance_mode || false}
+                              checked={botConfig.maintenance_mode || false}
                               onChange={(e) => setBotConfig({ ...botConfig, maintenance_mode: e.target.checked })}
                               label="Активировать режим"
                               className="mt-2"

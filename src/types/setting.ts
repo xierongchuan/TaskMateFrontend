@@ -54,8 +54,7 @@ export interface BotConfig {
   bot_token?: string;
 }
 
-// ... intervening code ...
-
+// Bot Configuration Update Request
 export interface UpdateBotConfigRequest {
   telegram_bot_id?: string;
   telegram_bot_username?: string;
@@ -76,4 +75,43 @@ export interface UpdateBotConfigRequest {
     task_completed?: boolean;
     system_errors?: boolean;
   };
+}
+
+// Request interfaces
+export interface CreateSettingRequest {
+  key: string;
+  value: string | number | boolean | object | null;
+  type?: SettingType;
+  description?: string;
+  dealership_id?: number;
+}
+
+export interface UpdateSettingRequest {
+  value: string | number | boolean | object | null;
+  type?: SettingType;
+  description?: string;
+  dealership_id?: number;
+}
+
+export interface UpdateShiftConfigRequest {
+  shift_1_start_time?: string;
+  shift_1_end_time?: string;
+  shift_2_start_time?: string;
+  shift_2_end_time?: string;
+  late_tolerance_minutes?: number;
+  dealership_id?: number;
+}
+
+// Legacy interfaces
+export interface DealershipBotConfig {
+  shift_1_start_time?: string;
+  shift_1_end_time?: string;
+  late_tolerance_minutes?: number;
+}
+
+export interface DealershipSettingsResponse {
+  dealership_id: number;
+  settings: ShiftConfig;
+  global_settings: BotConfig;
+  inherited_fields: (keyof DealershipBotConfig)[];
 }

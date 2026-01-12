@@ -20,14 +20,16 @@ export const Layout: React.FC = () => {
   const currentShift = currentShiftData?.data;
 
   return (
-    <div className="h-screen bg-gray-100 dark:bg-gray-900 flex overflow-hidden transition-colors duration-200">
+    <div className="h-screen bg-gray-100 dark:bg-gray-900 flex overflow-hidden transition-colors duration-200 print:h-auto print:overflow-visible">
       {/* Sidebar */}
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <div className="print:hidden">
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      </div>
 
       {/* Main content area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 print:h-auto print:overflow-visible">
         {/* Top header */}
-        <header className="bg-white dark:bg-gray-800 shadow-sm h-16 flex items-center justify-between px-4 lg:px-6 z-10 transition-colors duration-200">
+        <header className="bg-white dark:bg-gray-800 shadow-sm h-16 flex items-center justify-between px-4 lg:px-6 z-10 transition-colors duration-200 print:hidden">
           {/* Menu toggle button - visible on all screen sizes */}
           <div className="flex items-center space-x-3">
             <button
@@ -77,7 +79,7 @@ export const Layout: React.FC = () => {
         </header>
 
         {/* Main content */}
-        <main className="flex-1 overflow-auto bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
+        <main className="flex-1 overflow-auto bg-gray-100 dark:bg-gray-900 transition-colors duration-200 print:h-auto print:overflow-visible">
           <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <Outlet />
           </div>

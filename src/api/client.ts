@@ -43,29 +43,31 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error: AxiosError) => {
-    // Only clear auth state on 401 errors for session validation endpoints
-    // Don't clear on network errors, login failures, or other server errors
+    // Only clear auth state on 401 errors
+    // Don't clear on network errors or other server errors
     if (error.response?.status === 401) {
       const requestUrl = error.config?.url;
       const requestMethod = error.config?.method?.toUpperCase();
 
-      // Only redirect on session validation failure (GET /session/current)
-      // or logout failure (DELETE /session)
-      // Do NOT redirect on login attempt failure (POST /session)
-      const isSessionValidation = requestUrl?.includes('/session/current') && requestMethod === 'GET';
-      const isLogoutAttempt = requestUrl?.includes('/session') && requestMethod === 'DELETE';
+      // Check if the request is NOT a login attempt (POST /session)
+      // We should handle 401 on login manually in the component to show "Wrong password"
+      const isLoginAttempt = requestUrl?.endsWith('/session') && requestMethod === 'POST';
 
-      if (isSessionValidation || isLogoutAttempt) {
-        debugAuth.log('401 error on session validation/logout, clearing auth state. URL:', requestUrl);
+      if (!isLoginAttempt) {
+        debugAuth.log('401 error on protected resource, clearing auth state. URL:', requestUrl);
         // Log to console for user visibility
         console.error('Session expired or invalid. Server returned 401 for:', requestUrl);
+
+        // Execute clearAuth callback (clears Zustand store)
         clearAuth?.();
+
         // Only redirect if not already on login page
         if (!window.location.pathname.includes('/login')) {
+          // Verify we aren't in a loop or redirecting unnecessarily
           window.location.href = '/login';
         }
       } else {
-        debugAuth.log('401 error on other request (login or protected resource), not redirecting');
+        debugAuth.log('401 error on login attempt, not redirecting');
       }
     }
 
