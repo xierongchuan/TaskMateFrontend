@@ -12,7 +12,7 @@ export const authApi = {
   },
 
   getCurrentUser: async (): Promise<User> => {
-    const response = await apiClient.get<User>('/session/current');
-    return response.data;
+    const response = await apiClient.get<{ user: User }>('/session/current');
+    return response.data.user;
   },
 };
