@@ -47,7 +47,7 @@ export const ArchivedTasksPage: React.FC = () => {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
   const { limit } = usePagination();
-  const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'cards', 768, 'view_mode_archived_tasks');
+  const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'grid', 768, 'view_mode_archived_tasks');
   const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<ArchivedTaskFilters>({
@@ -151,10 +151,10 @@ export const ArchivedTasksPage: React.FC = () => {
           {!isMobile && (
             <ViewModeToggle
               mode={viewMode}
-              onChange={(mode) => setViewMode(mode as 'list' | 'cards')}
+              onChange={(mode) => setViewMode(mode as 'list' | 'grid')}
               options={[
                 { value: 'list', icon: <ListBulletIcon className="w-4 h-4" /> },
-                { value: 'cards', icon: <Squares2X2Icon className="w-4 h-4" /> },
+                { value: 'grid', icon: <Squares2X2Icon className="w-4 h-4" /> },
               ]}
             />
           )}
@@ -312,7 +312,7 @@ export const ArchivedTasksPage: React.FC = () => {
           )}
 
           {/* Cards View */}
-          {viewMode === 'cards' && (
+          {viewMode === 'grid' && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {tasks.map((task) => (
                 <Card key={task.id} className="hover:shadow-md transition-shadow">

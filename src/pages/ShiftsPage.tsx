@@ -24,7 +24,7 @@ import {
 
 export const ShiftsPage: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'cards', 768, 'view_mode_shifts');
+  const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'grid', 768, 'view_mode_shifts');
   const { limit } = usePagination();
   const [filters, setFilters] = useState<ShiftsFilters>({
     status: searchParams.get('status') || '',
@@ -123,10 +123,10 @@ export const ShiftsPage: React.FC = () => {
         {!isMobile && (
           <ViewModeToggle
             mode={viewMode}
-            onChange={(mode) => setViewMode(mode as 'list' | 'cards')}
+            onChange={(mode) => setViewMode(mode as 'list' | 'grid')}
             options={[
               { value: 'list', icon: <ListBulletIcon />, label: 'Список' },
-              { value: 'cards', icon: <Squares2X2Icon />, label: 'Карточки' },
+              { value: 'grid', icon: <Squares2X2Icon />, label: 'Карточки' },
             ]}
           />
         )}
@@ -308,7 +308,7 @@ export const ShiftsPage: React.FC = () => {
             )}
 
             {/* Cards View */}
-            {viewMode === 'cards' && (
+            {viewMode === 'grid' && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {shiftsData?.data.map((shift) => (
                   <div key={shift.id} className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md dark:hover:bg-gray-700/50 transition-shadow">

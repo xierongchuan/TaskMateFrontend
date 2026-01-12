@@ -55,7 +55,7 @@ export const TaskGeneratorsPage: React.FC = () => {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
   const { limit } = usePagination();
-  const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'cards', 768, 'view_mode_task_generators');
+  const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'grid', 768, 'view_mode_task_generators');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedGenerator, setSelectedGenerator] = useState<TaskGenerator | null>(null);
   const [showFilters, setShowFilters] = useState(false);
@@ -241,10 +241,10 @@ export const TaskGeneratorsPage: React.FC = () => {
         {!isMobile && (
           <ViewModeToggle
             mode={viewMode}
-            onChange={(mode) => setViewMode(mode as 'list' | 'cards')}
+            onChange={(mode) => setViewMode(mode as 'list' | 'grid')}
             options={[
               { value: 'list', icon: <ListBulletIcon className="w-4 h-4" /> },
-              { value: 'cards', icon: <Squares2X2Icon className="w-4 h-4" /> },
+              { value: 'grid', icon: <Squares2X2Icon className="w-4 h-4" /> },
             ]}
           />
         )}
@@ -461,7 +461,7 @@ export const TaskGeneratorsPage: React.FC = () => {
           )}
 
           {/* Cards View */}
-          {viewMode === 'cards' && (
+          {viewMode === 'grid' && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {generators.map((generator) => (
                 <Card key={generator.id} className="hover:shadow-md transition-shadow">

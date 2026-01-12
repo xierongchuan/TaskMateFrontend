@@ -1,29 +1,31 @@
 import { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 
-type ViewMode = 'list' | 'cards' | 'grid';
+type ViewMode = 'list' | 'grid';
 
 /**
  * Hook for responsive view mode switching with cookie persistence.
- * Automatically switches to cards/grid mode on mobile/tablet devices.
+ * Automatically switches to grid mode on mobile/tablet devices.
  *
  * @param defaultMode - Default view mode for desktop
- * @param mobileMode - Mode to use on mobile (default: 'cards')
+ * @param mobileMode - Mode to use on mobile (default: 'grid')
  * @param breakpoint - Breakpoint in pixels (default: 768 = md)
  * @param storageKey - Optional key to persist the view mode in cookies
  */
 export function useResponsiveViewMode(
   defaultMode: ViewMode = 'list',
-  mobileMode: ViewMode = 'cards',
+  mobileMode: ViewMode = 'grid',
   breakpoint: number = 768,
   storageKey?: string
 ) {
   // Initialize state from cookie if available, otherwise use default
   const [viewMode, setViewModeState] = useState<ViewMode>(() => {
     if (storageKey) {
-      const savedMode = Cookies.get(storageKey) as ViewMode;
-      if (savedMode && ['list', 'cards', 'grid'].includes(savedMode)) {
-        return savedMode;
+      const savedMode = Cookies.get(storageKey);
+      // Migrate legacy 'cards' to 'grid'
+      if (savedMode === 'cards') return 'grid';
+      if (savedMode && ['list', 'grid'].includes(savedMode)) {
+        return savedMode as ViewMode;
       }
     }
     return defaultMode;

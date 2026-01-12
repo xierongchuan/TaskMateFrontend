@@ -44,7 +44,7 @@ export const UsersPage: React.FC = () => {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'cards', 768, 'view_mode_users');
+  const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'grid', 768, 'view_mode_users');
   const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState<User | null>(null);
@@ -176,10 +176,10 @@ export const UsersPage: React.FC = () => {
         {!isMobile && (
           <ViewModeToggle
             mode={viewMode}
-            onChange={(mode) => setViewMode(mode as 'list' | 'cards')}
+            onChange={(mode) => setViewMode(mode as 'list' | 'grid')}
             options={[
               { value: 'list', icon: <ListBulletIcon />, label: 'Список' },
-              { value: 'cards', icon: <Squares2X2Icon />, label: 'Карточки' },
+              { value: 'grid', icon: <Squares2X2Icon />, label: 'Карточки' },
             ]}
           />
         )}
@@ -339,7 +339,7 @@ export const UsersPage: React.FC = () => {
           )}
 
           {/* Cards View */}
-          {viewMode === 'cards' && (
+          {viewMode === 'grid' && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {usersData?.data.map((user) => (
                 <div key={user.id} className={`p-4 sm:p-6 ${getUserCardClass(user)}`}>
