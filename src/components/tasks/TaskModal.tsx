@@ -5,8 +5,8 @@ import { format } from 'date-fns';
 import { tasksApi } from '../../api/tasks';
 import { usersApi } from '../../api/users';
 import { DealershipSelector } from '../common/DealershipSelector';
+import { UserCheckboxList } from '../common/UserCheckboxList';
 import { TaskNotificationSettings } from './TaskNotificationSettings';
-import { getRoleLabel } from '../../utils/roleTranslations';
 import {
   TASK_PRIORITIES,
   TASK_TYPES,
@@ -169,7 +169,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
     }
   };
 
-  const handleUserToggle = (userId: number, currentAssignments: number[]) => {
+  const handleUserToggle = (userId: number) => {
+    const currentAssignments = assignments as number[];
     const newAssignments = currentAssignments.includes(userId)
       ? currentAssignments.filter(id => id !== userId)
       : [...currentAssignments, userId];
@@ -339,39 +340,16 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
                 </div>
 
                 {/* Assignments */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Получатели</label>
-                  <div className="border border-gray-300 dark:border-gray-600 rounded-md p-3 max-h-48 overflow-y-auto bg-white dark:bg-gray-700">
-                    {!dealershipId ? (
-                      <p className="text-sm text-gray-500 text-center py-2">
-                        Сначала выберите автосалон
-                      </p>
-                    ) : isLoadingUsers ? (
-                      <p className="text-sm text-gray-500 text-center py-2">
-                        Загрузка сотрудников...
-                      </p>
-                    ) : usersData?.data.length === 0 ? (
-                      <p className="text-sm text-gray-500 text-center py-2">
-                        В этом салоне нет сотрудников
-                      </p>
-                    ) : (
-                      usersData?.data.map((user) => (
-                        <div key={user.id} className="flex items-center mb-2">
-                          <input
-                            type="checkbox"
-                            id={`user-${user.id}`}
-                            checked={assignments.includes(user.id)}
-                            onChange={() => handleUserToggle(user.id, assignments as number[])}
-                            className="h-4 w-4 rounded border-gray-300 dark:border-gray-500 text-indigo-600 focus:ring-indigo-500 bg-white dark:bg-gray-600"
-                          />
-                          <label htmlFor={`user-${user.id}`} className="ml-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-                            {user.full_name} ({getRoleLabel(user.role)})
-                          </label>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
+                <UserCheckboxList
+                  users={usersData?.data || []}
+                  selectedIds={assignments as number[]}
+                  onToggle={handleUserToggle}
+                  isLoading={isLoadingUsers}
+                  noDealership={!dealershipId}
+                  label="Получатели"
+                  emptyMessage="В этом салоне нет сотрудников"
+                  maxHeight="max-h-48"
+                />
               </div>
             </div>
 

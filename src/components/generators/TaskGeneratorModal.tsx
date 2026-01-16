@@ -3,6 +3,7 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { taskGeneratorsApi } from '../../api/taskGenerators';
 import { usersApi } from '../../api/users';
 import { DealershipSelector } from '../common/DealershipSelector';
+import { UserCheckboxList } from '../common/UserCheckboxList';
 import { TaskNotificationSettings } from '../tasks/TaskNotificationSettings';
 import type { TaskGenerator, CreateTaskGeneratorRequest, GeneratorRecurrence } from '../../types/taskGenerator';
 import { XMarkIcon } from '@heroicons/react/24/outline';
@@ -354,29 +355,14 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
 
                 {/* Assignments */}
                 {formData.dealership_id && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Исполнители * ({formData.assignments.length} выбрано)
-                    </label>
-                    <div className="border border-gray-300 dark:border-gray-600 rounded-lg max-h-40 overflow-y-auto p-2 bg-white dark:bg-gray-700">
-                      {users.length === 0 ? (
-                        <p className="text-sm text-gray-500 dark:text-gray-400 p-2">Нет сотрудников</p>
-                      ) : (
-                        users.map((user) => (
-                          <label key={user.id} className="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-600 rounded cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={formData.assignments.includes(user.id)}
-                              onChange={() => handleUserToggle(user.id)}
-                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
-                            />
-                            <span className="ml-2 text-sm text-gray-900 dark:text-white">{user.full_name}</span>
-                            <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">({user.role})</span>
-                          </label>
-                        ))
-                      )}
-                    </div>
-                  </div>
+                  <UserCheckboxList
+                    users={users}
+                    selectedIds={formData.assignments}
+                    onToggle={handleUserToggle}
+                    label="Исполнители"
+                    showCount
+                    required
+                  />
                 )}
 
                 {/* Notification Settings */}

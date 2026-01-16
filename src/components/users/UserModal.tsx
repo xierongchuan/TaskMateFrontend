@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { usersApi } from '../../api/users';
 import { DealershipSelector } from '../common/DealershipSelector';
+import { DealershipCheckboxList } from '../common/DealershipCheckboxList';
 import { useDealerships } from '../../hooks/useDealerships';
 import type { User, CreateUserRequest, UpdateUserRequest, Role } from '../../types/user';
 
@@ -174,37 +175,27 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Автосалон</label>
                   {formData.role === 'manager' ? (
-                    <div className="mt-1 border rounded-md border-gray-300 dark:border-gray-600 p-3 max-h-48 overflow-y-auto bg-white dark:bg-gray-700">
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Выберите салоны для управления:</p>
-                      <div className="space-y-2">
-                        {dealershipsData?.data.map((dealership) => (
-                          <label key={dealership.id} className="flex items-center space-x-2">
-                            <input
-                              type="checkbox"
-                              checked={formData.dealership_ids?.includes(dealership.id)}
-                              onChange={(e) => {
-                                const currentIds = formData.dealership_ids || [];
-                                let newIds;
-                                if (e.target.checked) {
-                                  newIds = [...currentIds, dealership.id];
-                                } else {
-                                  newIds = currentIds.filter(id => id !== dealership.id);
-                                }
-                                // Also update primary dealership_id to the first selected one if not set
-                                const newPrimaryId = newIds.length > 0 ? newIds[0] : undefined;
-                                setFormData({
-                                  ...formData,
-                                  dealership_ids: newIds,
-                                  dealership_id: newPrimaryId
-                                });
-                              }}
-                              className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                            />
-                            <span className="text-sm text-gray-700 dark:text-gray-300">{dealership.name}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
+                    <DealershipCheckboxList
+                      dealerships={dealershipsData?.data || []}
+                      selectedIds={formData.dealership_ids || []}
+                      onToggle={(dealershipId) => {
+                        const currentIds = formData.dealership_ids || [];
+                        let newIds;
+                        if (currentIds.includes(dealershipId)) {
+                          newIds = currentIds.filter(id => id !== dealershipId);
+                        } else {
+                          newIds = [...currentIds, dealershipId];
+                        }
+                        // Also update primary dealership_id to the first selected one if not set
+                        const newPrimaryId = newIds.length > 0 ? newIds[0] : undefined;
+                        setFormData({
+                          ...formData,
+                          dealership_ids: newIds,
+                          dealership_id: newPrimaryId
+                        });
+                      }}
+                      description="Выберите салоны для управления:"
+                    />
                   ) : (
                     <DealershipSelector
                       value={formData.dealership_id}

@@ -1,6 +1,8 @@
 // Доменные компоненты общего назначения
 
 export { DealershipSelector } from './DealershipSelector';
+export { DealershipCheckboxList } from './DealershipCheckboxList';
+export { UserCheckboxList } from './UserCheckboxList';
 
 export { StatusBadge } from './StatusBadge';
 export type { StatusBadgeProps, TaskStatus, ShiftStatus } from './StatusBadge';
