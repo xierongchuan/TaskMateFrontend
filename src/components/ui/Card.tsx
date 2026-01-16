@@ -1,6 +1,6 @@
 import React from 'react';
 
-export interface CardProps {
+export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   className?: string;
   hover?: boolean;
@@ -59,6 +59,7 @@ export const Card: React.FC<CardProps> & {
   hover = false,
   padding = 'none',
   variant = 'default',
+  ...props
 }) => {
     const cardClasses = [
       'rounded-xl shadow-sm border transition-all duration-200',
@@ -69,7 +70,7 @@ export const Card: React.FC<CardProps> & {
     ].filter(Boolean).join(' ');
 
     return (
-      <div className={cardClasses}>
+      <div className={cardClasses} {...props}>
         {children}
       </div>
     );

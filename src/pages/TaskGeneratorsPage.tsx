@@ -464,7 +464,11 @@ export const TaskGeneratorsPage: React.FC = () => {
           {viewMode === 'grid' && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {generators.map((generator) => (
-                <Card key={generator.id} className="hover:shadow-md transition-shadow">
+                <Card
+                  key={generator.id}
+                  className="hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => setDetailsGenerator(generator)}
+                >
                   <Card.Body className="flex flex-col h-full">
                     <div className="flex justify-between items-start mb-4">
                       <div className="min-w-0 flex-1">
@@ -483,7 +487,10 @@ export const TaskGeneratorsPage: React.FC = () => {
                       {permissions.canManageTasks && (
                         <div className="flex items-center gap-1 ml-2">
                           <button
-                            onClick={() => handlePauseResume(generator)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlePauseResume(generator);
+                            }}
                             disabled={pauseMutation.isPending || resumeMutation.isPending}
                             className={`p-1.5 rounded-lg transition-colors ${generator.is_active
                               ? 'text-yellow-600 hover:bg-yellow-50 dark:text-yellow-400 dark:hover:bg-yellow-900/20'
@@ -494,14 +501,20 @@ export const TaskGeneratorsPage: React.FC = () => {
                             {generator.is_active ? <PauseIcon className="w-5 h-5" /> : <PlayIcon className="w-5 h-5" />}
                           </button>
                           <button
-                            onClick={() => handleEdit(generator)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEdit(generator);
+                            }}
                             className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                             title="Редактировать"
                           >
                             <PencilIcon className="w-5 h-5" />
                           </button>
                           <button
-                            onClick={() => handleDelete(generator)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(generator);
+                            }}
                             disabled={deleteMutation.isPending}
                             className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                             title="Удалить"
