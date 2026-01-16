@@ -8,6 +8,9 @@ export type { IconButtonProps, IconButtonVariant, IconButtonSize } from './IconB
 export { Badge } from './Badge';
 export type { BadgeProps, BadgeVariant, BadgeSize } from './Badge';
 
+export { Tag } from './Tag';
+export type { TagProps } from './Tag';
+
 export { Input } from './Input';
 export type { InputProps, InputSize } from './Input';
 

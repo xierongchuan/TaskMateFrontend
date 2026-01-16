@@ -14,7 +14,7 @@ import {
 import type { Task } from '../../types/task';
 import { usePermissions } from '../../hooks/usePermissions';
 import { PriorityBadge, StatusBadge } from '../common';
-import { Button, Modal, Badge } from '../ui';
+import { Button, Modal, Badge, Tag } from '../ui';
 
 interface TaskDetailsModalProps {
   isOpen: boolean;
@@ -122,9 +122,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
             </h4>
             <div className="flex flex-wrap gap-2">
               {task.tags.map((tag, idx) => (
-                <span key={idx} className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-800">
-                  {tag}
-                </span>
+                <Tag key={idx} label={tag} size="md" />
               ))}
             </div>
           </div>

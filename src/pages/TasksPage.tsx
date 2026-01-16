@@ -14,7 +14,6 @@ import {
   PlusIcon,
   CalendarIcon,
   UserIcon,
-  TagIcon,
   ClockIcon,
   BuildingOfficeIcon,
   ListBulletIcon,
@@ -39,6 +38,7 @@ import {
   Pagination,
   ConfirmDialog,
   PageHeader,
+  Tag,
 } from '../components/ui';
 import { StatusBadge, PriorityBadge, ActionButtons } from '../components/common';
 
@@ -109,6 +109,9 @@ export const TasksPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      // Invalidate generator stats when task is deleted
+      queryClient.invalidateQueries({ queryKey: ['generator-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['task-generators'] });
       setConfirmDelete(null);
     },
   });
@@ -170,6 +173,9 @@ export const TasksPage: React.FC = () => {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      // Invalidate generator stats when task status changes
+      queryClient.invalidateQueries({ queryKey: ['generator-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['task-generators'] });
     },
   });
 
@@ -447,10 +453,7 @@ export const TasksPage: React.FC = () => {
                         {task.tags && task.tags.length > 0 && (
                           <div className="mt-3 flex flex-wrap gap-2">
                             {task.tags.map((tag, idx) => (
-                              <span key={idx} className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700">
-                                <TagIcon className="w-3 h-3 mr-1" />
-                                {tag}
-                              </span>
+                              <Tag key={idx} label={tag} />
                             ))}
                           </div>
                         )}
@@ -524,9 +527,7 @@ export const TasksPage: React.FC = () => {
                   {task.tags && task.tags.length > 0 && (
                     <div className="mb-4 flex flex-wrap gap-1">
                       {task.tags.map((tag, idx) => (
-                        <span key={idx} className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                          {tag}
-                        </span>
+                        <Tag key={idx} label={tag} />
                       ))}
                     </div>
                   )}

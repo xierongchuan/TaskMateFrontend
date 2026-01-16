@@ -123,6 +123,9 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      // Invalidate generator stats when task is created
+      queryClient.invalidateQueries({ queryKey: ['generator-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['task-generators'] });
       onClose();
     },
     onError: (error: any) => {
@@ -135,6 +138,9 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      // Invalidate generator stats when task is updated
+      queryClient.invalidateQueries({ queryKey: ['generator-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['task-generators'] });
       onClose();
     },
     onError: (error: any) => {

@@ -67,22 +67,28 @@ export const DonutChart: React.FC<DonutChartProps> = ({
 
   // Calculate segment positions
   let accumulatedOffset = 0;
-  const renderedSegments = segments
-    .filter(s => s.value > 0)
-    .map((segment) => {
-      const percentage = segment.value / total;
-      const segmentLength = percentage * circumference;
-      const dashArray = `${segmentLength} ${circumference - segmentLength}`;
-      const dashOffset = -accumulatedOffset;
-      accumulatedOffset += segmentLength;
+  // Gap between segments in pixels (along the circumference)
+  const GAP_LENGTH = 2;
+  const activeSegments = segments.filter(s => s.value > 0);
+  const shouldApplyGap = activeSegments.length > 1;
 
-      return {
-        ...segment,
-        percentage,
-        dashArray,
-        dashOffset,
-      };
-    });
+  const renderedSegments = activeSegments.map((segment) => {
+    const percentage = segment.value / total;
+    const segmentLength = percentage * circumference;
+    // Subtract gap from length if we have multiple segments to create clean separation
+    const visibleLength = shouldApplyGap ? Math.max(0, segmentLength - GAP_LENGTH) : segmentLength;
+
+    const dashArray = `${visibleLength} ${circumference - visibleLength}`;
+    const dashOffset = -accumulatedOffset;
+    accumulatedOffset += segmentLength;
+
+    return {
+      ...segment,
+      percentage,
+      dashArray,
+      dashOffset,
+    };
+  });
 
   return (
     <div className={`relative inline-flex items-center justify-center ${className}`}>

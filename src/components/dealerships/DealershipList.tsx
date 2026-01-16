@@ -264,7 +264,7 @@ export const DealershipList: React.FC<DealershipListProps> = ({ onEdit }) => {
         title="Удаление автосалона"
         message={`Вы уверены, что хотите удалить автосалон "${confirmDelete?.name}"? Это действие нельзя будет отменить.`}
         variant="danger"
-        confirmText={deleteDealership.isPending ? 'Удаление...' : 'Удалить'}
+        confirmText="Удалить"
         cancelText="Отмена"
         onConfirm={confirmDeleteAction}
         onCancel={() => setConfirmDelete(null)}

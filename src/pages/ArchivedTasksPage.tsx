@@ -24,6 +24,8 @@ import {
   Pagination,
   ViewModeToggle,
   PageHeader,
+  Tag,
+  ConfirmDialog,
 } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
 
@@ -37,7 +39,6 @@ import {
   ArrowDownTrayIcon,
   BuildingOfficeIcon,
   ArchiveBoxIcon,
-  TagIcon,
   ListBulletIcon,
   Squares2X2Icon,
 } from '@heroicons/react/24/outline';
@@ -50,6 +51,7 @@ export const ArchivedTasksPage: React.FC = () => {
   const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'grid', 768, 'view_mode_archived_tasks');
   const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(1);
+  const [confirmRestore, setConfirmRestore] = useState<ArchivedTask | null>(null);
   const [filters, setFilters] = useState<ArchivedTaskFilters>({
     search: '',
     archive_reason: undefined,
@@ -82,6 +84,9 @@ export const ArchivedTasksPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['archived-tasks'] });
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      // Invalidate generator stats when task is restored from archive
+      queryClient.invalidateQueries({ queryKey: ['generator-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['task-generators'] });
       showToast({ type: 'success', message: 'Задача восстановлена из архива' });
     },
     onError: () => {
@@ -90,9 +95,7 @@ export const ArchivedTasksPage: React.FC = () => {
   });
 
   const handleRestore = (task: ArchivedTask) => {
-    if (window.confirm(`Восстановить задачу "${task.title}" из архива?`)) {
-      restoreMutation.mutate(task.id);
-    }
+    setConfirmRestore(task);
   };
 
   const handleExport = async () => {
@@ -265,9 +268,7 @@ export const ArchivedTasksPage: React.FC = () => {
                             {task.tags && task.tags.length > 0 && (
                               <div className="flex flex-wrap gap-1">
                                 {task.tags.slice(0, 3).map((tag, idx) => (
-                                  <span key={idx} className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                                    <TagIcon className="w-2.5 h-2.5 mr-0.5" />{tag}
-                                  </span>
+                                  <Tag key={idx} label={tag} />
                                 ))}
                                 {task.tags.length > 3 && (
                                   <span className="text-xs text-gray-500 dark:text-gray-400">+{task.tags.length - 3}</span>
@@ -329,9 +330,7 @@ export const ArchivedTasksPage: React.FC = () => {
                     {task.tags && task.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1 mb-3">
                         {task.tags.slice(0, 3).map((tag, idx) => (
-                          <span key={idx} className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                            <TagIcon className="w-2.5 h-2.5 mr-0.5" />{tag}
-                          </span>
+                          <Tag key={idx} label={tag} />
                         ))}
                       </div>
                     )}
@@ -378,6 +377,23 @@ export const ArchivedTasksPage: React.FC = () => {
           )}
         </>
       )}
+
+      <ConfirmDialog
+        isOpen={!!confirmRestore}
+        title={`Восстановить "${confirmRestore?.title}"?`}
+        message="Задача будет перемещена из архива обратно в активные задачи"
+        variant="info"
+        confirmText="Восстановить"
+        cancelText="Отмена"
+        onConfirm={() => {
+          if (confirmRestore) {
+            restoreMutation.mutate(confirmRestore.id);
+            setConfirmRestore(null);
+          }
+        }}
+        onCancel={() => setConfirmRestore(null)}
+        isLoading={restoreMutation.isPending}
+      />
     </PageContainer>
   );
 };
