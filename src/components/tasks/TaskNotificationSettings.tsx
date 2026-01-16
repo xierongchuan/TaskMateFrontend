@@ -50,6 +50,15 @@ export const TaskNotificationSettings: React.FC<TaskNotificationSettingsProps> =
     return Object.keys(value).length > 0;
   });
 
+  // Sync state when external value changes (e.g. form reset)
+  React.useEffect(() => {
+    if (Object.keys(value).length > 0) {
+      setUseCustomSettings(true);
+      // Optional: Auto-expand if we want to show the settings immediately
+      // setIsExpanded(true);
+    }
+  }, [value]);
+
   const handleToggleCustomSettings = () => {
     if (!useCustomSettings) {
       setUseCustomSettings(true);
