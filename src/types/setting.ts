@@ -28,9 +28,7 @@ export interface ShiftConfig {
 
 // Bot Configuration
 export interface BotConfig {
-  telegram_bot_id?: string;
-  telegram_bot_username?: string;
-  telegram_webhook_url?: string;
+
   notification_enabled?: boolean;
   auto_close_shifts?: boolean;
   shift_reminder_minutes?: number;
@@ -51,14 +49,12 @@ export interface BotConfig {
     task_completed?: boolean;
     system_errors?: boolean;
   };
-  bot_token?: string;
+
 }
 
 // Bot Configuration Update Request
 export interface UpdateBotConfigRequest {
-  telegram_bot_id?: string;
-  telegram_bot_username?: string;
-  telegram_webhook_url?: string;
+
   notification_enabled?: boolean;
   auto_close_shifts?: boolean;
   shift_reminder_minutes?: number;

@@ -14,7 +14,7 @@ import {
   UserIcon,
   BuildingOfficeIcon,
   PhoneIcon,
-  ChatBubbleLeftRightIcon,
+
   ListBulletIcon,
   Squares2X2Icon
 } from '@heroicons/react/24/outline';
@@ -52,12 +52,12 @@ export const UsersPage: React.FC = () => {
     search: string;
     role: string;
     dealership_id: number | undefined;
-    has_telegram: string;
+
   }>({
     search: '',
     role: '',
     dealership_id: undefined,
-    has_telegram: '',
+
   });
 
   // Сброс страницы при изменении фильтров
@@ -111,20 +111,12 @@ export const UsersPage: React.FC = () => {
       search: '',
       role: '',
       dealership_id: undefined,
-      has_telegram: '',
+
     });
     setPage(1);
   };
 
-  const getUserCardClass = (user: User) => {
-    const baseClasses = 'bg-white dark:bg-gray-800 rounded-lg shadow-sm border hover:shadow-md transition-all duration-200';
 
-    if (!user.telegram_id) {
-      return `${baseClasses} border-orange-200 bg-orange-50 dark:bg-orange-900/10 dark:border-orange-800`;
-    }
-
-    return `${baseClasses} border-gray-200 dark:border-gray-700`;
-  };
 
   const getDealershipsDisplay = (user: User) => {
     if (user.dealerships && user.dealerships.length > 0) {
@@ -150,11 +142,7 @@ export const UsersPage: React.FC = () => {
     { value: 'owner', label: 'Владелец' },
   ];
 
-  const telegramOptions = [
-    { value: '', label: 'Все' },
-    { value: 'connected', label: 'Подключен' },
-    { value: 'not_connected', label: 'Не подключен' },
-  ];
+
 
   const dealershipOptions = [
     { value: '', label: 'Все салоны' },
@@ -164,7 +152,7 @@ export const UsersPage: React.FC = () => {
     })),
   ];
 
-  const hasActiveFilters = filters.search || filters.role || filters.dealership_id || filters.has_telegram;
+  const hasActiveFilters = filters.search || filters.role || filters.dealership_id;
 
   return (
     <PageContainer>
@@ -224,12 +212,7 @@ export const UsersPage: React.FC = () => {
             options={dealershipOptions}
           />
 
-          <Select
-            label="Telegram"
-            value={filters.has_telegram}
-            onChange={(e) => setFilters({ ...filters, has_telegram: e.target.value })}
-            options={telegramOptions}
-          />
+
         </FilterPanel.Grid>
       </FilterPanel>
 
@@ -265,7 +248,7 @@ export const UsersPage: React.FC = () => {
             <Card>
               <Card.Body className="space-y-4">
                 {usersData?.data.map((user) => (
-                  <div key={user.id} className={`p-4 sm:p-5 rounded-lg border hover:shadow-sm transition-all ${getUserCardClass(user)}`}>
+                  <div key={user.id} className={`p-4 sm:p-5 rounded-lg border hover:shadow-sm transition-all bg-white dark:bg-gray-800 rounded-lg shadow-sm border hover:shadow-md transition-all duration-200 border-gray-200 dark:border-gray-700`}>
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-3 mb-3">
@@ -273,9 +256,7 @@ export const UsersPage: React.FC = () => {
                             <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white font-semibold ${getAvatarColor(user.role)}`}>
                               {user.full_name.charAt(0).toUpperCase()}
                             </div>
-                            {!user.telegram_id && (
-                              <div className="ml-2 w-2 h-2 bg-orange-500 rounded-full" title="Нет Telegram"></div>
-                            )}
+
                           </div>
                           <div className="min-w-0 flex-1">
                             <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
@@ -298,12 +279,7 @@ export const UsersPage: React.FC = () => {
                               {getDealershipsDisplay(user)}
                             </span>
                           </div>
-                          <div className="flex items-center text-gray-500 dark:text-gray-400">
-                            <ChatBubbleLeftRightIcon className="w-4 h-4 mr-2 flex-shrink-0" />
-                            <span className={user.telegram_id ? 'text-green-600' : 'text-orange-600'}>
-                              {user.telegram_id ? 'Подключен' : 'Не подключен'}
-                            </span>
-                          </div>
+
                         </div>
                       </div>
 
@@ -342,15 +318,13 @@ export const UsersPage: React.FC = () => {
           {viewMode === 'grid' && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {usersData?.data.map((user) => (
-                <div key={user.id} className={`p-4 sm:p-6 ${getUserCardClass(user)}`}>
+                <div key={user.id} className={`p-4 sm:p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border hover:shadow-md transition-all duration-200 border-gray-200 dark:border-gray-700`}>
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center">
                       <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-lg ${getAvatarColor(user.role)}`}>
                         {user.full_name.charAt(0).toUpperCase()}
                       </div>
-                      {!user.telegram_id && (
-                        <div className="ml-2 -mt-1 w-3 h-3 bg-orange-500 rounded-full border-2 border-white" title="Нет Telegram"></div>
-                      )}
+
                     </div>
                     {permissions.canCreateUsers && (
                       <>
@@ -389,12 +363,7 @@ export const UsersPage: React.FC = () => {
                         {getDealershipsDisplay(user)}
                       </span>
                     </div>
-                    <div className="flex items-center">
-                      <ChatBubbleLeftRightIcon className="w-4 h-4 mr-2 flex-shrink-0" />
-                      <span className={user.telegram_id ? 'text-green-600' : 'text-orange-600'}>
-                        {user.telegram_id ? 'Подключен' : 'Не подключен'}
-                      </span>
-                    </div>
+
                   </div>
                 </div>
               ))}

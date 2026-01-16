@@ -19,7 +19,7 @@ import {
   ChartBarIcon,
   ArrowRightOnRectangleIcon,
   PhoneIcon,
-  ChatBubbleLeftRightIcon,
+
   BriefcaseIcon,
   CalendarDaysIcon,
   ClockIcon,
@@ -42,7 +42,7 @@ export const ProfilePage: React.FC = () => {
   const [formData, setFormData] = useState({
     full_name: '',
     phone: '',
-    telegram_id: '',
+
     dealership_id: undefined as number | undefined,
     dealership_ids: [] as number[],
   });
@@ -58,7 +58,7 @@ export const ProfilePage: React.FC = () => {
       setFormData({
         full_name: user.full_name,
         phone: user.phone || user.phone_number || '',
-        telegram_id: user.telegram_id?.toString() || '',
+
         dealership_id: user.dealership_id || undefined,
         dealership_ids: user.dealerships?.map(d => d.id) || [],
       });
@@ -106,7 +106,7 @@ export const ProfilePage: React.FC = () => {
     updateProfileMutation.mutate({
       full_name: formData.full_name,
       phone: formData.phone,
-      telegram_id: formData.telegram_id ? Number(formData.telegram_id) : undefined,
+
       // Only include dealership info if user has permission to change it (e.g. manager)
       // For now, we allow sending it if it's in the state, backend should validate permissions
       dealership_id: formData.dealership_id,
@@ -185,14 +185,7 @@ export const ProfilePage: React.FC = () => {
                       Смен
                     </div>
                   </div>
-                  <div>
-                    <div className={`text-2xl font-bold ${user.telegram_id ? 'text-green-600' : 'text-orange-500'}`}>
-                      {user.telegram_id ? 'ON' : 'OFF'}
-                    </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-1">
-                      Telegram
-                    </div>
-                  </div>
+
                 </div>
               </div>
 
@@ -265,13 +258,7 @@ export const ProfilePage: React.FC = () => {
                       required
                     />
 
-                    <Input
-                      label="Telegram ID"
-                      value={formData.telegram_id}
-                      onChange={(e) => setFormData({ ...formData, telegram_id: e.target.value })}
-                      type="number"
-                      icon={<ChatBubbleLeftRightIcon className="w-5 h-5 text-gray-400" />}
-                    />
+
                   </div>
 
                   {/* Dealership Info (Read Only or Editable depending on role, mimicking UserModal) */}

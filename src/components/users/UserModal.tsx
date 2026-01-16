@@ -23,7 +23,7 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
     role: 'employee',
     dealership_id: undefined,
     dealership_ids: [],
-    telegram_id: undefined,
+
   });
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
         role: user.role,
         dealership_id: user.dealership_id || undefined,
         dealership_ids: user.dealerships?.map(d => d.id) || [],
-        telegram_id: user.telegram_id || undefined,
+
       });
     } else {
       setFormData({
@@ -46,7 +46,7 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
         role: 'employee',
         dealership_id: undefined,
         dealership_ids: [],
-        telegram_id: undefined,
+
       });
     }
   }, [user]);
@@ -206,15 +206,7 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
                   )}
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Telegram ID</label>
-                  <input
-                    type="number"
-                    value={formData.telegram_id || ''}
-                    onChange={(e) => setFormData({ ...formData, telegram_id: e.target.value ? parseInt(e.target.value) : undefined })}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  />
-                </div>
+
               </div>
             </div>
 
