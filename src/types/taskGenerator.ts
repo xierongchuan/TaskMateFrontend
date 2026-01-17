@@ -10,8 +10,8 @@ export interface TaskGenerator {
   recurrence: GeneratorRecurrence;
   recurrence_time: string;
   deadline_time: string;
-  recurrence_day_of_week: number | null;
-  recurrence_day_of_month: number | null;
+  recurrence_days_of_week: number[] | null;  // [1,2,5] = Mon, Tue, Fri (ISO weekday)
+  recurrence_days_of_month: number[] | null; // [1,15,-1] = 1st, 15th, last day
   start_date: string;
   end_date: string | null;
   last_generated_at: string | null;
@@ -75,8 +75,8 @@ export interface CreateTaskGeneratorRequest {
   recurrence: GeneratorRecurrence;
   recurrence_time: string;
   deadline_time: string;
-  recurrence_day_of_week?: number;
-  recurrence_day_of_month?: number;
+  recurrence_days_of_week?: number[];  // [1,2,5] for Mon, Tue, Fri
+  recurrence_days_of_month?: number[]; // [1,15,-1] for 1st, 15th, last
   start_date: string;
   end_date?: string;
   task_type?: 'individual' | 'group';
@@ -99,3 +99,4 @@ export interface TaskGeneratorFilters {
   page?: number;
   per_page?: number;
 }
+

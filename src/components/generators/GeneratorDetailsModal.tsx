@@ -46,22 +46,47 @@ export const GeneratorDetailsModal: React.FC<GeneratorDetailsModalProps> = ({
 
   const stats = statsData?.data;
 
-  const getRecurrenceLabel = (recurrence: string, dayOfWeek?: number | null, dayOfMonth?: number | null) => {
+  const getRecurrenceLabel = (
+    recurrence: string,
+    daysOfWeek?: number[] | null,
+    daysOfMonth?: number[] | null
+  ) => {
     const dayLabels: Record<number, string> = {
-      1: 'понедельник', 2: 'вторник', 3: 'среда',
-      4: 'четверг', 5: 'пятница', 6: 'суббота', 7: 'воскресенье'
+      1: 'Пн', 2: 'Вт', 3: 'Ср',
+      4: 'Чт', 5: 'Пт', 6: 'Сб', 7: 'Вс'
     };
 
     switch (recurrence) {
       case 'daily':
         return 'Ежедневно';
-      case 'weekly':
-        return `Еженедельно (${dayLabels[dayOfWeek || 1] || 'понедельник'})`;
-      case 'monthly':
-        if (dayOfMonth && dayOfMonth < 0) {
-          return dayOfMonth === -1 ? 'Ежемесячно (последний день)' : `Ежемесячно (${Math.abs(dayOfMonth)}-й с конца)`;
+      case 'weekly': {
+        if (!daysOfWeek || daysOfWeek.length === 0) {
+          return 'Еженедельно';
         }
-        return `Ежемесячно (${dayOfMonth || 1}-го числа)`;
+        if (daysOfWeek.length === 1) {
+          return `Еженедельно (${dayLabels[daysOfWeek[0]] || 'Пн'})`;
+        }
+        const labels = daysOfWeek.map(d => dayLabels[d]).join(', ');
+        return `Еженедельно (${labels})`;
+      }
+      case 'monthly': {
+        if (!daysOfMonth || daysOfMonth.length === 0) {
+          return 'Ежемесячно';
+        }
+        if (daysOfMonth.length === 1) {
+          const day = daysOfMonth[0];
+          if (day < 0) {
+            return day === -1 ? 'Ежемесячно (последний день)' : `Ежемесячно (${Math.abs(day)}-й с конца)`;
+          }
+          return `Ежемесячно (${day}-го)`;
+        }
+        const dayLabelsMonth = daysOfMonth.map(d => {
+          if (d === -1) return 'последний';
+          if (d === -2) return 'предпосл.';
+          return `${d}`;
+        }).join(', ');
+        return `Ежемесячно (${dayLabelsMonth})`;
+      }
       default:
         return recurrence;
     }
@@ -139,7 +164,7 @@ export const GeneratorDetailsModal: React.FC<GeneratorDetailsModalProps> = ({
             </Badge>
           )}
           <Badge variant="info" size="sm" icon={<ArrowPathIcon className="w-3 h-3" />}>
-            {getRecurrenceLabel(generator.recurrence, generator.recurrence_day_of_week, generator.recurrence_day_of_month)}
+            {getRecurrenceLabel(generator.recurrence, generator.recurrence_days_of_week, generator.recurrence_days_of_month)}
           </Badge>
         </div>
 

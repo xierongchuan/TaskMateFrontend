@@ -4,6 +4,7 @@ import { useTheme } from '../context/ThemeContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { useAuth } from '../hooks/useAuth';
 import { DealershipSelector } from '../components/common/DealershipSelector';
+import { YearCalendar } from '../components/settings/YearCalendar';
 import type { BotConfig, ShiftConfig } from '../types/setting';
 
 // UI Components
@@ -31,6 +32,7 @@ import {
   WrenchIcon,
   ComputerDesktopIcon,
   ClipboardDocumentListIcon,
+  CalendarDaysIcon,
   SwatchIcon,
   SunIcon,
   MoonIcon,
@@ -42,9 +44,10 @@ export const SettingsPage: React.FC = () => {
   const { pendingTheme, setTheme, applyTheme } = useTheme();
   const { user } = useAuth();
   const { showToast } = useToast();
-  const [activeTab, setActiveTab] = useState<'general' | 'interface' | 'tasks' | 'shifts' | 'notifications' | 'maintenance'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'interface' | 'tasks' | 'calendar' | 'shifts' | 'notifications' | 'maintenance'>('general');
   const [selectedDealershipId, setSelectedDealershipId] = useState<number | undefined>(user?.dealership_id || undefined);
   const [showDetailedNotifications, setShowDetailedNotifications] = useState(false);
+  const [selectedCalendarYear, setSelectedCalendarYear] = useState(new Date().getFullYear());
 
   // Initialize shift config with default values
   const [shiftConfig, setShiftConfig] = useState<ShiftConfig>({
@@ -129,6 +132,7 @@ export const SettingsPage: React.FC = () => {
     { id: 'general', name: 'Общие', icon: CogIcon },
     { id: 'interface', name: 'Интерфейс', icon: ComputerDesktopIcon },
     { id: 'tasks', name: 'Задачи', icon: ClipboardDocumentListIcon },
+    { id: 'calendar', name: 'Календарь', icon: CalendarDaysIcon },
     { id: 'shifts', name: 'Смены', icon: ClockIcon },
     { id: 'notifications', name: 'Уведомления', icon: BellIcon },
     { id: 'maintenance', name: 'Обслуживание', icon: WrenchIcon },
@@ -405,6 +409,24 @@ export const SettingsPage: React.FC = () => {
                           </Card.Body>
                         </Card>
                       </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* CALENDAR TAB */}
+                {activeTab === 'calendar' && (
+                  <div className="space-y-6">
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Календарь выходных дней</h2>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                        Управляйте выходными днями для генераторов задач. В дни, отмеченные как выходные,
+                        задачи создаваться не будут.
+                      </p>
+                      <YearCalendar
+                        year={selectedCalendarYear}
+                        dealershipId={selectedDealershipId}
+                        onYearChange={setSelectedCalendarYear}
+                      />
                     </div>
                   </div>
                 )}

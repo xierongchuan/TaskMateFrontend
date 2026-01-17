@@ -4,10 +4,11 @@ import { taskGeneratorsApi } from '../../api/taskGenerators';
 import { usersApi } from '../../api/users';
 import { DealershipSelector } from '../common/DealershipSelector';
 import { UserCheckboxList } from '../common/UserCheckboxList';
+import { WeekDaySelector } from '../common/WeekDaySelector';
+import { MonthDayPicker } from '../common/MonthDayPicker';
 import { TaskNotificationSettings } from '../tasks/TaskNotificationSettings';
 import type { TaskGenerator, CreateTaskGeneratorRequest, GeneratorRecurrence } from '../../types/taskGenerator';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-
 interface TaskGeneratorModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -30,8 +31,8 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
     recurrence: 'daily' as GeneratorRecurrence,
     recurrence_time: '09:00',
     deadline_time: '18:00',
-    recurrence_day_of_week: 1,
-    recurrence_day_of_month: 1,
+    recurrence_days_of_week: [] as number[],
+    recurrence_days_of_month: [] as number[],
     start_date: new Date().toISOString().split('T')[0],
     end_date: '',
     task_type: 'individual' as 'individual' | 'group',
@@ -58,8 +59,8 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
         recurrence: generator.recurrence,
         recurrence_time: generator.recurrence_time?.slice(0, 5) || '09:00',
         deadline_time: generator.deadline_time?.slice(0, 5) || '18:00',
-        recurrence_day_of_week: generator.recurrence_day_of_week || 1,
-        recurrence_day_of_month: generator.recurrence_day_of_month || 1,
+        recurrence_days_of_week: generator.recurrence_days_of_week || [],
+        recurrence_days_of_month: generator.recurrence_days_of_month || [],
         start_date: generator.start_date?.split('T')[0] || '',
         end_date: generator.end_date?.split('T')[0] || '',
         task_type: generator.task_type,
@@ -78,8 +79,8 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
         recurrence: 'daily',
         recurrence_time: '09:00',
         deadline_time: '18:00',
-        recurrence_day_of_week: 1,
-        recurrence_day_of_month: 1,
+        recurrence_days_of_week: [],
+        recurrence_days_of_month: [],
         start_date: new Date().toISOString().split('T')[0],
         end_date: '',
         task_type: 'individual',
@@ -120,8 +121,12 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
       recurrence: formData.recurrence,
       recurrence_time: formData.recurrence_time,
       deadline_time: formData.deadline_time,
-      recurrence_day_of_week: formData.recurrence === 'weekly' ? formData.recurrence_day_of_week : undefined,
-      recurrence_day_of_month: formData.recurrence === 'monthly' ? formData.recurrence_day_of_month : undefined,
+      recurrence_days_of_week: formData.recurrence === 'weekly' && formData.recurrence_days_of_week.length > 0
+        ? formData.recurrence_days_of_week
+        : undefined,
+      recurrence_days_of_month: formData.recurrence === 'monthly' && formData.recurrence_days_of_month.length > 0
+        ? formData.recurrence_days_of_month
+        : undefined,
       start_date: formData.start_date,
       end_date: formData.end_date || undefined,
       task_type: formData.task_type,
@@ -208,7 +213,7 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
                 </div>
 
                 {/* Recurrence */}
-                <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Повторяемость</label>
                     <select
@@ -224,35 +229,21 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
 
                   {formData.recurrence === 'weekly' && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">День недели</label>
-                      <select
-                        value={formData.recurrence_day_of_week}
-                        onChange={(e) => setFormData({ ...formData, recurrence_day_of_week: Number(e.target.value) })}
-                        className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      >
-                        <option value={1}>Понедельник</option>
-                        <option value={2}>Вторник</option>
-                        <option value={3}>Среда</option>
-                        <option value={4}>Четверг</option>
-                        <option value={5}>Пятница</option>
-                        <option value={6}>Суббота</option>
-                        <option value={7}>Воскресенье</option>
-                      </select>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Дни недели</label>
+                      <WeekDaySelector
+                        value={formData.recurrence_days_of_week}
+                        onChange={(days) => setFormData({ ...formData, recurrence_days_of_week: days })}
+                      />
                     </div>
                   )}
 
                   {formData.recurrence === 'monthly' && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">День месяца</label>
-                      <input
-                        type="number"
-                        min={-2}
-                        max={31}
-                        value={formData.recurrence_day_of_month}
-                        onChange={(e) => setFormData({ ...formData, recurrence_day_of_month: Number(e.target.value) })}
-                        className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Дни месяца</label>
+                      <MonthDayPicker
+                        value={formData.recurrence_days_of_month}
+                        onChange={(days) => setFormData({ ...formData, recurrence_days_of_month: days })}
                       />
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">-1 = последний день, -2 = предпоследний</p>
                     </div>
                   )}
                 </div>
