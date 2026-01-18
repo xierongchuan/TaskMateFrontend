@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useShiftConfig, useBotConfig, useUpdateShiftConfig, useUpdateBotConfig, useDealershipSettings } from '../hooks/useSettings';
+import { useShiftConfig, useBotConfig, useUpdateShiftConfig, useUpdateBotConfig, useDealershipSettings, useTaskConfig, useUpdateTaskConfig } from '../hooks/useSettings';
 import { useTheme } from '../context/ThemeContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { useAuth } from '../hooks/useAuth';
 import { DealershipSelector } from '../components/common/DealershipSelector';
 import { YearCalendar } from '../components/settings/YearCalendar';
-import type { BotConfig, ShiftConfig } from '../types/setting';
+import type { BotConfig, ShiftConfig, TaskConfig } from '../types/setting';
 
 // UI Components
 import {
@@ -27,7 +27,6 @@ import {
   ClockIcon,
   BellIcon,
   CheckCircleIcon,
-  InformationCircleIcon,
   ArrowPathIcon,
   WrenchIcon,
   ComputerDesktopIcon,
@@ -70,9 +69,16 @@ export const SettingsPage: React.FC = () => {
     auto_archive_day_of_week: 0
   });
 
+  // Initialize task config with default values
+  const [taskConfig, setTaskConfig] = useState<TaskConfig>({
+    task_requires_open_shift: false,
+    archive_overdue_hours_after_shift: 2,
+  });
+
   // Data fetching
   const { data: shiftConfigData, isLoading: shiftConfigLoading } = useShiftConfig(selectedDealershipId);
   const { data: botConfigData, isLoading: botConfigLoading } = useBotConfig(selectedDealershipId);
+  const { data: taskConfigData, isLoading: taskConfigLoading } = useTaskConfig(selectedDealershipId);
   const { data: config } = useDealershipSettings(selectedDealershipId || 0);
 
   // Effects to filter data
@@ -88,9 +94,16 @@ export const SettingsPage: React.FC = () => {
     }
   }, [botConfigData]);
 
+  useEffect(() => {
+    if (taskConfigData?.data) {
+      setTaskConfig(prev => ({ ...prev, ...taskConfigData.data }));
+    }
+  }, [taskConfigData]);
+
   // Mutations
   const updateShiftConfigMutation = useUpdateShiftConfig();
   const updateBotConfigMutation = useUpdateBotConfig();
+  const updateTaskConfigMutation = useUpdateTaskConfig();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,6 +134,22 @@ export const SettingsPage: React.FC = () => {
         onSuccess: () => showToast({ type: 'success', message: 'Настройки сохранены' }),
         onError: () => showToast({ type: 'error', message: 'Ошибка сохранения настроек' }),
       });
+    } else if (activeTab === 'tasks') {
+      // Save task config (shift requirements, archiving)
+      updateTaskConfigMutation.mutate({
+        ...taskConfig,
+        dealership_id: selectedDealershipId,
+      }, {
+        onError: () => showToast({ type: 'error', message: 'Ошибка сохранения настроек задач' }),
+      });
+      // Also save bot config for archive settings
+      updateBotConfigMutation.mutate({
+        ...botConfig,
+        dealership_id: selectedDealershipId,
+      }, {
+        onSuccess: () => showToast({ type: 'success', message: 'Настройки задач сохранены' }),
+        onError: () => showToast({ type: 'error', message: 'Ошибка сохранения настроек' }),
+      });
     } else {
       updateBotConfigMutation.mutate({
         ...botConfig,
@@ -147,18 +176,6 @@ export const SettingsPage: React.FC = () => {
     { id: 'maintenance', name: 'Обслуживание', icon: WrenchIcon },
   ];
 
-  // Archive day options
-  const archiveDayOptions = [
-    { value: '0', label: 'Отключено (Вручную)' },
-    { value: '1', label: 'Каждый Понедельник' },
-    { value: '2', label: 'Каждый Вторник' },
-    { value: '3', label: 'Каждую Среду' },
-    { value: '4', label: 'Каждый Четверг' },
-    { value: '5', label: 'Каждую Пятницу' },
-    { value: '6', label: 'Каждую Субботу' },
-    { value: '7', label: 'Каждое Воскресенье' },
-  ];
-
   if (!permissions.canManageSettings) {
     return (
       <PageContainer>
@@ -170,8 +187,8 @@ export const SettingsPage: React.FC = () => {
     );
   }
 
-  const isLoading = shiftConfigLoading || botConfigLoading;
-  const isSaving = updateShiftConfigMutation.isPending || updateBotConfigMutation.isPending;
+  const isLoading = shiftConfigLoading || botConfigLoading || taskConfigLoading;
+  const isSaving = updateShiftConfigMutation.isPending || updateBotConfigMutation.isPending || updateTaskConfigMutation.isPending;
 
   return (
     <PageContainer>
@@ -348,6 +365,51 @@ export const SettingsPage: React.FC = () => {
                       <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Настройки Задач</h2>
 
                       <div className="space-y-6">
+                        {/* Shift Requirements */}
+                        <Card>
+                          <Card.Body>
+                            <h4 className="font-medium text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                              <ClockIcon className="w-5 h-5 text-blue-500" />
+                              Связь со сменами
+                            </h4>
+                            <Checkbox
+                              checked={taskConfig.task_requires_open_shift || false}
+                              onChange={(e) => setTaskConfig({
+                                ...taskConfig,
+                                task_requires_open_shift: e.target.checked
+                              })}
+                              label="Требовать открытую смену для выполнения задач"
+                            />
+                            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400 ml-7">
+                              Если включено, сотрудники смогут выполнять задачи только при активной смене.
+                              Менеджеры и владельцы могут закрывать задачи без ограничений.
+                            </p>
+
+                            <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Задержка архивации
+                              </label>
+                              <div className="flex items-center gap-3">
+                                <Input
+                                  type="number"
+                                  min={1}
+                                  max={48}
+                                  value={taskConfig.archive_overdue_hours_after_shift || 2}
+                                  onChange={(e) => setTaskConfig({
+                                    ...taskConfig,
+                                    archive_overdue_hours_after_shift: parseInt(e.target.value) || 2
+                                  })}
+                                  className="w-20"
+                                />
+                                <span className="text-gray-500 dark:text-gray-400 text-sm">часов после закрытия смены</span>
+                              </div>
+                              <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">
+                                Просроченные задачи будут автоматически архивированы через указанное время после закрытия смены.
+                              </p>
+                            </div>
+                          </Card.Body>
+                        </Card>
+
                         <Card>
                           <Card.Body>
                             <h4 className="font-medium text-gray-900 dark:text-white mb-4 flex items-center gap-2">
@@ -368,52 +430,6 @@ export const SettingsPage: React.FC = () => {
                                 })}
                                 className="w-32"
                               />
-                            </div>
-                          </Card.Body>
-                        </Card>
-
-                        <Card>
-                          <Card.Body>
-                            <h4 className="font-medium text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                              <ClockIcon className="w-5 h-5 text-orange-500" />
-                              Архивация просроченных задач
-                            </h4>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                              Просроченные задачи будут переноситься в архив по выбранному расписанию.
-                            </p>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">День недели</label>
-                                <Select
-                                  value={String(botConfig.archive_overdue_day_of_week || 0)}
-                                  onChange={(e) => setBotConfig({
-                                    ...botConfig,
-                                    archive_overdue_day_of_week: parseInt(e.target.value) || 0
-                                  })}
-                                  options={archiveDayOptions}
-                                />
-                              </div>
-
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Время запуска</label>
-                                <Input
-                                  type="time"
-                                  value={botConfig.archive_overdue_time || '03:00'}
-                                  onChange={(e) => setBotConfig({
-                                    ...botConfig,
-                                    archive_overdue_time: e.target.value
-                                  })}
-                                  className="w-full"
-                                />
-                              </div>
-                            </div>
-
-                            <div className="mt-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 border border-orange-100 dark:border-orange-900/30 text-xs text-orange-800 dark:text-orange-300 flex items-start">
-                              <InformationCircleIcon className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
-                              <p>
-                                Задачи считаются просроченными, если их дедлайн истёк более 24 часов назад.
-                              </p>
                             </div>
                           </Card.Body>
                         </Card>

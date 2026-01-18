@@ -123,16 +123,22 @@ export const ArchivedTasksPage: React.FC = () => {
   const reasonOptions = [
     { value: '', label: 'Все' },
     { value: 'completed', label: 'Выполнено' },
+    { value: 'completed_late', label: 'Выполнено с опозданием' },
     { value: 'expired', label: 'Просрочено' },
+    { value: 'expired_after_shift', label: 'Просрочено (после смены)' },
   ];
 
   const getReasonBadge = (reason: string) => {
-    const config: Record<string, { label: string; variant: 'success' | 'danger' | 'gray' }> = {
+    const config: Record<string, { label: string; variant: 'success' | 'warning' | 'danger' | 'gray' }> = {
       completed: { label: 'Выполнено', variant: 'success' },
+      completed_late: { label: 'Выполнено с опозданием', variant: 'warning' },
       expired: { label: 'Просрочено', variant: 'danger' },
+      expired_after_shift: { label: 'Просрочено (после смены)', variant: 'danger' },
     };
     const cfg = config[reason] || { label: reason, variant: 'gray' as const };
-    const Icon = reason === 'completed' ? CheckCircleIcon : reason === 'expired' ? XCircleIcon : ArchiveBoxIcon;
+    const Icon = reason === 'completed' ? CheckCircleIcon :
+      reason === 'completed_late' ? CheckCircleIcon :
+        reason === 'expired' || reason === 'expired_after_shift' ? XCircleIcon : ArchiveBoxIcon;
 
     return (
       <Badge variant={cfg.variant} size="sm" icon={<Icon className="w-3 h-3" />}>

@@ -111,3 +111,15 @@ export interface DealershipSettingsResponse {
   global_settings: BotConfig;
   inherited_fields: (keyof DealershipBotConfig)[];
 }
+
+// Task Configuration (shift requirements, archiving)
+export interface TaskConfig {
+  task_requires_open_shift: boolean;
+  archive_overdue_hours_after_shift: number;
+}
+
+export interface UpdateTaskConfigRequest {
+  task_requires_open_shift?: boolean;
+  archive_overdue_hours_after_shift?: number;
+  dealership_id?: number;
+}

@@ -3,12 +3,14 @@ import type {
   Setting,
   BotConfig,
   ShiftConfig,
+  TaskConfig,
   DealershipBotConfig,
   DealershipSettingsResponse,
   CreateSettingRequest,
   UpdateSettingRequest,
   UpdateShiftConfigRequest,
-  UpdateBotConfigRequest
+  UpdateBotConfigRequest,
+  UpdateTaskConfigRequest
 } from '../types/setting';
 
 export const settingsApi = {
@@ -62,6 +64,19 @@ export const settingsApi = {
 
   updateBotConfig: async (data: UpdateBotConfigRequest): Promise<{ data: BotConfig }> => {
     const response = await apiClient.put<{ data: BotConfig }>('/settings/bot-config', data);
+    return response.data;
+  },
+
+  // Task Configuration (shift requirements, archiving)
+  getTaskConfig: async (dealershipId?: number): Promise<{ data: TaskConfig }> => {
+    const response = await apiClient.get<{ data: TaskConfig }>('/settings/task-config', {
+      params: dealershipId ? { dealership_id: dealershipId } : {},
+    });
+    return response.data;
+  },
+
+  updateTaskConfig: async (data: UpdateTaskConfigRequest): Promise<{ data: TaskConfig }> => {
+    const response = await apiClient.put<{ data: TaskConfig }>('/settings/task-config', data);
     return response.data;
   },
 

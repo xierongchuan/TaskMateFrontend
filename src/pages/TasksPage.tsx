@@ -227,6 +227,7 @@ export const TasksPage: React.FC = () => {
     { value: 'pending', label: 'Ожидает' },
     { value: 'pending_review', label: 'На проверке' },
     { value: 'completed', label: 'Выполнено' },
+    { value: 'completed_late', label: 'Выполнено с опозданием' },
     { value: 'overdue', label: 'Просрочено' },
   ];
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { taskGeneratorsApi } from '../../api/taskGenerators';
 import { usersApi } from '../../api/users';
@@ -7,8 +7,9 @@ import { UserCheckboxList } from '../common/UserCheckboxList';
 import { WeekDaySelector } from '../common/WeekDaySelector';
 import { MonthDayPicker } from '../common/MonthDayPicker';
 import { TaskNotificationSettings } from '../tasks/TaskNotificationSettings';
+import { useShiftConfig } from '../../hooks/useSettings';
 import type { TaskGenerator, CreateTaskGeneratorRequest, GeneratorRecurrence } from '../../types/taskGenerator';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 interface TaskGeneratorModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -153,6 +154,49 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
     }));
   };
 
+  // Fetch shift config to check if generator times are within shift hours
+  const { data: shiftConfigData } = useShiftConfig(formData.dealership_id || undefined);
+
+  // Check if time is within shift hours
+  const isTimeOutsideShifts = useMemo(() => {
+    if (!shiftConfigData?.data || !formData.recurrence_time) return false;
+
+    const config = shiftConfigData.data;
+    const recTime = formData.recurrence_time;
+    const deadTime = formData.deadline_time;
+
+    // Convert time to minutes for comparison
+    const toMinutes = (time: string) => {
+      const [h, m] = time.split(':').map(Number);
+      return h * 60 + m;
+    };
+
+    const recMinutes = toMinutes(recTime);
+    const deadMinutes = toMinutes(deadTime);
+
+    // Check shift 1
+    const s1Start = config.shift_1_start_time ? toMinutes(config.shift_1_start_time) : null;
+    const s1End = config.shift_1_end_time ? toMinutes(config.shift_1_end_time) : null;
+
+    // Check shift 2
+    const s2Start = config.shift_2_start_time ? toMinutes(config.shift_2_start_time) : null;
+    const s2End = config.shift_2_end_time ? toMinutes(config.shift_2_end_time) : null;
+
+    const isInShift1 = s1Start !== null && s1End !== null && recMinutes >= s1Start && deadMinutes <= s1End;
+    const isInShift2 = s2Start !== null && s2End !== null && recMinutes >= s2Start && deadMinutes <= s2End;
+
+    // If both shifts configured, check if time falls in either
+    if (s1Start !== null && s2Start !== null) {
+      return !isInShift1 && !isInShift2;
+    }
+    // If only shift 1 configured
+    if (s1Start !== null) {
+      return !isInShift1;
+    }
+
+    return false; // No shifts configured = no warning
+  }, [shiftConfigData?.data, formData.recurrence_time, formData.deadline_time, formData.dealership_id]);
+
   if (!isOpen) return null;
 
   const users = usersData?.data || [];
@@ -269,6 +313,22 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
                     />
                   </div>
                 </div>
+
+                {/* Warning: Task outside shift hours */}
+                {isTimeOutsideShifts && formData.dealership_id && (
+                  <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 flex items-start gap-3">
+                    <ExclamationTriangleIcon className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
+                        Время вне рабочих смен
+                      </p>
+                      <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
+                        Задачи будут создаваться вне стандартного рабочего времени смен.
+                        Сотрудники могут не успеть выполнить их вовремя.
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {/* Date Range */}
                 <div className="grid grid-cols-2 gap-4">

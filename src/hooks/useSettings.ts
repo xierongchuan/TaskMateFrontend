@@ -4,7 +4,8 @@ import type {
   CreateSettingRequest,
   UpdateSettingRequest,
   UpdateShiftConfigRequest,
-  UpdateBotConfigRequest
+  UpdateBotConfigRequest,
+  UpdateTaskConfigRequest
 } from '../types/setting';
 
 // Hook for getting all settings
@@ -40,6 +41,15 @@ export const useBotConfig = (dealershipId?: number) => {
   return useQuery({
     queryKey: ['settings', 'bot-config', dealershipId],
     queryFn: () => settingsApi.getBotConfig(dealershipId),
+    placeholderData: (prev) => prev,
+  });
+};
+
+// Hook for getting task configuration (shift requirements, archiving)
+export const useTaskConfig = (dealershipId?: number) => {
+  return useQuery({
+    queryKey: ['settings', 'task-config', dealershipId],
+    queryFn: () => settingsApi.getTaskConfig(dealershipId),
     placeholderData: (prev) => prev,
   });
 };
@@ -116,6 +126,21 @@ export const useUpdateBotConfig = () => {
       queryClient.invalidateQueries({ queryKey: ['settings', 'bot-config'] });
       if (variables.dealership_id) {
         queryClient.invalidateQueries({ queryKey: ['settings', 'bot-config', variables.dealership_id] });
+      }
+    },
+  });
+};
+
+// Hook for updating task configuration
+export const useUpdateTaskConfig = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: UpdateTaskConfigRequest) => settingsApi.updateTaskConfig(data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['settings', 'task-config'] });
+      if (variables.dealership_id) {
+        queryClient.invalidateQueries({ queryKey: ['settings', 'task-config', variables.dealership_id] });
       }
     },
   });
