@@ -96,12 +96,21 @@ export const SettingsPage: React.FC = () => {
     e.preventDefault();
 
     if (activeTab === 'shifts') {
+      // Save shift times
       updateShiftConfigMutation.mutate({
         ...shiftConfig,
         dealership_id: selectedDealershipId,
       }, {
-        onSuccess: () => showToast({ type: 'success', message: 'Настройки смен сохранены' }),
-        onError: () => showToast({ type: 'error', message: 'Ошибка сохранения настроек смен' }),
+        onError: () => showToast({ type: 'error', message: 'Ошибка сохранения времени смен' }),
+      });
+
+      // Also save bot config (automation settings used in Shifts tab)
+      updateBotConfigMutation.mutate({
+        ...botConfig,
+        dealership_id: selectedDealershipId,
+      }, {
+        onSuccess: () => showToast({ type: 'success', message: 'Настройки смен и автоматизации сохранены' }),
+        onError: () => showToast({ type: 'error', message: 'Ошибка сохранения настроек автоматизации' }),
       });
     } else if (activeTab === 'interface') {
       applyTheme();
@@ -518,6 +527,43 @@ export const SettingsPage: React.FC = () => {
                         </Card.Body>
                       </Card>
                     </div>
+
+                    {/* Shift Automation */}
+                    <div className="mt-6 border-t border-gray-100 dark:border-gray-800 pt-6">
+                      <h4 className="font-medium text-gray-900 dark:text-white mb-4">Автоматизация смен</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Card>
+                          <Card.Body>
+                            <Checkbox
+                              checked={botConfig.auto_close_shifts || false}
+                              onChange={(e) => setBotConfig({ ...botConfig, auto_close_shifts: e.target.checked })}
+                              label="Авто-закрытие смен"
+                            />
+                            <p className="mt-2 text-xs text-gray-500 ml-7">
+                              Автоматически закрывать смены в конце рабочего дня, если сотрудник забыл это сделать.
+                            </p>
+                          </Card.Body>
+                        </Card>
+
+                        <Card>
+                          <Card.Body>
+                            <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">Напоминание о начале смены</label>
+                            <div className="flex items-center gap-3">
+                              <Input
+                                type="number"
+                                min={0}
+                                max={120}
+                                value={botConfig.shift_reminder_minutes || 15}
+                                onChange={(e) => setBotConfig({ ...botConfig, shift_reminder_minutes: parseInt(e.target.value) || 0 })}
+                                className="w-24"
+                              />
+                              <span className="text-gray-500 dark:text-gray-400 text-sm">минут до начала</span>
+                            </div>
+                            <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">Бот отправит уведомление сотруднику перед началом смены.</p>
+                          </Card.Body>
+                        </Card>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -537,33 +583,51 @@ export const SettingsPage: React.FC = () => {
                     </div>
 
                     <div className="grid grid-cols-1 gap-4">
-                      {[
-                        { key: 'task_overdue', label: 'Просроченные задачи', desc: 'Задачи, срок которых истек' },
-                        { key: 'shift_late', label: 'Опоздания', desc: 'Сотрудник не открыл смену вовремя' },
-                        { key: 'task_completed', label: 'Завершение задач', desc: 'Сотрудник выполнил задачу' },
-                        { key: 'system_errors', label: 'Системные ошибки', desc: 'Сбои в работе оборудования или API' },
-                      ].map((item) => (
-                        <Card key={item.key} className="hover:border-blue-300 dark:hover:border-blue-500 transition-colors cursor-pointer">
-                          <Card.Body>
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <div className="font-medium text-gray-900 dark:text-white">{item.label}</div>
-                                <div className="text-sm text-gray-500 dark:text-gray-400">{item.desc}</div>
-                              </div>
-                              <Checkbox
-                                checked={botConfig.notification_types?.[item.key as keyof typeof botConfig.notification_types] || false}
-                                onChange={(e) => setBotConfig({
-                                  ...botConfig,
-                                  notification_types: {
-                                    ...botConfig.notification_types,
-                                    [item.key]: e.target.checked
-                                  }
-                                })}
-                              />
-                            </div>
-                          </Card.Body>
-                        </Card>
-                      ))}
+                      <Card>
+                        <Card.Body>
+                          <Checkbox
+                            checked={botConfig.notification_enabled || false}
+                            onChange={(e) => setBotConfig({ ...botConfig, notification_enabled: e.target.checked })}
+                            label={<span className="font-medium">Включить уведомления Telegram</span>}
+                          />
+                          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 ml-7">
+                            Полное отключение/включение всех уведомлений бота. Если выключено, никакие сообщения отправляться не будут.
+                          </p>
+                        </Card.Body>
+                      </Card>
+
+                      {botConfig.notification_enabled && (
+                        <>
+                          <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-2 mb-2">Типы уведомлений</div>
+                          {[
+                            { key: 'task_overdue', label: 'Просроченные задачи', desc: 'Задачи, срок которых истек' },
+                            { key: 'shift_late', label: 'Опоздания', desc: 'Сотрудник не открыл смену вовремя' },
+                            { key: 'task_completed', label: 'Завершение задач', desc: 'Сотрудник выполнил задачу' },
+                            { key: 'system_errors', label: 'Системные ошибки', desc: 'Сбои в работе оборудования или API' },
+                          ].map((item) => (
+                            <Card key={item.key} className="hover:border-blue-300 dark:hover:border-blue-500 transition-colors cursor-pointer">
+                              <Card.Body>
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <div className="font-medium text-gray-900 dark:text-white">{item.label}</div>
+                                    <div className="text-sm text-gray-500 dark:text-gray-400">{item.desc}</div>
+                                  </div>
+                                  <Checkbox
+                                    checked={botConfig.notification_types?.[item.key as keyof typeof botConfig.notification_types] || false}
+                                    onChange={(e) => setBotConfig({
+                                      ...botConfig,
+                                      notification_types: {
+                                        ...botConfig.notification_types,
+                                        [item.key]: e.target.checked
+                                      }
+                                    })}
+                                  />
+                                </div>
+                              </Card.Body>
+                            </Card>
+                          ))}
+                        </>
+                      )}
                     </div>
 
                     {showDetailedNotifications && (
