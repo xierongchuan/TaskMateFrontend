@@ -40,6 +40,7 @@ import {
   ConfirmDialog,
   PageHeader,
   Tag,
+  Modal,
 } from '../components/ui';
 import { StatusBadge, PriorityBadge, ActionButtons } from '../components/common';
 
@@ -55,6 +56,7 @@ export const TasksPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const { limit } = usePagination();
   const [confirmDelete, setConfirmDelete] = useState<Task | null>(null);
+  const [confirmGroupComplete, setConfirmGroupComplete] = useState<{ task: Task; status: string } | null>(null);
   const [filters, setFilters] = useState({
     search: searchParams.get('search') || '',
     status: searchParams.get('status') || '',
@@ -149,8 +151,8 @@ export const TasksPage: React.FC = () => {
   };
 
   const updateStatusMutation = useMutation({
-    mutationFn: ({ taskId, status }: { taskId: number; status: string }) =>
-      tasksApi.updateTaskStatus(taskId, status),
+    mutationFn: ({ taskId, status, completeForAll }: { taskId: number; status: string; completeForAll?: boolean }) =>
+      tasksApi.updateTaskStatus(taskId, status, completeForAll),
     onMutate: async ({ taskId, status }) => {
       await queryClient.cancelQueries({ queryKey: ['tasks', filters, page, limit] });
       const previousTasks = queryClient.getQueryData(['tasks', filters, page, limit]);
@@ -183,7 +185,27 @@ export const TasksPage: React.FC = () => {
   });
 
   const handleStatusChange = (task: Task, newStatus: string) => {
+    // Если менеджер/владелец отмечает групповую задачу как выполненную - показать диалог выбора
+    if (
+      task.task_type === 'group' &&
+      (permissions.isManager || permissions.isOwner) &&
+      (newStatus === 'completed' || newStatus === 'pending_review')
+    ) {
+      setConfirmGroupComplete({ task, status: newStatus });
+      return;
+    }
     updateStatusMutation.mutate({ taskId: task.id, status: newStatus });
+  };
+
+  const handleGroupCompleteConfirm = (completeForAll: boolean) => {
+    if (confirmGroupComplete) {
+      updateStatusMutation.mutate({
+        taskId: confirmGroupComplete.task.id,
+        status: confirmGroupComplete.status,
+        completeForAll,
+      });
+      setConfirmGroupComplete(null);
+    }
   };
 
   const clearFilters = () => {
@@ -631,6 +653,41 @@ export const TasksPage: React.FC = () => {
         onCancel={() => setConfirmDelete(null)}
         isLoading={deleteMutation.isPending}
       />
+
+      {/* Диалог выбора способа завершения групповой задачи */}
+      <Modal
+        isOpen={!!confirmGroupComplete}
+        onClose={() => setConfirmGroupComplete(null)}
+        title="Завершение групповой задачи"
+        size="md"
+      >
+        <Modal.Body>
+          <p className="text-gray-700 dark:text-gray-300 mb-4">
+            Эта задача назначена нескольким исполнителям. Выберите способ завершения:
+          </p>
+          {confirmGroupComplete?.task.completion_progress && (
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+              Текущий прогресс: {confirmGroupComplete.task.completion_progress.completed_count} из{' '}
+              {confirmGroupComplete.task.completion_progress.total_assignees} исполнителей
+            </p>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setConfirmGroupComplete(null)}
+          >
+            Отмена
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => handleGroupCompleteConfirm(true)}
+            disabled={updateStatusMutation.isPending}
+          >
+            Завершить для всех
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </PageContainer >
   );
 };

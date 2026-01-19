@@ -46,6 +46,7 @@ export interface IssueDetail {
   type: 'task' | 'shift' | 'user';
   user_id?: number;
   score?: number;
+  dealership_id?: number;
 }
 
 export interface IssueDetailsResponse {

@@ -51,9 +51,9 @@ export const IssueDetailsModal: React.FC<IssueDetailsModalProps> = ({
     onClose();
     const params = new URLSearchParams();
 
-    // Добавляем dealership_id если он выбран
-    if (dealershipId) {
-      params.append('dealership_id', dealershipId.toString());
+    // Добавляем dealership_id из самого элемента
+    if (item.dealership_id) {
+      params.append('dealership_id', item.dealership_id.toString());
     }
 
     switch (item.type) {

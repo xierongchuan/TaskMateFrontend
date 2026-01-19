@@ -39,8 +39,12 @@ export const tasksApi = {
     return response.data;
   },
 
-  updateTaskStatus: async (id: number, status: string): Promise<{ data: Task }> => {
-    const response = await apiClient.patch<{ data: Task }>(`/tasks/${id}/status`, { status });
+  updateTaskStatus: async (id: number, status: string, completeForAll?: boolean): Promise<{ data: Task }> => {
+    const payload: { status: string; complete_for_all?: boolean } = { status };
+    if (completeForAll !== undefined) {
+      payload.complete_for_all = completeForAll;
+    }
+    const response = await apiClient.patch<{ data: Task }>(`/tasks/${id}/status`, payload);
     return response.data;
   },
 
