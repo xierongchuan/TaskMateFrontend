@@ -6,6 +6,7 @@ import { useResponsiveViewMode } from '../hooks/useResponsiveViewMode';
 import { useAuth } from '../hooks/useAuth';
 import { usePagination } from '../hooks/usePagination';
 import { UserModal } from '../components/users/UserModal';
+import { UserDetailsModal } from '../components/users/UserDetailsModal';
 import { formatPhoneNumber } from '../utils/phoneFormatter';
 import type { User } from '../types/user';
 import type { Dealership } from '../types/dealership';
@@ -44,6 +45,7 @@ export const UsersPage: React.FC = () => {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [detailsUser, setDetailsUser] = useState<User | null>(null);
   const { viewMode, setViewMode, isMobile } = useResponsiveViewMode('list', 'grid', 768, 'view_mode_users');
   const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(1);
@@ -98,6 +100,10 @@ export const UsersPage: React.FC = () => {
 
   const handleDelete = (user: User) => {
     setConfirmDelete(user);
+  };
+
+  const handleViewDetails = (user: User) => {
+    setDetailsUser(user);
   };
 
   const handleRoleChange = (user: User, newRole: string) => {
@@ -259,9 +265,14 @@ export const UsersPage: React.FC = () => {
 
                           </div>
                           <div className="min-w-0 flex-1">
-                            <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
-                              {user.full_name}
-                            </h3>
+                            <button
+                              onClick={() => handleViewDetails(user)}
+                              className="text-left cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                            >
+                              <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
+                                {user.full_name}
+                              </h3>
+                            </button>
                             <p className="text-sm text-gray-500 dark:text-gray-400 truncate">@{user.login}</p>
                           </div>
                         </div>
@@ -342,9 +353,14 @@ export const UsersPage: React.FC = () => {
                   </div>
 
                   <div className="mb-3">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
-                      {user.full_name}
-                    </h3>
+                    <button
+                      onClick={() => handleViewDetails(user)}
+                      className="text-left cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded w-full"
+                    >
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+                        {user.full_name}
+                      </h3>
+                    </button>
                     <p className="text-sm text-gray-500 dark:text-gray-400 truncate">@{user.login}</p>
                   </div>
 
@@ -388,6 +404,16 @@ export const UsersPage: React.FC = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         user={selectedUser}
+      />
+
+      <UserDetailsModal
+        isOpen={!!detailsUser}
+        onClose={() => setDetailsUser(null)}
+        user={detailsUser}
+        onEdit={(user) => {
+          setDetailsUser(null);
+          handleEdit(user);
+        }}
       />
 
       {/* Delete Confirmation */}
