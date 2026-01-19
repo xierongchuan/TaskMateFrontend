@@ -43,7 +43,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
       description: '',
       comment: '',
       task_type: TASK_TYPES.INDIVIDUAL,
-      response_type: RESPONSE_TYPES.ACKNOWLEDGE,
+      response_type: RESPONSE_TYPES.NOTIFICATION,
       dealership_id: undefined,
       assignments: [],
       priority: TASK_PRIORITIES.MEDIUM,
@@ -57,6 +57,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
   const dealershipId = watch('dealership_id');
   const assignments = watch('assignments') || []; // Ensure array
   const taskType = watch('task_type');
+  const responseType = watch('response_type');
 
   // Local state for tags input string
   const [tagsInput, setTagsInput] = useState('');
@@ -100,7 +101,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
           description: '',
           comment: '',
           task_type: TASK_TYPES.INDIVIDUAL,
-          response_type: RESPONSE_TYPES.ACKNOWLEDGE,
+          response_type: RESPONSE_TYPES.NOTIFICATION,
           dealership_id: undefined,
           assignments: [],
           notification_settings: {},
@@ -324,6 +325,11 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
                         <option key={value} value={value}>{label}</option>
                       ))}
                     </select>
+                    {responseType === RESPONSE_TYPES.COMPLETION_WITH_PROOF && (
+                      <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
+                        Исполнитель должен загрузить файлы (фото, видео, документы) для подтверждения выполнения
+                      </p>
+                    )}
                   </div>
                 </div>
 

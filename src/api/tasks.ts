@@ -39,13 +39,53 @@ export const tasksApi = {
     return response.data;
   },
 
-  updateTaskStatus: async (id: number, status: string, completeForAll?: boolean): Promise<{ data: Task }> => {
+  updateTaskStatus: async (id: number, status: string, completeForAll?: boolean): Promise<Task> => {
     const payload: { status: string; complete_for_all?: boolean } = { status };
     if (completeForAll !== undefined) {
       payload.complete_for_all = completeForAll;
     }
-    const response = await apiClient.patch<{ data: Task }>(`/tasks/${id}/status`, payload);
+    const response = await apiClient.patch<Task>(`/tasks/${id}/status`, payload);
     return response.data;
+  },
+
+  /**
+   * Update task status with proof files (for completion_with_proof tasks)
+   */
+  updateTaskStatusWithProofs: async (id: number, status: string, files: File[]): Promise<Task> => {
+    const formData = new FormData();
+    formData.append('status', status);
+    files.forEach((file) => {
+      formData.append('proof_files[]', file);
+    });
+    const response = await apiClient.patch<Task>(`/tasks/${id}/status`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  /**
+   * Approve a task response (manager/owner only)
+   */
+  approveTaskResponse: async (taskResponseId: number): Promise<Task> => {
+    const response = await apiClient.post<Task>(`/task-responses/${taskResponseId}/approve`);
+    return response.data;
+  },
+
+  /**
+   * Reject a task response with reason (manager/owner only)
+   */
+  rejectTaskResponse: async (taskResponseId: number, reason: string): Promise<Task> => {
+    const response = await apiClient.post<Task>(`/task-responses/${taskResponseId}/reject`, { reason });
+    return response.data;
+  },
+
+  /**
+   * Delete a task proof (manager/owner only)
+   */
+  deleteTaskProof: async (proofId: number): Promise<void> => {
+    await apiClient.delete(`/task-proofs/${proofId}`);
   },
 
   deleteTask: async (id: number): Promise<void> => {

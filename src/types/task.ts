@@ -1,13 +1,21 @@
 export type TaskRecurrence = 'none' | 'daily' | 'weekly' | 'monthly';
 export type TaskStatus = 'pending' | 'acknowledged' | 'pending_review' | 'completed' | 'completed_late' | 'overdue';
 export type TaskType = 'individual' | 'group';
-export type ResponseType = 'acknowledge' | 'complete';
+export type ResponseType = 'notification' | 'completion' | 'completion_with_proof';
 export type TaskPriority = 'low' | 'medium' | 'high';
 export type TaskResponseStatus = 'acknowledged' | 'pending_review' | 'completed' | 'postponed';
 
 export interface TaskResponseUser {
   id: number;
   full_name: string;
+}
+
+export interface TaskProof {
+  id: number;
+  url: string;
+  original_filename: string;
+  mime_type: string;
+  file_size: number;
 }
 
 export interface TaskResponse {
@@ -17,6 +25,11 @@ export interface TaskResponse {
   comment: string | null;
   responded_at: string | null;
   user: TaskResponseUser | null;
+  proofs?: TaskProof[];
+  verified_at?: string | null;
+  verified_by?: number | null;
+  rejection_reason?: string | null;
+  verifier?: TaskResponseUser | null;
 }
 
 export interface CompletionProgress {

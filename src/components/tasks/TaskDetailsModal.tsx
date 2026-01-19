@@ -10,17 +10,25 @@ import {
   ChatBubbleLeftIcon,
   ClockIcon,
   CogIcon,
+  DocumentIcon,
 } from '@heroicons/react/24/outline';
 import type { Task, TaskResponseStatus } from '../../types/task';
 import { usePermissions } from '../../hooks/usePermissions';
 import { PriorityBadge, StatusBadge } from '../common';
 import { Button, Modal, Badge, Tag } from '../ui';
+import { ProofViewer } from './ProofViewer';
+import { VerificationPanel } from './VerificationPanel';
+import { RESPONSE_TYPE_LABELS } from '../../constants/tasks';
 
 interface TaskDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   task: Task | null;
   onEdit?: (task: Task) => void;
+  onApproveResponse?: (responseId: number) => Promise<void>;
+  onRejectResponse?: (responseId: number, reason: string) => Promise<void>;
+  onDeleteProof?: (proofId: number) => Promise<void>;
+  isVerifying?: boolean;
 }
 
 const getResponseStatusLabel = (status?: TaskResponseStatus): string => {
@@ -47,11 +55,17 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
   isOpen,
   onClose,
   task,
-  onEdit
+  onEdit,
+  onApproveResponse,
+  onRejectResponse,
+  onDeleteProof,
+  isVerifying = false,
 }) => {
   const permissions = usePermissions();
 
   if (!isOpen || !task) return null;
+
+  const isProofTask = task.response_type === 'completion_with_proof';
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={task.title} size="2xl">
@@ -148,6 +162,18 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
           </div>
         )}
 
+        {/* Response Type Info */}
+        {isProofTask && (
+          <div className="mb-6">
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+              <DocumentIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <span className="text-sm text-blue-800 dark:text-blue-200">
+                Тип: {RESPONSE_TYPE_LABELS[task.response_type]} — требуется загрузка доказательств
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Assignees with Status for Group Tasks */}
         {task.assignments && task.assignments.length > 0 && (
           <div>
@@ -175,24 +201,48 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
               </div>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="space-y-4">
               {task.assignments.map((assignment) => {
                 const userResponse = task.responses?.find(r => r.user_id === assignment.user.id);
                 const statusLabel = getResponseStatusLabel(userResponse?.status);
                 const statusVariant = getResponseStatusVariant(userResponse?.status);
+                const hasProofs = userResponse?.proofs && userResponse.proofs.length > 0;
 
                 return (
-                  <div key={assignment.id} className="flex items-center justify-between p-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700">
-                    <div className="flex items-center">
-                      <div className="h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-600 flex items-center justify-center text-gray-500 dark:text-gray-300 text-xs font-semibold mr-3">
-                        {assignment.user.full_name.charAt(0)}
+                  <div key={assignment.id} className="p-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center">
+                        <div className="h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-600 flex items-center justify-center text-gray-500 dark:text-gray-300 text-xs font-semibold mr-3">
+                          {assignment.user.full_name.charAt(0)}
+                        </div>
+                        <span className="text-sm text-gray-900 dark:text-white font-medium">{assignment.user.full_name}</span>
                       </div>
-                      <span className="text-sm text-gray-900 dark:text-white font-medium">{assignment.user.full_name}</span>
-                    </div>
-                    {task.task_type === 'group' && (
                       <Badge variant={statusVariant} size="sm">
                         {statusLabel}
                       </Badge>
+                    </div>
+
+                    {/* Show proofs for this user */}
+                    {hasProofs && (
+                      <div className="mt-3">
+                        <ProofViewer
+                          proofs={userResponse!.proofs!}
+                          canDelete={permissions.canManageTasks && !!onDeleteProof}
+                          onDelete={onDeleteProof}
+                        />
+                      </div>
+                    )}
+
+                    {/* Verification panel for managers */}
+                    {userResponse && permissions.canManageTasks && onApproveResponse && onRejectResponse && (
+                      <div className="mt-3">
+                        <VerificationPanel
+                          response={userResponse}
+                          onApprove={onApproveResponse}
+                          onReject={onRejectResponse}
+                          isLoading={isVerifying}
+                        />
+                      </div>
                     )}
                   </div>
                 );

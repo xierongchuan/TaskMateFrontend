@@ -8,6 +8,7 @@ import { TaskModal } from '../components/tasks/TaskModal';
 import { TaskDetailsModal } from '../components/tasks/TaskDetailsModal';
 import { DealershipSelector } from '../components/common/DealershipSelector';
 import { UserSelector } from '../components/common/UserSelector';
+import { MultiFileUpload } from '../components/ui/MultiFileUpload';
 import type { Task } from '../types/task';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -20,7 +21,9 @@ import {
   ListBulletIcon,
   Squares2X2Icon,
   CheckCircleIcon,
+  DocumentIcon,
 } from '@heroicons/react/24/outline';
+import { RESPONSE_TYPE_LABELS } from '../constants/tasks';
 
 import { useSearchParams } from 'react-router-dom';
 
@@ -57,6 +60,8 @@ export const TasksPage: React.FC = () => {
   const { limit } = usePagination();
   const [confirmDelete, setConfirmDelete] = useState<Task | null>(null);
   const [confirmGroupComplete, setConfirmGroupComplete] = useState<{ task: Task; status: string } | null>(null);
+  const [proofUploadTask, setProofUploadTask] = useState<Task | null>(null);
+  const [proofFiles, setProofFiles] = useState<File[]>([]);
   const [filters, setFilters] = useState({
     search: searchParams.get('search') || '',
     status: searchParams.get('status') || '',
@@ -184,6 +189,41 @@ export const TasksPage: React.FC = () => {
     },
   });
 
+  const proofUploadMutation = useMutation({
+    mutationFn: ({ taskId, status, files }: { taskId: number; status: string; files: File[] }) =>
+      tasksApi.updateTaskStatusWithProofs(taskId, status, files),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      setProofUploadTask(null);
+      setProofFiles([]);
+    },
+  });
+
+  const approveResponseMutation = useMutation({
+    mutationFn: (responseId: number) => tasksApi.approveTaskResponse(responseId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+  });
+
+  const rejectResponseMutation = useMutation({
+    mutationFn: ({ responseId, reason }: { responseId: number; reason: string }) =>
+      tasksApi.rejectTaskResponse(responseId, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+  });
+
+  const deleteProofMutation = useMutation({
+    mutationFn: (proofId: number) => tasksApi.deleteTaskProof(proofId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
+
   const handleStatusChange = (task: Task, newStatus: string) => {
     // Если менеджер/владелец отмечает групповую задачу как выполненную - показать диалог выбора
     if (
@@ -194,7 +234,39 @@ export const TasksPage: React.FC = () => {
       setConfirmGroupComplete({ task, status: newStatus });
       return;
     }
+
+    // Если задача требует доказательства и это завершение - показать модальное окно загрузки
+    if (
+      task.response_type === 'completion_with_proof' &&
+      (newStatus === 'completed' || newStatus === 'pending_review')
+    ) {
+      setProofUploadTask(task);
+      return;
+    }
+
     updateStatusMutation.mutate({ taskId: task.id, status: newStatus });
+  };
+
+  const handleProofUploadSubmit = () => {
+    if (proofUploadTask && proofFiles.length > 0) {
+      proofUploadMutation.mutate({
+        taskId: proofUploadTask.id,
+        status: 'pending_review',
+        files: proofFiles,
+      });
+    }
+  };
+
+  const handleApproveResponse = async (responseId: number) => {
+    await approveResponseMutation.mutateAsync(responseId);
+  };
+
+  const handleRejectResponse = async (responseId: number, reason: string) => {
+    await rejectResponseMutation.mutateAsync({ responseId, reason });
+  };
+
+  const handleDeleteProof = async (proofId: number) => {
+    await deleteProofMutation.mutateAsync(proofId);
   };
 
   const handleGroupCompleteConfirm = (completeForAll: boolean) => {
@@ -272,8 +344,9 @@ export const TasksPage: React.FC = () => {
 
   const responseTypeOptions = [
     { value: '', label: 'Все' },
-    { value: 'acknowledge', label: 'Уведомление' },
-    { value: 'complete', label: 'Выполнение' },
+    { value: 'notification', label: 'Уведомление' },
+    { value: 'completion', label: 'На выполнение' },
+    { value: 'completion_with_proof', label: 'С доказательством' },
   ];
 
   const dateRangeOptions = [
@@ -474,11 +547,13 @@ export const TasksPage: React.FC = () => {
                             )}
                           </span>
                           <span className="flex items-center">
-                            {task.response_type === 'acknowledge' ?
-                              <CheckCircleIcon className="w-4 h-4 mr-1" /> :
-                              <CalendarIcon className="w-4 h-4 mr-1" />
+                            {task.response_type === 'completion_with_proof' ?
+                              <DocumentIcon className="w-4 h-4 mr-1" /> :
+                              task.response_type === 'notification' ?
+                                <CheckCircleIcon className="w-4 h-4 mr-1" /> :
+                                <CalendarIcon className="w-4 h-4 mr-1" />
                             }
-                            {task.response_type === 'acknowledge' ? 'Уведомление' : 'Выполнение'}
+                            {RESPONSE_TYPE_LABELS[task.response_type] || task.response_type}
                           </span>
                           {task.deadline && (
                             <span className="flex items-center">
@@ -634,6 +709,10 @@ export const TasksPage: React.FC = () => {
           setIsDetailsModalOpen(false);
           handleEdit(task);
         }}
+        onApproveResponse={handleApproveResponse}
+        onRejectResponse={handleRejectResponse}
+        onDeleteProof={handleDeleteProof}
+        isVerifying={approveResponseMutation.isPending || rejectResponseMutation.isPending}
       />
 
       <TaskModal
@@ -685,6 +764,48 @@ export const TasksPage: React.FC = () => {
             disabled={updateStatusMutation.isPending}
           >
             Завершить для всех
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Модальное окно загрузки доказательств */}
+      <Modal
+        isOpen={!!proofUploadTask}
+        onClose={() => {
+          setProofUploadTask(null);
+          setProofFiles([]);
+        }}
+        title="Загрузка доказательств"
+        size="lg"
+      >
+        <Modal.Body>
+          <p className="text-gray-700 dark:text-gray-300 mb-4">
+            Для выполнения задачи "{proofUploadTask?.title}" необходимо загрузить доказательства.
+          </p>
+          <MultiFileUpload
+            files={proofFiles}
+            onChange={setProofFiles}
+            disabled={proofUploadMutation.isPending}
+          />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setProofUploadTask(null);
+              setProofFiles([]);
+            }}
+            disabled={proofUploadMutation.isPending}
+          >
+            Отмена
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleProofUploadSubmit}
+            disabled={proofFiles.length === 0 || proofUploadMutation.isPending}
+            isLoading={proofUploadMutation.isPending}
+          >
+            Отправить на проверку
           </Button>
         </Modal.Footer>
       </Modal>
