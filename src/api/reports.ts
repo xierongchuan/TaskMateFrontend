@@ -38,14 +38,48 @@ export interface ReportData {
   }>;
 }
 
+export interface IssueDetail {
+  id: number;
+  title: string;
+  subtitle?: string;
+  date?: string;
+  type: 'task' | 'shift' | 'user';
+  user_id?: number;
+  score?: number;
+}
+
+export interface IssueDetailsResponse {
+  issue_type: string;
+  items: IssueDetail[];
+}
+
 export const reportsApi = {
-  getReport: async (dateFrom: string, dateTo: string): Promise<ReportData> => {
-    const response = await apiClient.get<ReportData>('/reports', {
-      params: {
-        date_from: dateFrom,
-        date_to: dateTo,
-      },
-    });
+  getReport: async (dateFrom: string, dateTo: string, dealershipId?: number | null): Promise<ReportData> => {
+    const params: { date_from: string; date_to: string; dealership_id?: number } = {
+      date_from: dateFrom,
+      date_to: dateTo,
+    };
+    if (dealershipId) {
+      params.dealership_id = dealershipId;
+    }
+    const response = await apiClient.get<ReportData>('/reports', { params });
+    return response.data;
+  },
+
+  getIssueDetails: async (
+    issueType: string,
+    dateFrom: string,
+    dateTo: string,
+    dealershipId?: number | null
+  ): Promise<IssueDetailsResponse> => {
+    const params: { date_from: string; date_to: string; dealership_id?: number } = {
+      date_from: dateFrom,
+      date_to: dateTo,
+    };
+    if (dealershipId) {
+      params.dealership_id = dealershipId;
+    }
+    const response = await apiClient.get<IssueDetailsResponse>(`/reports/issues/${issueType}`, { params });
     return response.data;
   },
 };

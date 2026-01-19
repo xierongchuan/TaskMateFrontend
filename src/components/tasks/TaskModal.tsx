@@ -7,6 +7,7 @@ import { usersApi } from '../../api/users';
 import { DealershipSelector } from '../common/DealershipSelector';
 import { UserCheckboxList } from '../common/UserCheckboxList';
 import { TaskNotificationSettings } from './TaskNotificationSettings';
+import { Alert } from '../ui';
 import {
   TASK_PRIORITIES,
   TASK_TYPES,
@@ -55,6 +56,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
   // Watch dealership_id to fetch users
   const dealershipId = watch('dealership_id');
   const assignments = watch('assignments') || []; // Ensure array
+  const taskType = watch('task_type');
 
   // Local state for tags input string
   const [tagsInput, setTagsInput] = useState('');
@@ -113,25 +115,46 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
     }
   }, [isOpen, task, reset]);
 
-  // Handle dealership change side effects
-  // We use a useEffect to detect change if we wanted to clear assignments,
-  // BUT be careful not to clear on initial load.
-  // Better approach: In the Controller onChange for dealership, clear assignments there.
+  // Автоматическое определение типа задачи на основе количества исполнителей
+  useEffect(() => {
+    const assignmentCount = (assignments as number[]).length;
+
+    // Если выбран 1 исполнитель - индивидуальная
+    // Если выбрано 2+ исполнителя - групповая
+    if (assignmentCount === 1 && taskType !== TASK_TYPES.INDIVIDUAL) {
+      setValue('task_type', TASK_TYPES.INDIVIDUAL);
+    } else if (assignmentCount > 1 && taskType !== TASK_TYPES.GROUP) {
+      setValue('task_type', TASK_TYPES.GROUP);
+    }
+  }, [assignments, taskType, setValue]);
 
   /**
    * Обработка ошибок API с учётом error_type.
    */
-  const handleApiError = (error: any, defaultMessage: string): void => {
-    const errorData = error.response?.data as ApiErrorResponse | undefined;
+  const handleApiError = (error: unknown, defaultMessage: string): void => {
+    const errorData = (error as { response?: { data?: ApiErrorResponse } })?.response?.data;
     const errorType = errorData?.error_type;
     const message = errorData?.message;
+    const validationErrors = errorData?.errors;
 
+    // Проверяем валидационные ошибки
+    if (validationErrors && Object.keys(validationErrors).length > 0) {
+      // Берём первую ошибку из списка
+      const firstErrorKey = Object.keys(validationErrors)[0];
+      const firstErrorMessage = validationErrors[firstErrorKey][0];
+      setServerError(firstErrorMessage || 'Проверьте правильность заполнения формы');
+      return;
+    }
+
+    // Обрабатываем специфичные типы ошибок
     if (errorType === 'duplicate_task') {
       setServerError('Такая задача уже существует. Измените название или параметры.');
     } else if (errorType === 'access_denied') {
       setServerError('У вас нет доступа для выполнения этого действия.');
+    } else if (message) {
+      setServerError(message);
     } else {
-      setServerError(message || defaultMessage);
+      setServerError(defaultMessage || 'Проверьте правильность заполнения формы и повторите попытку');
     }
   };
 
@@ -145,7 +168,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
       queryClient.invalidateQueries({ queryKey: ['task-generators'] });
       onClose();
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleApiError(error, 'Ошибка при создании задачи');
     },
   });
@@ -160,7 +183,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
       queryClient.invalidateQueries({ queryKey: ['task-generators'] });
       onClose();
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleApiError(error, 'Ошибка при обновлении задачи');
     },
   });
@@ -209,9 +232,13 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
               </h3>
 
               {serverError && (
-                <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
-                  <span className="block sm:inline">{serverError}</span>
-                </div>
+                <Alert
+                  variant="error"
+                  title="Ошибка"
+                  message={serverError}
+                  onClose={() => setServerError(null)}
+                  className="mb-4"
+                />
               )}
 
               <div className="space-y-4 max-h-[70vh] overflow-y-auto">
@@ -277,12 +304,14 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Тип задачи</label>
                     <select
                       {...register('task_type')}
-                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      disabled
+                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white opacity-75 cursor-not-allowed"
                     >
                       {Object.entries(TASK_TYPE_LABELS).map(([value, label]) => (
                         <option key={value} value={value}>{label}</option>
                       ))}
                     </select>
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Определяется автоматически по количеству исполнителей</p>
                   </div>
 
                   <div>

@@ -11,6 +11,9 @@ export type { BadgeProps, BadgeVariant, BadgeSize } from './Badge';
 export { Tag } from './Tag';
 export type { TagProps } from './Tag';
 
+export { Alert } from './Alert';
+export type { AlertProps, AlertVariant } from './Alert';
+
 export { Input } from './Input';
 export type { InputProps, InputSize } from './Input';
 

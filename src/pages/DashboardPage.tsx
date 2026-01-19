@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../hooks/useAuth';
 import { dashboardApi } from '../api/dashboard';
+import { tasksApi } from '../api/tasks';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import {
@@ -61,6 +62,16 @@ export const DashboardPage: React.FC = () => {
   const handleOpenTask = (task: Task) => {
     setSelectedTask(task);
     setIsDetailsOpen(true);
+  };
+
+  const handleOpenTaskById = async (taskId: number) => {
+    try {
+      const task = await tasksApi.getTask(taskId);
+      setSelectedTask(task);
+      setIsDetailsOpen(true);
+    } catch (error) {
+      console.error('Failed to load task:', error);
+    }
   };
 
   if (isLoading) {
@@ -264,7 +275,11 @@ export const DashboardPage: React.FC = () => {
           {dashboardData?.recent_tasks && dashboardData.recent_tasks.length > 0 ? (
             <div className="space-y-3">
               {dashboardData.recent_tasks.slice(0, 5).map((task) => (
-                <div key={task.id} className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div
+                  key={task.id}
+                  onClick={() => handleOpenTaskById(task.id)}
+                  className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600/50 transition-colors"
+                >
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-gray-900 dark:text-white text-sm truncate">{task.title}</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">

@@ -409,6 +409,42 @@ export const ProfilePage: React.FC = () => {
                     </div>
                   </div>
 
+                  {/* Completion Rate Progress - Only if has tasks */}
+                  {showTaskStats && myStats && (myStats.completed_tasks > 0 || myStats.overdue_tasks > 0) && (
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Выполнение в срок</h3>
+                      {(() => {
+                        const total = myStats.completed_tasks + myStats.overdue_tasks;
+                        const rate = total > 0 ? Math.round((myStats.completed_tasks / total) * 100) : 100;
+                        const textColorClass = rate >= 80 ? 'text-green-600 dark:text-green-400' : rate >= 60 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400';
+                        const bgColorClass = rate >= 80 ? 'bg-green-500' : rate >= 60 ? 'bg-yellow-500' : 'bg-red-500';
+                        return (
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-600 dark:text-gray-400">
+                                {myStats.completed_tasks} из {total} задач выполнено в срок
+                              </span>
+                              <span className={`text-2xl font-bold ${textColorClass}`}>
+                                {rate}%
+                              </span>
+                            </div>
+                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4">
+                              <div
+                                className={`h-4 rounded-full transition-all duration-500 ${bgColorClass}`}
+                                style={{ width: `${rate}%` }}
+                              />
+                            </div>
+                            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                              <span>0%</span>
+                              <span>50%</span>
+                              <span>100%</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
+
                   {/* Task Statistics Chart - Only if relevant */}
                   {showTaskStats && myStats && (
                     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">

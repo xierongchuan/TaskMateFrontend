@@ -3,6 +3,27 @@ export type TaskStatus = 'pending' | 'acknowledged' | 'pending_review' | 'comple
 export type TaskType = 'individual' | 'group';
 export type ResponseType = 'acknowledge' | 'complete';
 export type TaskPriority = 'low' | 'medium' | 'high';
+export type TaskResponseStatus = 'acknowledged' | 'pending_review' | 'completed' | 'postponed';
+
+export interface TaskResponseUser {
+  id: number;
+  full_name: string;
+}
+
+export interface TaskResponse {
+  id: number;
+  user_id: number;
+  status: TaskResponseStatus;
+  comment: string | null;
+  responded_at: string | null;
+  user: TaskResponseUser | null;
+}
+
+export interface CompletionProgress {
+  total_assignees: number;
+  completed_count: number;
+  percentage: number;
+}
 
 export interface Task {
   id: number;
@@ -40,6 +61,8 @@ export interface Task {
       full_name: string;
     };
   }[];
+  responses?: TaskResponse[];
+  completion_progress?: CompletionProgress;
   notification_settings?: Record<string, { enabled?: boolean; offset?: number }>;
 }
 

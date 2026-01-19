@@ -10,6 +10,7 @@ export interface TasksFilters {
   response_type?: string;
   dealership_id?: number;
   created_by?: number;
+  assigned_to?: number;
   per_page?: number;
   page?: number;
   priority?: string;

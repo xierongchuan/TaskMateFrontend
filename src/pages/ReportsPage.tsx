@@ -11,6 +11,9 @@ import {
   ArrowDownTrayIcon
 } from '@heroicons/react/24/outline';
 import { reportsApi } from '../api/reports';
+import { UserStatsModal, type EmployeePerformance } from '../components/reports/UserStatsModal';
+import { IssueDetailsModal } from '../components/reports/IssueDetailsModal';
+import { DealershipSelector } from '../components/common/DealershipSelector';
 
 // Унифицированные компоненты
 import {
@@ -27,6 +30,9 @@ import {
 
 export const ReportsPage: React.FC = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'custom'>('week');
+  const [selectedEmployee, setSelectedEmployee] = useState<EmployeePerformance | null>(null);
+  const [selectedIssue, setSelectedIssue] = useState<{ type: string; description: string } | null>(null);
+  const [dealershipId, setDealershipId] = useState<number | null>(null);
   const [dateRange, setDateRange] = useState({
     from: format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd'),
     to: format(endOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd'),
@@ -34,8 +40,8 @@ export const ReportsPage: React.FC = () => {
   const [reportFormat, setReportFormat] = useState<'json' | 'pdf'>('json');
 
   const { data: reportData, isLoading, refetch } = useQuery({
-    queryKey: ['reports', dateRange.from, dateRange.to],
-    queryFn: () => reportsApi.getReport(dateRange.from, dateRange.to),
+    queryKey: ['reports', dateRange.from, dateRange.to, dealershipId],
+    queryFn: () => reportsApi.getReport(dateRange.from, dateRange.to, dealershipId),
     enabled: !!dateRange.from && !!dateRange.to,
   });
 
@@ -159,48 +165,62 @@ export const ReportsPage: React.FC = () => {
       {/* Period Selector */}
       <Card className="mb-6">
         <Card.Body>
-          <div className="space-y-4 sm:space-y-0 sm:flex sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-            {/* Period Buttons */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:block">Период:</span>
-              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                <Button
-                  variant={selectedPeriod === 'week' ? 'primary' : 'secondary'}
-                  onClick={() => handlePeriodChange('week')}
-                  fullWidth={false}
-                >
-                  Эта неделя
-                </Button>
-                <Button
-                  variant={selectedPeriod === 'month' ? 'primary' : 'secondary'}
-                  onClick={() => handlePeriodChange('month')}
-                  fullWidth={false}
-                >
-                  Этот месяц
-                </Button>
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              {/* Period Buttons */}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:block">Период:</span>
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                  <Button
+                    variant={selectedPeriod === 'week' ? 'primary' : 'secondary'}
+                    onClick={() => handlePeriodChange('week')}
+                    fullWidth={false}
+                  >
+                    Эта неделя
+                  </Button>
+                  <Button
+                    variant={selectedPeriod === 'month' ? 'primary' : 'secondary'}
+                    onClick={() => handlePeriodChange('month')}
+                    fullWidth={false}
+                  >
+                    Этот месяц
+                  </Button>
+                </div>
+              </div>
+
+              {/* Date Range */}
+              <div className="flex flex-col gap-2 sm:gap-3">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:block">Диапазон дат:</span>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block sm:hidden">Диапазон дат:</label>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                  <input
+                    type="date"
+                    value={dateRange.from}
+                    onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
+                    className="w-full sm:w-auto px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                  <span className="text-gray-500 dark:text-gray-400 text-center sm:text-left hidden sm:block">—</span>
+                  <div className="text-center sm:hidden text-gray-500 dark:text-gray-400 text-sm mb-1">до</div>
+                  <input
+                    type="date"
+                    value={dateRange.to}
+                    onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
+                    className="w-full sm:w-auto px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Date Range */}
-            <div className="flex flex-col gap-2 sm:gap-3">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:block">Диапазон дат:</span>
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block sm:hidden">Диапазон дат:</label>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                <input
-                  type="date"
-                  value={dateRange.from}
-                  onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
-                  className="w-full sm:w-auto px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-                <span className="text-gray-500 dark:text-gray-400 text-center sm:text-left hidden sm:block">—</span>
-                <div className="text-center sm:hidden text-gray-500 dark:text-gray-400 text-sm mb-1">до</div>
-                <input
-                  type="date"
-                  value={dateRange.to}
-                  onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
-                  className="w-full sm:w-auto px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
+            {/* Dealership Filter */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Автосалон:</label>
+              <DealershipSelector
+                value={dealershipId}
+                onChange={(id) => setDealershipId(id)}
+                showAllOption={true}
+                allOptionLabel="Все автосалоны"
+                className="w-full sm:w-auto px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
             </div>
           </div>
         </Card.Body>
@@ -320,7 +340,11 @@ export const ReportsPage: React.FC = () => {
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {reportData.employees_performance.map((employee) => (
-                    <tr key={employee.employee_id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <tr
+                      key={employee.employee_id}
+                      onClick={() => setSelectedEmployee(employee)}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
+                    >
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                         {employee.employee_name}
                       </td>
@@ -347,25 +371,37 @@ export const ReportsPage: React.FC = () => {
 
           {/* Top Issues */}
           <Section title="Топ проблем за период">
-            <div className="space-y-3">
-              {reportData.top_issues.map((issue, index) => (
-                <div key={issue.issue_type} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold ${index === 0 ? 'bg-red-500' : index === 1 ? 'bg-yellow-500' : 'bg-orange-500'
-                      }`}>
-                      {index + 1}
+            {reportData.top_issues.length > 0 ? (
+              <div className="space-y-3">
+                {reportData.top_issues.map((issue, index) => (
+                  <div
+                    key={issue.issue_type}
+                    onClick={() => setSelectedIssue({ type: issue.issue_type, description: issue.description })}
+                    className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600/50 transition-colors"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold ${index === 0 ? 'bg-red-500' : index === 1 ? 'bg-yellow-500' : 'bg-orange-500'
+                        }`}>
+                        {index + 1}
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900 dark:text-white">{issue.description}</h4>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{issue.count} инцидентов</p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-medium text-gray-900 dark:text-white">{issue.description}</h4>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{issue.count} инцидентов</p>
+                    <div className="text-right">
+                      <span className="text-2xl font-bold text-gray-900 dark:text-white">{issue.count}</span>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <span className="text-2xl font-bold text-gray-900 dark:text-white">{issue.count}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <CheckCircleIcon className="w-12 h-12 mx-auto mb-2 text-green-500" />
+                <p className="font-medium text-green-600 dark:text-green-400">Проблем не обнаружено</p>
+                <p className="text-sm">За выбранный период все показатели в норме</p>
+              </div>
+            )}
           </Section>
         </div>
       ) : (
@@ -375,6 +411,23 @@ export const ReportsPage: React.FC = () => {
           description="Выберите период для генерации отчета"
         />
       )}
+
+      <UserStatsModal
+        isOpen={!!selectedEmployee}
+        onClose={() => setSelectedEmployee(null)}
+        employee={selectedEmployee}
+        periodLabel={`с ${dateRange.from} по ${dateRange.to}`}
+      />
+
+      <IssueDetailsModal
+        isOpen={!!selectedIssue}
+        onClose={() => setSelectedIssue(null)}
+        issueType={selectedIssue?.type ?? null}
+        issueDescription={selectedIssue?.description ?? ''}
+        dateFrom={dateRange.from}
+        dateTo={dateRange.to}
+        dealershipId={dealershipId}
+      />
     </PageContainer>
   );
 };

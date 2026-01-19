@@ -9,6 +9,8 @@ import { MonthDayPicker } from '../common/MonthDayPicker';
 import { TaskNotificationSettings } from '../tasks/TaskNotificationSettings';
 import { useShiftConfig } from '../../hooks/useSettings';
 import type { TaskGenerator, CreateTaskGeneratorRequest, GeneratorRecurrence } from '../../types/taskGenerator';
+import type { ApiErrorResponse } from '../../types/task';
+import { Alert } from '../ui';
 import { XMarkIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 interface TaskGeneratorModalProps {
   isOpen: boolean;
@@ -23,6 +25,7 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
 }) => {
   const queryClient = useQueryClient();
   const isEditing = !!generator;
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -92,13 +95,60 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
         notification_settings: {},
       });
     }
+    setServerError(null);
   }, [generator, isOpen]);
+
+  // Автоматическое определение типа задачи на основе количества исполнителей
+  useEffect(() => {
+    const assignmentCount = formData.assignments.length;
+
+    // Если выбран 1 исполнитель - индивидуальная
+    // Если выбрано 2+ исполнителя - групповая
+    if (assignmentCount === 1 && formData.task_type !== 'individual') {
+      setFormData((prev) => ({ ...prev, task_type: 'individual' }));
+    } else if (assignmentCount > 1 && formData.task_type !== 'group') {
+      setFormData((prev) => ({ ...prev, task_type: 'group' }));
+    }
+  }, [formData.assignments, formData.task_type]);
+
+  /**
+   * Обработка ошибок API с учётом error_type.
+   */
+  const handleApiError = (error: unknown, defaultMessage: string): void => {
+    const errorData = (error as { response?: { data?: ApiErrorResponse } })?.response?.data;
+    const errorType = errorData?.error_type;
+    const message = errorData?.message;
+    const validationErrors = errorData?.errors;
+
+    // Проверяем валидационные ошибки
+    if (validationErrors && Object.keys(validationErrors).length > 0) {
+      // Берём первую ошибку из списка
+      const firstErrorKey = Object.keys(validationErrors)[0];
+      const firstErrorMessage = validationErrors[firstErrorKey][0];
+      setServerError(firstErrorMessage || 'Проверьте правильность заполнения формы');
+      return;
+    }
+
+    // Обрабатываем специфичные типы ошибок
+    if (errorType === 'duplicate_task') {
+      setServerError('Такой генератор уже существует. Измените название или параметры.');
+    } else if (errorType === 'access_denied') {
+      setServerError('У вас нет доступа для выполнения этого действия.');
+    } else if (message) {
+      setServerError(message);
+    } else {
+      setServerError(defaultMessage || 'Проверьте правильность заполнения формы и повторите попытку');
+    }
+  };
 
   const createMutation = useMutation({
     mutationFn: (data: CreateTaskGeneratorRequest) => taskGeneratorsApi.createGenerator(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-generators'] });
       onClose();
+    },
+    onError: (error: unknown) => {
+      handleApiError(error, 'Ошибка при создании генератора');
     },
   });
 
@@ -109,10 +159,14 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
       queryClient.invalidateQueries({ queryKey: ['task-generators'] });
       onClose();
     },
+    onError: (error: unknown) => {
+      handleApiError(error, 'Ошибка при обновлении генератора');
+    },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setServerError(null);
 
     const payload: CreateTaskGeneratorRequest = {
       title: formData.title,
@@ -218,6 +272,16 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
                   <XMarkIcon className="h-6 w-6" />
                 </button>
               </div>
+
+              {serverError && (
+                <Alert
+                  variant="error"
+                  title="Ошибка"
+                  message={serverError}
+                  onClose={() => setServerError(null)}
+                  className="mb-4"
+                />
+              )}
 
               <div className="space-y-4">
                 {/* Title */}
@@ -360,12 +424,13 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Тип задачи</label>
                     <select
                       value={formData.task_type}
-                      onChange={(e) => setFormData({ ...formData, task_type: e.target.value as 'individual' | 'group' })}
-                      className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      disabled
+                      className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white opacity-75 cursor-not-allowed"
                     >
                       <option value="individual">Индивидуальная</option>
                       <option value="group">Групповая</option>
                     </select>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Определяется автоматически</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Тип ответа</label>

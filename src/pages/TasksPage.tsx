@@ -7,6 +7,7 @@ import { usePagination } from '../hooks/usePagination';
 import { TaskModal } from '../components/tasks/TaskModal';
 import { TaskDetailsModal } from '../components/tasks/TaskDetailsModal';
 import { DealershipSelector } from '../components/common/DealershipSelector';
+import { UserSelector } from '../components/common/UserSelector';
 import type { Task } from '../types/task';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -61,6 +62,7 @@ export const TasksPage: React.FC = () => {
     response_type: searchParams.get('response_type') || '',
     date_range: searchParams.get('date_range') || 'all',
     dealership_id: searchParams.get('dealership_id') ? Number(searchParams.get('dealership_id')) : null,
+    assigned_to: searchParams.get('assigned_to') ? Number(searchParams.get('assigned_to')) : null,
     tags: searchParams.getAll('tags') || [],
     priority: searchParams.get('priority') || '',
     from_generator: searchParams.get('from_generator') || '',
@@ -80,6 +82,7 @@ export const TasksPage: React.FC = () => {
         response_type?: string;
         date_range?: string;
         dealership_id?: number;
+        assigned_to?: number;
         tags?: string[];
         priority?: string;
         from_generator?: string;
@@ -191,6 +194,7 @@ export const TasksPage: React.FC = () => {
       response_type: '',
       date_range: 'all',
       dealership_id: null,
+      assigned_to: null,
       tags: [],
       priority: '',
       from_generator: '',
@@ -271,7 +275,7 @@ export const TasksPage: React.FC = () => {
 
   const hasActiveFilters = filters.search || filters.status || filters.priority ||
     filters.task_type || filters.response_type || filters.from_generator ||
-    filters.date_range !== 'all' || filters.dealership_id;
+    filters.date_range !== 'all' || filters.dealership_id || filters.assigned_to;
 
   return (
     <PageContainer>
@@ -362,10 +366,22 @@ export const TasksPage: React.FC = () => {
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Автосалон</label>
             <DealershipSelector
               value={filters.dealership_id}
-              onChange={(dealershipId) => setFilters({ ...filters, dealership_id: dealershipId })}
+              onChange={(dealershipId) => setFilters({ ...filters, dealership_id: dealershipId, assigned_to: null })}
               showAllOption={true}
               allOptionLabel="Все автосалоны"
               className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Исполнитель</label>
+            <UserSelector
+              dealershipId={filters.dealership_id}
+              value={filters.assigned_to}
+              onChange={(userId) => setFilters({ ...filters, assigned_to: userId })}
+              showAllOption={true}
+              allOptionLabel="Все сотрудники"
+              noDealershipMessage="Сначала выберите автосалон"
             />
           </div>
         </FilterPanel.Grid>
@@ -424,7 +440,16 @@ export const TasksPage: React.FC = () => {
                         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-500 dark:text-gray-400">
                           <span className="flex items-center">
                             <UserIcon className="w-4 h-4 mr-1" />
-                            {task.task_type === 'individual' ? 'Индивидуальная' : 'Групповая'}
+                            {task.task_type === 'individual' ? 'Индивидуальная' : (
+                              <span>
+                                Групповая
+                                {task.completion_progress && (
+                                  <span className="ml-1 text-green-600 dark:text-green-400">
+                                    ({task.completion_progress.completed_count}/{task.completion_progress.total_assignees})
+                                  </span>
+                                )}
+                              </span>
+                            )}
                           </span>
                           <span className="flex items-center">
                             {task.response_type === 'acknowledge' ?
@@ -517,7 +542,16 @@ export const TasksPage: React.FC = () => {
                     )}
                     <div className="flex items-center">
                       <UserIcon className="w-4 h-4 mr-2" />
-                      {task.task_type === 'individual' ? 'Индивидуальная' : 'Групповая'}
+                      {task.task_type === 'individual' ? 'Индивидуальная' : (
+                        <span>
+                          Групповая
+                          {task.completion_progress && (
+                            <span className="ml-1 text-green-600 dark:text-green-400">
+                              ({task.completion_progress.completed_count}/{task.completion_progress.total_assignees})
+                            </span>
+                          )}
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center">
                       <BuildingOfficeIcon className="w-4 h-4 mr-2" />
