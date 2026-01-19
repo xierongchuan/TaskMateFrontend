@@ -241,4 +241,4 @@ VITE_API_BASE_URL=http://localhost:8007/api/v1
 ## Лицензия
 
 Proprietary License
-Copyright © 2023-2026 谢榕川 All rights reserved.
+Copyright © 2023-2026 [https://github.com/xierongchuan](https://github.com/xierongchuan). All rights reserved.
