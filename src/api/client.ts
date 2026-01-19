@@ -43,6 +43,18 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error: AxiosError) => {
+    // Handle maintenance mode (503)
+    if (error.response?.status === 503) {
+      const errorData = error.response.data as { error_type?: string };
+      if (errorData?.error_type === 'maintenance_mode') {
+        console.warn('System is in maintenance mode');
+        // Redirect to maintenance page if not already there
+        if (!window.location.pathname.includes('/maintenance')) {
+          window.location.href = '/maintenance';
+        }
+      }
+    }
+
     // Only clear auth state on 401 errors
     // Don't clear on network errors or other server errors
     if (error.response?.status === 401) {

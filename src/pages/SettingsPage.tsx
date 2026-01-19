@@ -150,6 +150,15 @@ export const SettingsPage: React.FC = () => {
         onSuccess: () => showToast({ type: 'success', message: 'Настройки задач сохранены' }),
         onError: () => showToast({ type: 'error', message: 'Ошибка сохранения настроек' }),
       });
+    } else if (activeTab === 'maintenance') {
+      // maintenance_mode всегда глобальная настройка (dealership_id = undefined)
+      updateBotConfigMutation.mutate({
+        maintenance_mode: botConfig.maintenance_mode,
+        dealership_id: undefined, // Всегда глобальная
+      }, {
+        onSuccess: () => showToast({ type: 'success', message: 'Режим обслуживания обновлен' }),
+        onError: () => showToast({ type: 'error', message: 'Ошибка сохранения режима обслуживания' }),
+      });
     } else {
       updateBotConfigMutation.mutate({
         ...botConfig,
@@ -660,9 +669,17 @@ export const SettingsPage: React.FC = () => {
                     <div>
                       <div className="flex items-center gap-3 mb-4">
                         <h2 className="text-xl font-semibold text-red-700 dark:text-red-400">Опасная зона</h2>
-                        <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-600">
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-700">
                           Глобально
                         </span>
+                      </div>
+
+                      {/* Информационное сообщение */}
+                      <div className="mb-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                        <p className="text-sm text-blue-800 dark:text-blue-300">
+                          <strong>Внимание:</strong> Все настройки на этой странице применяются глобально ко всей системе,
+                          независимо от выбранного дилерского центра.
+                        </p>
                       </div>
 
                       <div className="space-y-4">
@@ -673,25 +690,47 @@ export const SettingsPage: React.FC = () => {
                                 <h4 className="font-medium text-gray-900 dark:text-white">Проверка бота</h4>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">Отправить тестовое сообщение для проверки связи</p>
                               </div>
-                              <Button variant="secondary" onClick={handleTestBot}>
+                              <Button variant="secondary" type="button" onClick={handleTestBot}>
                                 Проверить
                               </Button>
                             </div>
                           </Card.Body>
                         </Card>
 
-                        <div className="bg-red-50 dark:bg-red-900/10 p-6 rounded-xl border border-red-100 dark:border-red-900/30 flex items-start justify-between">
-                          <div>
-                            <h4 className="font-medium text-red-900 dark:text-red-300">Режим обслуживания</h4>
-                            <p className="text-sm text-red-700 dark:text-red-400 mb-2">Временно заблокировать доступ для всех пользователей кроме администраторов.</p>
+                        <div className="bg-red-50 dark:bg-red-900/10 p-6 rounded-xl border border-red-100 dark:border-red-900/30">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1">
+                              <h4 className="font-medium text-red-900 dark:text-red-300 flex items-center gap-2">
+                                Режим обслуживания
+                                <span className="text-xs px-2 py-0.5 rounded bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200">
+                                  Только для владельцев
+                                </span>
+                              </h4>
+                              <p className="text-sm text-red-700 dark:text-red-400 mt-2">
+                                При активации доступ к системе будет заблокирован для всех пользователей, кроме владельцев (роль "owner").
+                              </p>
+                            </div>
+                            <WrenchIcon className="w-8 h-8 text-red-200 dark:text-red-800 flex-shrink-0 ml-4" />
+                          </div>
+                          <div className="border-t border-red-200 dark:border-red-800 pt-4">
                             <Checkbox
                               checked={botConfig.maintenance_mode || false}
                               onChange={(e) => setBotConfig({ ...botConfig, maintenance_mode: e.target.checked })}
-                              label="Активировать режим"
-                              className="mt-2"
+                              label={
+                                <span className="font-medium">
+                                  {botConfig.maintenance_mode
+                                    ? '✓ Режим обслуживания активен'
+                                    : 'Активировать режим обслуживания'
+                                  }
+                                </span>
+                              }
                             />
+                            {botConfig.maintenance_mode && (
+                              <p className="mt-2 ml-7 text-xs text-red-600 dark:text-red-400">
+                                ⚠ Система сейчас в режиме обслуживания! Обычные пользователи не могут войти.
+                              </p>
+                            )}
                           </div>
-                          <WrenchIcon className="w-8 h-8 text-red-200 dark:text-red-800" />
                         </div>
                       </div>
                     </div>

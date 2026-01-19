@@ -5,6 +5,7 @@ import { useAuthStore } from './stores/authStore';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { Layout } from './components/layout/Layout';
 import { LoginPage } from './pages/LoginPage';
+import { MaintenancePage } from './pages/MaintenancePage';
 import { DashboardPage } from './pages/DashboardPage';
 import { TasksPage } from './pages/TasksPage';
 import { TaskGeneratorsPage } from './pages/TaskGeneratorsPage';
@@ -70,6 +71,8 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <BrowserRouter>
             <Routes>
+              <Route path="/maintenance" element={<MaintenancePage />} />
+
               <Route
                 path="/login"
                 element={
