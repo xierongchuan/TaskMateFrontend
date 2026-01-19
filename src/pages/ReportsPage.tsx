@@ -79,9 +79,11 @@ export const ReportsPage: React.FC = () => {
   const getStatusBadgeVariant = (status: string): 'success' | 'danger' | 'info' | 'warning' | 'gray' => {
     switch (status) {
       case 'completed': return 'success';
+      case 'completed_late': return 'warning';
       case 'overdue': return 'danger';
-      case 'active': return 'info';
+      case 'pending': return 'info';
       case 'pending_review': return 'warning';
+      case 'acknowledged': return 'info';
       default: return 'gray';
     }
   };
@@ -89,9 +91,11 @@ export const ReportsPage: React.FC = () => {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'completed': return 'Выполнено';
+      case 'completed_late': return 'Выполнено с опозданием';
       case 'overdue': return 'Просрочено';
-      case 'active': return 'В работе';
+      case 'pending': return 'Ожидает';
       case 'pending_review': return 'На проверке';
+      case 'acknowledged': return 'Принято';
       default: return status;
     }
   };
@@ -105,9 +109,11 @@ export const ReportsPage: React.FC = () => {
   const getProgressBarColor = (status: string) => {
     switch (status) {
       case 'completed': return 'bg-green-500';
+      case 'completed_late': return 'bg-yellow-500';
       case 'overdue': return 'bg-red-500';
-      case 'active': return 'bg-blue-500';
-      case 'pending_review': return 'bg-yellow-500';
+      case 'pending': return 'bg-blue-500';
+      case 'pending_review': return 'bg-orange-500';
+      case 'acknowledged': return 'bg-cyan-500';
       default: return 'bg-gray-500';
     }
   };
