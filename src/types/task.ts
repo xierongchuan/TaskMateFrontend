@@ -53,11 +53,23 @@ export interface CreateTaskRequest {
   recurrence_time?: string;
   recurrence_day_of_week?: number;
   recurrence_day_of_month?: number;
-  appear_date?: string;
-  deadline?: string;
-  dealership_id: number;
+  appear_date: string;  // required по StoreTaskRequest
+  deadline: string;     // required по StoreTaskRequest
+  dealership_id?: number; // nullable по StoreTaskRequest
   tags?: string[];
-  assignments: number[];
+  assignments?: number[]; // nullable по StoreTaskRequest
   notification_settings?: Record<string, { enabled?: boolean; offset?: number }>;
   priority?: TaskPriority;
+}
+
+/**
+ * Типы ошибок от API.
+ */
+export type ApiErrorType = 'duplicate_task' | 'access_denied' | 'validation_error';
+
+export interface ApiErrorResponse {
+  success?: boolean;
+  message: string;
+  error_type?: ApiErrorType;
+  errors?: Record<string, string[]>;
 }

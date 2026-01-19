@@ -4,7 +4,7 @@ import { usersApi } from '../../api/users';
 import { DealershipSelector } from '../common/DealershipSelector';
 import { DealershipCheckboxList } from '../common/DealershipCheckboxList';
 import { useDealerships } from '../../hooks/useDealerships';
-import type { User, CreateUserRequest, UpdateUserRequest, Role } from '../../types/user';
+import type { User, CreateUserRequest, UpdateUserRequest, Role, ApiErrorResponse } from '../../types/user';
 
 interface UserModalProps {
   isOpen: boolean;
@@ -15,6 +15,7 @@ interface UserModalProps {
 export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) => {
   const queryClient = useQueryClient();
   const { data: dealershipsData } = useDealerships();
+  const [serverError, setServerError] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<CreateUserRequest & UpdateUserRequest>>({
     login: '',
     password: '',
@@ -23,10 +24,25 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
     role: 'employee',
     dealership_id: undefined,
     dealership_ids: [],
-
   });
 
+  /**
+   * Обработка ошибок API с учётом error_type.
+   */
+  const handleApiError = (error: any, defaultMessage: string): void => {
+    const errorData = error.response?.data as ApiErrorResponse | undefined;
+    const errorType = errorData?.error_type;
+    const message = errorData?.message;
+
+    if (errorType === 'access_denied') {
+      setServerError('У вас нет доступа для выполнения этого действия.');
+    } else {
+      setServerError(message || defaultMessage);
+    }
+  };
+
   useEffect(() => {
+    setServerError(null);
     if (user) {
       setFormData({
         login: user.login,
@@ -35,7 +51,6 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
         role: user.role,
         dealership_id: user.dealership_id || undefined,
         dealership_ids: user.dealerships?.map(d => d.id) || [],
-
       });
     } else {
       setFormData({
@@ -46,7 +61,6 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
         role: 'employee',
         dealership_id: undefined,
         dealership_ids: [],
-
       });
     }
   }, [user]);
@@ -58,6 +72,9 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       onClose();
     },
+    onError: (error: any) => {
+      handleApiError(error, 'Ошибка при создании пользователя');
+    },
   });
 
   const updateMutation = useMutation({
@@ -67,10 +84,14 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       onClose();
     },
+    onError: (error: any) => {
+      handleApiError(error, 'Ошибка при обновлении пользователя');
+    },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setServerError(null);
     if (user) {
       updateMutation.mutate(formData as UpdateUserRequest);
     } else {
@@ -227,13 +248,11 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
               </button>
             </div>
 
-            {(createMutation.isError || updateMutation.isError) && (
+            {serverError && (
               <div className="px-4 pb-4">
                 <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
                   <div className="text-sm text-red-700 dark:text-red-400">
-                    <p className="font-medium">
-                      {(createMutation.error as any)?.response?.data?.message || (updateMutation.error as any)?.response?.data?.message || 'Произошла ошибка'}
-                    </p>
+                    <p className="font-medium">{serverError}</p>
                     {/* Display validation errors details if available */}
                     {((createMutation.error as any)?.response?.data?.errors || (updateMutation.error as any)?.response?.data?.errors) && (
                       <ul className="list-disc pl-5 mt-2 space-y-1">

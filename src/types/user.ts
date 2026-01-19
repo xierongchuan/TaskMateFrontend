@@ -44,11 +44,23 @@ export interface CreateUserRequest {
 
 export interface UpdateUserRequest {
   password?: string;
+  current_password?: string;
   full_name?: string;
   phone_number?: string;
   phone?: string;
   role?: string;
   dealership_id?: number;
   dealership_ids?: number[];
+}
 
+/**
+ * Типы ошибок от API.
+ */
+export type ApiErrorType = 'duplicate_task' | 'access_denied' | 'validation_error';
+
+export interface ApiErrorResponse {
+  success?: boolean;
+  message: string;
+  error_type?: ApiErrorType;
+  errors?: Record<string, string[]>;
 }

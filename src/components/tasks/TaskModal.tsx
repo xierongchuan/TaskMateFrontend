@@ -15,7 +15,7 @@ import {
   TASK_TYPE_LABELS,
   RESPONSE_TYPE_LABELS
 } from '../../constants/tasks';
-import type { Task, CreateTaskRequest } from '../../types/task';
+import type { Task, CreateTaskRequest, ApiErrorResponse } from '../../types/task';
 
 interface TaskModalProps {
   isOpen: boolean;
@@ -118,6 +118,23 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
   // BUT be careful not to clear on initial load.
   // Better approach: In the Controller onChange for dealership, clear assignments there.
 
+  /**
+   * Обработка ошибок API с учётом error_type.
+   */
+  const handleApiError = (error: any, defaultMessage: string): void => {
+    const errorData = error.response?.data as ApiErrorResponse | undefined;
+    const errorType = errorData?.error_type;
+    const message = errorData?.message;
+
+    if (errorType === 'duplicate_task') {
+      setServerError('Такая задача уже существует. Измените название или параметры.');
+    } else if (errorType === 'access_denied') {
+      setServerError('У вас нет доступа для выполнения этого действия.');
+    } else {
+      setServerError(message || defaultMessage);
+    }
+  };
+
   const createMutation = useMutation({
     mutationFn: (data: CreateTaskRequest) => tasksApi.createTask(data),
     onSuccess: () => {
@@ -129,7 +146,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
       onClose();
     },
     onError: (error: any) => {
-      setServerError(error.response?.data?.message || 'Ошибка при создании задачи');
+      handleApiError(error, 'Ошибка при создании задачи');
     },
   });
 
@@ -144,7 +161,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
       onClose();
     },
     onError: (error: any) => {
-      setServerError(error.response?.data?.message || 'Ошибка при обновлении задачи');
+      handleApiError(error, 'Ошибка при обновлении задачи');
     },
   });
 
