@@ -10,6 +10,9 @@ import { DashboardPage } from './pages/DashboardPage';
 import { TasksPage } from './pages/TasksPage';
 import { TaskGeneratorsPage } from './pages/TaskGeneratorsPage';
 import { ArchivedTasksPage } from './pages/ArchivedTasksPage';
+import { PendingReviewPage } from './pages/PendingReviewPage';
+import { MyHistoryPage } from './pages/MyHistoryPage';
+import { AuditLogPage } from './pages/AuditLogPage';
 import { UsersPage } from './pages/UsersPage';
 import { ShiftsPage } from './pages/ShiftsPage';
 import { LinksPage } from './pages/LinksPage';
@@ -96,6 +99,7 @@ function App() {
                 <Route path="dashboard" element={<DashboardPage />} />
                 <Route path="profile" element={<ProfilePage />} />
                 <Route path="tasks" element={<TasksPage />} />
+                <Route path="my-history" element={<MyHistoryPage />} />
                 <Route
                   path="task-generators"
                   element={
@@ -109,6 +113,14 @@ function App() {
                   element={
                     <ProtectedRoute requiredRoles={['manager', 'owner']}>
                       <ArchivedTasksPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="pending-review"
+                  element={
+                    <ProtectedRoute requiredRoles={['manager', 'owner']}>
+                      <PendingReviewPage />
                     </ProtectedRoute>
                   }
                 />
@@ -152,6 +164,14 @@ function App() {
                   element={
                     <ProtectedRoute requiredRoles={['manager', 'owner']}>
                       <NotificationSettingsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="audit-logs"
+                  element={
+                    <ProtectedRoute requiredRoles={['owner']}>
+                      <AuditLogPage />
                     </ProtectedRoute>
                   }
                 />

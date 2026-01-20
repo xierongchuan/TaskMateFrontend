@@ -8,6 +8,8 @@ export interface DashboardData {
   completed_tasks: number;
   overdue_tasks: number;
   overdue_tasks_list?: Task[];
+  pending_review_count?: number;
+  pending_review_tasks?: Task[];
   open_shifts: number;
   late_shifts_today: number;
   // Generator metrics

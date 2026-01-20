@@ -28,6 +28,7 @@ interface TaskDetailsModalProps {
   onApproveResponse?: (responseId: number) => Promise<void>;
   onRejectResponse?: (responseId: number, reason: string) => Promise<void>;
   onDeleteProof?: (proofId: number) => Promise<void>;
+  onVerificationComplete?: () => void;
   isVerifying?: boolean;
 }
 
@@ -59,6 +60,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
   onApproveResponse,
   onRejectResponse,
   onDeleteProof,
+  onVerificationComplete,
   isVerifying = false,
 }) => {
   const permissions = usePermissions();
@@ -182,21 +184,60 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                 <UserIcon className="w-4 h-4 mr-1.5" />
                 Исполнители
               </h4>
-              {task.task_type === 'group' && task.completion_progress && (
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  {task.completion_progress.completed_count}/{task.completion_progress.total_assignees} выполнено
-                </span>
-              )}
             </div>
 
-            {/* Progress bar for group tasks */}
+            {/* Detailed progress for group tasks */}
             {task.task_type === 'group' && task.completion_progress && (
-              <div className="mb-3">
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div
-                    className="bg-green-500 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${task.completion_progress.percentage}%` }}
-                  />
+              <div className="mb-4">
+                {/* Детальный breakdown */}
+                <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs mb-2">
+                  <span className="text-green-600 dark:text-green-400">
+                    {task.completion_progress.completed_count} выполнено
+                  </span>
+                  {task.completion_progress.pending_review_count > 0 && (
+                    <span className="text-yellow-600 dark:text-yellow-400">
+                      {task.completion_progress.pending_review_count} на проверке
+                    </span>
+                  )}
+                  {task.completion_progress.rejected_count > 0 && (
+                    <span className="text-red-600 dark:text-red-400">
+                      {task.completion_progress.rejected_count} отклонено
+                    </span>
+                  )}
+                  {task.completion_progress.pending_count > 0 && (
+                    <span className="text-gray-500 dark:text-gray-400">
+                      {task.completion_progress.pending_count} ожидает
+                    </span>
+                  )}
+                  <span className="text-gray-400 dark:text-gray-500 ml-auto">
+                    всего: {task.completion_progress.total_assignees}
+                  </span>
+                </div>
+
+                {/* Многоцветный progress bar */}
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden flex">
+                  {/* Completed - green */}
+                  {task.completion_progress.completed_count > 0 && (
+                    <div
+                      className="bg-green-500 h-2 transition-all duration-300"
+                      style={{ width: `${(task.completion_progress.completed_count / task.completion_progress.total_assignees) * 100}%` }}
+                    />
+                  )}
+                  {/* Pending review - yellow */}
+                  {task.completion_progress.pending_review_count > 0 && (
+                    <div
+                      className="bg-yellow-500 h-2 transition-all duration-300"
+                      style={{ width: `${(task.completion_progress.pending_review_count / task.completion_progress.total_assignees) * 100}%` }}
+                    />
+                  )}
+                  {/* Rejected - red */}
+                  {task.completion_progress.rejected_count > 0 && (
+                    <div
+                      className="bg-red-500 h-2 transition-all duration-300"
+                      style={{ width: `${(task.completion_progress.rejected_count / task.completion_progress.total_assignees) * 100}%` }}
+                    />
+                  )}
+                  {/* Pending остается серым (background) */}
                 </div>
               </div>
             )}
@@ -238,8 +279,14 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                       <div className="mt-3">
                         <VerificationPanel
                           response={userResponse}
-                          onApprove={onApproveResponse}
-                          onReject={onRejectResponse}
+                          onApprove={async (id) => {
+                            await onApproveResponse(id);
+                            onVerificationComplete?.();
+                          }}
+                          onReject={async (id, reason) => {
+                            await onRejectResponse(id, reason);
+                            onVerificationComplete?.();
+                          }}
                           isLoading={isVerifying}
                         />
                       </div>

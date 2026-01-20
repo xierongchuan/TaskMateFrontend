@@ -296,7 +296,7 @@ export const UsersPage: React.FC = () => {
 
                       {permissions.canCreateUsers && (
                         <div className="flex flex-col gap-2">
-                          {(!permissions.isOwner && user.role === 'owner') || user.id === currentUser?.id ? null : (
+                          {(!permissions.isOwner && (user.role === 'owner' || user.role === 'manager')) || user.id === currentUser?.id ? null : (
                             <ActionButtons
                               onEdit={() => handleEdit(user)}
                               onDelete={() => handleDelete(user)}
@@ -339,7 +339,7 @@ export const UsersPage: React.FC = () => {
                     </div>
                     {permissions.canCreateUsers && (
                       <>
-                        {(!permissions.isOwner && user.role === 'owner') || user.id === currentUser?.id ? null : (
+                        {(!permissions.isOwner && (user.role === 'owner' || user.role === 'manager')) || user.id === currentUser?.id ? null : (
                           <ActionButtons
                             onEdit={() => handleEdit(user)}
                             onDelete={() => handleDelete(user)}

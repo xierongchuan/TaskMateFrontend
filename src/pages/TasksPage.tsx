@@ -6,6 +6,7 @@ import { useResponsiveViewMode } from '../hooks/useResponsiveViewMode';
 import { usePagination } from '../hooks/usePagination';
 import { TaskModal } from '../components/tasks/TaskModal';
 import { TaskDetailsModal } from '../components/tasks/TaskDetailsModal';
+import { TaskEmployeeActions } from '../components/tasks/TaskEmployeeActions';
 import { DealershipSelector } from '../components/common/DealershipSelector';
 import { UserSelector } from '../components/common/UserSelector';
 import { MultiFileUpload } from '../components/ui/MultiFileUpload';
@@ -44,12 +45,14 @@ import {
   PageHeader,
   Tag,
   Modal,
+  useToast,
 } from '../components/ui';
 import { StatusBadge, PriorityBadge, ActionButtons } from '../components/common';
 
 export const TasksPage: React.FC = () => {
   const permissions = usePermissions();
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   const [searchParams] = useSearchParams();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
@@ -193,18 +196,28 @@ export const TasksPage: React.FC = () => {
     mutationFn: ({ taskId, status, files }: { taskId: number; status: string; files: File[] }) =>
       tasksApi.updateTaskStatusWithProofs(taskId, status, files),
     onSuccess: () => {
+      showToast({ type: 'success', message: 'Доказательства отправлены на проверку' });
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       setProofUploadTask(null);
       setProofFiles([]);
+    },
+    onError: (error: unknown) => {
+      const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Ошибка загрузки файлов';
+      showToast({ type: 'error', message });
     },
   });
 
   const approveResponseMutation = useMutation({
     mutationFn: (responseId: number) => tasksApi.approveTaskResponse(responseId),
     onSuccess: () => {
+      showToast({ type: 'success', message: 'Доказательство одобрено' });
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+    onError: (error: unknown) => {
+      const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Ошибка при одобрении';
+      showToast({ type: 'error', message });
     },
   });
 
@@ -212,15 +225,25 @@ export const TasksPage: React.FC = () => {
     mutationFn: ({ responseId, reason }: { responseId: number; reason: string }) =>
       tasksApi.rejectTaskResponse(responseId, reason),
     onSuccess: () => {
+      showToast({ type: 'success', message: 'Доказательство отклонено' });
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+    onError: (error: unknown) => {
+      const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Ошибка при отклонении';
+      showToast({ type: 'error', message });
     },
   });
 
   const deleteProofMutation = useMutation({
     mutationFn: (proofId: number) => tasksApi.deleteTaskProof(proofId),
     onSuccess: () => {
+      showToast({ type: 'success', message: 'Файл удалён' });
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+    onError: (error: unknown) => {
+      const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Ошибка удаления файла';
+      showToast({ type: 'error', message });
     },
   });
 
@@ -600,6 +623,17 @@ export const TasksPage: React.FC = () => {
                           />
                         </div>
                       )}
+
+                      {/* Действия для сотрудников */}
+                      {!permissions.canManageTasks && permissions.canCompleteAssignedTasks && permissions.userId && (
+                        <TaskEmployeeActions
+                          task={task}
+                          userId={permissions.userId}
+                          onComplete={(t) => handleStatusChange(t, t.response_type === 'notification' ? 'acknowledged' : 'pending_review')}
+                          onUploadProof={(t) => setProofUploadTask(t)}
+                          isLoading={updateStatusMutation.isPending || proofUploadMutation.isPending}
+                        />
+                      )}
                     </div>
                   </div>
                 ))}
@@ -681,6 +715,19 @@ export const TasksPage: React.FC = () => {
                       />
                     </div>
                   )}
+
+                  {/* Действия для сотрудников */}
+                  {!permissions.canManageTasks && permissions.canCompleteAssignedTasks && permissions.userId && (
+                    <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700">
+                      <TaskEmployeeActions
+                        task={task}
+                        userId={permissions.userId}
+                        onComplete={(t) => handleStatusChange(t, t.response_type === 'notification' ? 'acknowledged' : 'pending_review')}
+                        onUploadProof={(t) => setProofUploadTask(t)}
+                        isLoading={updateStatusMutation.isPending || proofUploadMutation.isPending}
+                      />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -712,6 +759,16 @@ export const TasksPage: React.FC = () => {
         onApproveResponse={handleApproveResponse}
         onRejectResponse={handleRejectResponse}
         onDeleteProof={handleDeleteProof}
+        onVerificationComplete={async () => {
+          // Обновить selectedTask из свежих данных
+          const freshData = await refetch();
+          if (selectedTask && freshData.data?.data) {
+            const updated = freshData.data.data.find(t => t.id === selectedTask.id);
+            if (updated) {
+              setSelectedTask(updated);
+            }
+          }
+        }}
         isVerifying={approveResponseMutation.isPending || rejectResponseMutation.isPending}
       />
 

@@ -22,9 +22,11 @@ export const usePermissions = () => {
     return user?.role === 'owner';
   };
 
-  // Shift work via admin panel restricted to Owner only
-  // Employees must use Telegram bot to open/close shifts
-  const canWorkShifts = user?.role === 'owner';
+  // Shift work via admin panel - Owner and Employee can work with shifts
+  const canWorkShifts = user?.role === 'owner' || user?.role === 'employee';
+
+  // Employees can complete tasks assigned to them
+  const canCompleteAssignedTasks = user?.role !== 'observer';
 
   const isOwner = user?.role === 'owner';
   const isManager = user?.role === 'manager';
@@ -42,11 +44,13 @@ export const usePermissions = () => {
     canManageGlobalSettings,
     canManageDealershipSettingsFor,
     canWorkShifts,
+    canCompleteAssignedTasks,
     isOwner,
     isManager,
     isObserver,
     isEmployee,
     role: user?.role,
+    userId: user?.id,
     dealershipId: user?.dealership_id,
   };
 };

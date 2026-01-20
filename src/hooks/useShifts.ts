@@ -25,7 +25,7 @@ export const useCurrentShifts = () => {
   return useQuery({
     queryKey: ['shifts', 'current'],
     queryFn: () => shiftsApi.getCurrentShifts(),
-    refetchInterval: 15000, // Refetch every 15 seconds for live updates
+    refetchInterval: 60000, // Refetch every 60 seconds (URLs are now stable)
   });
 };
 
@@ -56,7 +56,7 @@ export const useMyCurrentShift = (dealershipId?: number) => {
   return useQuery({
     queryKey: ['my-shift', 'current', dealershipId],
     queryFn: () => shiftsApi.getMyCurrentShift(dealershipId),
-    refetchInterval: 10000, // Refetch every 10 seconds
+    refetchInterval: 30000, // Refetch every 30 seconds (URLs are now stable)
     enabled: !!dealershipId, // Only fetch if dealershipId is provided
   });
 };

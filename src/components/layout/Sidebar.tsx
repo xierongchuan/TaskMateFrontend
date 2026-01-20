@@ -4,6 +4,7 @@ import { usePermissions } from '../../hooks/usePermissions';
 import {
   HomeIcon,
   ClipboardDocumentListIcon,
+  ClipboardDocumentCheckIcon,
   CogIcon,
   ArchiveBoxIcon,
   ClockIcon,
@@ -12,6 +13,7 @@ import {
   BuildingOfficeIcon,
   ChartBarIcon,
   Cog6ToothIcon,
+  DocumentMagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 
 interface SidebarProps {
@@ -33,14 +35,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const navItems: NavItem[] = [
     { path: '/dashboard', label: 'Dashboard', icon: HomeIcon },
     { path: '/tasks', label: 'Задачи', icon: ClipboardDocumentListIcon },
+    { path: '/my-history', label: 'Моя история', icon: ClockIcon },
     { path: '/task-generators', label: 'Генераторы', icon: CogIcon, permission: permissions.canManageTasks },
     { path: '/archived-tasks', label: 'Архив', icon: ArchiveBoxIcon, permission: permissions.canManageTasks },
+    { path: '/pending-review', label: 'На проверке', icon: ClipboardDocumentCheckIcon, permission: permissions.canManageTasks },
     { path: '/shifts', label: 'Смены', icon: ClockIcon },
     { path: '/employees', label: 'Сотрудники', icon: UsersIcon, permission: permissions.canCreateUsers || permissions.isObserver },
     { path: '/links', label: 'Ссылки', icon: LinkIcon },
     { path: '/dealerships', label: 'Автосалоны', icon: BuildingOfficeIcon, permission: permissions.canManageTasks },
     { path: '/reports', label: 'Отчёты', icon: ChartBarIcon, permission: permissions.canManageTasks },
     { path: '/settings', label: 'Настройки', icon: Cog6ToothIcon, permission: permissions.canManageTasks },
+    { path: '/audit-logs', label: 'Аудит', icon: DocumentMagnifyingGlassIcon, permission: permissions.isOwner },
   ];
 
   const filteredItems = navItems.filter(item => item.permission === undefined || item.permission);

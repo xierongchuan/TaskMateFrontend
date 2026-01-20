@@ -27,7 +27,6 @@ import {
 } from '@heroicons/react/24/outline';
 import { RoleBadge } from '../components/common';
 // import { formatPhoneNumber } from '../utils/phoneFormatter'; // Removed unused
-import { DealershipSelector } from '../components/common/DealershipSelector';
 import { DonutChart, DonutChartLegend } from '../components/ui/DonutChart';
 import { reportsApi } from '../api/reports';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
@@ -49,6 +48,7 @@ export const ProfilePage: React.FC = () => {
 
   // Password Form State
   const [passwordData, setPasswordData] = useState({
+    current_password: '',
     password: '',
     confirm_password: '',
   });
@@ -106,16 +106,15 @@ export const ProfilePage: React.FC = () => {
     updateProfileMutation.mutate({
       full_name: formData.full_name,
       phone: formData.phone,
-
-      // Only include dealership info if user has permission to change it (e.g. manager)
-      // For now, we allow sending it if it's in the state, backend should validate permissions
-      dealership_id: formData.dealership_id,
-      dealership_ids: formData.dealership_ids,
     });
   };
 
   const handleUpdatePassword = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!passwordData.current_password) {
+      showToast({ type: 'error', message: 'Введите текущий пароль' });
+      return;
+    }
     if (passwordData.password !== passwordData.confirm_password) {
       showToast({ type: 'error', message: 'Пароли не совпадают' });
       return;
@@ -126,9 +125,10 @@ export const ProfilePage: React.FC = () => {
     }
 
     updateProfileMutation.mutate({
+      current_password: passwordData.current_password,
       password: passwordData.password,
     });
-    setPasswordData({ password: '', confirm_password: '' });
+    setPasswordData({ current_password: '', password: '', confirm_password: '' });
   };
 
   const handleLogout = async () => {
@@ -185,7 +185,14 @@ export const ProfilePage: React.FC = () => {
                       Смен
                     </div>
                   </div>
-
+                  <div>
+                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      {myStats?.completed_tasks || 0}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-1">
+                      Задач
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -261,23 +268,15 @@ export const ProfilePage: React.FC = () => {
 
                   </div>
 
-                  {/* Dealership Info (Read Only or Editable depending on role, mimicking UserModal) */}
+                  {/* Dealership Info (Read Only for all roles) */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Автосалон
                     </label>
-                    {user.role === 'manager' ? (
-                      <DealershipSelector
-                        value={formData.dealership_id}
-                        onChange={(id) => setFormData({ ...formData, dealership_id: id || undefined })}
-                        placeholder="Выберите основной салон"
-                      />
-                    ) : (
-                      <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-md border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 flex items-center gap-2">
-                        <BriefcaseIcon className="w-5 h-5" />
-                        {user.dealership?.name || 'Не привязан'}
-                      </div>
-                    )}
+                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-md border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 flex items-center gap-2">
+                      <BriefcaseIcon className="w-5 h-5" />
+                      {user.dealership?.name || user.dealerships?.map(d => d.name).join(', ') || 'Не привязан'}
+                    </div>
                   </div>
 
                   <div className="flex justify-end pt-4 border-t border-gray-100 dark:border-gray-700">
@@ -304,6 +303,15 @@ export const ProfilePage: React.FC = () => {
                   </div>
 
                   <Input
+                    label="Текущий пароль"
+                    type="password"
+                    value={passwordData.current_password}
+                    onChange={(e) => setPasswordData({ ...passwordData, current_password: e.target.value })}
+                    required
+                    placeholder="••••••••"
+                  />
+
+                  <Input
                     label="Новый пароль"
                     type="password"
                     value={passwordData.password}
@@ -326,7 +334,7 @@ export const ProfilePage: React.FC = () => {
                       type="submit"
                       variant="warning"
                       isLoading={updateProfileMutation.isPending}
-                      disabled={!passwordData.password}
+                      disabled={!passwordData.current_password || !passwordData.password}
                     >
                       Обновить пароль
                     </Button>

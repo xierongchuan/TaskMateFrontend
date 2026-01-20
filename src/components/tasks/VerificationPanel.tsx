@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
+import {
+  CheckIcon,
+  XMarkIcon,
+  ExclamationTriangleIcon,
+  ClockIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+} from '@heroicons/react/24/outline';
 import type { TaskResponse } from '../../types/task';
-import { Button } from '../ui/Button';
-import { Modal } from '../ui/Modal';
-import { Textarea } from '../ui/Textarea';
+import { Button, Modal, Textarea, Alert } from '../ui';
 
 export interface VerificationPanelProps {
   response: TaskResponse;
@@ -29,9 +35,7 @@ export const VerificationPanel: React.FC<VerificationPanelProps> = ({
       return (
         <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
           <div className="flex items-center gap-2">
-            <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <CheckCircleIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
             <span className="text-sm font-medium text-green-800 dark:text-green-200">
               Одобрено
             </span>
@@ -50,24 +54,19 @@ export const VerificationPanel: React.FC<VerificationPanelProps> = ({
       );
     }
 
-    // Show rejection reason if rejected
-    if (response.rejection_reason) {
+    // Show rejection status if rejected (using explicit status instead of rejection_reason)
+    if (response.status === 'rejected') {
       return (
         <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
           <div className="flex items-center gap-2">
-            <svg className="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <XCircleIcon className="w-5 h-5 text-red-600 dark:text-red-400" />
             <span className="text-sm font-medium text-red-800 dark:text-red-200">
-              Отклонено
+              Отклонено{response.rejection_count && response.rejection_count > 1 ? ` (${response.rejection_count} раз)` : ''}
             </span>
           </div>
-          <p className="mt-2 text-sm text-red-700 dark:text-red-300">
-            Причина: {response.rejection_reason}
-          </p>
-          {response.verifier && (
-            <p className="mt-1 text-xs text-red-600 dark:text-red-400">
-              Отклонил: {response.verifier.full_name}
+          {response.rejection_reason && (
+            <p className="mt-2 text-sm text-red-700 dark:text-red-300">
+              Причина: {response.rejection_reason}
             </p>
           )}
         </div>
@@ -102,36 +101,34 @@ export const VerificationPanel: React.FC<VerificationPanelProps> = ({
     <>
       <div className="p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
         <div className="flex items-center gap-2 mb-3">
-          <svg className="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+          <ClockIcon className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
           <span className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
             Ожидает проверки
           </span>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <Button
             variant="primary"
             size="sm"
+            icon={<CheckIcon className="w-4 h-4" />}
             onClick={handleApprove}
             disabled={isLoading || approving || rejecting}
             isLoading={approving}
+            fullWidth
+            className="sm:w-auto"
           >
-            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
             Одобрить
           </Button>
           <Button
             variant="danger"
             size="sm"
+            icon={<XMarkIcon className="w-4 h-4" />}
             onClick={() => setShowRejectModal(true)}
             disabled={isLoading || approving || rejecting}
+            fullWidth
+            className="sm:w-auto"
           >
-            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
             Отклонить
           </Button>
         </div>
@@ -144,41 +141,69 @@ export const VerificationPanel: React.FC<VerificationPanelProps> = ({
           setShowRejectModal(false);
           setRejectReason('');
         }}
-        title="Отклонить доказательство"
-        size="sm"
+        title="Отклонение доказательства"
+        size="md"
       >
-        <div className="space-y-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Укажите причину отклонения. Сотрудник сможет загрузить новые доказательства.
-          </p>
-          <Textarea
-            label="Причина отклонения"
-            value={rejectReason}
-            onChange={(e) => setRejectReason(e.target.value)}
-            placeholder="Например: Фото нечёткое, необходимо загрузить более качественное изображение"
-            rows={3}
-          />
-          <div className="flex justify-end gap-2">
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setShowRejectModal(false);
-                setRejectReason('');
-              }}
-              disabled={rejecting}
-            >
-              Отмена
-            </Button>
-            <Button
-              variant="danger"
-              onClick={handleReject}
-              disabled={!rejectReason.trim() || rejecting}
-              isLoading={rejecting}
-            >
-              Отклонить
-            </Button>
+        <Modal.Body>
+          <div className="space-y-6">
+            {/* Заголовок с иконкой предупреждения */}
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/30">
+                <ExclamationTriangleIcon className="h-6 w-6 text-red-600 dark:text-red-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-base font-medium text-gray-900 dark:text-white mb-1">
+                  Отклонить доказательство
+                </h4>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Исполнитель: {response.user?.full_name || 'Неизвестно'}
+                </p>
+              </div>
+            </div>
+
+            {/* Предупреждение о последствиях */}
+            <Alert
+              variant="warning"
+              message="При отклонении все загруженные файлы будут удалены. Сотрудник сможет повторно отправить доказательства."
+            />
+
+            {/* Поле причины */}
+            <div>
+              <Textarea
+                label="Причина отклонения"
+                placeholder="Опишите, почему доказательство отклонено и что нужно исправить...&#10;Например: Качество фото недостаточное, необходимо переснять при лучшем освещении."
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                rows={4}
+                required
+              />
+              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                Причина будет показана сотруднику
+              </p>
+            </div>
           </div>
-        </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setShowRejectModal(false);
+              setRejectReason('');
+            }}
+            disabled={rejecting}
+          >
+            Отмена
+          </Button>
+          <Button
+            variant="danger"
+            icon={<XMarkIcon className="w-4 h-4" />}
+            onClick={handleReject}
+            disabled={!rejectReason.trim() || rejecting}
+            isLoading={rejecting}
+          >
+            Отклонить
+          </Button>
+        </Modal.Footer>
       </Modal>
     </>
   );

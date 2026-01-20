@@ -3,7 +3,7 @@ export type TaskStatus = 'pending' | 'acknowledged' | 'pending_review' | 'comple
 export type TaskType = 'individual' | 'group';
 export type ResponseType = 'notification' | 'completion' | 'completion_with_proof';
 export type TaskPriority = 'low' | 'medium' | 'high';
-export type TaskResponseStatus = 'acknowledged' | 'pending_review' | 'completed' | 'postponed';
+export type TaskResponseStatus = 'pending' | 'acknowledged' | 'pending_review' | 'completed' | 'rejected' | 'postponed';
 
 export interface TaskResponseUser {
   id: number;
@@ -29,12 +29,16 @@ export interface TaskResponse {
   verified_at?: string | null;
   verified_by?: number | null;
   rejection_reason?: string | null;
+  rejection_count?: number;
   verifier?: TaskResponseUser | null;
 }
 
 export interface CompletionProgress {
   total_assignees: number;
   completed_count: number;
+  pending_review_count: number;
+  rejected_count: number;
+  pending_count: number;
   percentage: number;
 }
 

@@ -16,7 +16,9 @@ import {
   LinkIcon,
   ChartBarIcon,
   ArrowPathIcon,
+  ClipboardDocumentCheckIcon,
 } from '@heroicons/react/24/outline';
+import { usePermissions } from '../hooks/usePermissions';
 
 import type { Task } from '../types/task';
 
@@ -39,6 +41,7 @@ import { StatusBadge } from '../components/common';
 
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
+  const permissions = usePermissions();
   const navigate = useNavigate();
   const [selectedDealership] = useState<number | undefined>(user?.dealership_id || undefined);
 
@@ -105,7 +108,18 @@ export const DashboardPage: React.FC = () => {
       color: 'bg-green-500',
       textColor: 'text-green-600',
       description: 'Сейчас на смене',
-      link: '/shifts?status=open'
+      link: '/shifts?status=open',
+      visible: true,
+    },
+    {
+      name: 'На проверке',
+      value: dashboardData?.pending_review_count || 0,
+      icon: <ClipboardDocumentCheckIcon className="w-6 h-6" />,
+      color: 'bg-yellow-500',
+      textColor: 'text-yellow-600',
+      description: 'Ожидают верификации',
+      link: '/tasks?status=pending_review',
+      visible: permissions.canManageTasks,
     },
     {
       name: 'Просроченные задачи',
@@ -114,7 +128,8 @@ export const DashboardPage: React.FC = () => {
       color: 'bg-red-500',
       textColor: 'text-red-600',
       description: 'Требуют внимания',
-      link: '/tasks?status=overdue'
+      link: '/tasks?status=overdue',
+      visible: true,
     },
     {
       name: 'Выполнено сегодня',
@@ -123,7 +138,8 @@ export const DashboardPage: React.FC = () => {
       color: 'bg-blue-500',
       textColor: 'text-blue-600',
       description: 'Успешно завершено',
-      link: '/tasks?status=completed&date_range=today'
+      link: '/tasks?status=completed&date_range=today',
+      visible: true,
     },
     {
       name: 'Генераторы',
@@ -132,9 +148,10 @@ export const DashboardPage: React.FC = () => {
       color: 'bg-purple-500',
       textColor: 'text-purple-600',
       description: `Активных: ${dashboardData?.active_generators || 0}`,
-      link: '/task-generators'
+      link: '/task-generators',
+      visible: permissions.canManageTasks,
     },
-  ];
+  ].filter(stat => stat.visible);
 
   return (
     <PageContainer>
@@ -232,29 +249,58 @@ export const DashboardPage: React.FC = () => {
         {/* Quick Actions */}
         <Section title="Быстрые действия" icon={<ChartBarIcon />}>
           <div className="space-y-3">
-            <Button
-              variant="primary"
-              icon={<CalendarIcon />}
-              onClick={() => navigate('/tasks')}
-              fullWidth
-            >
-              Создать задачу
-            </Button>
+            {/* Действия для менеджеров/владельцев */}
+            {permissions.canManageTasks && (
+              <>
+                <Button
+                  variant="primary"
+                  icon={<CalendarIcon />}
+                  onClick={() => navigate('/tasks?action=create')}
+                  fullWidth
+                >
+                  Создать задачу
+                </Button>
+                <Button
+                  variant="secondary"
+                  icon={<ChartBarIcon />}
+                  onClick={() => navigate('/reports')}
+                  fullWidth
+                >
+                  Отчеты
+                </Button>
+              </>
+            )}
+
+            {/* Действия для сотрудников */}
+            {permissions.isEmployee && (
+              <>
+                <Button
+                  variant="primary"
+                  icon={<ClipboardDocumentCheckIcon />}
+                  onClick={() => navigate('/tasks')}
+                  fullWidth
+                >
+                  Мои задачи
+                </Button>
+                <Button
+                  variant="secondary"
+                  icon={<ClockIcon />}
+                  onClick={() => navigate('/my-history')}
+                  fullWidth
+                >
+                  История выполнения
+                </Button>
+              </>
+            )}
+
+            {/* Действия для всех */}
             <Button
               variant="secondary"
               icon={<LinkIcon />}
               onClick={() => navigate('/links')}
               fullWidth
             >
-              Добавить ссылку
-            </Button>
-            <Button
-              variant="secondary"
-              icon={<ChartBarIcon />}
-              onClick={() => navigate('/reports')}
-              fullWidth
-            >
-              Отчеты
+              Полезные ссылки
             </Button>
           </div>
         </Section>
@@ -371,6 +417,61 @@ export const DashboardPage: React.FC = () => {
           )}
         </Section>
       </div>
+
+      {/* Pending Review Section - for managers/owners */}
+      {permissions.canManageTasks && (dashboardData?.pending_review_count || 0) > 0 && (
+        <Section
+          title="Задачи на проверке"
+          icon={<ClipboardDocumentCheckIcon />}
+          subtitle={`${dashboardData?.pending_review_count || 0} задач ожидают верификации`}
+          action={
+            <Button variant="ghost" size="sm" onClick={() => navigate('/tasks?status=pending_review')}>
+              Все на проверке
+            </Button>
+          }
+          className="mt-6"
+        >
+          {dashboardData?.pending_review_tasks && dashboardData.pending_review_tasks.length > 0 ? (
+            <div className="space-y-3">
+              {dashboardData.pending_review_tasks.map((task) => (
+                <Card
+                  key={task.id}
+                  variant="warning"
+                  className="cursor-pointer hover:shadow-md transition-shadow"
+                >
+                  <div onClick={() => handleOpenTask(task)} className="p-3">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-900 dark:text-white text-sm truncate">{task.title}</p>
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-gray-600 dark:text-gray-400 mt-1">
+                          {task.assignments && task.assignments.length > 0 && (
+                            <span>
+                              {task.assignments.map(a => a.user.full_name).join(', ')}
+                            </span>
+                          )}
+                          {task.responses?.filter(r => r.status === 'pending_review').map(r => (
+                            r.proofs && r.proofs.length > 0 && (
+                              <Badge key={r.id} variant="info" size="sm">
+                                {r.proofs.length} файл(ов)
+                              </Badge>
+                            )
+                          ))}
+                        </div>
+                      </div>
+                      <StatusBadge status="pending_review" type="task" />
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              icon={<ClipboardDocumentCheckIcon />}
+              title="Нет задач на проверке"
+            />
+          )}
+        </Section>
+      )}
 
       <TaskDetailsModal
         isOpen={isDetailsOpen}

@@ -1,4 +1,4 @@
-export type ShiftStatus = 'open' | 'closed';
+export type ShiftStatus = 'open' | 'closed' | 'late' | 'replaced';
 
 export type ShiftType = 'regular' | 'overtime' | 'weekend' | 'holiday';
 
@@ -24,6 +24,9 @@ export interface Shift {
   shift_end: string | null;
   opening_photo_path: string | null;
   closing_photo_path: string | null;
+  // Signed URLs for photo access (available based on user permissions)
+  opening_photo_url: string | null;
+  closing_photo_url: string | null;
   break_duration?: number;
   is_late: boolean;
   late_minutes: number | null;

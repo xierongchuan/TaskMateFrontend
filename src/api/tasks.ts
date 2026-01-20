@@ -16,6 +16,13 @@ export interface TasksFilters {
   priority?: string;
 }
 
+export interface MyHistoryFilters {
+  response_status?: string;
+  dealership_id?: number;
+  per_page?: number;
+  page?: number;
+}
+
 export const tasksApi = {
   getTasks: async (filters?: TasksFilters): Promise<PaginatedResponse<Task>> => {
     const response = await apiClient.get<PaginatedResponse<Task>>('/tasks', {
@@ -104,6 +111,16 @@ export const tasksApi = {
     acknowledged: number;
   }> => {
     const response = await apiClient.get('/tasks/stats', { params: filters });
+    return response.data;
+  },
+
+  /**
+   * Get history of tasks completed by current user
+   */
+  getMyHistory: async (filters?: MyHistoryFilters): Promise<PaginatedResponse<Task>> => {
+    const response = await apiClient.get<PaginatedResponse<Task>>('/tasks/my-history', {
+      params: filters,
+    });
     return response.data;
   },
 };

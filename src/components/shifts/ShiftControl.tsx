@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useMyCurrentShift, useCreateShift, useUpdateShift } from '../../hooks/useShifts';
 import { useAuth } from '../../hooks/useAuth';
 import { usePermissions } from '../../hooks/usePermissions';
-import { CameraIcon, PlayIcon, StopIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { CameraIcon, PlayIcon, StopIcon } from '@heroicons/react/24/outline';
 import { DealershipSelector } from '../common/DealershipSelector';
+import { useToast } from '../ui';
+import { ShiftPhotoViewer } from './ShiftPhotoViewer';
 import type { CreateShiftRequest, UpdateShiftRequest } from '../../types/shift';
 
 export const ShiftControl: React.FC = () => {
@@ -23,23 +25,13 @@ export const ShiftControl: React.FC = () => {
   const createShiftMutation = useCreateShift();
   const updateShiftMutation = useUpdateShift();
 
+  const { showToast } = useToast();
   const [openingPhoto, setOpeningPhoto] = useState<File | null>(null);
   const [closingPhoto, setClosingPhoto] = useState<File | null>(null);
-  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' | null }>({
-    message: '',
-    type: null,
-  });
-
-  const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
-    setNotification({ message, type });
-    setTimeout(() => {
-      setNotification(prev => prev.message === message ? { message: '', type: null } : prev);
-    }, 3000);
-  };
 
   const handleOpenShift = async () => {
     if (!openingPhoto || !selectedDealershipId) {
-      showNotification('Необходимо выбрать фото открытия смены и автосалон', 'error');
+      showToast({ type: 'error', message: 'Необходимо выбрать фото открытия смены и автосалон' });
       return;
     }
 
@@ -52,10 +44,11 @@ export const ShiftControl: React.FC = () => {
     createShiftMutation.mutate(shiftData, {
       onSuccess: () => {
         setOpeningPhoto(null);
-        showNotification('Смена успешно открыта!');
+        showToast({ type: 'success', message: 'Смена успешно открыта!' });
       },
-      onError: (error: any) => {
-        showNotification(`Ошибка открытия смены: ${error.response?.data?.message || 'Неизвестная ошибка'}`, 'error');
+      onError: (error: unknown) => {
+        const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Неизвестная ошибка';
+        showToast({ type: 'error', message: `Ошибка открытия смены: ${message}` });
       },
     });
   };
@@ -76,10 +69,11 @@ export const ShiftControl: React.FC = () => {
       {
         onSuccess: () => {
           setClosingPhoto(null);
-          showNotification('Смена успешно закрыта!');
+          showToast({ type: 'success', message: 'Смена успешно закрыта!' });
         },
-        onError: (error: any) => {
-          showNotification(`Ошибка закрытия смены: ${error.response?.data?.message || 'Неизвестная ошибка'}`, 'error');
+        onError: (error: unknown) => {
+          const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Неизвестная ошибка';
+          showToast({ type: 'error', message: `Ошибка закрытия смены: ${message}` });
         },
       }
     );
@@ -132,6 +126,18 @@ export const ShiftControl: React.FC = () => {
                   <p>Автосалон: {currentShift.dealership?.name}</p>
                 </div>
 
+                {/* Current Shift Photos */}
+                {currentShift.opening_photo_url && (
+                  <div className="mt-3">
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Фото открытия:</p>
+                    <ShiftPhotoViewer
+                      openingPhotoUrl={currentShift.opening_photo_url}
+                      closingPhotoUrl={null}
+                      shiftId={currentShift.id}
+                    />
+                  </div>
+                )}
+
                 <div className="pt-4 border-t border-gray-100 dark:border-gray-700">
                   <h3 className="text-base font-medium text-gray-900 dark:text-white mb-4">Закрытие смены</h3>
 
@@ -144,6 +150,7 @@ export const ShiftControl: React.FC = () => {
                         <input
                           type="file"
                           accept="image/*"
+                          capture="environment"
                           onChange={(e) => setClosingPhoto(e.target.files?.[0] || null)}
                           className="hidden"
                           id="closing-photo"
@@ -194,6 +201,7 @@ export const ShiftControl: React.FC = () => {
                     <input
                       type="file"
                       accept="image/*"
+                      capture="environment"
                       onChange={(e) => setOpeningPhoto(e.target.files?.[0] || null)}
                       className="hidden"
                       id="opening-photo"
@@ -235,28 +243,6 @@ export const ShiftControl: React.FC = () => {
         ) : null}
       </div>
 
-      {/* Notification Toast */}
-      {notification.type && (
-        <div className="fixed bottom-8 right-8 z-[100] animate-slide-in-up">
-          <div className={`flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl border ${notification.type === 'success'
-            ? 'bg-green-600 border-green-500 text-white'
-            : 'bg-red-600 border-red-500 text-white'
-            }`}>
-            {notification.type === 'success' ? (
-              <CheckCircleIcon className="w-6 h-6" />
-            ) : (
-              <XCircleIcon className="w-6 h-6" />
-            )}
-            <p className="font-medium text-sm sm:text-base">{notification.message}</p>
-            <button
-              onClick={() => setNotification({ message: '', type: null })}
-              className="ml-2 hover:bg-black/10 rounded-full p-1 transition-colors"
-            >
-              <XCircleIcon className="w-4 h-4 opacity-70" />
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -21,6 +21,8 @@ import {
   PageHeader,
   ViewModeToggle,
 } from '../components/ui';
+import { ShiftControl } from '../components/shifts/ShiftControl';
+import { ShiftPhotoViewer } from '../components/shifts/ShiftPhotoViewer';
 
 export const ShiftsPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -133,6 +135,8 @@ export const ShiftsPage: React.FC = () => {
       </PageHeader>
 
       {/* Shift Control Component */}
+      <ShiftControl />
+
       {/* Active Dealerships Plaques */}
       {activeShiftDealerships.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -195,6 +199,18 @@ export const ShiftsPage: React.FC = () => {
                   {shift.dealership && (
                     <div className="text-gray-600 dark:text-gray-400">
                       Автосалон: {shift.dealership.name}
+                    </div>
+                  )}
+                  {/* Shift Photos */}
+                  {(shift.opening_photo_url || shift.closing_photo_url) && (
+                    <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+                      <ShiftPhotoViewer
+                        openingPhotoUrl={shift.opening_photo_url}
+                        closingPhotoUrl={shift.closing_photo_url}
+                        shiftId={shift.id}
+                        userName={shift.user?.full_name}
+                        compact
+                      />
                     </div>
                   )}
                 </div>
@@ -301,6 +317,17 @@ export const ShiftsPage: React.FC = () => {
                           {shift.dealership && <div className="text-gray-600 dark:text-gray-400">Автосалон: {shift.dealership.name}</div>}
                         </div>
                       </div>
+                      {/* Shift Photos */}
+                      {(shift.opening_photo_url || shift.closing_photo_url) && (
+                        <div className="flex-shrink-0 ml-4">
+                          <ShiftPhotoViewer
+                            openingPhotoUrl={shift.opening_photo_url}
+                            closingPhotoUrl={shift.closing_photo_url}
+                            shiftId={shift.id}
+                            userName={shift.user?.full_name}
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -322,6 +349,18 @@ export const ShiftsPage: React.FC = () => {
                       <div className="flex items-center mt-2"><span className="mr-1">Тип:</span>{getShiftTypeBadge(shift.shift_type)}</div>
                       {shift.is_late && <div className="text-red-600 dark:text-red-400 font-medium">Опоздание: {shift.late_minutes} мин</div>}
                       {shift.dealership && <div>Автосалон: {shift.dealership.name}</div>}
+                      {/* Shift Photos */}
+                      {(shift.opening_photo_url || shift.closing_photo_url) && (
+                        <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+                          <ShiftPhotoViewer
+                            openingPhotoUrl={shift.opening_photo_url}
+                            closingPhotoUrl={shift.closing_photo_url}
+                            shiftId={shift.id}
+                            userName={shift.user?.full_name}
+                            compact
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
