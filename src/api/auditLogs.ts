@@ -7,13 +7,22 @@ export interface AuditActor {
   email: string;
 }
 
+export interface AuditDealership {
+  id: number;
+  name: string;
+}
+
 export interface AuditLog {
   id: number;
   table_name: string;
+  table_label: string;
   record_id: number;
   actor_id: number | null;
   actor: AuditActor | null;
+  dealership_id: number | null;
+  dealership: AuditDealership | null;
   action: string;
+  action_label: string;
   payload: Record<string, unknown>;
   created_at: string;
 }
@@ -22,6 +31,7 @@ export interface AuditLogsFilters {
   table_name?: string;
   action?: string;
   actor_id?: number;
+  dealership_id?: number;
   from_date?: string;
   to_date?: string;
   record_id?: number;
@@ -45,6 +55,14 @@ export const auditLogsApi = {
    */
   getRecordHistory: async (tableName: string, recordId: number): Promise<{ data: AuditLog[] }> => {
     const response = await apiClient.get<{ data: AuditLog[] }>(`/audit-logs/${tableName}/${recordId}`);
+    return response.data;
+  },
+
+  /**
+   * Get list of users who performed actions (for filter dropdown)
+   */
+  getActors: async (): Promise<{ data: AuditActor[] }> => {
+    const response = await apiClient.get<{ data: AuditActor[] }>('/audit-logs/actors');
     return response.data;
   },
 };

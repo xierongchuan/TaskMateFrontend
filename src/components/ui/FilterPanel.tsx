@@ -39,7 +39,7 @@ export const FilterPanel: React.FC<FilterPanelProps> & {
   clearButtonText = 'Сбросить фильтры',
 }) => {
     const containerClasses = [
-      'bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 transition-colors',
+      'bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 transition-colors overflow-hidden',
       className,
     ].filter(Boolean).join(' ');
 

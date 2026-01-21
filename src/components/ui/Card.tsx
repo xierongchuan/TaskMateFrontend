@@ -62,7 +62,7 @@ export const Card: React.FC<CardProps> & {
   ...props
 }) => {
     const cardClasses = [
-      'rounded-xl shadow-sm border transition-all duration-200',
+      'rounded-xl shadow-sm border transition-all duration-200 overflow-hidden',
       variantClasses[variant],
       paddingClasses[padding],
       hover ? 'hover:shadow-md' : '',
