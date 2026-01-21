@@ -237,9 +237,6 @@ export const MyHistoryPage: React.FC = () => {
                       {/* Доказательства */}
                       {myResponse.proofs && myResponse.proofs.length > 0 && (
                         <div className="lg:w-64 flex-shrink-0">
-                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Доказательства ({myResponse.proofs.length})
-                          </p>
                           <ProofViewer proofs={myResponse.proofs} />
                         </div>
                       )}

@@ -224,9 +224,6 @@ export const PendingReviewPage: React.FC = () => {
                       {/* Доказательства */}
                       {pendingResponse.proofs && pendingResponse.proofs.length > 0 && (
                         <div className="lg:w-64 flex-shrink-0">
-                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Доказательства ({pendingResponse.proofs.length})
-                          </p>
                           <ProofViewer proofs={pendingResponse.proofs} />
                         </div>
                       )}

@@ -18,6 +18,8 @@ const formatFileSize = (bytes: number): string => {
 const getFileTypeLabel = (mimeType: string): string => {
   if (mimeType.startsWith('image/')) return 'Изображение';
   if (mimeType.startsWith('video/')) return 'Видео';
+  if (mimeType.startsWith('audio/')) return 'Аудио';
+  if (mimeType.startsWith('text/')) return 'Текст';
   if (mimeType.includes('pdf')) return 'PDF';
   if (mimeType.includes('word') || mimeType.includes('document')) return 'Документ';
   if (mimeType.includes('sheet') || mimeType.includes('excel')) return 'Таблица';
@@ -26,7 +28,13 @@ const getFileTypeLabel = (mimeType: string): string => {
 };
 
 const isPreviewable = (mimeType: string): boolean => {
-  return mimeType.startsWith('image/') || mimeType.startsWith('video/') || mimeType.includes('pdf');
+  return (
+    mimeType.startsWith('image/') ||
+    mimeType.startsWith('video/') ||
+    mimeType.startsWith('audio/') ||
+    mimeType.startsWith('text/') ||
+    mimeType.includes('pdf')
+  );
 };
 
 export const ProofViewer: React.FC<ProofViewerProps> = ({
@@ -73,9 +81,9 @@ export const ProofViewer: React.FC<ProofViewerProps> = ({
           isOpen={true}
           onClose={() => setSelectedProof(null)}
           title={selectedProof.original_filename}
-          size="lg"
+          size="xl"
         >
-          <div className="flex flex-col items-center">
+          <Modal.Body className="flex flex-col items-center">
             <ProofPreview proof={selectedProof} />
             <div className="mt-4 flex gap-3">
               <Button
@@ -94,7 +102,7 @@ export const ProofViewer: React.FC<ProofViewerProps> = ({
                 Закрыть
               </Button>
             </div>
-          </div>
+          </Modal.Body>
         </Modal>
       )}
     </div>
@@ -111,6 +119,7 @@ interface ProofThumbnailProps {
 const ProofThumbnail: React.FC<ProofThumbnailProps> = ({ proof, onClick, onDelete }) => {
   const isImage = proof.mime_type.startsWith('image/');
   const isVideo = proof.mime_type.startsWith('video/');
+  const isAudio = proof.mime_type.startsWith('audio/');
 
   return (
     <div className="relative group">
@@ -128,6 +137,12 @@ const ProofThumbnail: React.FC<ProofThumbnailProps> = ({ proof, onClick, onDelet
           <div className="w-full h-full flex items-center justify-center bg-gray-800">
             <svg className="w-12 h-12 text-white opacity-80" fill="currentColor" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z" />
+            </svg>
+          </div>
+        ) : isAudio ? (
+          <div className="w-full h-full flex items-center justify-center bg-purple-100 dark:bg-purple-900/30">
+            <svg className="w-12 h-12 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
             </svg>
           </div>
         ) : (
@@ -169,6 +184,8 @@ interface ProofPreviewProps {
 const ProofPreview: React.FC<ProofPreviewProps> = ({ proof }) => {
   const isImage = proof.mime_type.startsWith('image/');
   const isVideo = proof.mime_type.startsWith('video/');
+  const isAudio = proof.mime_type.startsWith('audio/');
+  const isText = proof.mime_type.startsWith('text/');
   const isPdf = proof.mime_type.includes('pdf');
 
   if (isImage) {
@@ -190,6 +207,31 @@ const ProofPreview: React.FC<ProofPreviewProps> = ({ proof }) => {
       >
         Ваш браузер не поддерживает воспроизведение видео.
       </video>
+    );
+  }
+
+  if (isAudio) {
+    return (
+      <div className="w-full max-w-md p-6 bg-gray-100 dark:bg-gray-700 rounded-lg">
+        <div className="flex items-center justify-center mb-4">
+          <svg className="w-16 h-16 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+          </svg>
+        </div>
+        <audio src={proof.url} controls className="w-full">
+          Ваш браузер не поддерживает воспроизведение аудио.
+        </audio>
+      </div>
+    );
+  }
+
+  if (isText) {
+    return (
+      <iframe
+        src={proof.url}
+        title={proof.original_filename}
+        className="w-full h-[70vh] rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700"
+      />
     );
   }
 
@@ -228,6 +270,22 @@ interface FileTypeIconProps {
 
 const FileTypeIcon: React.FC<FileTypeIconProps> = ({ mimeType, size = 'md' }) => {
   const sizeClass = size === 'lg' ? 'w-16 h-16' : 'w-10 h-10';
+
+  if (mimeType.startsWith('audio/')) {
+    return (
+      <svg className={`${sizeClass} text-purple-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+      </svg>
+    );
+  }
+
+  if (mimeType.startsWith('text/')) {
+    return (
+      <svg className={`${sizeClass} text-cyan-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+    );
+  }
 
   if (mimeType.includes('pdf')) {
     return (
