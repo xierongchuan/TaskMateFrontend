@@ -28,12 +28,11 @@ const getFileTypeLabel = (mimeType: string): string => {
 };
 
 const isPreviewable = (mimeType: string): boolean => {
+  // PDF и text убраны - они будут скачиваться напрямую
   return (
     mimeType.startsWith('image/') ||
     mimeType.startsWith('video/') ||
-    mimeType.startsWith('audio/') ||
-    mimeType.startsWith('text/') ||
-    mimeType.includes('pdf')
+    mimeType.startsWith('audio/')
   );
 };
 
@@ -185,8 +184,6 @@ const ProofPreview: React.FC<ProofPreviewProps> = ({ proof }) => {
   const isImage = proof.mime_type.startsWith('image/');
   const isVideo = proof.mime_type.startsWith('video/');
   const isAudio = proof.mime_type.startsWith('audio/');
-  const isText = proof.mime_type.startsWith('text/');
-  const isPdf = proof.mime_type.includes('pdf');
 
   if (isImage) {
     return (
@@ -225,27 +222,7 @@ const ProofPreview: React.FC<ProofPreviewProps> = ({ proof }) => {
     );
   }
 
-  if (isText) {
-    return (
-      <iframe
-        src={proof.url}
-        title={proof.original_filename}
-        className="w-full h-[70vh] rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700"
-      />
-    );
-  }
-
-  if (isPdf) {
-    return (
-      <iframe
-        src={proof.url}
-        title={proof.original_filename}
-        className="w-full h-[70vh] rounded-lg"
-      />
-    );
-  }
-
-  // Fallback for non-previewable files
+  // Fallback for non-previewable files (не должно вызываться, т.к. isPreviewable фильтрует)
   return (
     <div className="text-center py-8">
       <FileTypeIcon mimeType={proof.mime_type} size="lg" />
