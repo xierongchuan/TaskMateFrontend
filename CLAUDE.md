@@ -22,12 +22,12 @@ npm run preview
 
 ## Technology Stack
 
-- **React 19** with TypeScript for UI development
-- **Vite** as build tool and development server
-- **Tailwind CSS** with custom primary color scheme (blue-600)
-- **Zustand** for client-side state management with persistence
+- **React 19.1** with TypeScript 5.9 for UI development
+- **Vite 7.1** as build tool and development server
+- **Tailwind CSS 3.4** with custom primary color scheme (blue-600)
+- **Zustand 5** for client-side state management with persistence
 - **TanStack Query (React Query v5)** for server state management
-- **React Router v7** for navigation and protected routes
+- **React Router v7.9** for navigation and protected routes
 - **Axios** for HTTP requests with interceptors
 - **React Hook Form** for form handling and validation
 - **date-fns** with Russian locale for date formatting
@@ -154,3 +154,33 @@ The application supports multi-tenancy through dealership-based data filtering. 
 - Error messages are user-friendly and localized
 - Component styling follows Tailwind CSS patterns with consistent design tokens
 - Form validation includes both client-side and server-side error handling
+
+## Правила разработки (User Rules)
+
+### Общие правила
+
+1. **Язык**: Русский для всех UI, комментариев и документации
+2. **Работа с инструментами**: При работе с инструментами окружения используй всё через Docker контейнеры
+
+### Frontend
+
+1. При изменении Backend **обязательно** проверять совместимость с Frontend и документацией API
+2. При изменении Frontend сверяться с документацией API и проверять корректность запросов
+3. Поддерживать синхронизацию между Backend, Frontend и API-коллекцией
+4. Использовать установленные версии зависимостей (React 19.1, Vite 7.1, TypeScript 5.9)
+5. Следовать паттернам TanStack Query для работы с серверным состоянием
+6. Использовать Zustand для клиентского состояния
+7. Соблюдать структуру компонентов и API модулей
+
+### Development Workflow
+
+1. Разработка: `npm run dev` (или через Docker)
+2. Сборка: `npm run build`
+3. Линтинг: `npm run lint`
+4. Превью продакшн-сборки: `npm run preview`
+
+### Backend Integration
+
+- Backend API: `http://localhost:8007` (через Docker)
+- Используется Bearer token аутентификация через Laravel Sanctum
+- Все запросы проходят через централизованный Axios клиент с интерсепторами
