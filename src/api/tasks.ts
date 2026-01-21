@@ -58,15 +58,31 @@ export const tasksApi = {
   /**
    * Update task status with proof files (for completion_with_proof tasks)
    */
-  updateTaskStatusWithProofs: async (id: number, status: string, files: File[]): Promise<Task> => {
+  updateTaskStatusWithProofs: async (
+    id: number,
+    status: string,
+    files: File[],
+    completeForAll?: boolean,
+    onProgress?: (progress: number) => void
+  ): Promise<Task> => {
     const formData = new FormData();
     formData.append('status', status);
+    if (completeForAll) {
+      formData.append('complete_for_all', '1');
+    }
     files.forEach((file) => {
       formData.append('proof_files[]', file);
     });
     const response = await apiClient.patch<Task>(`/tasks/${id}/status`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
+      },
+      timeout: 300000, // 5 минут для загрузки файлов
+      onUploadProgress: (progressEvent) => {
+        if (onProgress && progressEvent.total) {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(percent);
+        }
       },
     });
     return response.data;

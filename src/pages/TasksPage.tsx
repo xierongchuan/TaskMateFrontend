@@ -62,9 +62,9 @@ export const TasksPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const { limit } = usePagination();
   const [confirmDelete, setConfirmDelete] = useState<Task | null>(null);
-  const [confirmGroupComplete, setConfirmGroupComplete] = useState<{ task: Task; status: string } | null>(null);
   const [proofUploadTask, setProofUploadTask] = useState<Task | null>(null);
   const [proofFiles, setProofFiles] = useState<File[]>([]);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [filters, setFilters] = useState({
     search: searchParams.get('search') || '',
     status: searchParams.get('status') || '',
@@ -177,11 +177,15 @@ export const TasksPage: React.FC = () => {
       });
       return { previousTasks };
     },
-    onError: (_err, _variables, context) => {
+    onError: (err, _variables, context) => {
       // Откат при ошибке
       if (context?.previousTasks) {
         queryClient.setQueryData(['tasks', filters, page, limit], context.previousTasks);
       }
+      // Показать сообщение об ошибке
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+        || 'Ошибка изменения статуса';
+      showToast({ type: 'error', message });
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
@@ -193,17 +197,26 @@ export const TasksPage: React.FC = () => {
   });
 
   const proofUploadMutation = useMutation({
-    mutationFn: ({ taskId, status, files }: { taskId: number; status: string; files: File[] }) =>
-      tasksApi.updateTaskStatusWithProofs(taskId, status, files),
+    mutationFn: ({ taskId, status, files, completeForAll }: { taskId: number; status: string; files: File[]; completeForAll?: boolean }) =>
+      tasksApi.updateTaskStatusWithProofs(taskId, status, files, completeForAll, setUploadProgress),
+    onMutate: () => {
+      setUploadProgress(0);
+    },
     onSuccess: () => {
       showToast({ type: 'success', message: 'Доказательства отправлены на проверку' });
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       setProofUploadTask(null);
       setProofFiles([]);
+      setUploadProgress(0);
     },
     onError: (error: unknown) => {
-      const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Ошибка загрузки файлов';
+      setUploadProgress(0);
+      console.error('Upload error:', error);
+      const axiosError = error as { response?: { data?: { message?: string }, status?: number }, message?: string };
+      const message = axiosError?.response?.data?.message
+        || axiosError?.message
+        || 'Ошибка загрузки файлов';
       showToast({ type: 'error', message });
     },
   });
@@ -248,17 +261,7 @@ export const TasksPage: React.FC = () => {
   });
 
   const handleStatusChange = (task: Task, newStatus: string) => {
-    // Если менеджер/владелец отмечает групповую задачу как выполненную - показать диалог выбора
-    if (
-      task.task_type === 'group' &&
-      (permissions.isManager || permissions.isOwner) &&
-      (newStatus === 'completed' || newStatus === 'pending_review')
-    ) {
-      setConfirmGroupComplete({ task, status: newStatus });
-      return;
-    }
-
-    // Если задача требует доказательства и это завершение - показать модальное окно загрузки
+    // Если задача требует доказательства - показать модальное окно загрузки
     if (
       task.response_type === 'completion_with_proof' &&
       (newStatus === 'completed' || newStatus === 'pending_review')
@@ -267,15 +270,35 @@ export const TasksPage: React.FC = () => {
       return;
     }
 
+    // Для групповых задач менеджер/владелец меняет статус сразу для всех
+    if (
+      task.task_type === 'group' &&
+      (permissions.isManager || permissions.isOwner) &&
+      (newStatus === 'completed' || newStatus === 'pending_review')
+    ) {
+      updateStatusMutation.mutate({
+        taskId: task.id,
+        status: newStatus,
+        completeForAll: true,
+      });
+      return;
+    }
+
     updateStatusMutation.mutate({ taskId: task.id, status: newStatus });
   };
 
   const handleProofUploadSubmit = () => {
     if (proofUploadTask && proofFiles.length > 0) {
+      // Для групповых задач менеджер/владелец выполняет за всех
+      const shouldCompleteForAll =
+        proofUploadTask.task_type === 'group' &&
+        (permissions.isManager || permissions.isOwner);
+
       proofUploadMutation.mutate({
         taskId: proofUploadTask.id,
         status: 'pending_review',
         files: proofFiles,
+        completeForAll: shouldCompleteForAll,
       });
     }
   };
@@ -290,17 +313,6 @@ export const TasksPage: React.FC = () => {
 
   const handleDeleteProof = async (proofId: number) => {
     await deleteProofMutation.mutateAsync(proofId);
-  };
-
-  const handleGroupCompleteConfirm = (completeForAll: boolean) => {
-    if (confirmGroupComplete) {
-      updateStatusMutation.mutate({
-        taskId: confirmGroupComplete.task.id,
-        status: confirmGroupComplete.status,
-        completeForAll,
-      });
-      setConfirmGroupComplete(null);
-    }
   };
 
   const clearFilters = () => {
@@ -790,47 +802,13 @@ export const TasksPage: React.FC = () => {
         isLoading={deleteMutation.isPending}
       />
 
-      {/* Диалог выбора способа завершения групповой задачи */}
-      <Modal
-        isOpen={!!confirmGroupComplete}
-        onClose={() => setConfirmGroupComplete(null)}
-        title="Завершение групповой задачи"
-        size="md"
-      >
-        <Modal.Body>
-          <p className="text-gray-700 dark:text-gray-300 mb-4">
-            Эта задача назначена нескольким исполнителям. Выберите способ завершения:
-          </p>
-          {confirmGroupComplete?.task.completion_progress && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-              Текущий прогресс: {confirmGroupComplete.task.completion_progress.completed_count} из{' '}
-              {confirmGroupComplete.task.completion_progress.total_assignees} исполнителей
-            </p>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={() => setConfirmGroupComplete(null)}
-          >
-            Отмена
-          </Button>
-          <Button
-            variant="primary"
-            onClick={() => handleGroupCompleteConfirm(true)}
-            disabled={updateStatusMutation.isPending}
-          >
-            Завершить для всех
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
       {/* Модальное окно загрузки доказательств */}
       <Modal
         isOpen={!!proofUploadTask}
         onClose={() => {
           setProofUploadTask(null);
           setProofFiles([]);
+          setUploadProgress(0);
         }}
         title="Загрузка доказательств"
         size="lg"
@@ -839,6 +817,22 @@ export const TasksPage: React.FC = () => {
           <p className="text-gray-700 dark:text-gray-300 mb-4">
             Для выполнения задачи "{proofUploadTask?.title}" необходимо загрузить доказательства.
           </p>
+
+          {proofUploadMutation.isPending && uploadProgress > 0 && (
+            <div className="mb-4">
+              <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
+                <span>Загрузка файлов...</span>
+                <span>{uploadProgress}%</span>
+              </div>
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
+
           <MultiFileUpload
             files={proofFiles}
             onChange={setProofFiles}
@@ -851,6 +845,7 @@ export const TasksPage: React.FC = () => {
             onClick={() => {
               setProofUploadTask(null);
               setProofFiles([]);
+              setUploadProgress(0);
             }}
             disabled={proofUploadMutation.isPending}
           >
