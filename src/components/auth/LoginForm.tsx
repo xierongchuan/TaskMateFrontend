@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { APP_NAME } from '../../constants/app';
 
 export const LoginForm: React.FC = () => {
   const [login, setLogin] = useState('');
@@ -24,7 +25,7 @@ export const LoginForm: React.FC = () => {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-            Вход в систему TaskMate
+            Вход в систему {APP_NAME}
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>

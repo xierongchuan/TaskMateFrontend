@@ -7,6 +7,7 @@ import { Sidebar } from './Sidebar';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { ClockIcon, Bars3Icon } from '@heroicons/react/24/outline';
+import { APP_NAME } from '../../constants/app';
 
 export const Layout: React.FC = () => {
   const { user } = useAuth();
@@ -42,7 +43,7 @@ export const Layout: React.FC = () => {
 
             {/* Logo */}
             <Link to="/" className="text-lg font-bold text-indigo-600 dark:text-indigo-400">
-              TaskMate
+              {APP_NAME}
             </Link>
           </div>
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { usePermissions } from '../../hooks/usePermissions';
+import { APP_NAME } from '../../constants/app';
 import {
   HomeIcon,
   ClipboardDocumentListIcon,
@@ -75,7 +76,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       >
         {/* Mobile Header / Logo area */}
         <div className="h-16 flex items-center px-6 border-b border-gray-100 dark:border-gray-800 lg:hidden shrink-0">
-          <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">TaskMate</span>
+          <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">{APP_NAME}</span>
         </div>
 
         {/* Navigation */}
