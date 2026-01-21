@@ -15,7 +15,6 @@ import {
   CalendarIcon,
   LinkIcon,
   ChartBarIcon,
-  ArrowPathIcon,
   ClipboardDocumentCheckIcon,
 } from '@heroicons/react/24/outline';
 import { usePermissions } from '../hooks/usePermissions';
@@ -100,6 +99,20 @@ export const DashboardPage: React.FC = () => {
     );
   }
 
+  // Вычисляем класс сетки в зависимости от количества карточек
+  const getGridColsClass = (count: number) => {
+    switch (count) {
+      case 3:
+        return 'grid-cols-1 sm:grid-cols-3';
+      case 4:
+        return 'grid-cols-2 lg:grid-cols-4';
+      case 5:
+        return 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5';
+      default:
+        return 'grid-cols-2 lg:grid-cols-4';
+    }
+  };
+
   const stats = [
     {
       name: 'Активные смены',
@@ -141,16 +154,6 @@ export const DashboardPage: React.FC = () => {
       link: '/tasks?status=completed&date_range=today',
       visible: true,
     },
-    {
-      name: 'Генераторы',
-      value: dashboardData?.total_generators || 0,
-      icon: <ArrowPathIcon className="w-6 h-6" />,
-      color: 'bg-purple-500',
-      textColor: 'text-purple-600',
-      description: `Активных: ${dashboardData?.active_generators || 0}`,
-      link: '/task-generators',
-      visible: permissions.canManageTasks,
-    },
   ].filter(stat => stat.visible);
 
   return (
@@ -176,7 +179,7 @@ export const DashboardPage: React.FC = () => {
       </PageHeader>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+      <div className={`grid ${getGridColsClass(stats.length)} gap-4 sm:gap-6 mb-8`}>
         {stats.map((stat) => (
           <Card
             key={stat.name}
