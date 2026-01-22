@@ -1,14 +1,16 @@
 import apiClient from './client';
 import type {
   Setting,
-  BotConfig,
+  NotificationConfig,
+  ArchiveConfig,
   ShiftConfig,
   TaskConfig,
   DealershipBotConfig,
   DealershipSettingsResponse,
   UpdateSettingRequest,
   UpdateShiftConfigRequest,
-  UpdateBotConfigRequest,
+  UpdateNotificationConfigRequest,
+  UpdateArchiveConfigRequest,
   UpdateTaskConfigRequest
 } from '../types/setting';
 
@@ -44,16 +46,29 @@ export const settingsApi = {
     return response.data;
   },
 
-  // Bot Configuration
-  getBotConfig: async (dealershipId?: number): Promise<{ data: BotConfig }> => {
-    const response = await apiClient.get<{ data: BotConfig }>('/settings/bot-config', {
+  // Notification Configuration
+  getNotificationConfig: async (dealershipId?: number): Promise<{ data: NotificationConfig }> => {
+    const response = await apiClient.get<{ data: NotificationConfig }>('/settings/notification-config', {
       params: dealershipId ? { dealership_id: dealershipId } : {},
     });
     return response.data;
   },
 
-  updateBotConfig: async (data: UpdateBotConfigRequest): Promise<{ data: BotConfig }> => {
-    const response = await apiClient.put<{ data: BotConfig }>('/settings/bot-config', data);
+  updateNotificationConfig: async (data: UpdateNotificationConfigRequest): Promise<{ data: NotificationConfig }> => {
+    const response = await apiClient.put<{ data: NotificationConfig }>('/settings/notification-config', data);
+    return response.data;
+  },
+
+  // Archive Configuration
+  getArchiveConfig: async (dealershipId?: number): Promise<{ data: ArchiveConfig }> => {
+    const response = await apiClient.get<{ data: ArchiveConfig }>('/settings/archive-config', {
+      params: dealershipId ? { dealership_id: dealershipId } : {},
+    });
+    return response.data;
+  },
+
+  updateArchiveConfig: async (data: UpdateArchiveConfigRequest): Promise<{ data: ArchiveConfig }> => {
+    const response = await apiClient.put<{ data: ArchiveConfig }>('/settings/archive-config', data);
     return response.data;
   },
 
@@ -72,13 +87,16 @@ export const settingsApi = {
 
   // Legacy methods for backward compatibility
   // Dealership-specific settings (using new shift config endpoints)
-  getDealershipBotConfig: async (dealershipId: number): Promise<DealershipSettingsResponse> => {
+  getDealershipSettings: async (dealershipId: number): Promise<DealershipSettingsResponse> => {
     if (!dealershipId) {
       throw new Error('Dealership ID is required');
     }
 
-    const dealershipConfig = await apiClient.get<{ data: ShiftConfig }>(`/settings/shift-config${dealershipId ? `?dealership_id=${dealershipId}` : ''}`);
-    const globalConfig = await apiClient.get<{ data: ShiftConfig }>('/settings/shift-config');
+    const [dealershipConfig, globalNotification, globalArchive] = await Promise.all([
+      apiClient.get<{ data: ShiftConfig }>(`/settings/shift-config?dealership_id=${dealershipId}`),
+      apiClient.get<{ data: NotificationConfig }>('/settings/notification-config'),
+      apiClient.get<{ data: ArchiveConfig }>('/settings/archive-config'),
+    ]);
 
     // Determine which fields are inherited (not set for dealership)
     const inheritedFields: (keyof DealershipBotConfig)[] = [];
@@ -89,14 +107,15 @@ export const settingsApi = {
     return {
       dealership_id: dealershipId,
       settings: dealershipConfig.data.data,
-      global_settings: globalConfig.data.data as BotConfig,
+      global_notification_settings: globalNotification.data.data,
+      global_archive_settings: globalArchive.data.data,
       inherited_fields: inheritedFields,
     };
   },
 
-  updateDealershipBotConfig: async (data: UpdateShiftConfigRequest): Promise<any> => {
-    const response = await apiClient.post<DealershipBotConfig>(`/settings/shift-config/${data.dealership_id}`, data);
-    return response.data;
+  updateDealershipShiftConfig: async (data: UpdateShiftConfigRequest): Promise<ShiftConfig> => {
+    const response = await apiClient.post<{ data: ShiftConfig }>('/settings/shift-config', data);
+    return response.data.data;
   },
 
   resetDealershipToGlobal: async (dealershipId: number): Promise<void> => {

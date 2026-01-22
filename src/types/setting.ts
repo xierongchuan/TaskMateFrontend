@@ -26,51 +26,48 @@ export interface ShiftConfig {
   timezone?: string;
 }
 
-// Bot Configuration
-export interface BotConfig {
+// Notification Configuration
+export interface NotificationConfig {
+  notification_enabled: boolean;
+  auto_close_shifts: boolean;
+  shift_reminder_minutes: number;
+  rows_per_page: number;
+  notification_types: {
+    task_overdue: boolean;
+    shift_late: boolean;
+    task_completed: boolean;
+    system_errors: boolean;
+  };
+}
 
+// Archive Configuration
+export interface ArchiveConfig {
+  archive_completed_time: string;
+  archive_overdue_day_of_week: number; // 0 = disabled, 1-7 = Monday-Sunday
+  archive_overdue_time: string;
+}
+
+// Notification Configuration Update Request
+export interface UpdateNotificationConfigRequest {
   notification_enabled?: boolean;
   auto_close_shifts?: boolean;
   shift_reminder_minutes?: number;
-  maintenance_mode?: boolean;
-  // Legacy interface fields
-  shift_start_time?: string;
-  shift_end_time?: string;
-  late_tolerance_minutes?: number;
   rows_per_page?: number;
-  auto_archive_day_of_week?: number; // 0 = disabled, 1-7 = Monday-Sunday
-  // New archive settings
-  archive_completed_time?: string;
-  archive_overdue_day_of_week?: number; // 0 = disabled, 1-7 = Monday-Sunday
-  archive_overdue_time?: string;
   notification_types?: {
     task_overdue?: boolean;
     shift_late?: boolean;
     task_completed?: boolean;
     system_errors?: boolean;
   };
-
+  dealership_id?: number;
 }
 
-// Bot Configuration Update Request
-export interface UpdateBotConfigRequest {
-
-  notification_enabled?: boolean;
-  auto_close_shifts?: boolean;
-  shift_reminder_minutes?: number;
-  maintenance_mode?: boolean;
-  rows_per_page?: number;
-  auto_archive_day_of_week?: number;
+// Archive Configuration Update Request
+export interface UpdateArchiveConfigRequest {
   archive_completed_time?: string;
   archive_overdue_day_of_week?: number;
   archive_overdue_time?: string;
   dealership_id?: number;
-  notification_types?: {
-    task_overdue?: boolean;
-    shift_late?: boolean;
-    task_completed?: boolean;
-    system_errors?: boolean;
-  };
 }
 
 // Request interfaces
@@ -100,7 +97,8 @@ export interface DealershipBotConfig {
 export interface DealershipSettingsResponse {
   dealership_id: number;
   settings: ShiftConfig;
-  global_settings: BotConfig;
+  global_notification_settings: NotificationConfig;
+  global_archive_settings: ArchiveConfig;
   inherited_fields: (keyof DealershipBotConfig)[];
 }
 

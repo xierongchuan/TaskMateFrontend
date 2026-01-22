@@ -3,7 +3,8 @@ import { settingsApi } from '../api/settings';
 import type {
   UpdateSettingRequest,
   UpdateShiftConfigRequest,
-  UpdateBotConfigRequest,
+  UpdateNotificationConfigRequest,
+  UpdateArchiveConfigRequest,
   UpdateTaskConfigRequest
 } from '../types/setting';
 
@@ -35,11 +36,20 @@ export const useShiftConfig = (dealershipId?: number) => {
   });
 };
 
-// Hook for getting bot configuration
-export const useBotConfig = (dealershipId?: number) => {
+// Hook for getting notification configuration
+export const useNotificationConfig = (dealershipId?: number) => {
   return useQuery({
-    queryKey: ['settings', 'bot-config', dealershipId],
-    queryFn: () => settingsApi.getBotConfig(dealershipId),
+    queryKey: ['settings', 'notification-config', dealershipId],
+    queryFn: () => settingsApi.getNotificationConfig(dealershipId),
+    placeholderData: (prev) => prev,
+  });
+};
+
+// Hook for getting archive configuration
+export const useArchiveConfig = (dealershipId?: number) => {
+  return useQuery({
+    queryKey: ['settings', 'archive-config', dealershipId],
+    queryFn: () => settingsApi.getArchiveConfig(dealershipId),
     placeholderData: (prev) => prev,
   });
 };
@@ -57,7 +67,7 @@ export const useTaskConfig = (dealershipId?: number) => {
 export const useDealershipSettings = (dealershipId: number) => {
   return useQuery({
     queryKey: ['settings', 'dealership', dealershipId],
-    queryFn: () => settingsApi.getDealershipBotConfig(dealershipId),
+    queryFn: () => settingsApi.getDealershipSettings(dealershipId),
     enabled: !!dealershipId,
     placeholderData: (prev) => prev,
   });
@@ -90,17 +100,31 @@ export const useUpdateShiftConfig = () => {
   });
 };
 
-// Hook for updating bot configuration
-export const useUpdateBotConfig = () => {
+// Hook for updating notification configuration
+export const useUpdateNotificationConfig = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: UpdateBotConfigRequest) => settingsApi.updateBotConfig(data),
+    mutationFn: (data: UpdateNotificationConfigRequest) => settingsApi.updateNotificationConfig(data),
     onSuccess: (_, variables) => {
-      // Инвалидируем все запросы bot-config
-      queryClient.invalidateQueries({ queryKey: ['settings', 'bot-config'] });
+      queryClient.invalidateQueries({ queryKey: ['settings', 'notification-config'] });
       if (variables.dealership_id) {
-        queryClient.invalidateQueries({ queryKey: ['settings', 'bot-config', variables.dealership_id] });
+        queryClient.invalidateQueries({ queryKey: ['settings', 'notification-config', variables.dealership_id] });
+      }
+    },
+  });
+};
+
+// Hook for updating archive configuration
+export const useUpdateArchiveConfig = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: UpdateArchiveConfigRequest) => settingsApi.updateArchiveConfig(data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['settings', 'archive-config'] });
+      if (variables.dealership_id) {
+        queryClient.invalidateQueries({ queryKey: ['settings', 'archive-config', variables.dealership_id] });
       }
     },
   });
@@ -126,7 +150,7 @@ export const useUpdateDealershipSettings = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: UpdateShiftConfigRequest) => settingsApi.updateDealershipBotConfig(data),
+    mutationFn: (data: UpdateShiftConfigRequest) => settingsApi.updateDealershipShiftConfig(data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['settings', 'shift-config'] });
       queryClient.invalidateQueries({ queryKey: ['settings', 'shift-config', variables.dealership_id] });

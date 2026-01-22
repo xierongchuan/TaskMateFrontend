@@ -143,13 +143,15 @@ public function updateSensitiveData(Request $request)
 ### Настройки (Settings)
 - `GET /api/v1/settings` - Все авторизованные пользователи
 - `GET /api/v1/settings/shift-config` - Все авторизованные пользователи
-- `GET /api/v1/settings/bot-config` - Все авторизованные пользователи
+- `GET /api/v1/settings/notification-config` - Все авторизованные пользователи
+- `GET /api/v1/settings/archive-config` - Все авторизованные пользователи
+- `GET /api/v1/settings/task-config` - Все авторизованные пользователи
 - `GET /api/v1/settings/{key}` - Все авторизованные пользователи
-- `POST /api/v1/settings/shift-config` - **Только Manager, Owner**
-- `POST /api/v1/settings/bot-config` - **Только Manager, Owner**
-- `POST /api/v1/settings` - **Только Manager, Owner**
-- `PUT /api/v1/settings/{id}` - **Только Manager, Owner**
-- `DELETE /api/v1/settings/{id}` - **Только Manager, Owner**
+- `POST /api/v1/settings/shift-config` - **Только Owner**
+- `PUT /api/v1/settings/notification-config` - **Только Manager, Owner**
+- `PUT /api/v1/settings/archive-config` - **Только Manager, Owner**
+- `PUT /api/v1/settings/task-config` - **Только Manager, Owner**
+- `PUT /api/v1/settings/{key}` - **Только Owner**
 
 ### Dashboard
 - `GET /api/v1/dashboard` - Все авторизованные пользователи

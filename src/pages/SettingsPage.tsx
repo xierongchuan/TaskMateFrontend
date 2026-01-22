@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useShiftConfig, useBotConfig, useUpdateShiftConfig, useUpdateBotConfig, useDealershipSettings, useTaskConfig, useUpdateTaskConfig } from '../hooks/useSettings';
+import { useShiftConfig, useNotificationConfig, useArchiveConfig, useUpdateShiftConfig, useUpdateNotificationConfig, useUpdateArchiveConfig, useDealershipSettings, useTaskConfig, useUpdateTaskConfig, useSetting, useUpdateSetting } from '../hooks/useSettings';
 import { useTheme } from '../context/ThemeContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { useAuth } from '../hooks/useAuth';
 import { DealershipSelector } from '../components/common/DealershipSelector';
 import { YearCalendar } from '../components/settings/YearCalendar';
-import type { BotConfig, ShiftConfig, TaskConfig } from '../types/setting';
+import type { NotificationConfig, ArchiveConfig, ShiftConfig, TaskConfig } from '../types/setting';
 
 // UI Components
 import {
@@ -59,15 +59,29 @@ export const SettingsPage: React.FC = () => {
     timezone: 'Europe/Moscow',
   });
 
-  // Initialize bot config with default values
-  const [botConfig, setBotConfig] = useState<BotConfig>({
+  // Initialize notification config with default values
+  const [notificationConfig, setNotificationConfig] = useState<NotificationConfig>({
     notification_enabled: true,
     auto_close_shifts: false,
     shift_reminder_minutes: 15,
-    maintenance_mode: false,
-    rows_per_page: 15,
-    auto_archive_day_of_week: 0
+    rows_per_page: 10,
+    notification_types: {
+      task_overdue: true,
+      shift_late: true,
+      task_completed: true,
+      system_errors: true,
+    },
   });
+
+  // Initialize archive config with default values
+  const [archiveConfig, setArchiveConfig] = useState<ArchiveConfig>({
+    archive_completed_time: '03:00',
+    archive_overdue_day_of_week: 0,
+    archive_overdue_time: '03:00',
+  });
+
+  // Maintenance mode (global setting)
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
 
   // Initialize task config with default values
   const [taskConfig, setTaskConfig] = useState<TaskConfig>({
@@ -77,9 +91,11 @@ export const SettingsPage: React.FC = () => {
 
   // Data fetching
   const { data: shiftConfigData, isLoading: shiftConfigLoading } = useShiftConfig(selectedDealershipId);
-  const { data: botConfigData, isLoading: botConfigLoading } = useBotConfig(selectedDealershipId);
+  const { data: notificationConfigData, isLoading: notificationConfigLoading } = useNotificationConfig(selectedDealershipId);
+  const { data: archiveConfigData, isLoading: archiveConfigLoading } = useArchiveConfig(selectedDealershipId);
   const { data: taskConfigData, isLoading: taskConfigLoading } = useTaskConfig(selectedDealershipId);
   const { data: config } = useDealershipSettings(selectedDealershipId || 0);
+  const { data: maintenanceModeData, isLoading: maintenanceModeLoading } = useSetting('maintenance_mode');
 
   // Effects to filter data
   useEffect(() => {
@@ -89,10 +105,22 @@ export const SettingsPage: React.FC = () => {
   }, [shiftConfigData]);
 
   useEffect(() => {
-    if (botConfigData?.data) {
-      setBotConfig(prev => ({ ...prev, ...botConfigData.data }));
+    if (notificationConfigData?.data) {
+      setNotificationConfig(prev => ({ ...prev, ...notificationConfigData.data }));
     }
-  }, [botConfigData]);
+  }, [notificationConfigData]);
+
+  useEffect(() => {
+    if (archiveConfigData?.data) {
+      setArchiveConfig(prev => ({ ...prev, ...archiveConfigData.data }));
+    }
+  }, [archiveConfigData]);
+
+  useEffect(() => {
+    if (maintenanceModeData?.data) {
+      setMaintenanceMode(maintenanceModeData.data.value === 'true' || maintenanceModeData.data.value === '1');
+    }
+  }, [maintenanceModeData]);
 
   useEffect(() => {
     if (taskConfigData?.data) {
@@ -102,8 +130,10 @@ export const SettingsPage: React.FC = () => {
 
   // Mutations
   const updateShiftConfigMutation = useUpdateShiftConfig();
-  const updateBotConfigMutation = useUpdateBotConfig();
+  const updateNotificationConfigMutation = useUpdateNotificationConfig();
+  const updateArchiveConfigMutation = useUpdateArchiveConfig();
   const updateTaskConfigMutation = useUpdateTaskConfig();
+  const updateSettingMutation = useUpdateSetting();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,9 +147,10 @@ export const SettingsPage: React.FC = () => {
         onError: () => showToast({ type: 'error', message: 'Ошибка сохранения времени смен' }),
       });
 
-      // Also save bot config (automation settings used in Shifts tab)
-      updateBotConfigMutation.mutate({
-        ...botConfig,
+      // Also save notification config (automation settings used in Shifts tab)
+      updateNotificationConfigMutation.mutate({
+        auto_close_shifts: notificationConfig.auto_close_shifts,
+        shift_reminder_minutes: notificationConfig.shift_reminder_minutes,
         dealership_id: selectedDealershipId,
       }, {
         onSuccess: () => showToast({ type: 'success', message: 'Настройки смен и автоматизации сохранены' }),
@@ -127,8 +158,8 @@ export const SettingsPage: React.FC = () => {
       });
     } else if (activeTab === 'interface') {
       applyTheme();
-      updateBotConfigMutation.mutate({
-        ...botConfig,
+      updateNotificationConfigMutation.mutate({
+        rows_per_page: notificationConfig.rows_per_page,
         dealership_id: selectedDealershipId,
       }, {
         onSuccess: () => showToast({ type: 'success', message: 'Настройки сохранены' }),
@@ -142,36 +173,42 @@ export const SettingsPage: React.FC = () => {
       }, {
         onError: () => showToast({ type: 'error', message: 'Ошибка сохранения настроек задач' }),
       });
-      // Also save bot config for archive settings
-      updateBotConfigMutation.mutate({
-        ...botConfig,
+      // Also save archive config for archive settings
+      updateArchiveConfigMutation.mutate({
+        ...archiveConfig,
         dealership_id: selectedDealershipId,
       }, {
         onSuccess: () => showToast({ type: 'success', message: 'Настройки задач сохранены' }),
         onError: () => showToast({ type: 'error', message: 'Ошибка сохранения настроек' }),
       });
     } else if (activeTab === 'maintenance') {
-      // maintenance_mode всегда глобальная настройка (dealership_id = undefined)
-      updateBotConfigMutation.mutate({
-        maintenance_mode: botConfig.maintenance_mode,
-        dealership_id: undefined, // Всегда глобальная
+      // maintenance_mode через глобальный settings endpoint
+      if (maintenanceModeData?.data?.id) {
+        updateSettingMutation.mutate({
+          id: maintenanceModeData.data.id,
+          data: { value: maintenanceMode, type: 'boolean' },
+        }, {
+          onSuccess: () => showToast({ type: 'success', message: 'Режим обслуживания обновлен' }),
+          onError: () => showToast({ type: 'error', message: 'Ошибка сохранения режима обслуживания' }),
+        });
+      }
+    } else if (activeTab === 'notifications') {
+      updateNotificationConfigMutation.mutate({
+        ...notificationConfig,
+        dealership_id: selectedDealershipId,
       }, {
-        onSuccess: () => showToast({ type: 'success', message: 'Режим обслуживания обновлен' }),
-        onError: () => showToast({ type: 'error', message: 'Ошибка сохранения режима обслуживания' }),
+        onSuccess: () => showToast({ type: 'success', message: 'Настройки уведомлений сохранены' }),
+        onError: () => showToast({ type: 'error', message: 'Ошибка сохранения настроек' }),
       });
     } else {
-      updateBotConfigMutation.mutate({
-        ...botConfig,
+      updateNotificationConfigMutation.mutate({
+        ...notificationConfig,
         dealership_id: selectedDealershipId,
       }, {
         onSuccess: () => showToast({ type: 'success', message: 'Настройки сохранены' }),
         onError: () => showToast({ type: 'error', message: 'Ошибка сохранения настроек' }),
       });
     }
-  };
-
-  const handleTestBot = () => {
-    showToast({ type: 'info', message: 'Проверка подключения... (Заглушка)' });
   };
 
   // Tabs definition
@@ -196,8 +233,8 @@ export const SettingsPage: React.FC = () => {
     );
   }
 
-  const isLoading = shiftConfigLoading || botConfigLoading || taskConfigLoading;
-  const isSaving = updateShiftConfigMutation.isPending || updateBotConfigMutation.isPending || updateTaskConfigMutation.isPending;
+  const isLoading = shiftConfigLoading || notificationConfigLoading || archiveConfigLoading || taskConfigLoading || maintenanceModeLoading;
+  const isSaving = updateShiftConfigMutation.isPending || updateNotificationConfigMutation.isPending || updateArchiveConfigMutation.isPending || updateTaskConfigMutation.isPending || updateSettingMutation.isPending;
 
   return (
     <PageContainer>
@@ -350,12 +387,12 @@ export const SettingsPage: React.FC = () => {
                                     min="5"
                                     max="100"
                                     step="5"
-                                    value={botConfig.rows_per_page || 15}
-                                    onChange={(e) => setBotConfig({ ...botConfig, rows_per_page: parseInt(e.target.value) })}
+                                    value={notificationConfig.rows_per_page || 10}
+                                    onChange={(e) => setNotificationConfig({ ...notificationConfig, rows_per_page: parseInt(e.target.value) })}
                                     className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
                                   />
                                   <div className="w-16 h-10 flex items-center justify-center border border-gray-300 dark:border-gray-600 rounded-lg font-mono font-bold text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-700">
-                                    {botConfig.rows_per_page || 15}
+                                    {notificationConfig.rows_per_page || 10}
                                   </div>
                                 </div>
                               </div>
@@ -432,9 +469,9 @@ export const SettingsPage: React.FC = () => {
                               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Время запуска:</label>
                               <Input
                                 type="time"
-                                value={botConfig.archive_completed_time || '03:00'}
-                                onChange={(e) => setBotConfig({
-                                  ...botConfig,
+                                value={archiveConfig.archive_completed_time || '03:00'}
+                                onChange={(e) => setArchiveConfig({
+                                  ...archiveConfig,
                                   archive_completed_time: e.target.value
                                 })}
                                 className="w-32"
@@ -560,8 +597,8 @@ export const SettingsPage: React.FC = () => {
                         <Card>
                           <Card.Body>
                             <Checkbox
-                              checked={botConfig.auto_close_shifts || false}
-                              onChange={(e) => setBotConfig({ ...botConfig, auto_close_shifts: e.target.checked })}
+                              checked={notificationConfig.auto_close_shifts || false}
+                              onChange={(e) => setNotificationConfig({ ...notificationConfig, auto_close_shifts: e.target.checked })}
                               label="Авто-закрытие смен"
                             />
                             <p className="mt-2 text-xs text-gray-500 ml-7">
@@ -578,13 +615,13 @@ export const SettingsPage: React.FC = () => {
                                 type="number"
                                 min={0}
                                 max={120}
-                                value={botConfig.shift_reminder_minutes || 15}
-                                onChange={(e) => setBotConfig({ ...botConfig, shift_reminder_minutes: parseInt(e.target.value) || 0 })}
+                                value={notificationConfig.shift_reminder_minutes || 15}
+                                onChange={(e) => setNotificationConfig({ ...notificationConfig, shift_reminder_minutes: parseInt(e.target.value) || 0 })}
                                 className="w-24"
                               />
                               <span className="text-gray-500 dark:text-gray-400 text-sm">минут до начала</span>
                             </div>
-                            <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">Бот отправит уведомление сотруднику перед началом смены.</p>
+                            <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">Система отправит уведомление сотруднику перед началом смены.</p>
                           </Card.Body>
                         </Card>
                       </div>
@@ -611,17 +648,17 @@ export const SettingsPage: React.FC = () => {
                       <Card>
                         <Card.Body>
                           <Checkbox
-                            checked={botConfig.notification_enabled || false}
-                            onChange={(e) => setBotConfig({ ...botConfig, notification_enabled: e.target.checked })}
-                            label={<span className="font-medium">Включить уведомления Telegram</span>}
+                            checked={notificationConfig.notification_enabled || false}
+                            onChange={(e) => setNotificationConfig({ ...notificationConfig, notification_enabled: e.target.checked })}
+                            label={<span className="font-medium">Включить уведомления</span>}
                           />
                           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 ml-7">
-                            Полное отключение/включение всех уведомлений бота. Если выключено, никакие сообщения отправляться не будут.
+                            Полное отключение/включение всех уведомлений системы. Если выключено, никакие сообщения отправляться не будут.
                           </p>
                         </Card.Body>
                       </Card>
 
-                      {botConfig.notification_enabled && (
+                      {notificationConfig.notification_enabled && (
                         <>
                           <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-2 mb-2">Типы уведомлений</div>
                           {[
@@ -638,11 +675,11 @@ export const SettingsPage: React.FC = () => {
                                     <div className="text-sm text-gray-500 dark:text-gray-400">{item.desc}</div>
                                   </div>
                                   <Checkbox
-                                    checked={botConfig.notification_types?.[item.key as keyof typeof botConfig.notification_types] || false}
-                                    onChange={(e) => setBotConfig({
-                                      ...botConfig,
+                                    checked={notificationConfig.notification_types?.[item.key as keyof typeof notificationConfig.notification_types] || false}
+                                    onChange={(e) => setNotificationConfig({
+                                      ...notificationConfig,
                                       notification_types: {
-                                        ...botConfig.notification_types,
+                                        ...notificationConfig.notification_types,
                                         [item.key]: e.target.checked
                                       }
                                     })}
@@ -683,20 +720,6 @@ export const SettingsPage: React.FC = () => {
                       </div>
 
                       <div className="space-y-4">
-                        <Card>
-                          <Card.Body>
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <h4 className="font-medium text-gray-900 dark:text-white">Проверка бота</h4>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">Отправить тестовое сообщение для проверки связи</p>
-                              </div>
-                              <Button variant="secondary" type="button" onClick={handleTestBot}>
-                                Проверить
-                              </Button>
-                            </div>
-                          </Card.Body>
-                        </Card>
-
                         <div className="bg-red-50 dark:bg-red-900/10 p-6 rounded-xl border border-red-100 dark:border-red-900/30">
                           <div className="flex items-start justify-between mb-4">
                             <div className="flex-1">
@@ -714,18 +737,18 @@ export const SettingsPage: React.FC = () => {
                           </div>
                           <div className="border-t border-red-200 dark:border-red-800 pt-4">
                             <Checkbox
-                              checked={botConfig.maintenance_mode || false}
-                              onChange={(e) => setBotConfig({ ...botConfig, maintenance_mode: e.target.checked })}
+                              checked={maintenanceMode}
+                              onChange={(e) => setMaintenanceMode(e.target.checked)}
                               label={
                                 <span className="font-medium">
-                                  {botConfig.maintenance_mode
+                                  {maintenanceMode
                                     ? '✓ Режим обслуживания активен'
                                     : 'Активировать режим обслуживания'
                                   }
                                 </span>
                               }
                             />
-                            {botConfig.maintenance_mode && (
+                            {maintenanceMode && (
                               <p className="mt-2 ml-7 text-xs text-red-600 dark:text-red-400">
                                 ⚠ Система сейчас в режиме обслуживания! Обычные пользователи не могут войти.
                               </p>

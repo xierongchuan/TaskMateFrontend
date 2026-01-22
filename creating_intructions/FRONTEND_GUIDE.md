@@ -56,10 +56,16 @@ POST   /dealerships          - Создать автосалон (Manager/Owner)
 PUT    /dealerships/{id}     - Обновить автосалон (Manager/Owner)
 DELETE /dealerships/{id}     - Удалить автосалон (Manager/Owner)
 
-GET    /settings             - Настройки
-POST   /settings             - Создать настройку (Manager/Owner)
-GET    /settings/bot-config  - Настройки бота
-POST   /settings/bot-config  - Обновить настройки бота (Manager/Owner)
+GET    /settings                   - Настройки
+GET    /settings/shift-config      - Конфигурация смен
+GET    /settings/notification-config - Настройки уведомлений
+GET    /settings/archive-config    - Настройки архивации
+GET    /settings/task-config       - Настройки задач
+POST   /settings/shift-config      - Обновить конфигурацию смен (Owner)
+PUT    /settings/notification-config - Обновить настройки уведомлений (Manager/Owner)
+PUT    /settings/archive-config    - Обновить настройки архивации (Manager/Owner)
+PUT    /settings/task-config       - Обновить настройки задач (Manager/Owner)
+PUT    /settings/{key}             - Обновить настройку (Owner)
 
 GET    /dashboard            - Общая статистика
 ```
@@ -1562,17 +1568,33 @@ export const settingsApi = {
     return response.data;
   },
 
-  // Получить настройки бота
-  getBotConfig: async (dealership_id?: number): Promise<BotConfig> => {
-    const response = await apiClient.get<BotConfig>('/settings/bot-config', {
+  // Получить настройки уведомлений
+  getNotificationConfig: async (dealership_id?: number): Promise<NotificationConfig> => {
+    const response = await apiClient.get<NotificationConfig>('/settings/notification-config', {
       params: { dealership_id },
     });
     return response.data;
   },
 
-  // Обновить настройки бота (только Manager/Owner)
-  updateBotConfig: async (data: Partial<BotConfig>, dealership_id?: number): Promise<void> => {
-    await apiClient.post('/settings/bot-config', {
+  // Обновить настройки уведомлений (только Manager/Owner)
+  updateNotificationConfig: async (data: Partial<NotificationConfig>, dealership_id?: number): Promise<void> => {
+    await apiClient.put('/settings/notification-config', {
+      ...data,
+      dealership_id,
+    });
+  },
+
+  // Получить настройки архивации
+  getArchiveConfig: async (dealership_id?: number): Promise<ArchiveConfig> => {
+    const response = await apiClient.get<ArchiveConfig>('/settings/archive-config', {
+      params: { dealership_id },
+    });
+    return response.data;
+  },
+
+  // Обновить настройки архивации (только Manager/Owner)
+  updateArchiveConfig: async (data: Partial<ArchiveConfig>, dealership_id?: number): Promise<void> => {
+    await apiClient.put('/settings/archive-config', {
       ...data,
       dealership_id,
     });
