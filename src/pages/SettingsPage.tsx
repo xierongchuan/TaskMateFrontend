@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useShiftConfig, useNotificationConfig, useArchiveConfig, useUpdateShiftConfig, useUpdateNotificationConfig, useUpdateArchiveConfig, useDealershipSettings, useTaskConfig, useUpdateTaskConfig, useSetting, useUpdateSetting } from '../hooks/useSettings';
 import { useTheme } from '../context/ThemeContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { useAuth } from '../hooks/useAuth';
 import { DealershipSelector } from '../components/common/DealershipSelector';
-import { YearCalendar } from '../components/settings/YearCalendar';
+import { YearCalendar, type YearCalendarRef } from '../components/settings/YearCalendar';
 import type { NotificationConfig, ArchiveConfig, ShiftConfig, TaskConfig } from '../types/setting';
 
 // UI Components
@@ -47,6 +47,8 @@ export const SettingsPage: React.FC = () => {
   const [selectedDealershipId, setSelectedDealershipId] = useState<number | undefined>(user?.dealership_id || undefined);
   const [showDetailedNotifications, setShowDetailedNotifications] = useState(false);
   const [selectedCalendarYear, setSelectedCalendarYear] = useState(new Date().getFullYear());
+  const [calendarSaving, setCalendarSaving] = useState(false);
+  const calendarRef = useRef<YearCalendarRef>(null);
 
   // Initialize shift config with default values
   const [shiftConfig, setShiftConfig] = useState<ShiftConfig>({
@@ -200,6 +202,22 @@ export const SettingsPage: React.FC = () => {
         onSuccess: () => showToast({ type: 'success', message: 'Настройки уведомлений сохранены' }),
         onError: () => showToast({ type: 'error', message: 'Ошибка сохранения настроек' }),
       });
+    } else if (activeTab === 'calendar') {
+      if (calendarRef.current?.hasPendingChanges()) {
+        setCalendarSaving(true);
+        calendarRef.current.save()
+          .then(() => {
+            showToast({ type: 'success', message: 'Календарь сохранён' });
+          })
+          .catch(() => {
+            showToast({ type: 'error', message: 'Ошибка сохранения календаря' });
+          })
+          .finally(() => {
+            setCalendarSaving(false);
+          });
+      } else {
+        showToast({ type: 'info', message: 'Нет изменений для сохранения' });
+      }
     } else {
       updateNotificationConfigMutation.mutate({
         ...notificationConfig,
@@ -234,7 +252,7 @@ export const SettingsPage: React.FC = () => {
   }
 
   const isLoading = shiftConfigLoading || notificationConfigLoading || archiveConfigLoading || taskConfigLoading || maintenanceModeLoading;
-  const isSaving = updateShiftConfigMutation.isPending || updateNotificationConfigMutation.isPending || updateArchiveConfigMutation.isPending || updateTaskConfigMutation.isPending || updateSettingMutation.isPending;
+  const isSaving = updateShiftConfigMutation.isPending || updateNotificationConfigMutation.isPending || updateArchiveConfigMutation.isPending || updateTaskConfigMutation.isPending || updateSettingMutation.isPending || calendarSaving;
 
   return (
     <PageContainer>
@@ -494,6 +512,7 @@ export const SettingsPage: React.FC = () => {
                         задачи создаваться не будут.
                       </p>
                       <YearCalendar
+                        ref={calendarRef}
                         year={selectedCalendarYear}
                         dealershipId={selectedDealershipId}
                         onYearChange={setSelectedCalendarYear}

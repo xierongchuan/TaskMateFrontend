@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useImperativeHandle, forwardRef, useEffect } from 'react';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -6,15 +6,21 @@ import {
   ArrowPathIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline';
-import { useHolidays, useBulkCalendarUpdate, useUpdateCalendarDay, useClearCalendarYear } from '../../hooks/useCalendar';
+import { useHolidays, useBulkCalendarUpdate, useClearCalendarYear } from '../../hooks/useCalendar';
 import { Button, ConfirmDialog } from '../ui';
 import { useToast } from '../ui/Toast';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
+
+export interface YearCalendarRef {
+  save: () => Promise<void>;
+  hasPendingChanges: () => boolean;
+}
 
 interface YearCalendarProps {
   year?: number;
   dealershipId?: number;
   onYearChange?: (year: number) => void;
+  onPendingChange?: (hasPending: boolean) => void;
 }
 
 const MONTHS = [
@@ -28,6 +34,7 @@ interface MonthCalendarProps {
   year: number;
   month: number; // 1-12
   holidays: Set<string>;
+  pendingDates: Set<string>;
   onDayClick: (date: string) => void;
   isLoading: boolean;
 }
@@ -36,6 +43,7 @@ const MonthCalendar: React.FC<MonthCalendarProps> = ({
   year,
   month,
   holidays,
+  pendingDates,
   onDayClick,
   isLoading,
 }) => {
@@ -88,6 +96,7 @@ const MonthCalendar: React.FC<MonthCalendarProps> = ({
 
           const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
           const isHoliday = holidays.has(dateStr);
+          const isPending = pendingDates.has(dateStr);
           const dayOfWeek = new Date(year, month - 1, day).getDay();
           const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
@@ -105,9 +114,10 @@ const MonthCalendar: React.FC<MonthCalendarProps> = ({
                     ? 'bg-gray-100 dark:bg-gray-700 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/30'
                     : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }
+                ${isPending ? 'ring-2 ring-amber-400 ring-offset-1' : ''}
                 ${isLoading ? 'opacity-50 cursor-wait' : 'cursor-pointer'}
               `}
-              title={isHoliday ? 'Выходной (кликните для отмены)' : 'Кликните чтобы отметить как выходной'}
+              title={isPending ? 'Несохранённое изменение' : isHoliday ? 'Выходной (кликните для отмены)' : 'Кликните чтобы отметить как выходной'}
             >
               {day}
             </button>
@@ -118,11 +128,12 @@ const MonthCalendar: React.FC<MonthCalendarProps> = ({
   );
 };
 
-export const YearCalendar: React.FC<YearCalendarProps> = ({
+export const YearCalendar = forwardRef<YearCalendarRef, YearCalendarProps>(({
   year: initialYear,
   dealershipId,
   onYearChange,
-}) => {
+  onPendingChange,
+}, ref) => {
   const currentYear = new Date().getFullYear();
   const [year, setYear] = useState(initialYear || currentYear);
   const { showToast } = useToast();
@@ -131,8 +142,10 @@ export const YearCalendar: React.FC<YearCalendarProps> = ({
   const { data: holidaysData, isLoading, refetch } = useHolidays(year, dealershipId);
 
   const bulkUpdateMutation = useBulkCalendarUpdate();
-  const updateDayMutation = useUpdateCalendarDay();
   const clearYearMutation = useClearCalendarYear();
+
+  // Локальное состояние для несохранённых изменений
+  const [pendingChanges, setPendingChanges] = useState<Map<string, 'holiday' | 'workday'>>(new Map());
 
   // Convert holidays array to Set for fast lookup
   const holidaysSet = useMemo(() => {
@@ -140,26 +153,97 @@ export const YearCalendar: React.FC<YearCalendarProps> = ({
     return new Set(holidaysData.data.dates);
   }, [holidaysData]);
 
+  // Эффективный набор выходных с учётом pending изменений
+  const effectiveHolidaysSet = useMemo(() => {
+    const effective = new Set(holidaysSet);
+    pendingChanges.forEach((type, date) => {
+      if (type === 'holiday') {
+        effective.add(date);
+      } else {
+        effective.delete(date);
+      }
+    });
+    return effective;
+  }, [holidaysSet, pendingChanges]);
+
+  const hasPendingChanges = pendingChanges.size > 0;
+
+  // Уведомляем родителя об изменении pending состояния
+  useEffect(() => {
+    onPendingChange?.(hasPendingChanges);
+  }, [hasPendingChanges, onPendingChange]);
+
   const handleYearChange = (newYear: number) => {
+    setPendingChanges(new Map()); // Очистить pending при смене года
     setYear(newYear);
     onYearChange?.(newYear);
   };
 
-  const handleDayClick = async (dateStr: string) => {
-    const isCurrentlyHoliday = holidaysSet.has(dateStr);
+  const handleDayClick = (dateStr: string) => {
+    const serverIsHoliday = holidaysSet.has(dateStr);
+    const pendingType = pendingChanges.get(dateStr);
+    const effectiveIsHoliday = pendingType ? pendingType === 'holiday' : serverIsHoliday;
+    const newType = effectiveIsHoliday ? 'workday' : 'holiday';
+
+    setPendingChanges(prev => {
+      const newChanges = new Map(prev);
+      // Если новое состояние совпадает с серверным — убираем из pending
+      if ((newType === 'holiday') === serverIsHoliday) {
+        newChanges.delete(dateStr);
+      } else {
+        newChanges.set(dateStr, newType);
+      }
+      return newChanges;
+    });
+  };
+
+  const handleSaveChanges = async () => {
+    if (pendingChanges.size === 0) return;
 
     try {
-      await updateDayMutation.mutateAsync({
-        date: dateStr,
-        data: {
-          type: isCurrentlyHoliday ? 'workday' : 'holiday',
+      const holidays = [...pendingChanges.entries()]
+        .filter(([, type]) => type === 'holiday')
+        .map(([date]) => date);
+      const workdays = [...pendingChanges.entries()]
+        .filter(([, type]) => type === 'workday')
+        .map(([date]) => date);
+
+      if (holidays.length > 0) {
+        await bulkUpdateMutation.mutateAsync({
+          operation: 'set_dates',
+          year,
+          dates: holidays,
+          type: 'holiday',
           dealership_id: dealershipId,
-        },
-      });
-    } catch {
-      showToast({ type: 'error', message: 'Ошибка обновления календаря' });
+        });
+      }
+      if (workdays.length > 0) {
+        await bulkUpdateMutation.mutateAsync({
+          operation: 'set_dates',
+          year,
+          dates: workdays,
+          type: 'workday',
+          dealership_id: dealershipId,
+        });
+      }
+
+      setPendingChanges(new Map());
+      // Toast показывает родительский компонент (SettingsPage)
+    } catch (error) {
+      // Ошибку пробрасываем наверх для обработки в родительском компоненте
+      throw error;
     }
   };
+
+  const handleDiscardChanges = () => {
+    setPendingChanges(new Map());
+  };
+
+  // Expose методы через ref для родительского компонента
+  useImperativeHandle(ref, () => ({
+    save: handleSaveChanges,
+    hasPendingChanges: () => pendingChanges.size > 0,
+  }), [pendingChanges, year, dealershipId, bulkUpdateMutation]);
 
   const handleSetAllSaturdays = async () => {
     try {
@@ -227,7 +311,7 @@ export const YearCalendar: React.FC<YearCalendarProps> = ({
     }
   };
 
-  const isMutating = bulkUpdateMutation.isPending || updateDayMutation.isPending || clearYearMutation.isPending;
+  const isMutating = bulkUpdateMutation.isPending || clearYearMutation.isPending;
 
   return (
     <div className="space-y-6">
@@ -307,6 +391,23 @@ export const YearCalendar: React.FC<YearCalendarProps> = ({
         </Button>
       </div>
 
+      {/* Pending changes indicator */}
+      {hasPendingChanges && (
+        <div className="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+          <span className="text-sm text-amber-700 dark:text-amber-300">
+            Несохранённых изменений: <strong>{pendingChanges.size}</strong>
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleDiscardChanges}
+            disabled={isMutating}
+          >
+            Сбросить
+          </Button>
+        </div>
+      )}
+
       {/* Statistics */}
       <div className="flex items-center gap-4 text-sm">
         <div className="flex items-center gap-2">
@@ -328,7 +429,8 @@ export const YearCalendar: React.FC<YearCalendarProps> = ({
             key={month}
             year={year}
             month={month}
-            holidays={holidaysSet}
+            holidays={effectiveHolidaysSet}
+            pendingDates={new Set(pendingChanges.keys())}
             onDayClick={handleDayClick}
             isLoading={isLoading || isMutating}
           />
@@ -357,4 +459,6 @@ export const YearCalendar: React.FC<YearCalendarProps> = ({
       />
     </div>
   );
-};
+});
+
+YearCalendar.displayName = 'YearCalendar';
