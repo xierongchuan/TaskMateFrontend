@@ -115,21 +115,6 @@ export const tasksApi = {
     await apiClient.delete(`/tasks/${id}`);
   },
 
-  bulkUpdateStatus: async (taskIds: number[], status: string): Promise<void> => {
-    await apiClient.post('/tasks/bulk-update-status', { task_ids: taskIds, status });
-  },
-
-  getTaskStats: async (filters?: TasksFilters): Promise<{
-    total: number;
-    pending: number;
-    completed: number;
-    overdue: number;
-    acknowledged: number;
-  }> => {
-    const response = await apiClient.get('/tasks/stats', { params: filters });
-    return response.data;
-  },
-
   /**
    * Get history of tasks completed by current user
    */

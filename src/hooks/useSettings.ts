@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { settingsApi } from '../api/settings';
 import type {
-  CreateSettingRequest,
   UpdateSettingRequest,
   UpdateShiftConfigRequest,
   UpdateBotConfigRequest,
@@ -64,18 +63,6 @@ export const useDealershipSettings = (dealershipId: number) => {
   });
 };
 
-// Hook for creating a setting
-export const useCreateSetting = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: CreateSettingRequest) => settingsApi.createSetting(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['settings'] });
-    },
-  });
-};
-
 // Hook for updating a setting
 export const useUpdateSetting = () => {
   const queryClient = useQueryClient();
@@ -83,18 +70,6 @@ export const useUpdateSetting = () => {
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdateSettingRequest }) =>
       settingsApi.updateSettingById(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['settings'] });
-    },
-  });
-};
-
-// Hook for deleting a setting
-export const useDeleteSetting = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: number) => settingsApi.deleteSetting(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] });
     },
@@ -170,53 +145,6 @@ export const useResetDealershipSettings = () => {
       queryClient.invalidateQueries({ queryKey: ['settings', 'shift-config'] });
       queryClient.invalidateQueries({ queryKey: ['settings', 'shift-config', dealershipId] });
       queryClient.invalidateQueries({ queryKey: ['settings', 'dealership', dealershipId] });
-    },
-  });
-};
-
-// Utility hooks
-export const useClearOldTasks = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: () => settingsApi.clearOldTasks(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
-    },
-  });
-};
-
-export const useTestBotConnection = () => {
-  return useMutation({
-    mutationFn: () => settingsApi.testBotConnection(),
-  });
-};
-
-export const useExportSettings = () => {
-  return useMutation({
-    mutationFn: () => settingsApi.exportSettings(),
-  });
-};
-
-export const useImportSettings = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (file: File) => settingsApi.importSettings(file),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['settings'] });
-    },
-  });
-};
-
-export const useResetSettings = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: () => settingsApi.resetSettings(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['settings'] });
     },
   });
 };

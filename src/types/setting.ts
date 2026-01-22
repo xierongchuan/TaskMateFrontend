@@ -74,14 +74,6 @@ export interface UpdateBotConfigRequest {
 }
 
 // Request interfaces
-export interface CreateSettingRequest {
-  key: string;
-  value: string | number | boolean | object | null;
-  type?: SettingType;
-  description?: string;
-  dealership_id?: number;
-}
-
 export interface UpdateSettingRequest {
   value: string | number | boolean | object | null;
   type?: SettingType;
