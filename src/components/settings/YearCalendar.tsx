@@ -131,8 +131,8 @@ const MonthCalendar: React.FC<MonthCalendarProps> = ({
                 ${isHoliday
                   ? 'bg-red-500 text-white'
                   : isWeekend
-                    ? 'bg-gray-100 dark:bg-gray-700 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/30'
-                    : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    ? 'bg-transparent text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/30'
+                    : 'bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }
                 ${isPending ? 'ring-2 ring-amber-400 ring-offset-1' : ''}
                 ${isLoading ? 'opacity-50 cursor-wait' : 'cursor-pointer'}
