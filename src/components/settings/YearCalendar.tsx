@@ -6,9 +6,8 @@ import {
   ArrowPathIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline';
-import { useHolidays, useBulkCalendarUpdate, useClearCalendarYear } from '../../hooks/useCalendar';
+import { useHolidays, useBulkCalendarUpdate } from '../../hooks/useCalendar';
 import { Button, ConfirmDialog } from '../ui';
-import { useToast } from '../ui/Toast';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 
 export interface YearCalendarRef {
@@ -29,6 +28,27 @@ const MONTHS = [
 ];
 
 const WEEKDAY_LABELS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+
+// Получить все даты определённых дней недели за год
+// weekdays: массив дней недели (1=Пн, ..., 6=Сб, 7=Вс)
+const getDatesForWeekdays = (year: number, weekdays: number[]): string[] => {
+  const dates: string[] = [];
+  const startDate = new Date(year, 0, 1);
+  const endDate = new Date(year, 11, 31);
+
+  for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+    // JS: 0=Вс, 1=Пн, ..., 6=Сб
+    // Нужно: 1=Пн, ..., 6=Сб, 7=Вс
+    const jsDay = d.getDay();
+    const isoDay = jsDay === 0 ? 7 : jsDay;
+
+    if (weekdays.includes(isoDay)) {
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      dates.push(dateStr);
+    }
+  }
+  return dates;
+};
 
 interface MonthCalendarProps {
   year: number;
@@ -136,13 +156,11 @@ export const YearCalendar = forwardRef<YearCalendarRef, YearCalendarProps>(({
 }, ref) => {
   const currentYear = new Date().getFullYear();
   const [year, setYear] = useState(initialYear || currentYear);
-  const { showToast } = useToast();
   const { showConfirm, confirmState, handleConfirm, handleCancel } = useConfirmDialog();
 
   const { data: holidaysData, isLoading, refetch } = useHolidays(year, dealershipId);
 
   const bulkUpdateMutation = useBulkCalendarUpdate();
-  const clearYearMutation = useClearCalendarYear();
 
   // Локальное состояние для несохранённых изменений
   const [pendingChanges, setPendingChanges] = useState<Map<string, 'holiday' | 'workday'>>(new Map());
@@ -245,55 +263,37 @@ export const YearCalendar = forwardRef<YearCalendarRef, YearCalendarProps>(({
     hasPendingChanges: () => pendingChanges.size > 0,
   }), [pendingChanges, year, dealershipId, bulkUpdateMutation]);
 
-  const handleSetAllSaturdays = async () => {
-    try {
-      const result = await bulkUpdateMutation.mutateAsync({
-        operation: 'set_weekdays',
-        year,
-        dealership_id: dealershipId,
-        weekdays: [6],
-        type: 'holiday',
-      });
-      showToast({ type: 'success', message: `Отмечено ${result.data.affected_count} суббот как выходные` });
-    } catch {
-      showToast({ type: 'error', message: 'Ошибка установки суббот' });
-    }
+  // Добавить даты в pending как выходные
+  const addWeekdaysToHolidays = (weekdays: number[]) => {
+    const dates = getDatesForWeekdays(year, weekdays);
+    setPendingChanges(prev => {
+      const newChanges = new Map(prev);
+      for (const date of dates) {
+        // Если на сервере уже выходной — не добавляем в pending
+        if (!holidaysSet.has(date)) {
+          newChanges.set(date, 'holiday');
+        }
+      }
+      return newChanges;
+    });
   };
 
-  const handleSetAllSundays = async () => {
-    try {
-      const result = await bulkUpdateMutation.mutateAsync({
-        operation: 'set_weekdays',
-        year,
-        dealership_id: dealershipId,
-        weekdays: [7],
-        type: 'holiday',
-      });
-      showToast({ type: 'success', message: `Отмечено ${result.data.affected_count} воскресений как выходные` });
-    } catch {
-      showToast({ type: 'error', message: 'Ошибка установки воскресений' });
-    }
+  const handleSetAllSaturdays = () => {
+    addWeekdaysToHolidays([6]);
   };
 
-  const handleSetAllWeekends = async () => {
-    try {
-      const result = await bulkUpdateMutation.mutateAsync({
-        operation: 'set_weekdays',
-        year,
-        dealership_id: dealershipId,
-        weekdays: [6, 7],
-        type: 'holiday',
-      });
-      showToast({ type: 'success', message: `Отмечено ${result.data.affected_count} выходных дней` });
-    } catch {
-      showToast({ type: 'error', message: 'Ошибка установки выходных' });
-    }
+  const handleSetAllSundays = () => {
+    addWeekdaysToHolidays([7]);
+  };
+
+  const handleSetAllWeekends = () => {
+    addWeekdaysToHolidays([6, 7]);
   };
 
   const handleClearYear = async () => {
     const confirmed = await showConfirm({
       title: 'Очистить календарь',
-      message: `Вы уверены, что хотите очистить все выходные за ${year} год?`,
+      message: `Вы уверены, что хотите отметить все выходные за ${year} год как рабочие дни?`,
       confirmText: 'Очистить',
       cancelText: 'Отмена',
       variant: 'danger',
@@ -303,15 +303,24 @@ export const YearCalendar = forwardRef<YearCalendarRef, YearCalendarProps>(({
       return;
     }
 
-    try {
-      const result = await clearYearMutation.mutateAsync({ year, dealershipId });
-      showToast({ type: 'success', message: `Удалено ${result.data.affected_count} записей` });
-    } catch {
-      showToast({ type: 'error', message: 'Ошибка очистки календаря' });
-    }
+    // Все текущие выходные (с сервера + pending) отметить как workday
+    setPendingChanges(prev => {
+      const newChanges = new Map(prev);
+      // Очистить все pending holidays
+      for (const [date, type] of prev) {
+        if (type === 'holiday') {
+          newChanges.delete(date);
+        }
+      }
+      // Все серверные выходные отметить как workday
+      holidaysSet.forEach(date => {
+        newChanges.set(date, 'workday');
+      });
+      return newChanges;
+    });
   };
 
-  const isMutating = bulkUpdateMutation.isPending || clearYearMutation.isPending;
+  const isMutating = bulkUpdateMutation.isPending;
 
   return (
     <div className="space-y-6">
@@ -342,6 +351,7 @@ export const YearCalendar = forwardRef<YearCalendarRef, YearCalendarProps>(({
 
         <div className="flex items-center gap-2">
           <Button
+            type="button"
             variant="ghost"
             size="sm"
             onClick={() => refetch()}
@@ -356,6 +366,7 @@ export const YearCalendar = forwardRef<YearCalendarRef, YearCalendarProps>(({
       {/* Quick action buttons */}
       <div className="flex flex-wrap gap-2 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
         <Button
+          type="button"
           variant="secondary"
           size="sm"
           onClick={handleSetAllSaturdays}
@@ -364,6 +375,7 @@ export const YearCalendar = forwardRef<YearCalendarRef, YearCalendarProps>(({
           Все субботы — выходные
         </Button>
         <Button
+          type="button"
           variant="secondary"
           size="sm"
           onClick={handleSetAllSundays}
@@ -372,6 +384,7 @@ export const YearCalendar = forwardRef<YearCalendarRef, YearCalendarProps>(({
           Все воскресенья — выходные
         </Button>
         <Button
+          type="button"
           variant="secondary"
           size="sm"
           onClick={handleSetAllWeekends}
@@ -380,6 +393,7 @@ export const YearCalendar = forwardRef<YearCalendarRef, YearCalendarProps>(({
           Все выходные (Сб+Вс)
         </Button>
         <Button
+          type="button"
           variant="ghost"
           size="sm"
           onClick={handleClearYear}
@@ -398,6 +412,7 @@ export const YearCalendar = forwardRef<YearCalendarRef, YearCalendarProps>(({
             Несохранённых изменений: <strong>{pendingChanges.size}</strong>
           </span>
           <Button
+            type="button"
             variant="ghost"
             size="sm"
             onClick={handleDiscardChanges}

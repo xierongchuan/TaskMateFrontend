@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useShiftConfig, useNotificationConfig, useArchiveConfig, useUpdateShiftConfig, useUpdateNotificationConfig, useUpdateArchiveConfig, useDealershipSettings, useTaskConfig, useUpdateTaskConfig, useSetting, useUpdateSetting } from '../hooks/useSettings';
 import { useTheme } from '../context/ThemeContext';
 import { usePermissions } from '../hooks/usePermissions';
@@ -37,10 +37,12 @@ import {
   MoonIcon,
 } from '@heroicons/react/24/outline';
 import { NotificationSettingsContent } from '../components/notifications/NotificationSettingsContent';
+import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
+import { ConfirmDialog } from '../components/ui';
 
 export const SettingsPage: React.FC = () => {
   const permissions = usePermissions();
-  const { pendingTheme, setTheme, applyTheme } = useTheme();
+  const { pendingTheme, setTheme, applyTheme, hasPendingChanges: themeHasPendingChanges } = useTheme();
   const { user } = useAuth();
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'general' | 'interface' | 'tasks' | 'calendar' | 'shifts' | 'notifications' | 'maintenance'>('general');
@@ -91,6 +93,14 @@ export const SettingsPage: React.FC = () => {
     archive_overdue_hours_after_shift: 2,
   });
 
+  // Оригинальные значения для отслеживания изменений
+  const [originalShiftConfig, setOriginalShiftConfig] = useState<ShiftConfig | null>(null);
+  const [originalNotificationConfig, setOriginalNotificationConfig] = useState<NotificationConfig | null>(null);
+  const [originalArchiveConfig, setOriginalArchiveConfig] = useState<ArchiveConfig | null>(null);
+  const [originalTaskConfig, setOriginalTaskConfig] = useState<TaskConfig | null>(null);
+  const [originalMaintenanceMode, setOriginalMaintenanceMode] = useState<boolean | null>(null);
+  const [calendarHasPendingChanges, setCalendarHasPendingChanges] = useState(false);
+
   // Data fetching
   const { data: shiftConfigData, isLoading: shiftConfigLoading } = useShiftConfig(selectedDealershipId);
   const { data: notificationConfigData, isLoading: notificationConfigLoading } = useNotificationConfig(selectedDealershipId);
@@ -99,35 +109,49 @@ export const SettingsPage: React.FC = () => {
   const { data: config } = useDealershipSettings(selectedDealershipId || 0);
   const { data: maintenanceModeData, isLoading: maintenanceModeLoading } = useSetting('maintenance_mode');
 
-  // Effects to filter data
+  // Effects to filter data and save original values
   useEffect(() => {
     if (shiftConfigData?.data) {
-      setShiftConfig(prev => ({ ...prev, ...shiftConfigData.data }));
+      const newConfig = { ...shiftConfig, ...shiftConfigData.data };
+      setShiftConfig(newConfig);
+      setOriginalShiftConfig(newConfig);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shiftConfigData]);
 
   useEffect(() => {
     if (notificationConfigData?.data) {
-      setNotificationConfig(prev => ({ ...prev, ...notificationConfigData.data }));
+      const newConfig = { ...notificationConfig, ...notificationConfigData.data };
+      setNotificationConfig(newConfig);
+      setOriginalNotificationConfig(newConfig);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notificationConfigData]);
 
   useEffect(() => {
     if (archiveConfigData?.data) {
-      setArchiveConfig(prev => ({ ...prev, ...archiveConfigData.data }));
+      const newConfig = { ...archiveConfig, ...archiveConfigData.data };
+      setArchiveConfig(newConfig);
+      setOriginalArchiveConfig(newConfig);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [archiveConfigData]);
 
   useEffect(() => {
     if (maintenanceModeData?.data) {
-      setMaintenanceMode(maintenanceModeData.data.value === 'true' || maintenanceModeData.data.value === '1');
+      const value = maintenanceModeData.data.value === 'true' || maintenanceModeData.data.value === '1';
+      setMaintenanceMode(value);
+      setOriginalMaintenanceMode(value);
     }
   }, [maintenanceModeData]);
 
   useEffect(() => {
     if (taskConfigData?.data) {
-      setTaskConfig(prev => ({ ...prev, ...taskConfigData.data }));
+      const newConfig = { ...taskConfig, ...taskConfigData.data };
+      setTaskConfig(newConfig);
+      setOriginalTaskConfig(newConfig);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskConfigData]);
 
   // Mutations
@@ -136,6 +160,43 @@ export const SettingsPage: React.FC = () => {
   const updateArchiveConfigMutation = useUpdateArchiveConfig();
   const updateTaskConfigMutation = useUpdateTaskConfig();
   const updateSettingMutation = useUpdateSetting();
+
+  // Определяем наличие несохранённых изменений для текущего таба
+  const hasCurrentTabChanges = useMemo(() => {
+    switch (activeTab) {
+      case 'shifts':
+        return originalShiftConfig !== null && JSON.stringify(shiftConfig) !== JSON.stringify(originalShiftConfig);
+      case 'interface':
+        return themeHasPendingChanges || (originalNotificationConfig !== null && JSON.stringify(notificationConfig) !== JSON.stringify(originalNotificationConfig));
+      case 'general':
+      case 'notifications':
+        return originalNotificationConfig !== null && JSON.stringify(notificationConfig) !== JSON.stringify(originalNotificationConfig);
+      case 'tasks':
+        return (originalTaskConfig !== null && JSON.stringify(taskConfig) !== JSON.stringify(originalTaskConfig)) ||
+               (originalArchiveConfig !== null && JSON.stringify(archiveConfig) !== JSON.stringify(originalArchiveConfig));
+      case 'maintenance':
+        return originalMaintenanceMode !== null && maintenanceMode !== originalMaintenanceMode;
+      case 'calendar':
+        return calendarHasPendingChanges;
+      default:
+        return false;
+    }
+  }, [activeTab, shiftConfig, originalShiftConfig, notificationConfig, originalNotificationConfig,
+      taskConfig, originalTaskConfig, archiveConfig, originalArchiveConfig,
+      maintenanceMode, originalMaintenanceMode, calendarHasPendingChanges, themeHasPendingChanges]);
+
+  // Хук для предупреждения о несохранённых изменениях
+  const { confirmLeave, confirmState, handleConfirm, handleCancel } = useUnsavedChanges(hasCurrentTabChanges);
+
+  // Обработчик смены таба с проверкой несохранённых изменений
+  const handleTabChange = async (newTab: typeof activeTab) => {
+    if (newTab === activeTab) return;
+
+    const canLeave = await confirmLeave();
+    if (canLeave) {
+      setActiveTab(newTab);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -290,7 +351,7 @@ export const SettingsPage: React.FC = () => {
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                  onClick={() => handleTabChange(tab.id as typeof activeTab)}
                   className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all ${activeTab === tab.id
                     ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700'
                     : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200'
@@ -516,6 +577,7 @@ export const SettingsPage: React.FC = () => {
                         year={selectedCalendarYear}
                         dealershipId={selectedDealershipId}
                         onYearChange={setSelectedCalendarYear}
+                        onPendingChange={setCalendarHasPendingChanges}
                       />
                     </div>
                   </div>
@@ -800,6 +862,18 @@ export const SettingsPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Диалог подтверждения для несохранённых изменений */}
+      <ConfirmDialog
+        isOpen={confirmState.isOpen}
+        title={confirmState.title}
+        message={confirmState.message}
+        confirmText={confirmState.confirmText}
+        cancelText={confirmState.cancelText}
+        variant={confirmState.variant}
+        onConfirm={handleConfirm}
+        onCancel={handleCancel}
+      />
     </PageContainer>
   );
 };
