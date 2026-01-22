@@ -17,7 +17,7 @@ export const Layout: React.FC = () => {
     }
     return true;
   });
-  const { data: currentShiftData } = useMyCurrentShift();
+  const { data: currentShiftData } = useMyCurrentShift(user?.dealership_id ?? undefined);
   const currentShift = currentShiftData?.data;
 
   return (

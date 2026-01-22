@@ -8,6 +8,7 @@ export const useShifts = (filters?: ShiftsFilters) => {
     queryKey: ['shifts', filters],
     queryFn: () => shiftsApi.getShifts(filters),
     refetchInterval: 30000, // Refetch every 30 seconds for live updates
+    placeholderData: (prev) => prev,
   });
 };
 
@@ -17,6 +18,7 @@ export const useShift = (id: number) => {
     queryKey: ['shift', id],
     queryFn: () => shiftsApi.getShift(id),
     enabled: !!id,
+    placeholderData: (prev) => prev,
   });
 };
 
@@ -26,6 +28,7 @@ export const useCurrentShifts = () => {
     queryKey: ['shifts', 'current'],
     queryFn: () => shiftsApi.getCurrentShifts(),
     refetchInterval: 60000, // Refetch every 60 seconds (URLs are now stable)
+    placeholderData: (prev) => prev,
   });
 };
 
@@ -39,6 +42,7 @@ export const useShiftsStatistics = (filters?: {
     queryKey: ['shifts', 'statistics', filters],
     queryFn: () => shiftsApi.getStatistics(filters),
     refetchInterval: 60000, // Refetch every minute
+    placeholderData: (prev) => prev,
   });
 };
 
@@ -48,6 +52,7 @@ export const useMyShifts = (filters?: ShiftsFilters) => {
     queryKey: ['my-shifts', filters],
     queryFn: () => shiftsApi.getMyShifts(filters),
     refetchInterval: 30000,
+    placeholderData: (prev) => prev,
   });
 };
 
@@ -58,6 +63,7 @@ export const useMyCurrentShift = (dealershipId?: number) => {
     queryFn: () => shiftsApi.getMyCurrentShift(dealershipId),
     refetchInterval: 30000, // Refetch every 30 seconds (URLs are now stable)
     enabled: !!dealershipId, // Only fetch if dealershipId is provided
+    placeholderData: (prev) => prev,
   });
 };
 
