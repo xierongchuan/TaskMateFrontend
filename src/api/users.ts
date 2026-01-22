@@ -8,6 +8,7 @@ export interface UsersFilters {
   name?: string;
   role?: string;
   dealership_id?: number;
+  orphan_only?: boolean;
   phone?: string;
   per_page?: number;
   page?: number;

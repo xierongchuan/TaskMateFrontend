@@ -5,6 +5,8 @@ export interface AuditActor {
   id: number;
   full_name: string;
   email: string;
+  login: string;
+  role: 'owner' | 'manager' | 'employee' | 'observer';
 }
 
 export interface AuditDealership {
@@ -39,6 +41,10 @@ export interface AuditLogsFilters {
   page?: number;
 }
 
+export interface GetActorsFilters {
+  dealership_id?: number;
+}
+
 export const auditLogsApi = {
   /**
    * Get list of audit logs (owner only)
@@ -61,8 +67,10 @@ export const auditLogsApi = {
   /**
    * Get list of users who performed actions (for filter dropdown)
    */
-  getActors: async (): Promise<{ data: AuditActor[] }> => {
-    const response = await apiClient.get<{ data: AuditActor[] }>('/audit-logs/actors');
+  getActors: async (filters?: GetActorsFilters): Promise<{ data: AuditActor[] }> => {
+    const response = await apiClient.get<{ data: AuditActor[] }>('/audit-logs/actors', {
+      params: filters,
+    });
     return response.data;
   },
 };

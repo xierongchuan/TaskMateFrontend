@@ -8,11 +8,16 @@ export interface SelectOption {
   disabled?: boolean;
 }
 
+export interface SelectOptionGroup {
+  label: string;
+  options: SelectOption[];
+}
+
 export interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'size'> {
   label?: string;
   error?: string;
   hint?: string;
-  options: SelectOption[];
+  options: SelectOption[] | SelectOptionGroup[];
   placeholder?: string;
   selectSize?: SelectSize;
   fullWidth?: boolean;
@@ -37,6 +42,10 @@ const sizeClasses: Record<SelectSize, string> = {
  *   ]}
  * />
  */
+const isOptionGroup = (option: SelectOption | SelectOptionGroup): option is SelectOptionGroup => {
+  return 'options' in option;
+};
+
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({
   label,
   error,
@@ -68,6 +77,8 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({
     className,
   ].filter(Boolean).join(' ');
 
+  const hasGroups = options.length > 0 && isOptionGroup(options[0]);
+
   return (
     <div className={fullWidth ? 'w-full' : ''}>
       {label && (
@@ -84,20 +95,45 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({
         className={selectClasses}
         {...props}
       >
-        {placeholder && (
-          <option value="" disabled>
-            {placeholder}
-          </option>
+        {hasGroups ? (
+          // Render grouped options with optional placeholder
+          <>
+            {placeholder && (
+              <option value="">{placeholder}</option>
+            )}
+            {(options as SelectOptionGroup[]).map((group, groupIndex) => (
+              <optgroup key={groupIndex} label={group.label}>
+                {group.options.map((option) => (
+                  <option
+                    key={option.value}
+                    value={option.value}
+                    disabled={option.disabled}
+                  >
+                    {option.label}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </>
+        ) : (
+          // Render flat options
+          <>
+            {placeholder && (
+              <option value="" disabled>
+                {placeholder}
+              </option>
+            )}
+            {(options as SelectOption[]).map((option) => (
+              <option
+                key={option.value}
+                value={option.value}
+                disabled={option.disabled}
+              >
+                {option.label}
+              </option>
+            ))}
+          </>
         )}
-        {options.map((option) => (
-          <option
-            key={option.value}
-            value={option.value}
-            disabled={option.disabled}
-          >
-            {option.label}
-          </option>
-        ))}
       </select>
       {error && (
         <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>

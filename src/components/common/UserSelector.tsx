@@ -2,12 +2,14 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { usersApi } from '../../api/users';
 
+console.log('[UserSelector] Module loaded at', new Date().toISOString());
+
 interface UserSelectorProps {
   dealershipId?: number | null;
   value?: number | null;
   onChange: (userId: number | null) => void;
   placeholder?: string;
-  noDealershipMessage?: string;
+  orphanPlaceholder?: string;
   className?: string;
   disabled?: boolean;
   showAllOption?: boolean;
@@ -16,28 +18,49 @@ interface UserSelectorProps {
 
 /**
  * Компонент выбора сотрудника.
- * Работает только при выбранном автосалоне (dealershipId).
+ *
+ * - Если dealershipId указан - показывает пользователей этого автосалона
+ * - Если dealershipId === null - показывает "orphan" пользователей (без привязки к автосалону)
  */
 export const UserSelector: React.FC<UserSelectorProps> = ({
   dealershipId,
   value,
   onChange,
   placeholder = "Выберите сотрудника",
-  noDealershipMessage = "Сначала выберите автосалон",
+  orphanPlaceholder = "Пользователи без автосалона",
   className = "",
   disabled = false,
   showAllOption = false,
   allOptionLabel = "Все сотрудники",
 }) => {
-  const { data: usersData, isLoading } = useQuery({
+  // Debug log
+  console.log('[UserSelector] Render with dealershipId:', dealershipId, 'type:', typeof dealershipId);
+
+  const { data: usersData, isLoading, error, isFetching } = useQuery({
     queryKey: ['user-selector-users', dealershipId],
-    queryFn: () => usersApi.getUsers({
-      per_page: 100,
-      dealership_id: dealershipId!,
-    }),
-    enabled: !!dealershipId,
+    queryFn: async () => {
+      // Вычисляем параметры прямо здесь
+      const params: { per_page: number; dealership_id?: number; orphan_only?: boolean } = {
+        per_page: 100,
+      };
+
+      if (dealershipId === null) {
+        params.orphan_only = true;
+      } else if (dealershipId !== undefined && dealershipId !== null) {
+        params.dealership_id = dealershipId;
+      }
+
+      console.log('[UserSelector] Fetching users with params:', params);
+      const result = await usersApi.getUsers(params);
+      console.log('[UserSelector] API response:', result);
+      return result;
+    },
     staleTime: 1000 * 60,
   });
+
+  // Debug logs
+  console.log('[UserSelector] Query state - isLoading:', isLoading, 'isFetching:', isFetching, 'error:', error);
+  console.log('[UserSelector] Users count:', usersData?.data?.length ?? 0);
 
   const users = usersData?.data || [];
 
@@ -50,14 +73,17 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
     }
   };
 
-  // Если автосалон не выбран - показываем сообщение
-  if (!dealershipId) {
+  // Определяем placeholder в зависимости от режима
+  const currentPlaceholder = dealershipId === null
+    ? orphanPlaceholder
+    : placeholder;
+
+  // Показать ошибку если есть
+  if (error) {
+    console.error('[UserSelector] Error:', error);
     return (
-      <select
-        disabled
-        className={`block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm sm:text-sm px-3 py-2 border bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed ${className}`}
-      >
-        <option value="">{noDealershipMessage}</option>
+      <select disabled className={`block w-full rounded-md border-red-300 text-red-500 ${className}`}>
+        <option value="">Ошибка загрузки</option>
       </select>
     );
   }
@@ -76,7 +102,7 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
           {showAllOption ? (
             <option value="">{allOptionLabel}</option>
           ) : (
-            <option value="">{placeholder}</option>
+            <option value="">{currentPlaceholder}</option>
           )}
           {users.map((user) => (
             <option key={user.id} value={user.id}>

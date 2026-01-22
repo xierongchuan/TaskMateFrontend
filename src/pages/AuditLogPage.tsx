@@ -142,8 +142,10 @@ export const AuditLogPage: React.FC = () => {
 
   // Запрос пользователей (actors) для фильтра
   const { data: actorsData } = useQuery({
-    queryKey: ['audit-actors'],
-    queryFn: () => auditLogsApi.getActors(),
+    queryKey: ['audit-actors', dealershipFilter],
+    queryFn: () => auditLogsApi.getActors({
+      dealership_id: dealershipFilter ? Number(dealershipFilter) : undefined,
+    }),
     enabled: permissions.isOwner,
   });
 
@@ -176,15 +178,50 @@ export const AuditLogPage: React.FC = () => {
     return options;
   }, [dealershipsData]);
 
-  // Опции для фильтра пользователей
+  // Опции для фильтра пользователей (с группировкой по ролям)
   const actorOptions = useMemo(() => {
-    const options = [{ value: '', label: 'Все пользователи' }];
-    if (actorsData?.data) {
-      actorsData.data.forEach((actor) => {
-        options.push({ value: String(actor.id), label: actor.full_name });
-      });
+    if (!actorsData?.data || actorsData.data.length === 0) {
+      return [{ value: '', label: 'Все пользователи' }];
     }
-    return options;
+
+    // Группируем пользователей по ролям
+    const roleLabels: Record<string, string> = {
+      owner: 'Владельцы',
+      manager: 'Управляющие',
+      employee: 'Сотрудники',
+      observer: 'Наблюдающие',
+    };
+
+    const groupedActors: Record<string, typeof actorsData.data> = {
+      owner: [],
+      manager: [],
+      employee: [],
+      observer: [],
+    };
+
+    actorsData.data.forEach((actor) => {
+      if (actor.role && groupedActors[actor.role]) {
+        groupedActors[actor.role].push(actor);
+      }
+    });
+
+    // Создаем структуру с группами (БЕЗ пустой первой группы)
+    const groups: Array<{ label: string; options: Array<{ value: string; label: string }> }> = [];
+
+    // Добавляем группы для каждой роли (только если есть пользователи)
+    (['owner', 'manager', 'employee', 'observer'] as const).forEach((role) => {
+      if (groupedActors[role].length > 0) {
+        groups.push({
+          label: roleLabels[role],
+          options: groupedActors[role].map((actor) => ({
+            value: String(actor.id),
+            label: actor.full_name,
+          })),
+        });
+      }
+    });
+
+    return groups;
   }, [actorsData]);
 
   // Проверка активности фильтров
@@ -252,6 +289,7 @@ export const AuditLogPage: React.FC = () => {
               value={dealershipFilter}
               onChange={(e) => {
                 setDealershipFilter(e.target.value);
+                setActorFilter(''); // Сбрасываем выбранного пользователя при смене автосалона
                 setPage(1);
               }}
               options={dealershipOptions}
@@ -264,6 +302,7 @@ export const AuditLogPage: React.FC = () => {
                 setPage(1);
               }}
               options={actorOptions}
+              placeholder="Все пользователи"
             />
           </div>
 

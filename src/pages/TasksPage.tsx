@@ -511,7 +511,6 @@ export const TasksPage: React.FC = () => {
               onChange={(userId) => setFilters({ ...filters, assigned_to: userId })}
               showAllOption={true}
               allOptionLabel="Все сотрудники"
-              noDealershipMessage="Сначала выберите автосалон"
             />
           </div>
         </FilterPanel.Grid>
