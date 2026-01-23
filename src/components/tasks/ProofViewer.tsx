@@ -21,9 +21,12 @@ const getFileTypeLabel = (mimeType: string): string => {
   if (mimeType.startsWith('audio/')) return 'Аудио';
   if (mimeType.startsWith('text/')) return 'Текст';
   if (mimeType.includes('pdf')) return 'PDF';
-  if (mimeType.includes('word') || mimeType.includes('document')) return 'Документ';
-  if (mimeType.includes('sheet') || mimeType.includes('excel')) return 'Таблица';
-  if (mimeType.includes('zip') || mimeType.includes('compressed') || mimeType.includes('tar')) return 'Архив';
+  // Word документы
+  if (mimeType.includes('wordprocessingml') || mimeType.includes('msword') || mimeType.includes('vnd.oasis.opendocument.text')) return 'Документ Word';
+  // Excel таблицы
+  if (mimeType.includes('spreadsheetml') || mimeType.includes('ms-excel') || mimeType.includes('csv')) return 'Таблица Excel';
+  // Архивы
+  if (mimeType.includes('zip') || mimeType.includes('tar') || mimeType.includes('7z') || mimeType.includes('compressed')) return 'Архив';
   return 'Файл';
 };
 
@@ -108,6 +111,12 @@ export const ProofViewer: React.FC<ProofViewerProps> = ({
   );
 };
 
+// Helper function to get file extension
+const getFileExtension = (filename: string): string => {
+  const parts = filename.toLowerCase().split('.');
+  return parts.length > 1 ? parts[parts.length - 1] : '';
+};
+
 // Thumbnail component
 interface ProofThumbnailProps {
   proof: TaskProof;
@@ -146,7 +155,7 @@ const ProofThumbnail: React.FC<ProofThumbnailProps> = ({ proof, onClick, onDelet
           </div>
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <FileTypeIcon mimeType={proof.mime_type} />
+            <FileTypeIcon mimeType={proof.mime_type} filename={proof.original_filename} />
           </div>
         )}
 
@@ -225,7 +234,7 @@ const ProofPreview: React.FC<ProofPreviewProps> = ({ proof }) => {
   // Fallback for non-previewable files (не должно вызываться, т.к. isPreviewable фильтрует)
   return (
     <div className="text-center py-8">
-      <FileTypeIcon mimeType={proof.mime_type} size="lg" />
+      <FileTypeIcon mimeType={proof.mime_type} filename={proof.original_filename} size="lg" />
       <p className="mt-4 text-gray-600 dark:text-gray-400">
         {getFileTypeLabel(proof.mime_type)}
       </p>
@@ -242,12 +251,33 @@ const ProofPreview: React.FC<ProofPreviewProps> = ({ proof }) => {
 // File type icon
 interface FileTypeIconProps {
   mimeType: string;
+  filename: string;
   size?: 'md' | 'lg';
 }
 
-const FileTypeIcon: React.FC<FileTypeIconProps> = ({ mimeType, size = 'md' }) => {
+const FileTypeIcon: React.FC<FileTypeIconProps> = ({ mimeType, filename, size = 'md' }) => {
   const sizeClass = size === 'lg' ? 'w-16 h-16' : 'w-10 h-10';
+  const extension = getFileExtension(filename);
 
+  // Проверяем расширение файла СНАЧАЛА для Office документов
+  // Это решает проблему, когда .docx определяется как application/zip
+  if (extension === 'doc' || extension === 'docx' || extension === 'odt') {
+    return (
+      <svg className={`${sizeClass} text-blue-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+    );
+  }
+
+  if (extension === 'xls' || extension === 'xlsx') {
+    return (
+      <svg className={`${sizeClass} text-green-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+      </svg>
+    );
+  }
+
+  // Затем проверяем MIME типы
   if (mimeType.startsWith('audio/')) {
     return (
       <svg className={`${sizeClass} text-purple-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -272,7 +302,8 @@ const FileTypeIcon: React.FC<FileTypeIconProps> = ({ mimeType, size = 'md' }) =>
     );
   }
 
-  if (mimeType.includes('word') || mimeType.includes('document')) {
+  // Word документы - проверяем ПЕРЕД архивами, чтобы избежать ложных срабатываний
+  if (mimeType.includes('wordprocessingml') || mimeType.includes('msword') || mimeType.includes('vnd.oasis.opendocument.text')) {
     return (
       <svg className={`${sizeClass} text-blue-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -280,7 +311,8 @@ const FileTypeIcon: React.FC<FileTypeIconProps> = ({ mimeType, size = 'md' }) =>
     );
   }
 
-  if (mimeType.includes('sheet') || mimeType.includes('excel') || mimeType.includes('csv')) {
+  // Excel таблицы
+  if (mimeType.includes('spreadsheetml') || mimeType.includes('ms-excel') || mimeType.includes('csv')) {
     return (
       <svg className={`${sizeClass} text-green-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -288,7 +320,18 @@ const FileTypeIcon: React.FC<FileTypeIconProps> = ({ mimeType, size = 'md' }) =>
     );
   }
 
-  if (mimeType.includes('zip') || mimeType.includes('compressed') || mimeType.includes('tar') || mimeType.includes('7z')) {
+  // Архивы - проверяем ПОСЛЕ документов
+  if (mimeType.includes('zip') || mimeType.includes('tar') || mimeType.includes('7z')) {
+    return (
+      <svg className={`${sizeClass} text-yellow-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+      </svg>
+    );
+  }
+
+  // application/x-compressed может быть как архив, так и другой тип
+  // Проверяем в конце, после всех специфичных типов
+  if (mimeType.includes('compressed')) {
     return (
       <svg className={`${sizeClass} text-yellow-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />

@@ -176,6 +176,102 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
           </div>
         )}
 
+        {/* Доказательства выполнения */}
+        {task.responses && task.responses.some(r => r.proofs && r.proofs.length > 0) && (
+          <div className="mb-6">
+            <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center">
+              <DocumentIcon className="w-4 h-4 mr-1.5" />
+              Доказательства выполнения
+            </h4>
+
+            {task.task_type === 'group' ? (
+              // Групповая задача - показать файлы от каждого исполнителя отдельно
+              <div className="space-y-4">
+                {task.responses
+                  .filter(r => r.proofs && r.proofs.length > 0)
+                  .map((response) => (
+                    <div
+                      key={response.id}
+                      className="p-4 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700"
+                    >
+                      {/* Заголовок с именем исполнителя и статусом */}
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">
+                          {response.user?.full_name || 'Неизвестно'}
+                        </span>
+                        <Badge variant={getResponseStatusVariant(response.status)} size="sm">
+                          {getResponseStatusLabel(response.status)}
+                        </Badge>
+                      </div>
+
+                      {/* Файлы */}
+                      <ProofViewer
+                        proofs={response.proofs!}
+                        canDelete={permissions.canManageTasks && !!onDeleteProof}
+                        onDelete={onDeleteProof}
+                      />
+
+                      {/* Панель верификации для pending_review */}
+                      {response.status === 'pending_review' &&
+                       permissions.canManageTasks &&
+                       onApproveResponse &&
+                       onRejectResponse && (
+                        <div className="mt-3">
+                          <VerificationPanel
+                            response={response}
+                            onApprove={async (id) => {
+                              await onApproveResponse(id);
+                              onVerificationComplete?.();
+                            }}
+                            onReject={async (id, reason) => {
+                              await onRejectResponse(id, reason);
+                              onVerificationComplete?.();
+                            }}
+                            isLoading={isVerifying}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+              </div>
+            ) : (
+              // Индивидуальная задача - показать файлы без группировки
+              (() => {
+                const responseWithProofs = task.responses.find(r => r.proofs && r.proofs.length > 0);
+                return responseWithProofs ? (
+                  <div className="p-4 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50">
+                    <ProofViewer
+                      proofs={responseWithProofs.proofs!}
+                      canDelete={permissions.canManageTasks && !!onDeleteProof}
+                      onDelete={onDeleteProof}
+                    />
+
+                    {responseWithProofs.status === 'pending_review' &&
+                     permissions.canManageTasks &&
+                     onApproveResponse &&
+                     onRejectResponse && (
+                      <div className="mt-3">
+                        <VerificationPanel
+                          response={responseWithProofs}
+                          onApprove={async (id) => {
+                            await onApproveResponse(id);
+                            onVerificationComplete?.();
+                          }}
+                          onReject={async (id, reason) => {
+                            await onRejectResponse(id, reason);
+                            onVerificationComplete?.();
+                          }}
+                          isLoading={isVerifying}
+                        />
+                      </div>
+                    )}
+                  </div>
+                ) : null;
+              })()
+            )}
+          </div>
+        )}
+
         {/* Assignees with Status for Group Tasks */}
         {task.assignments && task.assignments.length > 0 && (
           <div>
@@ -247,11 +343,10 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                 const userResponse = task.responses?.find(r => r.user_id === assignment.user.id);
                 const statusLabel = getResponseStatusLabel(userResponse?.status);
                 const statusVariant = getResponseStatusVariant(userResponse?.status);
-                const hasProofs = userResponse?.proofs && userResponse.proofs.length > 0;
 
                 return (
                   <div key={assignment.id} className="p-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700">
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <div className="h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-600 flex items-center justify-center text-gray-500 dark:text-gray-300 text-xs font-semibold mr-3">
                           {assignment.user.full_name.charAt(0)}
@@ -262,35 +357,6 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                         {statusLabel}
                       </Badge>
                     </div>
-
-                    {/* Show proofs for this user */}
-                    {hasProofs && (
-                      <div className="mt-3">
-                        <ProofViewer
-                          proofs={userResponse!.proofs!}
-                          canDelete={permissions.canManageTasks && !!onDeleteProof}
-                          onDelete={onDeleteProof}
-                        />
-                      </div>
-                    )}
-
-                    {/* Verification panel for managers */}
-                    {userResponse && permissions.canManageTasks && onApproveResponse && onRejectResponse && (
-                      <div className="mt-3">
-                        <VerificationPanel
-                          response={userResponse}
-                          onApprove={async (id) => {
-                            await onApproveResponse(id);
-                            onVerificationComplete?.();
-                          }}
-                          onReject={async (id, reason) => {
-                            await onRejectResponse(id, reason);
-                            onVerificationComplete?.();
-                          }}
-                          isLoading={isVerifying}
-                        />
-                      </div>
-                    )}
                   </div>
                 );
               })}
