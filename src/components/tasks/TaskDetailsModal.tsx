@@ -177,7 +177,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
         )}
 
         {/* Доказательства выполнения */}
-        {task.responses && task.responses.some(r => r.proofs && r.proofs.length > 0) && (
+        {((task.responses && task.responses.some(r => r.proofs && r.proofs.length > 0)) || (task.shared_proofs && task.shared_proofs.length > 0)) && (
           <div className="mb-6">
             <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center">
               <DocumentIcon className="w-4 h-4 mr-1.5" />
@@ -187,8 +187,29 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
             {task.task_type === 'group' ? (
               // Групповая задача - показать файлы от каждого исполнителя отдельно
               <div className="space-y-4">
+                {/* Общие файлы задачи */}
+                {task.shared_proofs && task.shared_proofs.length > 0 && (
+                  <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-center gap-2 mb-3">
+                      <DocumentIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      <h5 className="font-medium text-blue-900 dark:text-blue-200">
+                        Файлы задачи
+                      </h5>
+                      <span className="text-xs text-blue-600 dark:text-blue-400">
+                        (общие для всех исполнителей)
+                      </span>
+                    </div>
+                    <ProofViewer
+                      proofs={task.shared_proofs}
+                      canDelete={permissions.canManageTasks && !!onDeleteProof}
+                      onDelete={onDeleteProof}
+                    />
+                  </div>
+                )}
+
+                {/* Индивидуальные файлы каждого исполнителя */}
                 {task.responses
-                  .filter(r => r.proofs && r.proofs.length > 0)
+                  ?.filter(r => r.proofs && r.proofs.length > 0)
                   .map((response) => (
                     <div
                       key={response.id}
@@ -237,7 +258,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
             ) : (
               // Индивидуальная задача - показать файлы без группировки
               (() => {
-                const responseWithProofs = task.responses.find(r => r.proofs && r.proofs.length > 0);
+                const responseWithProofs = task.responses?.find(r => r.proofs && r.proofs.length > 0);
                 return responseWithProofs ? (
                   <div className="p-4 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50">
                     <ProofViewer

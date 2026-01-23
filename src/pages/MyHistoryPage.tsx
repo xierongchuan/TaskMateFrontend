@@ -235,9 +235,9 @@ export const MyHistoryPage: React.FC = () => {
                       </div>
 
                       {/* Доказательства */}
-                      {myResponse.proofs && myResponse.proofs.length > 0 && (
+                      {((myResponse.proofs && myResponse.proofs.length > 0) || (task.shared_proofs && task.shared_proofs.length > 0)) && (
                         <div className="lg:w-64 flex-shrink-0">
-                          <ProofViewer proofs={myResponse.proofs} />
+                          <ProofViewer proofs={myResponse.proofs && myResponse.proofs.length > 0 ? myResponse.proofs : task.shared_proofs || []} />
                         </div>
                       )}
 

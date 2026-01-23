@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import type { TaskProof } from '../../types/task';
+import type { BaseTaskProof } from '../../types/task';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 
 export interface ProofViewerProps {
-  proofs: TaskProof[];
+  proofs: BaseTaskProof[];
   onDelete?: (proofId: number) => void;
   canDelete?: boolean;
 }
@@ -44,13 +44,13 @@ export const ProofViewer: React.FC<ProofViewerProps> = ({
   onDelete,
   canDelete = false,
 }) => {
-  const [selectedProof, setSelectedProof] = useState<TaskProof | null>(null);
+  const [selectedProof, setSelectedProof] = useState<BaseTaskProof | null>(null);
 
   if (proofs.length === 0) {
     return null;
   }
 
-  const handleDownload = (proof: TaskProof) => {
+  const handleDownload = (proof: BaseTaskProof) => {
     const link = document.createElement('a');
     link.href = proof.url;
     link.download = proof.original_filename;
@@ -119,7 +119,7 @@ const getFileExtension = (filename: string): string => {
 
 // Thumbnail component
 interface ProofThumbnailProps {
-  proof: TaskProof;
+  proof: BaseTaskProof;
   onClick: () => void;
   onDelete?: () => void;
 }
@@ -186,7 +186,7 @@ const ProofThumbnail: React.FC<ProofThumbnailProps> = ({ proof, onClick, onDelet
 
 // Preview component for modal
 interface ProofPreviewProps {
-  proof: TaskProof;
+  proof: BaseTaskProof;
 }
 
 const ProofPreview: React.FC<ProofPreviewProps> = ({ proof }) => {

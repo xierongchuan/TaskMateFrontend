@@ -222,9 +222,9 @@ export const PendingReviewPage: React.FC = () => {
                       </div>
 
                       {/* Доказательства */}
-                      {pendingResponse.proofs && pendingResponse.proofs.length > 0 && (
+                      {((pendingResponse.proofs && pendingResponse.proofs.length > 0) || (task.shared_proofs && task.shared_proofs.length > 0)) && (
                         <div className="lg:w-64 flex-shrink-0">
-                          <ProofViewer proofs={pendingResponse.proofs} />
+                          <ProofViewer proofs={pendingResponse.proofs && pendingResponse.proofs.length > 0 ? pendingResponse.proofs : task.shared_proofs || []} />
                         </div>
                       )}
 

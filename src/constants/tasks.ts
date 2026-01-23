@@ -35,7 +35,7 @@ export const RESPONSE_TYPE_LABELS: Record<string, string> = {
 // Allowed file extensions for proof upload
 export const PROOF_ALLOWED_EXTENSIONS = [
   'jpg', 'jpeg', 'png', 'gif', 'webp',
-  'pdf', 'docx', 'xlsx', 'csv', 'odt', 'txt', 'json',
+  'pdf', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'odt', 'txt', 'json',
   'zip', 'tar', '7z',
   'mp4', 'webm', 'mov', 'avi',
 ];

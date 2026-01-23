@@ -10,12 +10,21 @@ export interface TaskResponseUser {
   full_name: string;
 }
 
-export interface TaskProof {
+// Базовый интерфейс для файлов доказательств
+export interface BaseTaskProof {
   id: number;
   url: string;
   original_filename: string;
   mime_type: string;
   file_size: number;
+}
+
+// Индивидуальные файлы пользователя
+export interface TaskProof extends BaseTaskProof {}
+
+// Общие файлы задачи
+export interface TaskSharedProof extends BaseTaskProof {
+  created_at: string;
 }
 
 export interface TaskResponse {
@@ -79,6 +88,7 @@ export interface Task {
     };
   }[];
   responses?: TaskResponse[];
+  shared_proofs?: TaskSharedProof[];
   completion_progress?: CompletionProgress;
   notification_settings?: Record<string, { enabled?: boolean; offset?: number }>;
 }

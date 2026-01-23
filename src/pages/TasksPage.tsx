@@ -214,9 +214,19 @@ export const TasksPage: React.FC = () => {
       setUploadProgress(0);
       console.error('Upload error:', error);
       const axiosError = error as { response?: { data?: { message?: string }, status?: number }, message?: string };
-      const message = axiosError?.response?.data?.message
-        || axiosError?.message
-        || 'Ошибка загрузки файлов';
+
+      let message = 'Ошибка загрузки файлов';
+
+      if (axiosError?.response?.status === 413) {
+        message = 'Файл слишком большой для загрузки. Максимальный размер: 200 MB';
+      } else if (axiosError?.response?.status === 422) {
+        message = axiosError?.response?.data?.message || 'Ошибка валидации файла';
+      } else if (axiosError?.response?.data?.message) {
+        message = axiosError.response.data.message;
+      } else if (axiosError?.message) {
+        message = axiosError.message;
+      }
+
       showToast({ type: 'error', message });
     },
   });
