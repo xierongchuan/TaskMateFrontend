@@ -28,6 +28,7 @@ interface TaskDetailsModalProps {
   onApproveResponse?: (responseId: number) => Promise<void>;
   onRejectResponse?: (responseId: number, reason: string) => Promise<void>;
   onDeleteProof?: (proofId: number) => Promise<void>;
+  onDeleteSharedProof?: (proofId: number) => Promise<void>;
   onVerificationComplete?: () => void;
   isVerifying?: boolean;
 }
@@ -37,16 +38,18 @@ const getResponseStatusLabel = (status?: TaskResponseStatus): string => {
     case 'completed': return 'Выполнено';
     case 'pending_review': return 'На проверке';
     case 'acknowledged': return 'Принято';
+    case 'rejected': return 'Отклонено';
     case 'postponed': return 'Отложено';
     default: return 'Ожидает';
   }
 };
 
-const getResponseStatusVariant = (status?: TaskResponseStatus): 'success' | 'warning' | 'info' | 'gray' => {
+const getResponseStatusVariant = (status?: TaskResponseStatus): 'success' | 'warning' | 'danger' | 'info' | 'gray' => {
   switch (status) {
     case 'completed': return 'success';
     case 'pending_review': return 'info';
     case 'acknowledged': return 'info';
+    case 'rejected': return 'danger';
     case 'postponed': return 'warning';
     default: return 'gray';
   }
@@ -60,6 +63,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
   onApproveResponse,
   onRejectResponse,
   onDeleteProof,
+  onDeleteSharedProof,
   onVerificationComplete,
   isVerifying = false,
 }) => {
@@ -201,8 +205,8 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                     </div>
                     <ProofViewer
                       proofs={task.shared_proofs}
-                      canDelete={permissions.canManageTasks && !!onDeleteProof}
-                      onDelete={onDeleteProof}
+                      canDelete={permissions.canManageTasks && !!onDeleteSharedProof}
+                      onDelete={onDeleteSharedProof}
                     />
                   </div>
                 )}
@@ -231,27 +235,6 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                         canDelete={permissions.canManageTasks && !!onDeleteProof}
                         onDelete={onDeleteProof}
                       />
-
-                      {/* Панель верификации для pending_review */}
-                      {response.status === 'pending_review' &&
-                       permissions.canManageTasks &&
-                       onApproveResponse &&
-                       onRejectResponse && (
-                        <div className="mt-3">
-                          <VerificationPanel
-                            response={response}
-                            onApprove={async (id) => {
-                              await onApproveResponse(id);
-                              onVerificationComplete?.();
-                            }}
-                            onReject={async (id, reason) => {
-                              await onRejectResponse(id, reason);
-                              onVerificationComplete?.();
-                            }}
-                            isLoading={isVerifying}
-                          />
-                        </div>
-                      )}
                     </div>
                   ))}
               </div>
@@ -364,6 +347,10 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                 const userResponse = task.responses?.find(r => r.user_id === assignment.user.id);
                 const statusLabel = getResponseStatusLabel(userResponse?.status);
                 const statusVariant = getResponseStatusVariant(userResponse?.status);
+                const canVerify = userResponse?.status === 'pending_review' &&
+                  permissions.canManageTasks &&
+                  onApproveResponse &&
+                  onRejectResponse;
 
                 return (
                   <div key={assignment.id} className="p-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700">
@@ -378,6 +365,24 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                         {statusLabel}
                       </Badge>
                     </div>
+
+                    {/* Действия верификации для pending_review */}
+                    {canVerify && userResponse && (
+                      <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-600">
+                        <VerificationPanel
+                          response={userResponse}
+                          onApprove={async (id) => {
+                            await onApproveResponse(id);
+                            onVerificationComplete?.();
+                          }}
+                          onReject={async (id, reason) => {
+                            await onRejectResponse(id, reason);
+                            onVerificationComplete?.();
+                          }}
+                          isLoading={isVerifying}
+                        />
+                      </div>
+                    )}
                   </div>
                 );
               })}

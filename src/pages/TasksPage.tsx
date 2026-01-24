@@ -270,6 +270,18 @@ export const TasksPage: React.FC = () => {
     },
   });
 
+  const deleteSharedProofMutation = useMutation({
+    mutationFn: (proofId: number) => tasksApi.deleteTaskSharedProof(proofId),
+    onSuccess: () => {
+      showToast({ type: 'success', message: 'Файл удалён' });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+    onError: (error: unknown) => {
+      const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Ошибка удаления файла';
+      showToast({ type: 'error', message });
+    },
+  });
+
   const handleStatusChange = (task: Task, newStatus: string) => {
     // Если задача требует доказательства - показать модальное окно загрузки
     if (
@@ -323,6 +335,10 @@ export const TasksPage: React.FC = () => {
 
   const handleDeleteProof = async (proofId: number) => {
     await deleteProofMutation.mutateAsync(proofId);
+  };
+
+  const handleDeleteSharedProof = async (proofId: number) => {
+    await deleteSharedProofMutation.mutateAsync(proofId);
   };
 
   const clearFilters = () => {
@@ -780,6 +796,7 @@ export const TasksPage: React.FC = () => {
         onApproveResponse={handleApproveResponse}
         onRejectResponse={handleRejectResponse}
         onDeleteProof={handleDeleteProof}
+        onDeleteSharedProof={handleDeleteSharedProof}
         onVerificationComplete={async () => {
           // Обновить selectedTask из свежих данных
           const freshData = await refetch();

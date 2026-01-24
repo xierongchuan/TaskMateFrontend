@@ -105,10 +105,25 @@ export const tasksApi = {
   },
 
   /**
+   * Reject all pending_review responses for a task at once (manager/owner only)
+   */
+  rejectAllTaskResponses: async (taskId: number, reason: string): Promise<Task> => {
+    const response = await apiClient.post<Task>(`/tasks/${taskId}/reject-all-responses`, { reason });
+    return response.data;
+  },
+
+  /**
    * Delete a task proof (manager/owner only)
    */
   deleteTaskProof: async (proofId: number): Promise<void> => {
     await apiClient.delete(`/task-proofs/${proofId}`);
+  },
+
+  /**
+   * Delete a shared task proof (manager/owner only)
+   */
+  deleteTaskSharedProof: async (proofId: number): Promise<void> => {
+    await apiClient.delete(`/task-shared-proofs/${proofId}`);
   },
 
   deleteTask: async (id: number): Promise<void> => {
