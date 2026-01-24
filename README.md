@@ -1,4 +1,4 @@
-# TaskMate Frontend
+# TaskMate Client
 
 Frontend приложение для системы управления задачами TaskMate, построенное на React 19 + TypeScript + Vite 7.
 
