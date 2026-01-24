@@ -1,7 +1,7 @@
 # Multi-stage build for React + Vite app
 
 # Stage 1: Build the application
-FROM node:22-alpine AS builder
+FROM docker.io/library/node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -25,7 +25,7 @@ ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
 RUN npm run build
 
 # Stage 2: Serve the application with nginx
-FROM nginx:alpine
+FROM docker.io/library/nginx:alpine
 
 # Copy built assets from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
