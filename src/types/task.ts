@@ -1,4 +1,3 @@
-export type TaskRecurrence = 'none' | 'daily' | 'weekly' | 'monthly';
 export type TaskStatus = 'pending' | 'acknowledged' | 'pending_review' | 'completed' | 'completed_late' | 'overdue';
 export type TaskType = 'individual' | 'group';
 export type ResponseType = 'notification' | 'completion' | 'completion_with_proof';
@@ -58,10 +57,6 @@ export interface Task {
   comment: string | null;
   task_type: TaskType;
   response_type: ResponseType;
-  recurrence: TaskRecurrence;
-  recurrence_time: string | null;
-  recurrence_day_of_week: number | null;
-  recurrence_day_of_month: number | null;
   appear_date: string | null;
   deadline: string | null;
   status: TaskStatus;
@@ -99,10 +94,6 @@ export interface CreateTaskRequest {
   comment?: string;
   task_type: TaskType;
   response_type: ResponseType;
-  recurrence?: TaskRecurrence;
-  recurrence_time?: string;
-  recurrence_day_of_week?: number;
-  recurrence_day_of_month?: number;
   appear_date: string;  // required по StoreTaskRequest
   deadline: string;     // required по StoreTaskRequest
   dealership_id?: number; // nullable по StoreTaskRequest

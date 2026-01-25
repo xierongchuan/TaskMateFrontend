@@ -5,7 +5,6 @@ import type { PaginatedResponse } from '../types/api';
 export interface TasksFilters {
   search?: string;
   status?: string;
-  recurrence?: string;
   task_type?: string;
   response_type?: string;
   dealership_id?: number;
