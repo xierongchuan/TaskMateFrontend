@@ -3,6 +3,7 @@ export type TaskType = 'individual' | 'group';
 export type ResponseType = 'notification' | 'completion' | 'completion_with_proof';
 export type TaskPriority = 'low' | 'medium' | 'high';
 export type TaskResponseStatus = 'pending' | 'acknowledged' | 'pending_review' | 'completed' | 'rejected' | 'postponed';
+export type SubmissionSource = 'individual' | 'shared' | 'resubmitted';
 
 export interface TaskResponseUser {
   id: number;
@@ -39,6 +40,8 @@ export interface TaskResponse {
   rejection_reason?: string | null;
   rejection_count?: number;
   verifier?: TaskResponseUser | null;
+  submission_source?: SubmissionSource;
+  uses_shared_proofs?: boolean;
 }
 
 export interface CompletionProgress {
