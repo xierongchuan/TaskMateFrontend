@@ -45,10 +45,18 @@ export const tasksApi = {
     return response.data;
   },
 
-  updateTaskStatus: async (id: number, status: string, completeForAll?: boolean): Promise<Task> => {
-    const payload: { status: string; complete_for_all?: boolean } = { status };
+  updateTaskStatus: async (
+    id: number,
+    status: string,
+    completeForAll?: boolean,
+    preserveProofs?: boolean
+  ): Promise<Task> => {
+    const payload: { status: string; complete_for_all?: boolean; preserve_proofs?: boolean } = { status };
     if (completeForAll !== undefined) {
       payload.complete_for_all = completeForAll;
+    }
+    if (preserveProofs !== undefined) {
+      payload.preserve_proofs = preserveProofs;
     }
     const response = await apiClient.patch<Task>(`/tasks/${id}/status`, payload);
     return response.data;

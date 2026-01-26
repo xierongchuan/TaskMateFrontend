@@ -65,6 +65,7 @@ export const TasksPage: React.FC = () => {
   const [proofUploadTask, setProofUploadTask] = useState<Task | null>(null);
   const [proofFiles, setProofFiles] = useState<File[]>([]);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [resetConfirmTask, setResetConfirmTask] = useState<Task | null>(null);
   const [filters, setFilters] = useState({
     search: searchParams.get('search') || '',
     status: searchParams.get('status') || '',
@@ -159,8 +160,8 @@ export const TasksPage: React.FC = () => {
   };
 
   const updateStatusMutation = useMutation({
-    mutationFn: ({ taskId, status, completeForAll }: { taskId: number; status: string; completeForAll?: boolean }) =>
-      tasksApi.updateTaskStatus(taskId, status, completeForAll),
+    mutationFn: ({ taskId, status, completeForAll, preserveProofs }: { taskId: number; status: string; completeForAll?: boolean; preserveProofs?: boolean }) =>
+      tasksApi.updateTaskStatus(taskId, status, completeForAll, preserveProofs),
     onMutate: async ({ taskId, status }) => {
       await queryClient.cancelQueries({ queryKey: ['tasks', filters, page, limit] });
       const previousTasks = queryClient.getQueryData(['tasks', filters, page, limit]);
@@ -283,12 +284,23 @@ export const TasksPage: React.FC = () => {
   });
 
   const handleStatusChange = (task: Task, newStatus: string) => {
-    // Если задача требует доказательства - показать модальное окно загрузки
+    // Проверяем, есть ли у задачи файлы (proofs или shared_proofs)
+    const hasProofs = task.responses?.some(r => r.proofs && r.proofs.length > 0)
+      || (task.shared_proofs && task.shared_proofs.length > 0);
+
+    // Если задача требует доказательства и файлов ЕЩЁ НЕТ - показать модальное окно загрузки
     if (
       task.response_type === 'completion_with_proof' &&
-      (newStatus === 'completed' || newStatus === 'pending_review')
+      (newStatus === 'completed' || newStatus === 'pending_review') &&
+      !hasProofs
     ) {
       setProofUploadTask(task);
+      return;
+    }
+
+    // При сбросе в pending с файлами - показываем диалог подтверждения
+    if (newStatus === 'pending' && hasProofs) {
+      setResetConfirmTask(task);
       return;
     }
 
@@ -307,6 +319,29 @@ export const TasksPage: React.FC = () => {
     }
 
     updateStatusMutation.mutate({ taskId: task.id, status: newStatus });
+  };
+
+  // Обработчики диалога сброса задачи
+  const handleResetWithProofs = () => {
+    if (resetConfirmTask) {
+      updateStatusMutation.mutate({
+        taskId: resetConfirmTask.id,
+        status: 'pending',
+        preserveProofs: true,
+      });
+      setResetConfirmTask(null);
+    }
+  };
+
+  const handleResetWithoutProofs = () => {
+    if (resetConfirmTask) {
+      updateStatusMutation.mutate({
+        taskId: resetConfirmTask.id,
+        status: 'pending',
+        preserveProofs: false,
+      });
+      setResetConfirmTask(null);
+    }
   };
 
   const handleProofUploadSubmit = () => {
@@ -417,11 +452,32 @@ export const TasksPage: React.FC = () => {
     { value: 'month', label: 'Этот месяц' },
   ];
 
-  const statusChangeOptions = [
+  // Базовые опции статусов (без вычисляемых)
+  const baseStatusOptions = [
     { value: 'pending', label: 'Ожидает' },
+    { value: 'acknowledged', label: 'Подтверждено' },
     { value: 'pending_review', label: 'На проверке' },
     { value: 'completed', label: 'Выполнено' },
   ];
+
+  // Вычисляемые статусы (автоматические)
+  const computedStatusLabels: Record<string, string> = {
+    'completed_late': 'Выполнено с опозданием',
+    'overdue': 'Просрочено',
+  };
+
+  // Получить опции для конкретной задачи
+  const getStatusOptionsForTask = (task: Task) => {
+    const currentStatus = task.status;
+    // Если текущий статус вычисляемый - добавить его в начало как disabled
+    if (currentStatus in computedStatusLabels) {
+      return [
+        { value: currentStatus, label: computedStatusLabels[currentStatus], disabled: true },
+        ...baseStatusOptions,
+      ];
+    }
+    return baseStatusOptions;
+  };
 
   const sourceOptions = [
     { value: '', label: 'Все источники' },
@@ -651,9 +707,9 @@ export const TasksPage: React.FC = () => {
                             isDeleting={deleteMutation.isPending}
                           />
                           <Select
-                            value={task.status === 'overdue' ? 'pending' : task.status}
+                            value={task.status}
                             onChange={(e) => handleStatusChange(task, e.target.value)}
-                            options={statusChangeOptions}
+                            options={getStatusOptionsForTask(task)}
                             selectSize="sm"
                             fullWidth={false}
                             className="min-w-[120px]"
@@ -745,9 +801,9 @@ export const TasksPage: React.FC = () => {
                         size="sm"
                       />
                       <Select
-                        value={task.status === 'overdue' ? 'pending' : task.status}
+                        value={task.status}
                         onChange={(e) => handleStatusChange(task, e.target.value)}
-                        options={statusChangeOptions}
+                        options={getStatusOptionsForTask(task)}
                         selectSize="sm"
                       />
                     </div>
@@ -884,6 +940,47 @@ export const TasksPage: React.FC = () => {
             isLoading={proofUploadMutation.isPending}
           >
             Отправить на проверку
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Модальное окно подтверждения сброса задачи */}
+      <Modal
+        isOpen={!!resetConfirmTask}
+        onClose={() => setResetConfirmTask(null)}
+        title="Сброс задачи"
+        size="md"
+      >
+        <Modal.Body>
+          <p className="text-gray-700 dark:text-gray-300 mb-4">
+            Задача "{resetConfirmTask?.title}" содержит загруженные файлы доказательств.
+          </p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm">
+            Выберите, что сделать с файлами при сбросе задачи:
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setResetConfirmTask(null)}
+            disabled={updateStatusMutation.isPending}
+          >
+            Отмена
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleResetWithProofs}
+            disabled={updateStatusMutation.isPending}
+            isLoading={updateStatusMutation.isPending}
+          >
+            Сохранить файлы
+          </Button>
+          <Button
+            variant="danger"
+            onClick={handleResetWithoutProofs}
+            disabled={updateStatusMutation.isPending}
+          >
+            Удалить файлы
           </Button>
         </Modal.Footer>
       </Modal>
