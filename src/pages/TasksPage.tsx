@@ -261,9 +261,14 @@ export const TasksPage: React.FC = () => {
 
   const deleteProofMutation = useMutation({
     mutationFn: (proofId: number) => tasksApi.deleteTaskProof(proofId),
-    onSuccess: () => {
+    onSuccess: async () => {
       showToast({ type: 'success', message: 'Файл удалён' });
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      const freshData = await refetch();
+      if (selectedTask && freshData.data?.data) {
+        const updated = freshData.data.data.find(t => t.id === selectedTask.id);
+        if (updated) setSelectedTask(updated);
+      }
     },
     onError: (error: unknown) => {
       const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Ошибка удаления файла';
@@ -273,9 +278,14 @@ export const TasksPage: React.FC = () => {
 
   const deleteSharedProofMutation = useMutation({
     mutationFn: (proofId: number) => tasksApi.deleteTaskSharedProof(proofId),
-    onSuccess: () => {
+    onSuccess: async () => {
       showToast({ type: 'success', message: 'Файл удалён' });
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      const freshData = await refetch();
+      if (selectedTask && freshData.data?.data) {
+        const updated = freshData.data.data.find(t => t.id === selectedTask.id);
+        if (updated) setSelectedTask(updated);
+      }
     },
     onError: (error: unknown) => {
       const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Ошибка удаления файла';

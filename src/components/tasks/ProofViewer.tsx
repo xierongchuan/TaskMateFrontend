@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { BaseTaskProof } from '../../types/task';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 
 export interface ProofViewerProps {
   proofs: BaseTaskProof[];
@@ -45,6 +47,7 @@ export const ProofViewer: React.FC<ProofViewerProps> = ({
   canDelete = false,
 }) => {
   const [selectedProof, setSelectedProof] = useState<BaseTaskProof | null>(null);
+  const [proofToDelete, setProofToDelete] = useState<BaseTaskProof | null>(null);
 
   if (proofs.length === 0) {
     return null;
@@ -60,6 +63,21 @@ export const ProofViewer: React.FC<ProofViewerProps> = ({
     document.body.removeChild(link);
   };
 
+  const handleDeleteClick = (proof: BaseTaskProof) => {
+    setProofToDelete(proof);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (proofToDelete && onDelete) {
+      onDelete(proofToDelete.id);
+    }
+    setProofToDelete(null);
+  };
+
+  const handleDeleteCancel = () => {
+    setProofToDelete(null);
+  };
+
   return (
     <div className="space-y-3">
       <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -72,7 +90,7 @@ export const ProofViewer: React.FC<ProofViewerProps> = ({
             key={proof.id}
             proof={proof}
             onClick={() => isPreviewable(proof.mime_type) ? setSelectedProof(proof) : handleDownload(proof)}
-            onDelete={canDelete && onDelete ? () => onDelete(proof.id) : undefined}
+            onDelete={canDelete && onDelete ? () => handleDeleteClick(proof) : undefined}
           />
         ))}
       </div>
@@ -106,6 +124,21 @@ export const ProofViewer: React.FC<ProofViewerProps> = ({
             </div>
           </Modal.Body>
         </Modal>
+      )}
+
+      {/* Delete Confirmation Dialog - rendered via Portal to avoid z-index issues with nested modals */}
+      {createPortal(
+        <ConfirmDialog
+          isOpen={proofToDelete !== null}
+          title="Удалить файл?"
+          message={proofToDelete ? `Файл "${proofToDelete.original_filename}" будет удалён. Это действие нельзя отменить.` : ''}
+          onConfirm={handleDeleteConfirm}
+          onCancel={handleDeleteCancel}
+          confirmText="Удалить"
+          cancelText="Отмена"
+          variant="danger"
+        />,
+        document.body
       )}
     </div>
   );
