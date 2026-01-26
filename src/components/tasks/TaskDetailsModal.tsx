@@ -180,99 +180,20 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
           </div>
         )}
 
-        {/* Доказательства выполнения */}
-        {((task.responses && task.responses.some(r => r.proofs && r.proofs.length > 0)) || (task.shared_proofs && task.shared_proofs.length > 0)) && (
+        {/* Файлы задачи (shared_proofs — загруженные менеджером/владельцем) */}
+        {task.shared_proofs && task.shared_proofs.length > 0 && (
           <div className="mb-6">
             <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center">
               <DocumentIcon className="w-4 h-4 mr-1.5" />
-              Доказательства выполнения
+              Файлы задачи
             </h4>
-
-            {task.task_type === 'group' ? (
-              // Групповая задача - показать файлы от каждого исполнителя отдельно
-              <div className="space-y-4">
-                {/* Общие файлы задачи */}
-                {task.shared_proofs && task.shared_proofs.length > 0 && (
-                  <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-                    <div className="flex items-center gap-2 mb-3">
-                      <DocumentIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                      <h5 className="font-medium text-blue-900 dark:text-blue-200">
-                        Файлы задачи
-                      </h5>
-                      <span className="text-xs text-blue-600 dark:text-blue-400">
-                        (общие для всех исполнителей)
-                      </span>
-                    </div>
-                    <ProofViewer
-                      proofs={task.shared_proofs}
-                      canDelete={permissions.canManageTasks && !!onDeleteSharedProof}
-                      onDelete={onDeleteSharedProof}
-                    />
-                  </div>
-                )}
-
-                {/* Индивидуальные файлы каждого исполнителя */}
-                {task.responses
-                  ?.filter(r => r.proofs && r.proofs.length > 0)
-                  .map((response) => (
-                    <div
-                      key={response.id}
-                      className="p-4 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700"
-                    >
-                      {/* Заголовок с именем исполнителя и статусом */}
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-medium text-gray-900 dark:text-white">
-                          {response.user?.full_name || 'Неизвестно'}
-                        </span>
-                        <Badge variant={getResponseStatusVariant(response.status)} size="sm">
-                          {getResponseStatusLabel(response.status)}
-                        </Badge>
-                      </div>
-
-                      {/* Файлы */}
-                      <ProofViewer
-                        proofs={response.proofs!}
-                        canDelete={permissions.canManageTasks && !!onDeleteProof}
-                        onDelete={onDeleteProof}
-                      />
-                    </div>
-                  ))}
-              </div>
-            ) : (
-              // Индивидуальная задача - показать файлы без группировки
-              (() => {
-                const responseWithProofs = task.responses?.find(r => r.proofs && r.proofs.length > 0);
-                return responseWithProofs ? (
-                  <div className="p-4 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50">
-                    <ProofViewer
-                      proofs={responseWithProofs.proofs!}
-                      canDelete={permissions.canManageTasks && !!onDeleteProof}
-                      onDelete={onDeleteProof}
-                    />
-
-                    {responseWithProofs.status === 'pending_review' &&
-                     permissions.canManageTasks &&
-                     onApproveResponse &&
-                     onRejectResponse && (
-                      <div className="mt-3">
-                        <VerificationPanel
-                          response={responseWithProofs}
-                          onApprove={async (id) => {
-                            await onApproveResponse(id);
-                            onVerificationComplete?.();
-                          }}
-                          onReject={async (id, reason) => {
-                            await onRejectResponse(id, reason);
-                            onVerificationComplete?.();
-                          }}
-                          isLoading={isVerifying}
-                        />
-                      </div>
-                    )}
-                  </div>
-                ) : null;
-              })()
-            )}
+            <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+              <ProofViewer
+                proofs={task.shared_proofs}
+                canDelete={permissions.canManageTasks && !!onDeleteSharedProof}
+                onDelete={onDeleteSharedProof}
+              />
+            </div>
           </div>
         )}
 
@@ -352,6 +273,9 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                   onApproveResponse &&
                   onRejectResponse;
 
+                const userProofs = userResponse?.proofs;
+                const hasProofs = userProofs && userProofs.length > 0;
+
                 return (
                   <div key={assignment.id} className="p-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700">
                     <div className="flex items-center justify-between">
@@ -366,9 +290,20 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                       </Badge>
                     </div>
 
+                    {/* Файлы доказательств исполнителя */}
+                    {hasProofs && (
+                      <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-600">
+                        <ProofViewer
+                          proofs={userProofs}
+                          canDelete={permissions.canManageTasks && !!onDeleteProof}
+                          onDelete={onDeleteProof}
+                        />
+                      </div>
+                    )}
+
                     {/* Действия верификации для pending_review */}
                     {canVerify && userResponse && (
-                      <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-600">
+                      <div className={hasProofs ? "mt-3" : "mt-2 pt-2 border-t border-gray-100 dark:border-gray-600"}>
                         <VerificationPanel
                           response={userResponse}
                           onApprove={async (id) => {
