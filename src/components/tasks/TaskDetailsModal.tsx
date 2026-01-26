@@ -72,6 +72,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
   if (!isOpen || !task) return null;
 
   const isProofTask = task.response_type === 'completion_with_proof';
+  const isCompleted = task.status === 'completed' || task.status === 'completed_late';
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={task.title} size="2xl">
@@ -190,7 +191,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
             <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
               <ProofViewer
                 proofs={task.shared_proofs}
-                canDelete={permissions.canManageTasks && !!onDeleteSharedProof}
+                canDelete={permissions.canManageTasks && !!onDeleteSharedProof && !isCompleted}
                 onDelete={onDeleteSharedProof}
               />
             </div>
@@ -295,7 +296,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                       <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-600">
                         <ProofViewer
                           proofs={userProofs}
-                          canDelete={permissions.canManageTasks && !!onDeleteProof}
+                          canDelete={permissions.canManageTasks && !!onDeleteProof && !isCompleted}
                           onDelete={onDeleteProof}
                         />
                       </div>
@@ -330,7 +331,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
         <Button variant="secondary" onClick={onClose}>
           Закрыть
         </Button>
-        {onEdit && permissions.canManageTasks && (
+        {onEdit && permissions.canManageTasks && !isCompleted && (
           <Button
             variant="primary"
             icon={<PencilIcon />}
