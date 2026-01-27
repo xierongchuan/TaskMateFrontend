@@ -32,15 +32,31 @@ export const RESPONSE_TYPE_LABELS: Record<string, string> = {
   [RESPONSE_TYPES.COMPLETION_WITH_PROOF]: 'С доказательством',
 };
 
-// Allowed file extensions for proof upload
+/**
+ * Разрешённые расширения файлов для загрузки доказательств.
+ *
+ * ВАЖНО: Это fallback значения. Основной источник истины - API endpoint
+ * GET /api/v1/config/file-upload. Используйте useFileUploadConfig() hook.
+ */
 export const PROOF_ALLOWED_EXTENSIONS = [
+  // Изображения
   'jpg', 'jpeg', 'png', 'gif', 'webp',
-  'pdf', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'odt', 'txt', 'json',
+  // Документы (MS Office)
+  'pdf', 'doc', 'docx', 'xls', 'xlsx', 'csv',
+  // Документы (OpenDocument)
+  'odt', 'ods', 'odp', 'odf', 'odg',
+  // Текстовые
+  'txt', 'json',
+  // Архивы
   'zip', 'tar', '7z',
+  // Видео
   'mp4', 'webm', 'mov', 'avi',
 ];
 
-// Max file sizes (in bytes)
+/**
+ * Максимальные размеры файлов (в байтах).
+ * Fallback значения - основной источник истины в API.
+ */
 export const PROOF_MAX_SIZE_IMAGE = 5 * 1024 * 1024;      // 5 MB
 export const PROOF_MAX_SIZE_DOCUMENT = 50 * 1024 * 1024;  // 50 MB
 export const PROOF_MAX_SIZE_VIDEO = 100 * 1024 * 1024;    // 100 MB

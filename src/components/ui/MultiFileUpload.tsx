@@ -1,12 +1,5 @@
-import React, { useCallback, useRef, useState } from 'react';
-import {
-  PROOF_ALLOWED_EXTENSIONS,
-  PROOF_MAX_SIZE_IMAGE,
-  PROOF_MAX_SIZE_DOCUMENT,
-  PROOF_MAX_SIZE_VIDEO,
-  PROOF_MAX_FILES_PER_RESPONSE,
-  PROOF_MAX_TOTAL_SIZE,
-} from '../../constants/tasks';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { useFileUploadConfig } from '../../hooks/useFileUploadConfig';
 
 export interface MultiFileUploadProps {
   files: File[];
@@ -15,18 +8,14 @@ export interface MultiFileUploadProps {
   maxTotalSize?: number;
   error?: string;
   disabled?: boolean;
+  /** Пресет конфигурации ('task_proof' | 'shift_photo') */
+  preset?: 'task_proof' | 'shift_photo';
 }
 
 const formatFileSize = (bytes: number): string => {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-};
-
-const getMaxSizeForFile = (mimeType: string): number => {
-  if (mimeType.startsWith('image/')) return PROOF_MAX_SIZE_IMAGE;
-  if (mimeType.startsWith('video/')) return PROOF_MAX_SIZE_VIDEO;
-  return PROOF_MAX_SIZE_DOCUMENT;
 };
 
 const getFileTypeLabel = (mimeType: string): string => {
@@ -47,20 +36,38 @@ const getFileExtension = (filename: string): string => {
 export const MultiFileUpload: React.FC<MultiFileUploadProps> = ({
   files,
   onChange,
-  maxFiles = PROOF_MAX_FILES_PER_RESPONSE,
-  maxTotalSize = PROOF_MAX_TOTAL_SIZE,
+  maxFiles,
+  maxTotalSize,
   error,
   disabled = false,
+  preset = 'task_proof',
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
+  // Получаем конфигурацию из API (с fallback на локальные константы)
+  const config = useFileUploadConfig(preset);
+
+  // Применяем конфигурацию с возможностью переопределения через пропсы
+  const effectiveMaxFiles = maxFiles ?? config.limits.max_files;
+  const effectiveMaxTotalSize = maxTotalSize ?? config.limits.max_total_size;
+
   const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+
+  // Функция для получения максимального размера файла по MIME типу
+  const getMaxSizeForFile = useCallback((mimeType: string): number => {
+    if (mimeType.startsWith('image/')) return config.limits.max_size_image;
+    if (mimeType.startsWith('video/')) return config.limits.max_size_video;
+    return config.limits.max_size_document;
+  }, [config.limits]);
+
+  // Мемоизированный список разрешённых расширений
+  const allowedExtensions = useMemo(() => config.extensions, [config.extensions]);
 
   const validateFile = useCallback((file: File): string | null => {
     const extension = getFileExtension(file.name);
-    if (!PROOF_ALLOWED_EXTENSIONS.includes(extension)) {
+    if (!allowedExtensions.includes(extension)) {
       return `Недопустимый формат файла: .${extension}`;
     }
 
@@ -70,17 +77,17 @@ export const MultiFileUpload: React.FC<MultiFileUploadProps> = ({
     }
 
     return null;
-  }, []);
+  }, [allowedExtensions, getMaxSizeForFile]);
 
   const handleFiles = useCallback((newFiles: FileList | File[]) => {
     setValidationError(null);
 
     const fileArray = Array.from(newFiles);
     const currentCount = files.length;
-    const remainingSlots = maxFiles - currentCount;
+    const remainingSlots = effectiveMaxFiles - currentCount;
 
     if (fileArray.length > remainingSlots) {
-      setValidationError(`Можно добавить ещё ${remainingSlots} файл(ов). Максимум: ${maxFiles}`);
+      setValidationError(`Можно добавить ещё ${remainingSlots} файл(ов). Максимум: ${effectiveMaxFiles}`);
       return;
     }
 
@@ -95,13 +102,13 @@ export const MultiFileUpload: React.FC<MultiFileUploadProps> = ({
 
     // Check total size
     const newTotalSize = totalSize + fileArray.reduce((sum, f) => sum + f.size, 0);
-    if (newTotalSize > maxTotalSize) {
-      setValidationError(`Превышен общий размер файлов. Максимум: ${formatFileSize(maxTotalSize)}`);
+    if (newTotalSize > effectiveMaxTotalSize) {
+      setValidationError(`Превышен общий размер файлов. Максимум: ${formatFileSize(effectiveMaxTotalSize)}`);
       return;
     }
 
     onChange([...files, ...fileArray]);
-  }, [files, maxFiles, maxTotalSize, totalSize, validateFile, onChange]);
+  }, [files, effectiveMaxFiles, effectiveMaxTotalSize, totalSize, validateFile, onChange]);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -143,7 +150,10 @@ export const MultiFileUpload: React.FC<MultiFileUploadProps> = ({
     }
   }, [disabled]);
 
-  const acceptExtensions = PROOF_ALLOWED_EXTENSIONS.map(ext => `.${ext}`).join(',');
+  const acceptExtensions = useMemo(
+    () => allowedExtensions.map(ext => `.${ext}`).join(','),
+    [allowedExtensions]
+  );
 
   return (
     <div className="w-full">
@@ -199,7 +209,7 @@ export const MultiFileUpload: React.FC<MultiFileUploadProps> = ({
         </div>
 
         <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-          Фото, видео, PDF, документы, архивы (до {maxFiles} файлов)
+          Фото, видео, PDF, документы, архивы (до {effectiveMaxFiles} файлов)
         </p>
       </div>
 
@@ -214,8 +224,8 @@ export const MultiFileUpload: React.FC<MultiFileUploadProps> = ({
       {files.length > 0 && (
         <div className="mt-4 space-y-2">
           <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-            <span>Выбрано файлов: {files.length}/{maxFiles}</span>
-            <span>Размер: {formatFileSize(totalSize)} / {formatFileSize(maxTotalSize)}</span>
+            <span>Выбрано файлов: {files.length}/{effectiveMaxFiles}</span>
+            <span>Размер: {formatFileSize(totalSize)} / {formatFileSize(effectiveMaxTotalSize)}</span>
           </div>
 
           <ul className="divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
