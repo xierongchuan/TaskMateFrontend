@@ -1,5 +1,5 @@
 import apiClient from './client';
-import type { ArchivedTask, ArchivedTaskFilters } from '../types/archivedTask';
+import type { ArchivedTask, ArchivedTaskFilters, ArchivedTaskStatistics } from '../types/archivedTask';
 import type { PaginatedResponse } from '../types/api';
 import { getTodayDateString } from '../utils/dateTime';
 
@@ -47,5 +47,14 @@ export const archivedTasksApi = {
     a.click();
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
+  },
+
+  /**
+   * Get archive statistics
+   */
+  getStatistics: async (dealershipId?: number): Promise<ArchivedTaskStatistics> => {
+    const params = dealershipId ? { dealership_id: dealershipId } : {};
+    const response = await apiClient.get<ArchivedTaskStatistics>('/archived-tasks/statistics', { params });
+    return response.data;
   },
 };

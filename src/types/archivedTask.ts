@@ -1,4 +1,6 @@
-export type TaskArchiveReason = 'completed' | 'expired';
+import type { TaskResponse, TaskSharedProof } from './task';
+
+export type TaskArchiveReason = 'completed' | 'completed_late' | 'expired' | 'expired_after_shift';
 
 export interface ArchivedTask {
   id: number;
@@ -7,7 +9,7 @@ export interface ArchivedTask {
   description: string | null;
   comment: string | null;
   task_type: 'individual' | 'group';
-  response_type: 'acknowledge' | 'complete';
+  response_type: 'notification' | 'completion' | 'completion_with_proof';
   priority: 'low' | 'medium' | 'high';
   appear_date: string | null;
   deadline: string | null;
@@ -42,6 +44,8 @@ export interface ArchivedTask {
       full_name: string;
     };
   }[];
+  responses?: TaskResponse[];
+  shared_proofs?: TaskSharedProof[];
 }
 
 export interface ArchivedTaskFilters {
@@ -49,6 +53,9 @@ export interface ArchivedTaskFilters {
   archive_reason?: TaskArchiveReason;
   generator_id?: number;
   assignee_id?: number;
+  priority?: string;
+  task_type?: 'individual' | 'group';
+  response_type?: 'notification' | 'completion' | 'completion_with_proof';
   date_from?: string;
   date_to?: string;
   tags?: string[];
@@ -57,4 +64,11 @@ export interface ArchivedTaskFilters {
   sort_dir?: 'asc' | 'desc';
   page?: number;
   per_page?: number;
+}
+
+export interface ArchivedTaskStatistics {
+  total: number;
+  completed: number;
+  completed_late: number;
+  expired: number;
 }
