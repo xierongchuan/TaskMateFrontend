@@ -6,6 +6,7 @@ import { CameraIcon, PlayIcon, StopIcon } from '@heroicons/react/24/outline';
 import { DealershipSelector } from '../common/DealershipSelector';
 import { useToast } from '../ui';
 import { ShiftPhotoViewer } from './ShiftPhotoViewer';
+import { formatDateTime } from '../../utils/dateTime';
 import type { CreateShiftRequest, UpdateShiftRequest } from '../../types/shift';
 
 export const ShiftControl: React.FC = () => {
@@ -117,7 +118,7 @@ export const ShiftControl: React.FC = () => {
               // Close Shift Form
               <div className="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
                 <div className="text-sm text-gray-600 dark:text-gray-400">
-                  <p>Начало смены: {new Date(currentShift.shift_start).toLocaleString('ru-RU')}</p>
+                  <p>Начало смены: {formatDateTime(currentShift.shift_start)}</p>
                   {currentShift.is_late && (
                     <p className="text-red-600 dark:text-red-400 font-medium">
                       Опоздание: {currentShift.late_minutes} минут

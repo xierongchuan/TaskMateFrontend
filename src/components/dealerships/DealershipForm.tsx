@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useCreateDealership, useUpdateDealership } from '../../hooks/useDealerships';
 import type { Dealership } from '../../types/dealership';
-import { BuildingOfficeIcon, PhoneIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { TIMEZONES } from '../../types/dealership';
+import { BuildingOfficeIcon, PhoneIcon, MapPinIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
 import { sanitizePhoneNumber } from '../../utils/phoneFormatter';
 
 interface DealershipFormProps {
@@ -19,6 +20,7 @@ export const DealershipForm: React.FC<DealershipFormProps> = ({
     name: dealership?.name || '',
     address: dealership?.address || '',
     phone: dealership?.phone || '',
+    timezone: dealership?.timezone || '+05:00',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -74,6 +76,7 @@ export const DealershipForm: React.FC<DealershipFormProps> = ({
             name: formData.name.trim(),
             address: formData.address.trim() || undefined,
             phone: sanitizedPhone,
+            timezone: formData.timezone,
           },
         });
       } else {
@@ -82,6 +85,7 @@ export const DealershipForm: React.FC<DealershipFormProps> = ({
           name: formData.name.trim(),
           address: formData.address.trim() || undefined,
           phone: sanitizedPhone,
+          timezone: formData.timezone,
         });
       }
 
@@ -187,6 +191,32 @@ export const DealershipForm: React.FC<DealershipFormProps> = ({
           )}
           <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
             Необязательно для заполнения
+          </p>
+        </div>
+
+        {/* Timezone Field */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Часовой пояс <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <GlobeAltIcon className="h-5 w-5 text-gray-400" />
+            </div>
+            <select
+              value={formData.timezone}
+              onChange={(e) => handleInputChange('timezone', e.target.value)}
+              className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm pl-10 pr-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            >
+              {TIMEZONES.map((tz) => (
+                <option key={tz.value} value={tz.value}>
+                  {tz.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            Используется для определения выходных дней в календаре
           </p>
         </div>
       </div>

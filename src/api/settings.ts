@@ -33,6 +33,12 @@ export const settingsApi = {
     return response.data;
   },
 
+  // Update or create a global setting by key
+  updateSettingByKey: async (key: string, data: { value: string; type?: string }): Promise<{ data: { key: string; value: string } }> => {
+    const response = await apiClient.put<{ data: { key: string; value: string } }>(`/settings/${key}`, data);
+    return response.data;
+  },
+
   // Shift Configuration
   getShiftConfig: async (dealershipId?: number): Promise<{ data: ShiftConfig }> => {
     const response = await apiClient.get<{ data: ShiftConfig }>('/settings/shift-config', {

@@ -11,8 +11,7 @@ import { TaskEmployeeActions } from '../components/tasks/TaskEmployeeActions';
 import { UserSelector } from '../components/common/UserSelector';
 import { MultiFileUpload } from '../components/ui/MultiFileUpload';
 import type { Task } from '../types/task';
-import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { formatDateTime, formatDateTimeShort, getDeadlineStatus } from '../utils/dateTime';
 import {
   PlusIcon,
   CalendarIcon,
@@ -405,21 +404,8 @@ export const TasksPage: React.FC = () => {
     });
   };
 
-  const getDeadlineStatus = (task: Task) => {
-    if (!task.deadline) return 'normal';
-
-    const now = new Date();
-    const deadline = new Date(task.deadline);
-    const hoursUntilDeadline = (deadline.getTime() - now.getTime()) / (1000 * 60 * 60);
-
-    if (hoursUntilDeadline < 0) return 'overdue';
-    if (hoursUntilDeadline < 2) return 'urgent';
-    if (hoursUntilDeadline < 24) return 'soon';
-    return 'normal';
-  };
-
   const getTaskCardClass = (task: Task) => {
-    const deadlineStatus = getDeadlineStatus(task);
+    const deadlineStatus = getDeadlineStatus(task.deadline);
     const baseClasses = 'bg-white dark:bg-gray-800 rounded-lg shadow-sm border hover:shadow-md transition-all duration-200';
 
     switch (deadlineStatus) {
@@ -677,7 +663,7 @@ export const TasksPage: React.FC = () => {
                           {task.deadline && (
                             <span className="flex items-center">
                               <ClockIcon className="w-4 h-4 mr-1" />
-                              {format(new Date(task.deadline), 'PPp', { locale: ru })}
+                              {formatDateTime(task.deadline)}
                             </span>
                           )}
                           {task.creator && (
@@ -764,7 +750,7 @@ export const TasksPage: React.FC = () => {
                     {task.deadline && (
                       <div className="flex items-center">
                         <ClockIcon className="w-4 h-4 mr-2" />
-                        {format(new Date(task.deadline), 'dd MMM HH:mm', { locale: ru })}
+                        {formatDateTimeShort(task.deadline)}
                       </div>
                     )}
                     <div className="flex items-center">

@@ -6,8 +6,7 @@ import { useWorkspace } from '../hooks/useWorkspace';
 import { useResponsiveViewMode } from '../hooks/useResponsiveViewMode';
 import { usePagination } from '../hooks/usePagination';
 import type { ArchivedTask, ArchivedTaskFilters } from '../types/archivedTask';
-import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { formatDateTime } from '../utils/dateTime';
 
 // UI Components
 import {
@@ -281,7 +280,7 @@ export const ArchivedTasksPage: React.FC = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                           <div className="flex items-center gap-1">
                             <CalendarIcon className="w-4 h-4" />
-                            {format(new Date(task.archived_at), 'dd.MM.yyyy HH:mm', { locale: ru })}
+                            {formatDateTime(task.archived_at, 'dd.MM.yyyy HH:mm')}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
@@ -338,7 +337,7 @@ export const ArchivedTasksPage: React.FC = () => {
                     <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1 mb-4">
                       <div className="flex items-center gap-1">
                         <CalendarIcon className="w-3.5 h-3.5" />
-                        {format(new Date(task.archived_at), 'dd.MM.yyyy HH:mm', { locale: ru })}
+                        {formatDateTime(task.archived_at, 'dd.MM.yyyy HH:mm')}
                       </div>
                       <div className="flex items-center gap-1">
                         <BuildingOfficeIcon className="w-3.5 h-3.5" />

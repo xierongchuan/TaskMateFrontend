@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
+import { getCurrentWeekRange, getCurrentMonthRange } from '../utils/dateTime';
 import {
   DocumentTextIcon,
   ChartBarIcon,
@@ -33,10 +33,7 @@ export const ReportsPage: React.FC = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'custom'>('week');
   const [selectedEmployee, setSelectedEmployee] = useState<EmployeePerformance | null>(null);
   const [selectedIssue, setSelectedIssue] = useState<{ type: string; description: string } | null>(null);
-  const [dateRange, setDateRange] = useState({
-    from: format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd'),
-    to: format(endOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd'),
-  });
+  const [dateRange, setDateRange] = useState(getCurrentWeekRange);
   const [reportFormat, setReportFormat] = useState<'json' | 'pdf'>('json');
 
   const { data: reportData, isLoading, refetch } = useQuery({
@@ -47,20 +44,13 @@ export const ReportsPage: React.FC = () => {
 
   const handlePeriodChange = (period: 'week' | 'month' | 'custom') => {
     setSelectedPeriod(period);
-    const now = new Date();
 
     switch (period) {
       case 'week':
-        setDateRange({
-          from: format(startOfWeek(now, { weekStartsOn: 1 }), 'yyyy-MM-dd'),
-          to: format(endOfWeek(now, { weekStartsOn: 1 }), 'yyyy-MM-dd'),
-        });
+        setDateRange(getCurrentWeekRange());
         break;
       case 'month':
-        setDateRange({
-          from: format(startOfMonth(now), 'yyyy-MM-dd'),
-          to: format(endOfMonth(now), 'yyyy-MM-dd'),
-        });
+        setDateRange(getCurrentMonthRange());
         break;
       case 'custom':
         // оставляем текущие даты

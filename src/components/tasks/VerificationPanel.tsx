@@ -9,6 +9,7 @@ import {
 } from '@heroicons/react/24/outline';
 import type { TaskResponse } from '../../types/task';
 import { Button, Modal, Textarea, Alert } from '../ui';
+import { formatDateTime } from '../../utils/dateTime';
 
 export interface VerificationPanelProps {
   response: TaskResponse;
@@ -47,7 +48,7 @@ export const VerificationPanel: React.FC<VerificationPanelProps> = ({
           )}
           {response.verified_at && (
             <p className="text-xs text-green-600 dark:text-green-400">
-              {new Date(response.verified_at).toLocaleString('ru-RU')}
+              {formatDateTime(response.verified_at)}
             </p>
           )}
         </div>

@@ -6,8 +6,7 @@ import { useMyCurrentShift } from '../../hooks/useShifts';
 import { useWorkspace } from '../../hooks/useWorkspace';
 import { Sidebar } from './Sidebar';
 import { WorkspaceSwitcher } from './WorkspaceSwitcher';
-import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { formatTime } from '../../utils/dateTime';
 import { ClockIcon, Bars3Icon } from '@heroicons/react/24/outline';
 import { APP_NAME } from '../../constants/app';
 
@@ -66,7 +65,7 @@ export const Layout: React.FC = () => {
                 <div className="text-xs text-green-800 dark:text-green-300">
                   <div className="font-medium">Смена открыта</div>
                   <div className="text-green-600 dark:text-green-400">
-                    с {format(new Date(currentShift.shift_start), 'HH:mm', { locale: ru })}
+                    с {formatTime(currentShift.shift_start)}
                   </div>
                 </div>
               </div>

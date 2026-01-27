@@ -1,6 +1,7 @@
 import apiClient from './client';
 import type { ArchivedTask, ArchivedTaskFilters } from '../types/archivedTask';
 import type { PaginatedResponse } from '../types/api';
+import { getTodayDateString } from '../utils/dateTime';
 
 export const archivedTasksApi = {
   /**
@@ -41,7 +42,7 @@ export const archivedTasksApi = {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `archived_tasks_${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `archived_tasks_${getTodayDateString()}.csv`;
     document.body.appendChild(a);
     a.click();
     window.URL.revokeObjectURL(url);

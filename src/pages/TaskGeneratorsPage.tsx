@@ -8,8 +8,7 @@ import { useResponsiveViewMode } from '../hooks/useResponsiveViewMode';
 import { TaskGeneratorModal } from '../components/generators/TaskGeneratorModal';
 import { GeneratorDetailsModal } from '../components/generators/GeneratorDetailsModal';
 import type { TaskGenerator, TaskGeneratorFilters } from '../types/taskGenerator';
-import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { formatDateTime, formatDateTimeShort } from '../utils/dateTime';
 
 // UI Components
 import {
@@ -371,8 +370,8 @@ export const TaskGeneratorsPage: React.FC = () => {
                           </span>
                           <span className="flex items-center gap-1">
                             <CalendarIcon className="w-4 h-4" />
-                            С {format(new Date(generator.start_date), 'dd.MM.yyyy', { locale: ru })}
-                            {generator.end_date && ` по ${format(new Date(generator.end_date), 'dd.MM.yyyy', { locale: ru })}`}
+                            С {formatDateTime(generator.start_date, 'dd.MM.yyyy')}
+                            {generator.end_date && ` по ${formatDateTime(generator.end_date, 'dd.MM.yyyy')}`}
                           </span>
                           <span className="flex items-center gap-1">
                             <BuildingOfficeIcon className="w-4 h-4" />
@@ -539,7 +538,7 @@ export const TaskGeneratorsPage: React.FC = () => {
                         <div className="flex items-center text-sm text-gray-600 dark:text-gray-300 gap-2">
                           <CalendarIcon className="w-4 h-4" />
                           <span>
-                            След. запуск: {format(new Date(generator.next_run_at), 'd MMM HH:mm', { locale: ru })}
+                            След. запуск: {formatDateTimeShort(generator.next_run_at)}
                           </span>
                         </div>
                       )}

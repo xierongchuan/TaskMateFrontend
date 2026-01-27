@@ -2,8 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { auditLogsApi, type AuditLog } from '../api/auditLogs';
 import { dealershipsApi } from '../api/dealerships';
-import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { formatDateTime } from '../utils/dateTime';
 import {
   DocumentMagnifyingGlassIcon,
   PlusCircleIcon,
@@ -427,7 +426,7 @@ export const AuditLogPage: React.FC = () => {
                         <td className="px-4 py-3 whitespace-nowrap">
                           <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                             <CalendarIcon className="w-4 h-4 mr-2 flex-shrink-0" />
-                            <span>{format(new Date(log.created_at), 'dd.MM.yyyy HH:mm', { locale: ru })}</span>
+                            <span>{formatDateTime(log.created_at, 'dd.MM.yyyy HH:mm')}</span>
                           </div>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
@@ -525,7 +524,7 @@ export const AuditLogPage: React.FC = () => {
                 <div>
                   <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Дата и время</label>
                   <p className="text-gray-900 dark:text-gray-100">
-                    {format(new Date(selectedLog.created_at), 'dd MMMM yyyy, HH:mm:ss', { locale: ru })}
+                    {formatDateTime(selectedLog.created_at, 'dd MMMM yyyy, HH:mm:ss')}
                   </p>
                 </div>
                 <div>

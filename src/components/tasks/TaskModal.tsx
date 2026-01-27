@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm, Controller, type SubmitHandler } from 'react-hook-form';
-import { format } from 'date-fns';
+import { utcToDatetimeLocal, datetimeLocalToUtc } from '../../utils/dateTime';
 import { tasksApi } from '../../api/tasks';
 import { usersApi } from '../../api/users';
 import { DealershipSelector } from '../common/DealershipSelector';
@@ -86,9 +86,9 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
           comment: task.comment || '',
           task_type: task.task_type,
           response_type: task.response_type,
-          // Format dates for datetime-local input
-          appear_date: task.appear_date ? format(new Date(task.appear_date), "yyyy-MM-dd'T'HH:mm") : undefined,
-          deadline: task.deadline ? format(new Date(task.deadline), "yyyy-MM-dd'T'HH:mm") : undefined,
+          // Конвертируем UTC даты из API в локальное время для datetime-local input
+          appear_date: utcToDatetimeLocal(task.appear_date) || undefined,
+          deadline: utcToDatetimeLocal(task.deadline) || undefined,
           dealership_id: task.dealership_id,
           assignments: task.assignments?.map(a => a.user.id) || [],
           notification_settings: task.notification_settings,
@@ -200,9 +200,12 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
       .map(t => t.trim())
       .filter(Boolean);
 
+    // Конвертируем локальные даты в UTC для отправки на API
     const finalData = {
       ...data,
-      tags: processedTags
+      tags: processedTags,
+      appear_date: datetimeLocalToUtc(data.appear_date as string | undefined) || '',
+      deadline: datetimeLocalToUtc(data.deadline as string | undefined) || ''
     };
 
     if (task?.id) {

@@ -1,7 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { formatDate } from '../../utils/dateTime';
 import {
   PencilIcon,
   CalendarIcon,
@@ -206,8 +205,8 @@ export const GeneratorDetailsModal: React.FC<GeneratorDetailsModalProps> = ({
               Период действия
             </div>
             <div className="text-gray-900 dark:text-white font-medium">
-              С {format(new Date(generator.start_date), 'd MMM yyyy', { locale: ru })}
-              {generator.end_date && ` по ${format(new Date(generator.end_date), 'd MMM yyyy', { locale: ru })}`}
+              С {formatDate(generator.start_date)}
+              {generator.end_date && ` по ${formatDate(generator.end_date)}`}
               {!generator.end_date && ' (бессрочно)'}
             </div>
           </div>

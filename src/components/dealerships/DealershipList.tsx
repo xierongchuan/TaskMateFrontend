@@ -12,8 +12,7 @@ import {
   PencilIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline';
-import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { formatDate } from '../../utils/dateTime';
 
 // UI Components
 import {
@@ -211,7 +210,7 @@ export const DealershipList: React.FC<DealershipListProps> = ({ onEdit }) => {
                     <div className="flex items-center gap-2">
                       <CalendarIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
                       <p className="text-sm text-gray-600 dark:text-gray-300">
-                        Создан: {format(new Date(dealership.created_at), 'dd MMM yyyy', { locale: ru })}
+                        Создан: {formatDate(dealership.created_at)}
                       </p>
                     </div>
                   </div>

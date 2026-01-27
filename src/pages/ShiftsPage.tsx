@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useShifts, useCurrentShifts } from '../hooks/useShifts';
 import { useResponsiveViewMode } from '../hooks/useResponsiveViewMode';
 import { usePagination } from '../hooks/usePagination';
-import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { formatDateTime } from '../utils/dateTime';
 import type { ShiftsFilters } from '../types/shift';
 import {
   BriefcaseIcon,
@@ -183,7 +182,7 @@ export const ShiftsPage: React.FC = () => {
                   {getStatusBadge(shift.status)}
                 </div>
                 <div className="text-sm text-gray-500 dark:text-gray-400 space-y-1">
-                  <div>Начало: {format(new Date(shift.shift_start), 'PPp', { locale: ru })}</div>
+                  <div>Начало: {formatDateTime(shift.shift_start)}</div>
                   <div className="flex items-center mt-1">
                     <span className="mr-2">Тип:</span>
                     {getShiftTypeBadge(shift.shift_type)}
@@ -307,8 +306,8 @@ export const ShiftsPage: React.FC = () => {
                         </div>
                         <div className="text-sm text-gray-500 dark:text-gray-400 space-y-1">
                           <div className="flex flex-wrap gap-x-4">
-                            <span>Начало: {format(new Date(shift.shift_start), 'PPp', { locale: ru })}</span>
-                            {shift.shift_end && <span>Конец: {format(new Date(shift.shift_end), 'PPp', { locale: ru })}</span>}
+                            <span>Начало: {formatDateTime(shift.shift_start)}</span>
+                            {shift.shift_end && <span>Конец: {formatDateTime(shift.shift_end)}</span>}
                           </div>
                           <div className="flex flex-wrap gap-x-4 items-center">
                             <div className="flex items-center"><span className="mr-2 text-sm text-gray-500 dark:text-gray-400">Тип:</span>{getShiftTypeBadge(shift.shift_type)}</div>
@@ -344,8 +343,8 @@ export const ShiftsPage: React.FC = () => {
                       {getStatusBadge(shift.status)}
                     </div>
                     <div className="text-sm text-gray-500 dark:text-gray-400 space-y-2">
-                      <div>Начало: {format(new Date(shift.shift_start), 'PPp', { locale: ru })}</div>
-                      {shift.shift_end && <div>Конец: {format(new Date(shift.shift_end), 'PPp', { locale: ru })}</div>}
+                      <div>Начало: {formatDateTime(shift.shift_start)}</div>
+                      {shift.shift_end && <div>Конец: {formatDateTime(shift.shift_end)}</div>}
                       <div className="flex items-center mt-2"><span className="mr-1">Тип:</span>{getShiftTypeBadge(shift.shift_type)}</div>
                       {shift.is_late && <div className="text-red-600 dark:text-red-400 font-medium">Опоздание: {shift.late_minutes} мин</div>}
                       {shift.dealership && <div>Автосалон: {shift.dealership.name}</div>}

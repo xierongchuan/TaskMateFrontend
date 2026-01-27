@@ -1,6 +1,5 @@
 import React from 'react';
-import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { formatDateTime, formatDate } from '../../utils/dateTime';
 import {
   PencilIcon,
   CalendarIcon,
@@ -106,7 +105,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
               Дедлайн
             </div>
             <div className="text-gray-900 dark:text-white font-medium">
-              {task.deadline ? format(new Date(task.deadline), 'd MMMM yyyy, HH:mm', { locale: ru }) : 'Не установлен'}
+              {task.deadline ? formatDateTime(task.deadline) : 'Не установлен'}
             </div>
           </div>
 
@@ -136,7 +135,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
               Создано
             </div>
             <div className="text-gray-900 dark:text-white font-medium">
-              {format(new Date(task.created_at), 'd MMM yyyy', { locale: ru })}
+              {formatDate(task.created_at)}
             </div>
           </div>
         </div>

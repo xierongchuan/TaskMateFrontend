@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { useShiftConfig, useNotificationConfig, useArchiveConfig, useUpdateShiftConfig, useUpdateNotificationConfig, useUpdateArchiveConfig, useDealershipSettings, useTaskConfig, useUpdateTaskConfig, useSetting, useUpdateSetting } from '../hooks/useSettings';
+import { useShiftConfig, useNotificationConfig, useArchiveConfig, useUpdateShiftConfig, useUpdateNotificationConfig, useUpdateArchiveConfig, useDealershipSettings, useTaskConfig, useUpdateTaskConfig, useSetting, useUpdateSetting, useUpdateSettingByKey } from '../hooks/useSettings';
+import { useDealership, useUpdateDealership } from '../hooks/useDealerships';
 import { useTheme } from '../context/ThemeContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { useWorkspace } from '../hooks/useWorkspace';
 import { YearCalendar, type YearCalendarRef } from '../components/settings/YearCalendar';
+import { getCurrentYear } from '../utils/dateTime';
 import type { NotificationConfig, ArchiveConfig, ShiftConfig, TaskConfig } from '../types/setting';
+import { TIMEZONES } from '../types/dealership';
 
 // UI Components
 import {
@@ -48,7 +51,7 @@ export const SettingsPage: React.FC = () => {
   // Конвертируем null (все автосалоны) в undefined (глобальные настройки)
   const selectedDealershipId = workspaceDealershipId || undefined;
   const [showDetailedNotifications, setShowDetailedNotifications] = useState(false);
-  const [selectedCalendarYear, setSelectedCalendarYear] = useState(new Date().getFullYear());
+  const [selectedCalendarYear, setSelectedCalendarYear] = useState(getCurrentYear);
   const [calendarSaving, setCalendarSaving] = useState(false);
   const calendarRef = useRef<YearCalendarRef>(null);
 
@@ -108,6 +111,16 @@ export const SettingsPage: React.FC = () => {
   const { data: taskConfigData, isLoading: taskConfigLoading } = useTaskConfig(selectedDealershipId);
   const { data: config } = useDealershipSettings(selectedDealershipId || 0);
   const { data: maintenanceModeData, isLoading: maintenanceModeLoading } = useSetting('maintenance_mode');
+  const { data: globalTimezoneData, isLoading: globalTimezoneLoading } = useSetting('global_timezone');
+  const { data: dealershipData, isLoading: dealershipLoading } = useDealership(selectedDealershipId || 0);
+
+  // Timezone state for current dealership
+  const [dealershipTimezone, setDealershipTimezone] = useState('+05:00');
+  const [originalDealershipTimezone, setOriginalDealershipTimezone] = useState<string | null>(null);
+
+  // Global timezone state (used when no dealership is selected)
+  const [globalTimezone, setGlobalTimezone] = useState('+05:00');
+  const [originalGlobalTimezone, setOriginalGlobalTimezone] = useState<string | null>(null);
 
   // Effects to filter data and save original values
   useEffect(() => {
@@ -154,12 +167,28 @@ export const SettingsPage: React.FC = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskConfigData]);
 
+  useEffect(() => {
+    if (dealershipData?.timezone) {
+      setDealershipTimezone(dealershipData.timezone);
+      setOriginalDealershipTimezone(dealershipData.timezone);
+    }
+  }, [dealershipData]);
+
+  useEffect(() => {
+    if (globalTimezoneData?.data?.value) {
+      setGlobalTimezone(globalTimezoneData.data.value);
+      setOriginalGlobalTimezone(globalTimezoneData.data.value);
+    }
+  }, [globalTimezoneData]);
+
   // Mutations
   const updateShiftConfigMutation = useUpdateShiftConfig();
   const updateNotificationConfigMutation = useUpdateNotificationConfig();
   const updateArchiveConfigMutation = useUpdateArchiveConfig();
   const updateTaskConfigMutation = useUpdateTaskConfig();
   const updateSettingMutation = useUpdateSetting();
+  const updateSettingByKeyMutation = useUpdateSettingByKey();
+  const updateDealershipMutation = useUpdateDealership();
 
   // Определяем наличие несохранённых изменений для текущего таба
   const hasCurrentTabChanges = useMemo(() => {
@@ -169,6 +198,9 @@ export const SettingsPage: React.FC = () => {
       case 'interface':
         return themeHasPendingChanges || (originalNotificationConfig !== null && JSON.stringify(notificationConfig) !== JSON.stringify(originalNotificationConfig));
       case 'general':
+        return (originalNotificationConfig !== null && JSON.stringify(notificationConfig) !== JSON.stringify(originalNotificationConfig)) ||
+               (selectedDealershipId && originalDealershipTimezone !== null && dealershipTimezone !== originalDealershipTimezone) ||
+               (!selectedDealershipId && originalGlobalTimezone !== null && globalTimezone !== originalGlobalTimezone);
       case 'notifications':
         return originalNotificationConfig !== null && JSON.stringify(notificationConfig) !== JSON.stringify(originalNotificationConfig);
       case 'tasks':
@@ -183,7 +215,8 @@ export const SettingsPage: React.FC = () => {
     }
   }, [activeTab, shiftConfig, originalShiftConfig, notificationConfig, originalNotificationConfig,
       taskConfig, originalTaskConfig, archiveConfig, originalArchiveConfig,
-      maintenanceMode, originalMaintenanceMode, calendarHasPendingChanges, themeHasPendingChanges]);
+      maintenanceMode, originalMaintenanceMode, calendarHasPendingChanges, themeHasPendingChanges,
+      dealershipTimezone, originalDealershipTimezone, globalTimezone, originalGlobalTimezone, selectedDealershipId]);
 
   // Хук для предупреждения о несохранённых изменениях
   const { confirmLeave, confirmState, handleConfirm, handleCancel } = useUnsavedChanges(hasCurrentTabChanges);
@@ -263,6 +296,35 @@ export const SettingsPage: React.FC = () => {
         onSuccess: () => showToast({ type: 'success', message: 'Настройки уведомлений сохранены' }),
         onError: () => showToast({ type: 'error', message: 'Ошибка сохранения настроек' }),
       });
+    } else if (activeTab === 'general') {
+      // Сохраняем timezone автосалона если он выбран и изменён
+      if (selectedDealershipId && dealershipTimezone !== originalDealershipTimezone) {
+        updateDealershipMutation.mutate({
+          id: selectedDealershipId,
+          data: { timezone: dealershipTimezone },
+        }, {
+          onSuccess: () => {
+            setOriginalDealershipTimezone(dealershipTimezone);
+            showToast({ type: 'success', message: 'Часовой пояс автосалона сохранён' });
+          },
+          onError: () => showToast({ type: 'error', message: 'Ошибка сохранения часового пояса' }),
+        });
+      } else if (!selectedDealershipId && globalTimezone !== originalGlobalTimezone) {
+        // Сохраняем глобальный timezone
+        updateSettingByKeyMutation.mutate({
+          key: 'global_timezone',
+          value: globalTimezone,
+          type: 'string',
+        }, {
+          onSuccess: () => {
+            setOriginalGlobalTimezone(globalTimezone);
+            showToast({ type: 'success', message: 'Глобальный часовой пояс сохранён' });
+          },
+          onError: () => showToast({ type: 'error', message: 'Ошибка сохранения глобального часового пояса' }),
+        });
+      } else {
+        showToast({ type: 'info', message: 'Нет изменений для сохранения' });
+      }
     } else if (activeTab === 'calendar') {
       if (calendarRef.current?.hasPendingChanges()) {
         setCalendarSaving(true);
@@ -312,8 +374,8 @@ export const SettingsPage: React.FC = () => {
     );
   }
 
-  const isLoading = shiftConfigLoading || notificationConfigLoading || archiveConfigLoading || taskConfigLoading || maintenanceModeLoading;
-  const isSaving = updateShiftConfigMutation.isPending || updateNotificationConfigMutation.isPending || updateArchiveConfigMutation.isPending || updateTaskConfigMutation.isPending || updateSettingMutation.isPending || calendarSaving;
+  const isLoading = shiftConfigLoading || notificationConfigLoading || archiveConfigLoading || taskConfigLoading || maintenanceModeLoading || dealershipLoading || globalTimezoneLoading;
+  const isSaving = updateShiftConfigMutation.isPending || updateNotificationConfigMutation.isPending || updateArchiveConfigMutation.isPending || updateTaskConfigMutation.isPending || updateSettingMutation.isPending || updateSettingByKeyMutation.isPending || updateDealershipMutation.isPending || calendarSaving;
 
   return (
     <PageContainer>
@@ -388,6 +450,31 @@ export const SettingsPage: React.FC = () => {
                               </div>
                             </div>
                           )}
+                        </Card.Body>
+                      </Card>
+
+                      {/* Timezone Setting */}
+                      <Card className="mt-6">
+                        <Card.Body>
+                          <h4 className="font-medium text-gray-900 dark:text-white mb-4">
+                            {selectedDealershipId ? 'Часовой пояс автосалона' : 'Глобальный часовой пояс'}
+                          </h4>
+                          <Select
+                            label="Часовой пояс"
+                            value={selectedDealershipId ? dealershipTimezone : globalTimezone}
+                            onChange={(e) => selectedDealershipId
+                              ? setDealershipTimezone(e.target.value)
+                              : setGlobalTimezone(e.target.value)
+                            }
+                            options={TIMEZONES.map(tz => ({ value: tz.value, label: tz.label }))}
+                            disabled={selectedDealershipId ? dealershipLoading : globalTimezoneLoading}
+                          />
+                          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                            {selectedDealershipId
+                              ? 'Используется для определения выходных дней в календаре этого автосалона.'
+                              : 'Глобальный часовой пояс по умолчанию. Применяется к автосалонам без собственного часового пояса.'
+                            }
+                          </p>
                         </Card.Body>
                       </Card>
                     </div>

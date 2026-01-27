@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { tasksApi } from '../api/tasks';
-import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { formatDateTime, formatDateTimeShort } from '../utils/dateTime';
 import {
   ClockIcon,
   CheckCircleIcon,
@@ -209,12 +208,12 @@ export const MyHistoryPage: React.FC = () => {
                           </span>
                           {myResponse.responded_at && (
                             <span>
-                              Ответ: {format(new Date(myResponse.responded_at), 'dd MMM yyyy HH:mm', { locale: ru })}
+                              Ответ: {formatDateTime(myResponse.responded_at)}
                             </span>
                           )}
                           {myResponse.verified_at && (
                             <span className="text-green-600 dark:text-green-400">
-                              Проверено: {format(new Date(myResponse.verified_at), 'dd MMM HH:mm', { locale: ru })}
+                              Проверено: {formatDateTimeShort(myResponse.verified_at)}
                             </span>
                           )}
                         </div>

@@ -4,8 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../hooks/useAuth';
 import { dashboardApi } from '../api/dashboard';
 import { tasksApi } from '../api/tasks';
-import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { formatTime, formatDateTime, formatCurrentTime } from '../utils/dateTime';
 import {
   CheckCircleIcon,
   XCircleIcon,
@@ -174,7 +173,7 @@ export const DashboardPage: React.FC = () => {
             Live обновления
           </Badge>
           <span className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
-            {format(new Date(), 'HH:mm:ss', { locale: ru })}
+            {formatCurrentTime()}
           </span>
         </div>
       </PageHeader>
@@ -222,7 +221,7 @@ export const DashboardPage: React.FC = () => {
                     <div className="min-w-0 flex-1">
                       <p className="font-medium text-gray-900 dark:text-white truncate">{shift.user?.full_name}</p>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Открыта: {format(new Date(shift.opened_at), 'HH:mm', { locale: ru })}
+                        Открыта: {formatTime(shift.opened_at)}
                         {shift.replacement && (
                           <span className="ml-2 text-orange-600 dark:text-orange-400 block sm:inline">
                             Заменяет: {shift.replacement.full_name}
@@ -333,7 +332,7 @@ export const DashboardPage: React.FC = () => {
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-gray-900 dark:text-white text-sm truncate">{task.title}</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {format(new Date(task.created_at), 'HH:mm', { locale: ru })}
+                      {formatTime(task.created_at)}
                     </p>
                   </div>
                   <StatusBadge status={task.status} type="task" />
@@ -368,7 +367,7 @@ export const DashboardPage: React.FC = () => {
                               {task.title}
                             </p>
                             <div className="flex items-center text-xs text-red-700 mt-1">
-                              <span>Просрочено: {task.deadline ? format(new Date(task.deadline), 'PP p', { locale: ru }) : 'Без срока'}</span>
+                              <span>Просрочено: {task.deadline ? formatDateTime(task.deadline) : 'Без срока'}</span>
                               <span className="mx-1">•</span>
                               <span>{task.creator?.full_name}</span>
                             </div>

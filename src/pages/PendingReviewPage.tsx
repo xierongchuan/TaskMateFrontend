@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { tasksApi } from '../api/tasks';
 import { usePermissions } from '../hooks/usePermissions';
-import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { formatDateTimeShort } from '../utils/dateTime';
 import {
   ClipboardDocumentCheckIcon,
   CheckIcon,
@@ -258,7 +257,7 @@ export const PendingReviewPage: React.FC = () => {
                           </span>
                           {firstResponse.responded_at && (
                             <span>
-                              Отправлено: {format(new Date(firstResponse.responded_at), 'dd MMM HH:mm', { locale: ru })}
+                              Отправлено: {formatDateTimeShort(firstResponse.responded_at)}
                             </span>
                           )}
                         </div>

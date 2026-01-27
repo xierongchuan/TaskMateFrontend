@@ -9,6 +9,7 @@ import {
 import { useHolidays, useBulkCalendarUpdate } from '../../hooks/useCalendar';
 import { Button, ConfirmDialog } from '../ui';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
+import { getDaysInMonth, getFirstDayOfMonth } from '../../utils/dateTime';
 
 export interface YearCalendarRef {
   save: () => Promise<void>;
@@ -67,13 +68,9 @@ const MonthCalendar: React.FC<MonthCalendarProps> = ({
   onDayClick,
   isLoading,
 }) => {
-  // Get first day of month and days in month
-  const firstDay = new Date(year, month - 1, 1);
-  const daysInMonth = new Date(year, month, 0).getDate();
-
-  // Get day of week for first day (0 = Sunday, so convert to Monday-based)
-  let startDayOfWeek = firstDay.getDay();
-  startDayOfWeek = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1; // Convert to Mon=0
+  // Get first day of month and days in month using centralized utilities
+  const daysInMonthCount = getDaysInMonth(year, month);
+  const startDayOfWeek = getFirstDayOfMonth(year, month); // Already returns Mon=0
 
   // Create calendar grid
   const days: (number | null)[] = [];
@@ -84,7 +81,7 @@ const MonthCalendar: React.FC<MonthCalendarProps> = ({
   }
 
   // Days of month
-  for (let i = 1; i <= daysInMonth; i++) {
+  for (let i = 1; i <= daysInMonthCount; i++) {
     days.push(i);
   }
 

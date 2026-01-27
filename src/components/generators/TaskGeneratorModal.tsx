@@ -12,6 +12,7 @@ import type { TaskGenerator, CreateTaskGeneratorRequest, GeneratorRecurrence } f
 import type { ApiErrorResponse } from '../../types/task';
 import { Alert } from '../ui';
 import { XMarkIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { getTodayDateString } from '../../utils/dateTime';
 interface TaskGeneratorModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -37,7 +38,7 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
     deadline_time: '18:00',
     recurrence_days_of_week: [] as number[],
     recurrence_days_of_month: [] as number[],
-    start_date: new Date().toISOString().split('T')[0],
+    start_date: getTodayDateString(),
     end_date: '',
     task_type: 'individual' as 'individual' | 'group',
     response_type: 'acknowledge' as 'acknowledge' | 'complete',
@@ -85,7 +86,7 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
         deadline_time: '18:00',
         recurrence_days_of_week: [],
         recurrence_days_of_month: [],
-        start_date: new Date().toISOString().split('T')[0],
+        start_date: getTodayDateString(),
         end_date: '',
         task_type: 'individual',
         response_type: 'acknowledge',

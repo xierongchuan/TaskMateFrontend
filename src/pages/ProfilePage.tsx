@@ -29,7 +29,7 @@ import { RoleBadge } from '../components/common';
 // import { formatPhoneNumber } from '../utils/phoneFormatter'; // Removed unused
 import { DonutChart, DonutChartLegend } from '../components/ui/DonutChart';
 import { reportsApi } from '../api/reports';
-import { format, startOfMonth, endOfMonth } from 'date-fns';
+import { getCurrentMonthRange } from '../utils/dateTime';
 
 export const ProfilePage: React.FC = () => {
   const { user, refreshUser, logout } = useAuth();
@@ -75,9 +75,7 @@ export const ProfilePage: React.FC = () => {
   const { data: reportData } = useQuery({
     queryKey: ['my-report-stats', user?.id],
     queryFn: async () => {
-      const now = new Date();
-      const from = format(startOfMonth(now), 'yyyy-MM-dd');
-      const to = format(endOfMonth(now), 'yyyy-MM-dd');
+      const { from, to } = getCurrentMonthRange();
       return reportsApi.getReport(from, to);
     },
     enabled: !!user,
