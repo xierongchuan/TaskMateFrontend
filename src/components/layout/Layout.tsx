@@ -1,10 +1,10 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useMyCurrentShift } from '../../hooks/useShifts';
 import { useWorkspace } from '../../hooks/useWorkspace';
-import { Sidebar } from './Sidebar';
+import { useSidebarStore } from '../../stores/sidebarStore';
+import { Sidebar } from './Sidebar/';
 import { WorkspaceSwitcher } from './WorkspaceSwitcher';
 import { formatTime } from '../../utils/dateTime';
 import { ClockIcon, Bars3Icon } from '@heroicons/react/24/outline';
@@ -13,12 +13,7 @@ import { APP_NAME } from '../../constants/app';
 export const Layout: React.FC = () => {
   const { user } = useAuth();
   const { dealershipId } = useWorkspace();
-  const [sidebarOpen, setSidebarOpen] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return window.innerWidth >= 1024;
-    }
-    return true;
-  });
+  const { isOpen: sidebarOpen, toggleSidebar } = useSidebarStore();
   const { data: currentShiftData } = useMyCurrentShift(dealershipId ?? undefined);
   const currentShift = currentShiftData?.data;
 
@@ -26,7 +21,7 @@ export const Layout: React.FC = () => {
     <div className="h-screen bg-gray-100 dark:bg-gray-900 flex overflow-hidden transition-colors duration-200 print:h-auto print:overflow-visible">
       {/* Sidebar */}
       <div className="print:hidden">
-        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <Sidebar />
       </div>
 
       {/* Main content area */}
@@ -36,7 +31,7 @@ export const Layout: React.FC = () => {
           {/* Menu toggle button - visible on all screen sizes */}
           <div className="flex items-center space-x-3">
             <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
+              onClick={toggleSidebar}
               className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700"
               title={sidebarOpen ? 'Скрыть меню' : 'Показать меню'}
             >
