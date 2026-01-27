@@ -58,15 +58,15 @@ export const NotificationSettingsPage: React.FC = () => {
         <NotificationSettingsContent dealershipId={dealershipId || undefined} />
 
         {/* Info Box */}
-        <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800">
+        <Card className="bg-accent-50 dark:bg-gray-700/50 border-accent-100 dark:border-gray-600">
           <Card.Body>
             <div className="flex">
               <div className="flex-shrink-0">
-                <InformationCircleIcon className="h-5 w-5 text-blue-400 dark:text-blue-300" />
+                <InformationCircleIcon className="h-5 w-5 text-accent-400 dark:text-accent-300" />
               </div>
               <div className="ml-3">
-                <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">Информация</h3>
-                <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
+                <h3 className="text-sm font-medium text-accent-800 dark:text-accent-200">Информация</h3>
+                <div className="mt-2 text-sm text-accent-700 dark:text-accent-300">
                   <p>
                     • Отключенные каналы не будут отправлять уведомления сотрудникам<br />
                     • Настройки применяются только к вашему автосалону<br />

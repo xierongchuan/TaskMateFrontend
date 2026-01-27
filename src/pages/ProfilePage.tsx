@@ -176,7 +176,7 @@ export const ProfilePage: React.FC = () => {
               <div className="w-full border-t border-gray-100 dark:border-gray-700 pt-6">
                 <div className="grid grid-cols-2 gap-4 text-center">
                   <div>
-                    <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                    <div className="text-2xl font-bold text-accent-600 dark:text-accent-400">
                       {shiftsData?.total || 0}
                     </div>
                     <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-1">
@@ -227,7 +227,7 @@ export const ProfilePage: React.FC = () => {
                     `}
                     title={tab.label}
                   >
-                    <Icon className={`w-5 h-5 ${isActive ? 'text-indigo-500 dark:text-indigo-400' : 'opacity-70'}`} />
+                    <Icon className={`w-5 h-5 ${isActive ? 'text-accent-500 dark:text-accent-400' : 'opacity-70'}`} />
                     <span className="hidden sm:inline">{tab.label}</span>
                   </button>
                 );
@@ -348,10 +348,10 @@ export const ProfilePage: React.FC = () => {
                     {/* Total Shifts */}
                     <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
                       <div className="absolute bottom-0 right-0 p-3 opacity-10">
-                        <CalendarDaysIcon className="w-16 h-16 text-indigo-600 dark:text-indigo-400" />
+                        <CalendarDaysIcon className="w-16 h-16 text-accent-600 dark:text-accent-400" />
                       </div>
                       <div className="flex flex-col items-start gap-3 mb-2 relative z-10">
-                        <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl text-indigo-600 dark:text-indigo-400">
+                        <div className="p-2 bg-accent-50 dark:bg-accent-900/20 rounded-xl text-accent-600 dark:text-accent-400">
                           <CalendarDaysIcon className="w-6 h-6" />
                         </div>
                         <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Всего смен</div>
@@ -364,10 +364,10 @@ export const ProfilePage: React.FC = () => {
                     {/* Role */}
                     <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
                       <div className="absolute bottom-0 right-0 p-3 opacity-10">
-                        <BriefcaseIcon className="w-16 h-16 text-blue-600 dark:text-blue-400" />
+                        <BriefcaseIcon className="w-16 h-16 text-accent-600 dark:text-accent-400" />
                       </div>
                       <div className="flex flex-col items-start gap-3 mb-2 relative z-10">
-                        <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-blue-600 dark:text-blue-400">
+                        <div className="p-2 bg-accent-50 dark:bg-gray-700 rounded-xl text-accent-600 dark:text-accent-400">
                           <BriefcaseIcon className="w-6 h-6" />
                         </div>
                         <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Роль</div>

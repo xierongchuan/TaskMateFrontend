@@ -91,11 +91,11 @@ export const WorkspaceSwitcher: React.FC = () => {
                 className={`
                   w-full flex items-center justify-between px-4 py-2.5 text-left
                   hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors
-                  ${isAllDealerships ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''}
+                  ${isAllDealerships ? 'bg-accent-50 dark:bg-accent-900/20' : ''}
                 `}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent-500 to-accent-700 flex items-center justify-center">
                     <BuildingOffice2Icon className="w-4 h-4 text-white" />
                   </div>
                   <div>
@@ -108,7 +108,7 @@ export const WorkspaceSwitcher: React.FC = () => {
                   </div>
                 </div>
                 {isAllDealerships && (
-                  <CheckIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                  <CheckIcon className="w-5 h-5 text-accent-600 dark:text-accent-400" />
                 )}
               </button>
               <div className="border-t border-gray-100 dark:border-gray-700 my-1" />
@@ -129,7 +129,7 @@ export const WorkspaceSwitcher: React.FC = () => {
                   className={`
                     w-full flex items-center justify-between px-4 py-2.5 text-left
                     hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors
-                    ${dealershipId === dealership.id ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''}
+                    ${dealershipId === dealership.id ? 'bg-accent-50 dark:bg-accent-900/20' : ''}
                   `}
                 >
                   <div className="flex items-center gap-3">
@@ -150,7 +150,7 @@ export const WorkspaceSwitcher: React.FC = () => {
                     </div>
                   </div>
                   {dealershipId === dealership.id && (
-                    <CheckIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
+                    <CheckIcon className="w-5 h-5 text-accent-600 dark:text-accent-400 flex-shrink-0" />
                   )}
                 </button>
               ))

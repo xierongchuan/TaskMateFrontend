@@ -161,8 +161,8 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
           </div>
 
           {/* Role Description Card (Full Width) */}
-          <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-100 dark:border-blue-800">
-            <p className="text-sm text-blue-900 dark:text-blue-200">
+          <div className="bg-accent-50 dark:bg-gray-700/50 p-3 rounded-lg border border-accent-100 dark:border-gray-600">
+            <p className="text-sm text-accent-900 dark:text-accent-200">
               {roleDescriptions[user.role] || 'Роль пользователя'}
             </p>
           </div>

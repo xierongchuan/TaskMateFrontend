@@ -262,7 +262,7 @@ export const ShiftPhotoViewer: React.FC<ShiftPhotoViewerProps> = ({
             {/* Loading state */}
             {modalImageLoading && !modalImageError && (
               <div className="w-full max-w-lg h-64 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-600" />
               </div>
             )}
 
@@ -348,7 +348,7 @@ const PhotoThumbnail: React.FC<PhotoThumbnailProps> = ({
 
   return (
     <div
-      className={`relative ${sizeClasses} rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 transition-colors flex-shrink-0 ${
+      className={`relative ${sizeClasses} rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:border-accent-500 dark:hover:border-accent-400 transition-colors flex-shrink-0 ${
         !hasError && blobUrl ? 'cursor-pointer' : ''
       }`}
       onClick={hasError || !blobUrl ? undefined : onClick}
@@ -356,7 +356,7 @@ const PhotoThumbnail: React.FC<PhotoThumbnailProps> = ({
       {/* Loading spinner */}
       {isLoading && !hasError && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-100 dark:bg-gray-700">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" />
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-accent-600" />
         </div>
       )}
 

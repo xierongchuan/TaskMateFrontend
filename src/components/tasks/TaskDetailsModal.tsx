@@ -171,9 +171,9 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
         {/* Response Type Info */}
         {isProofTask && (
           <div className="mb-6">
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-              <DocumentIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              <span className="text-sm text-blue-800 dark:text-blue-200">
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-accent-50 dark:bg-gray-700/50 border border-accent-200 dark:border-gray-600">
+              <DocumentIcon className="w-5 h-5 text-accent-600 dark:text-accent-400" />
+              <span className="text-sm text-accent-800 dark:text-accent-200">
                 Тип: {RESPONSE_TYPE_LABELS[task.response_type]} — требуется загрузка доказательств
               </span>
             </div>
@@ -187,7 +187,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
               <DocumentIcon className="w-4 h-4 mr-1.5" />
               Файлы задачи
             </h4>
-            <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+            <div className="p-4 rounded-lg bg-accent-50 dark:bg-gray-700/50 border border-accent-200 dark:border-gray-600">
               <ProofViewer
                 proofs={task.shared_proofs}
                 canDelete={permissions.canManageTasks && !!onDeleteSharedProof && !isCompleted}

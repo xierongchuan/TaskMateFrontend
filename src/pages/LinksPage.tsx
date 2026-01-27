@@ -272,7 +272,7 @@ export const LinksPage: React.FC = () => {
                                 {getCategoryIcon(link.category || 'general')}
                               </div>
                               <div>
-                                <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-accent-600 dark:group-hover:text-accent-400 transition-colors">
                                   {link.title}
                                 </h3>
                                 <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[150px]">
@@ -301,7 +301,7 @@ export const LinksPage: React.FC = () => {
                             icon={<ArrowTopRightOnSquareIcon />}
                             onClick={() => openLink(link.url)}
                             fullWidth
-                            className="bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50"
+                            className="bg-accent-50 text-accent-600 hover:bg-accent-100 dark:bg-gray-700 dark:text-accent-300 dark:hover:bg-gray-600"
                           >
                             Открыть
                           </Button>
@@ -319,7 +319,7 @@ export const LinksPage: React.FC = () => {
             <Card>
               <Card.Body className="space-y-4">
                 {linksData?.data.map((link) => (
-                  <div key={link.id} className="p-5 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-sm hover:border-blue-200 dark:hover:border-blue-500 transition-all">
+                  <div key={link.id} className="p-5 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-sm hover:border-accent-200 dark:hover:border-accent-500 transition-all">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center flex-1 min-w-0 pr-4">
                         <div className={`${getCategoryColor(link.category || 'general')} rounded-lg p-3 mr-4 text-white flex-shrink-0`}>
@@ -347,7 +347,7 @@ export const LinksPage: React.FC = () => {
                           variant="ghost"
                           icon={<EyeIcon />}
                           onClick={() => openLink(link.url)}
-                          className="bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50"
+                          className="bg-accent-50 text-accent-600 hover:bg-accent-100 dark:bg-gray-700 dark:text-accent-300 dark:hover:bg-gray-600"
                         >
                           Открыть
                         </Button>

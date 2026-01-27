@@ -166,7 +166,7 @@ const ProofThumbnail: React.FC<ProofThumbnailProps> = ({ proof, onClick, onDelet
     <div className="relative group">
       <div
         onClick={onClick}
-        className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 cursor-pointer border border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 transition-colors"
+        className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 cursor-pointer border border-gray-200 dark:border-gray-600 hover:border-accent-500 dark:hover:border-accent-400 transition-colors"
       >
         {isImage ? (
           <img
@@ -296,7 +296,7 @@ const FileTypeIcon: React.FC<FileTypeIconProps> = ({ mimeType, filename, size = 
   // Это решает проблему, когда .docx определяется как application/zip
   if (extension === 'doc' || extension === 'docx' || extension === 'odt') {
     return (
-      <svg className={`${sizeClass} text-blue-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className={`${sizeClass} text-accent-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
       </svg>
     );
@@ -338,7 +338,7 @@ const FileTypeIcon: React.FC<FileTypeIconProps> = ({ mimeType, filename, size = 
   // Word документы - проверяем ПЕРЕД архивами, чтобы избежать ложных срабатываний
   if (mimeType.includes('wordprocessingml') || mimeType.includes('msword') || mimeType.includes('vnd.oasis.opendocument.text')) {
     return (
-      <svg className={`${sizeClass} text-blue-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className={`${sizeClass} text-accent-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
       </svg>
     );

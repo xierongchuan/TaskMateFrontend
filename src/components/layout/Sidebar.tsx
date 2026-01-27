@@ -76,7 +76,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       >
         {/* Mobile Header / Logo area */}
         <div className="h-16 flex items-center px-6 border-b border-gray-100 dark:border-gray-800 lg:hidden shrink-0">
-          <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">{APP_NAME}</span>
+          <span className="text-xl font-bold text-accent-600 dark:text-accent-400">{APP_NAME}</span>
         </div>
 
         {/* Navigation */}
@@ -99,12 +99,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     className={`
                       w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all
                       ${isActive
-                        ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700'
+                        ? 'bg-white dark:bg-gray-800 text-accent-600 dark:text-accent-400 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700'
                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200'
                       }
                     `}
                   >
-                    <Icon className={`w-5 h-5 mr-3 ${isActive ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`} />
+                    <Icon className={`w-5 h-5 mr-3 ${isActive ? 'text-accent-500 dark:text-accent-400' : 'text-gray-400 dark:text-gray-500'}`} />
                     <span>{item.label}</span>
                   </NavLink>
                 </li>

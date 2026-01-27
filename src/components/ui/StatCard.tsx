@@ -23,24 +23,24 @@ const variantStyles: Record<StatCardVariant, { bg: string; accent: string; icon:
     icon: 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400',
   },
   success: {
-    bg: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800',
+    bg: 'bg-green-50 dark:bg-gray-800 border-green-200 dark:border-green-700',
     accent: 'text-green-600 dark:text-green-400',
-    icon: 'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400',
+    icon: 'bg-green-100 dark:bg-gray-700 text-green-600 dark:text-green-400',
   },
   warning: {
-    bg: 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800',
+    bg: 'bg-yellow-50 dark:bg-gray-800 border-yellow-200 dark:border-yellow-700',
     accent: 'text-yellow-600 dark:text-yellow-400',
-    icon: 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400',
+    icon: 'bg-yellow-100 dark:bg-gray-700 text-yellow-600 dark:text-yellow-400',
   },
   danger: {
-    bg: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800',
+    bg: 'bg-red-50 dark:bg-gray-800 border-red-200 dark:border-red-700',
     accent: 'text-red-600 dark:text-red-400',
-    icon: 'bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400',
+    icon: 'bg-red-100 dark:bg-gray-700 text-red-600 dark:text-red-400',
   },
   info: {
-    bg: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800',
-    accent: 'text-blue-600 dark:text-blue-400',
-    icon: 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400',
+    bg: 'bg-accent-50 dark:bg-gray-800 border-accent-200 dark:border-accent-800/50',
+    accent: 'text-accent-600 dark:text-accent-400',
+    icon: 'bg-accent-100 dark:bg-gray-700 text-accent-600 dark:text-accent-400',
   },
 };
 

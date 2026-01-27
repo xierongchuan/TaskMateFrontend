@@ -267,7 +267,7 @@ export const UsersPage: React.FC = () => {
                           <div className="min-w-0 flex-1">
                             <button
                               onClick={() => handleViewDetails(user)}
-                              className="text-left cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                              className="text-left cursor-pointer hover:text-accent-600 dark:hover:text-accent-400 transition-colors hover:underline focus:outline-none focus:ring-2 focus:ring-accent-500 rounded"
                             >
                               <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
                                 {user.full_name}
@@ -355,7 +355,7 @@ export const UsersPage: React.FC = () => {
                   <div className="mb-3">
                     <button
                       onClick={() => handleViewDetails(user)}
-                      className="text-left cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded w-full"
+                      className="text-left cursor-pointer hover:text-accent-600 dark:hover:text-accent-400 transition-colors hover:underline focus:outline-none focus:ring-2 focus:ring-accent-500 rounded w-full"
                     >
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
                         {user.full_name}

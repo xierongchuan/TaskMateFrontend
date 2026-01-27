@@ -136,7 +136,7 @@ export const DealershipForm: React.FC<DealershipFormProps> = ({
               minLength={2}
               placeholder="Например: Автомир Premium"
               className={`block w-full rounded-lg border ${errors.name ? 'border-red-300' : 'border-gray-300 dark:border-gray-600'
-                } shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm pl-10 pr-3 py-2 ${errors.name ? 'focus:border-red-500 focus:ring-red-500' : ''
+                } shadow-sm focus:border-accent-500 focus:ring-accent-500 sm:text-sm pl-10 pr-3 py-2 ${errors.name ? 'focus:border-red-500 focus:ring-red-500' : ''
                 } bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
             />
           </div>
@@ -159,7 +159,7 @@ export const DealershipForm: React.FC<DealershipFormProps> = ({
               value={formData.address}
               onChange={(e) => handleInputChange('address', e.target.value)}
               placeholder="Например: г. Москва, ул. Ленинградская, д. 15"
-              className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm pl-10 pr-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm focus:border-accent-500 focus:ring-accent-500 sm:text-sm pl-10 pr-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
           </div>
           <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
@@ -182,7 +182,7 @@ export const DealershipForm: React.FC<DealershipFormProps> = ({
               onChange={(e) => handleInputChange('phone', e.target.value)}
               placeholder="+998 99 495 85 14"
               className={`block w-full rounded-lg border ${errors.phone ? 'border-red-300' : 'border-gray-300 dark:border-gray-600'
-                } shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm pl-10 pr-3 py-2 ${errors.phone ? 'focus:border-red-500 focus:ring-red-500' : ''
+                } shadow-sm focus:border-accent-500 focus:ring-accent-500 sm:text-sm pl-10 pr-3 py-2 ${errors.phone ? 'focus:border-red-500 focus:ring-red-500' : ''
                 } bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
             />
           </div>
@@ -206,7 +206,7 @@ export const DealershipForm: React.FC<DealershipFormProps> = ({
             <select
               value={formData.timezone}
               onChange={(e) => handleInputChange('timezone', e.target.value)}
-              className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm pl-10 pr-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm focus:border-accent-500 focus:ring-accent-500 sm:text-sm pl-10 pr-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               {TIMEZONES.map((tz) => (
                 <option key={tz.value} value={tz.value}>
@@ -226,7 +226,7 @@ export const DealershipForm: React.FC<DealershipFormProps> = ({
         <button
           type="submit"
           disabled={createDealership.isPending || updateDealership.isPending}
-          className="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="inline-flex items-center justify-center px-6 py-3 bg-accent-600 text-white text-sm font-medium rounded-lg hover:bg-accent-700 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {createDealership.isPending || updateDealership.isPending ? (
             <>
@@ -246,7 +246,7 @@ export const DealershipForm: React.FC<DealershipFormProps> = ({
           <button
             type="button"
             onClick={onCancel}
-            className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-lg text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+            className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-lg text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2 transition-colors"
           >
             Отмена
           </button>

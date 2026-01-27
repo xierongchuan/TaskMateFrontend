@@ -45,9 +45,9 @@ export const ViewModeToggle: React.FC<ViewModeToggleProps> = ({
         const isLast = index === options.length - 1;
 
         const buttonClasses = [
-          'px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500',
+          'px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-accent-500',
           isActive
-            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+            ? 'bg-accent-100 text-accent-700 dark:bg-gray-700 dark:text-accent-300'
             : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
           isFirst ? 'rounded-l-lg' : '',
           isLast ? 'rounded-r-lg' : '',

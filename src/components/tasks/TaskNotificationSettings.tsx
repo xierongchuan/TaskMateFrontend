@@ -116,7 +116,7 @@ export const TaskNotificationSettings: React.FC<TaskNotificationSettingsProps> =
               Расширенные настройки уведомлений
             </h4>
             {hasActiveOverrides && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200">
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-accent-100 dark:bg-accent-900 text-accent-800 dark:text-accent-200">
                 Активны
               </span>
             )}
@@ -136,7 +136,7 @@ export const TaskNotificationSettings: React.FC<TaskNotificationSettingsProps> =
       {isExpanded && (
         <div className="px-4 py-4 space-y-4 bg-white dark:bg-gray-800">
           {/* Toggle for custom settings */}
-          <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md transition-colors">
+          <div className="flex items-center justify-between p-3 bg-accent-50 dark:bg-gray-700/50 rounded-md transition-colors">
             <div>
               <p className="text-sm font-medium text-gray-900 dark:text-white">Использовать индивидуальные настройки</p>
               <p className="text-xs text-gray-600 dark:text-gray-400">
@@ -146,7 +146,7 @@ export const TaskNotificationSettings: React.FC<TaskNotificationSettingsProps> =
             <button
               type="button"
               onClick={handleToggleCustomSettings}
-              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 ${useCustomSettings ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-600'
+              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent-600 focus:ring-offset-2 ${useCustomSettings ? 'bg-accent-600' : 'bg-gray-200 dark:bg-gray-600'
                 }`}
             >
               <span
@@ -177,7 +177,7 @@ export const TaskNotificationSettings: React.FC<TaskNotificationSettingsProps> =
                             id={`notify-${channel.key}`}
                             checked={isEnabled}
                             onChange={(e) => handleChannelToggle(channel.key, e.target.checked)}
-                            className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500 bg-white dark:bg-gray-700"
+                            className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-accent-600 focus:ring-accent-500 bg-white dark:bg-gray-700"
                           />
                           <label htmlFor={`notify-${channel.key}`} className="text-sm font-medium text-gray-900 dark:text-gray-200">
                             {channel.label}

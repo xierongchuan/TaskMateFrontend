@@ -115,12 +115,12 @@ export const NotificationSettingsContent: React.FC<NotificationSettingsContentPr
   // Если не выбран дилерский центр, показываем сообщение
   if (!dealershipId) {
     return (
-      <div className="p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+      <div className="p-4 bg-accent-50 dark:bg-gray-700/50 border border-accent-200 dark:border-gray-600 rounded-lg">
         <div className="flex">
-          <InformationCircleIcon className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2 flex-shrink-0" />
+          <InformationCircleIcon className="w-5 h-5 text-accent-600 dark:text-accent-400 mr-2 flex-shrink-0" />
           <div>
-            <h4 className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-1">Выберите дилерский центр</h4>
-            <p className="text-sm text-blue-700 dark:text-blue-400">
+            <h4 className="text-sm font-medium text-accent-800 dark:text-accent-300 mb-1">Выберите дилерский центр</h4>
+            <p className="text-sm text-accent-700 dark:text-accent-400">
               Для настройки уведомлений необходимо выбрать дилерский центр в выпадающем списке вверху страницы.
               Настройки уведомлений применяются отдельно для каждого автосалона.
             </p>
@@ -210,9 +210,9 @@ export const NotificationSettingsContent: React.FC<NotificationSettingsContentPr
             className={`
               relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent
               transition-colors duration-200 ease-in-out ml-4
-              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800
+              focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800
               disabled:opacity-50 disabled:cursor-not-allowed
-              ${setting.is_enabled ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'}
+              ${setting.is_enabled ? 'bg-accent-600' : 'bg-gray-200 dark:bg-gray-600'}
             `}
           >
             <span

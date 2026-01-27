@@ -23,28 +23,28 @@ const variantStyles: Record<AlertVariant, {
   message: string;
 }> = {
   success: {
-    container: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800',
+    container: 'bg-green-50 dark:bg-gray-700/50 border-green-200 dark:border-gray-600',
     icon: 'text-green-500 dark:text-green-400',
     title: 'text-green-800 dark:text-green-300',
     message: 'text-green-700 dark:text-green-400',
   },
   error: {
-    container: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800',
+    container: 'bg-red-50 dark:bg-gray-700/50 border-red-200 dark:border-gray-600',
     icon: 'text-red-500 dark:text-red-400',
     title: 'text-red-800 dark:text-red-300',
     message: 'text-red-700 dark:text-red-400',
   },
   warning: {
-    container: 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800',
+    container: 'bg-amber-50 dark:bg-gray-700/50 border-amber-200 dark:border-gray-600',
     icon: 'text-amber-500 dark:text-amber-400',
     title: 'text-amber-800 dark:text-amber-300',
     message: 'text-amber-700 dark:text-amber-400',
   },
   info: {
-    container: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800',
-    icon: 'text-blue-500 dark:text-blue-400',
-    title: 'text-blue-800 dark:text-blue-300',
-    message: 'text-blue-700 dark:text-blue-400',
+    container: 'bg-accent-50 dark:bg-gray-700/50 border-accent-200 dark:border-gray-600',
+    icon: 'text-accent-500 dark:text-accent-400',
+    title: 'text-accent-800 dark:text-accent-300',
+    message: 'text-accent-700 dark:text-accent-400',
   },
 };
 

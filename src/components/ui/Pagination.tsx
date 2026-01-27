@@ -70,7 +70,7 @@ export const Pagination: React.FC<PaginationProps> = ({
   const visiblePages = getVisiblePages();
 
   const baseButtonClasses = 'relative inline-flex items-center px-2 py-2 text-sm font-medium transition-colors focus:z-20 focus:outline-offset-0 disabled:opacity-50';
-  const activeClasses = 'z-10 bg-blue-600 text-white focus:ring-2 focus:ring-offset-2 focus:ring-blue-500';
+  const activeClasses = 'z-10 bg-accent-600 text-white focus:ring-2 focus:ring-offset-2 focus:ring-accent-500';
   const inactiveClasses = 'text-gray-900 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800';
 
   return (

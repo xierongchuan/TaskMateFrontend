@@ -34,9 +34,9 @@ const paddingClasses = {
 
 const variantClasses = {
   default: 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700',
-  highlighted: 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800',
-  warning: 'bg-yellow-50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800',
-  danger: 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800',
+  highlighted: 'bg-accent-50 dark:bg-gray-800 border-accent-200 dark:border-accent-800/50',
+  warning: 'bg-yellow-50 dark:bg-gray-800 border-yellow-200 dark:border-yellow-700',
+  danger: 'bg-red-50 dark:bg-gray-800 border-red-200 dark:border-red-700',
 };
 
 /**

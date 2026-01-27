@@ -44,7 +44,7 @@ export const Layout: React.FC = () => {
             </button>
 
             {/* Logo */}
-            <Link to="/" className="text-lg font-bold text-indigo-600 dark:text-indigo-400">
+            <Link to="/" className="text-lg font-bold text-accent-600 dark:text-accent-400">
               {APP_NAME}
             </Link>
 
@@ -72,7 +72,7 @@ export const Layout: React.FC = () => {
             )}
 
             <Link to="/profile" className="flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 p-2 rounded-lg transition-colors">
-              <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-medium shadow-sm">
+              <div className="w-8 h-8 rounded-full bg-accent-600 flex items-center justify-center text-white font-medium shadow-sm">
                 {user?.full_name?.charAt(0).toUpperCase()}
               </div>
               <div className="hidden sm:flex items-center gap-3">

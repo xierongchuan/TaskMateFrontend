@@ -129,11 +129,11 @@ export const DealershipList: React.FC<DealershipListProps> = ({ onEdit }) => {
                 placeholder="Поиск по названию или адресу..."
                 value={searchInput}
                 onChange={handleSearchChange}
-                icon={<MagnifyingGlassIcon className={isSearchLoading ? 'text-blue-500 animate-pulse' : ''} />}
+                icon={<MagnifyingGlassIcon className={isSearchLoading ? 'text-accent-500 animate-pulse' : ''} />}
               />
               {isSearchLoading && (
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-accent-500"></div>
                 </div>
               )}
             </div>
@@ -167,14 +167,14 @@ export const DealershipList: React.FC<DealershipListProps> = ({ onEdit }) => {
             {data?.data.map((dealership) => (
               <Card
                 key={dealership.id}
-                className="hover:shadow-md transition-all duration-200 hover:border-blue-200 dark:hover:border-blue-500"
+                className="hover:shadow-md transition-all duration-200 hover:border-accent-200 dark:hover:border-accent-500"
               >
                 <Card.Body>
                   {/* Header */}
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0 w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                        <BuildingOfficeIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                      <div className="flex-shrink-0 w-12 h-12 bg-accent-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                        <BuildingOfficeIcon className="w-6 h-6 text-accent-600 dark:text-accent-400" />
                       </div>
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">

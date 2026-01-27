@@ -93,7 +93,7 @@ export const UserCheckboxList: React.FC<UserCheckboxListProps> = ({
           type="checkbox"
           checked={selectedIds.includes(user.id)}
           onChange={() => onToggle(user.id)}
-          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
+          className="h-4 w-4 text-accent-600 focus:ring-accent-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
         />
         <span className="ml-2 text-sm text-gray-900 dark:text-white">
           {user.full_name}

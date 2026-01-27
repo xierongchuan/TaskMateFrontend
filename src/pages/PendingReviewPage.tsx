@@ -224,7 +224,7 @@ export const PendingReviewPage: React.FC = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-3 mb-2 flex-wrap">
                           <h3
-                            className="text-lg font-semibold text-gray-900 dark:text-white cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                            className="text-lg font-semibold text-gray-900 dark:text-white cursor-pointer hover:text-accent-600 dark:hover:text-accent-400 transition-colors"
                             onClick={() => handleViewDetails(task)}
                           >
                             {task.title}
@@ -376,7 +376,7 @@ export const PendingReviewPage: React.FC = () => {
                     </div>
                   </button>
                   <button
-                    className="w-full p-4 text-left rounded-lg border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors"
+                    className="w-full p-4 text-left rounded-lg border border-gray-200 dark:border-gray-600 hover:border-accent-300 dark:hover:border-accent-700 hover:bg-accent-50 dark:hover:bg-accent-900/10 transition-colors"
                     onClick={() => {
                       setRejectModal(null);
                       setRejectReason('');

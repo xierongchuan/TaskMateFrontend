@@ -350,7 +350,7 @@ export const YearCalendar = forwardRef<YearCalendarRef, YearCalendarProps>(({
       {/* Header with year navigation */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <CalendarDaysIcon className="w-6 h-6 text-blue-500" />
+          <CalendarDaysIcon className="w-6 h-6 text-accent-500" />
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -390,18 +390,18 @@ export const YearCalendar = forwardRef<YearCalendarRef, YearCalendarProps>(({
       {dealershipId && (
         <div className={`flex items-center justify-between p-3 rounded-lg border ${
           usesGlobal
-            ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
-            : 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+            ? 'bg-accent-50 dark:bg-gray-700/50 border-accent-200 dark:border-gray-600'
+            : 'bg-green-50 dark:bg-gray-700/50 border-green-200 dark:border-gray-600'
         }`}>
           <div className="flex items-center gap-2">
             {usesGlobal ? (
-              <GlobeAltIcon className="w-5 h-5 text-blue-500" />
+              <GlobeAltIcon className="w-5 h-5 text-accent-500" />
             ) : (
               <BuildingStorefrontIcon className="w-5 h-5 text-green-500" />
             )}
             <span className={`text-sm font-medium ${
               usesGlobal
-                ? 'text-blue-700 dark:text-blue-300'
+                ? 'text-accent-700 dark:text-accent-300'
                 : 'text-green-700 dark:text-green-300'
             }`}>
               {usesGlobal ? 'Глобальный календарь' : 'Собственный календарь автосалона'}
@@ -523,8 +523,8 @@ export const YearCalendar = forwardRef<YearCalendarRef, YearCalendarProps>(({
       </div>
 
       {/* Help text */}
-      <div className="text-sm text-gray-500 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-        <p className="font-medium text-blue-800 dark:text-blue-300 mb-1">💡 Подсказка</p>
+      <div className="text-sm text-gray-500 dark:text-gray-400 bg-accent-50 dark:bg-gray-700/50 rounded-lg p-4">
+        <p className="font-medium text-accent-800 dark:text-accent-300 mb-1">💡 Подсказка</p>
         <p>
           Кликните на любой день, чтобы переключить его между рабочим и выходным.
           В выходные дни задачи генераторов создаваться не будут.

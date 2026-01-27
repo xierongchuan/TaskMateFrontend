@@ -8,7 +8,7 @@ export interface TagProps {
 }
 
 export const Tag: React.FC<TagProps> = ({ label, className = '', size = 'sm' }) => {
-  const baseClasses = 'inline-flex items-center rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300';
+  const baseClasses = 'inline-flex items-center rounded bg-accent-100 text-accent-700 dark:bg-gray-700 dark:text-accent-300';
 
   const sizeClasses = {
     sm: 'px-1.5 py-0.5 text-xs',

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useShiftConfig, useNotificationConfig, useArchiveConfig, useUpdateShiftConfig, useUpdateNotificationConfig, useUpdateArchiveConfig, useDealershipSettings, useTaskConfig, useUpdateTaskConfig, useSetting, useUpdateSetting, useUpdateSettingByKey } from '../hooks/useSettings';
 import { useDealership, useUpdateDealership } from '../hooks/useDealerships';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme, ACCENT_COLOR_OPTIONS } from '../context/ThemeContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { useWorkspace } from '../hooks/useWorkspace';
 import { YearCalendar, type YearCalendarRef } from '../components/settings/YearCalendar';
@@ -44,7 +44,10 @@ import { ConfirmDialog } from '../components/ui';
 
 export const SettingsPage: React.FC = () => {
   const permissions = usePermissions();
-  const { pendingTheme, setTheme, applyTheme, hasPendingChanges: themeHasPendingChanges } = useTheme();
+  const {
+    pendingTheme, setTheme, applyTheme, hasPendingChanges: themeHasPendingChanges,
+    pendingAccentColor, setAccentColor, applyAccentColor, hasAccentPendingChanges
+  } = useTheme();
   const { dealershipId: workspaceDealershipId } = useWorkspace();
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'general' | 'interface' | 'tasks' | 'calendar' | 'shifts' | 'notifications' | 'maintenance'>('general');
@@ -196,7 +199,7 @@ export const SettingsPage: React.FC = () => {
       case 'shifts':
         return originalShiftConfig !== null && JSON.stringify(shiftConfig) !== JSON.stringify(originalShiftConfig);
       case 'interface':
-        return themeHasPendingChanges || (originalNotificationConfig !== null && JSON.stringify(notificationConfig) !== JSON.stringify(originalNotificationConfig));
+        return themeHasPendingChanges || hasAccentPendingChanges || (originalNotificationConfig !== null && JSON.stringify(notificationConfig) !== JSON.stringify(originalNotificationConfig));
       case 'general':
         return (originalNotificationConfig !== null && JSON.stringify(notificationConfig) !== JSON.stringify(originalNotificationConfig)) ||
                (selectedDealershipId && originalDealershipTimezone !== null && dealershipTimezone !== originalDealershipTimezone) ||
@@ -215,7 +218,7 @@ export const SettingsPage: React.FC = () => {
     }
   }, [activeTab, shiftConfig, originalShiftConfig, notificationConfig, originalNotificationConfig,
       taskConfig, originalTaskConfig, archiveConfig, originalArchiveConfig,
-      maintenanceMode, originalMaintenanceMode, calendarHasPendingChanges, themeHasPendingChanges,
+      maintenanceMode, originalMaintenanceMode, calendarHasPendingChanges, themeHasPendingChanges, hasAccentPendingChanges,
       dealershipTimezone, originalDealershipTimezone, globalTimezone, originalGlobalTimezone, selectedDealershipId]);
 
   // Хук для предупреждения о несохранённых изменениях
@@ -254,6 +257,7 @@ export const SettingsPage: React.FC = () => {
       });
     } else if (activeTab === 'interface') {
       applyTheme();
+      applyAccentColor();
       updateNotificationConfigMutation.mutate({
         rows_per_page: notificationConfig.rows_per_page,
         dealership_id: selectedDealershipId,
@@ -402,11 +406,11 @@ export const SettingsPage: React.FC = () => {
                   key={tab.id}
                   onClick={() => handleTabChange(tab.id as typeof activeTab)}
                   className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all ${activeTab === tab.id
-                    ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700'
+                    ? 'bg-white dark:bg-gray-800 text-accent-600 dark:text-accent-400 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700'
                     : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200'
                     }`}
                 >
-                  <tab.icon className={`w-5 h-5 mr-3 ${activeTab === tab.id ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500'}`} />
+                  <tab.icon className={`w-5 h-5 mr-3 ${activeTab === tab.id ? 'text-accent-500' : 'text-gray-400 dark:text-gray-500'}`} />
                   {tab.name}
                 </button>
               ))}
@@ -440,7 +444,7 @@ export const SettingsPage: React.FC = () => {
                             <div>
                               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Текущая конфигурация</label>
                               <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600 flex items-center">
-                                <div className={`w-2 h-2 rounded-full mr-2 ${selectedDealershipId ? 'bg-green-500' : 'bg-blue-500'}`}></div>
+                                <div className={`w-2 h-2 rounded-full mr-2 ${selectedDealershipId ? 'bg-green-500' : 'bg-accent-500'}`}></div>
                                 <span className="text-sm text-gray-700 dark:text-gray-300">
                                   {selectedDealershipId
                                     ? 'Настройки конкретного дилерского центра'
@@ -502,18 +506,55 @@ export const SettingsPage: React.FC = () => {
                                     { value: 'light', label: 'Светлая', icon: SunIcon },
                                     { value: 'dark', label: 'Темная', icon: MoonIcon },
                                     { value: 'system', label: 'Системная', icon: ComputerDesktopIcon },
-                                  ].map((theme) => (
+                                  ].map((themeOption) => (
                                     <button
-                                      key={theme.value}
+                                      key={themeOption.value}
                                       type="button"
-                                      onClick={() => setTheme(theme.value as 'light' | 'dark' | 'system')}
-                                      className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border font-medium transition-all ${pendingTheme === theme.value
-                                        ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/30 dark:border-blue-500 dark:text-blue-400'
+                                      onClick={() => setTheme(themeOption.value as 'light' | 'dark' | 'system')}
+                                      className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border font-medium transition-all ${pendingTheme === themeOption.value
+                                        ? 'bg-accent-50 border-accent-500 text-accent-700 dark:bg-gray-700 dark:border-accent-500 dark:text-accent-400'
                                         : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-750'
                                         }`}
                                     >
-                                      <theme.icon className="w-5 h-5" />
-                                      <span>{theme.label}</span>
+                                      <themeOption.icon className="w-5 h-5" />
+                                      <span>{themeOption.label}</span>
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          </Card.Body>
+                        </Card>
+
+                        {/* Accent Color */}
+                        <Card>
+                          <Card.Body>
+                            <div className="flex items-start">
+                              <SwatchIcon className="w-6 h-6 text-accent-500 mr-4 mt-1" />
+                              <div className="w-full">
+                                <label className="block text-base font-medium text-gray-900 dark:text-white mb-1">Акцентный цвет</label>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Выберите основной цвет интерфейса</p>
+
+                                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                                  {ACCENT_COLOR_OPTIONS.map((option) => (
+                                    <button
+                                      key={option.value}
+                                      type="button"
+                                      onClick={() => setAccentColor(option.value)}
+                                      className={`flex flex-col items-center gap-2 p-3 rounded-lg border transition-all ${
+                                        pendingAccentColor === option.value
+                                          ? 'border-accent-500 ring-2 ring-accent-500/20 bg-accent-50 dark:bg-gray-700'
+                                          : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:bg-gray-750'
+                                      }`}
+                                    >
+                                      <div className={`w-8 h-8 rounded-full ${option.colorClass}`} />
+                                      <span className={`text-sm font-medium ${
+                                        pendingAccentColor === option.value
+                                          ? 'text-accent-700 dark:text-accent-400'
+                                          : 'text-gray-700 dark:text-gray-300'
+                                      }`}>
+                                        {option.label}
+                                      </span>
                                     </button>
                                   ))}
                                 </div>
@@ -526,12 +567,12 @@ export const SettingsPage: React.FC = () => {
                         <Card>
                           <Card.Body>
                             <div className="flex items-start">
-                              <ClipboardDocumentListIcon className="w-6 h-6 text-blue-500 mr-4 mt-1" />
+                              <ClipboardDocumentListIcon className="w-6 h-6 text-accent-500 mr-4 mt-1" />
                               <div className="flex-1">
                                 <label className="block text-base font-medium text-gray-900 dark:text-white mb-1">Пагинация (Строк на странице)</label>
                                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                                   Количество элементов, отображаемых в таблицах.
-                                  <span className="ml-2 text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-1 rounded">Глобальная настройка</span>
+                                  <span className="ml-2 text-xs text-accent-600 dark:text-accent-400 bg-accent-50 dark:bg-gray-700 px-1 rounded">Глобальная настройка</span>
                                 </p>
 
                                 <div className="flex items-center gap-4">
@@ -568,7 +609,7 @@ export const SettingsPage: React.FC = () => {
                         <Card>
                           <Card.Body>
                             <h4 className="font-medium text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                              <ClockIcon className="w-5 h-5 text-blue-500" />
+                              <ClockIcon className="w-5 h-5 text-accent-500" />
                               Связь со сменами
                             </h4>
                             <Checkbox
@@ -680,7 +721,7 @@ export const SettingsPage: React.FC = () => {
                       <Card>
                         <Card.Body>
                           <h4 className="font-medium text-gray-900 dark:text-white mb-4 pb-2 border-b border-gray-100 dark:border-gray-700 flex items-center">
-                            <span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-300 flex items-center justify-center text-xs mr-2">1</span>
+                            <span className="w-6 h-6 rounded-full bg-accent-100 dark:bg-accent-900/50 text-accent-600 dark:text-accent-300 flex items-center justify-center text-xs mr-2">1</span>
                             Первая смена
                           </h4>
                           <div className="grid grid-cols-2 gap-4">
@@ -822,7 +863,7 @@ export const SettingsPage: React.FC = () => {
                             { key: 'task_completed', label: 'Завершение задач', desc: 'Сотрудник выполнил задачу' },
                             { key: 'system_errors', label: 'Системные ошибки', desc: 'Сбои в работе оборудования или API' },
                           ].map((item) => (
-                            <Card key={item.key} className="hover:border-blue-300 dark:hover:border-blue-500 transition-colors cursor-pointer">
+                            <Card key={item.key} className="hover:border-accent-300 dark:hover:border-accent-500 transition-colors cursor-pointer">
                               <Card.Body>
                                 <div className="flex items-center justify-between">
                                   <div>
@@ -861,14 +902,14 @@ export const SettingsPage: React.FC = () => {
                     <div>
                       <div className="flex items-center gap-3 mb-4">
                         <h2 className="text-xl font-semibold text-red-700 dark:text-red-400">Опасная зона</h2>
-                        <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-700">
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-accent-100 dark:bg-gray-700 text-accent-800 dark:text-accent-300 border border-accent-200 dark:border-gray-600">
                           Глобально
                         </span>
                       </div>
 
                       {/* Информационное сообщение */}
-                      <div className="mb-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                        <p className="text-sm text-blue-800 dark:text-blue-300">
+                      <div className="mb-6 bg-accent-50 dark:bg-gray-700/50 border border-accent-200 dark:border-gray-600 rounded-lg p-4">
+                        <p className="text-sm text-accent-800 dark:text-accent-300">
                           <strong>Внимание:</strong> Все настройки на этой странице применяются глобально ко всей системе,
                           независимо от выбранного дилерского центра.
                         </p>

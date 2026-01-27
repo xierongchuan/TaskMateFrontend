@@ -238,10 +238,17 @@ export const TasksPage: React.FC = () => {
 
   const approveResponseMutation = useMutation({
     mutationFn: (responseId: number) => tasksApi.approveTaskResponse(responseId),
-    onSuccess: () => {
+    onSuccess: (result) => {
       showToast({ type: 'success', message: 'Доказательство одобрено' });
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      // Обновить selectedTask напрямую из ответа API (избегаем stale closure)
+      setSelectedTask((current) => {
+        if (current && result.data && result.data.id === current.id) {
+          return result.data;
+        }
+        return current;
+      });
     },
     onError: (error: unknown) => {
       const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Ошибка при одобрении';
@@ -252,10 +259,17 @@ export const TasksPage: React.FC = () => {
   const rejectResponseMutation = useMutation({
     mutationFn: ({ responseId, reason }: { responseId: number; reason: string }) =>
       tasksApi.rejectTaskResponse(responseId, reason),
-    onSuccess: () => {
+    onSuccess: (result) => {
       showToast({ type: 'success', message: 'Доказательство отклонено' });
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      // Обновить selectedTask напрямую из ответа API (избегаем stale closure)
+      setSelectedTask((current) => {
+        if (current && result.data && result.data.id === current.id) {
+          return result.data;
+        }
+        return current;
+      });
     },
     onError: (error: unknown) => {
       const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Ошибка при отклонении';
@@ -624,7 +638,7 @@ export const TasksPage: React.FC = () => {
                       <div className="flex-1 min-w-0 pr-4">
                         <div className="flex items-center gap-3 mb-2 flex-wrap">
                           <h3
-                            className="text-lg font-semibold text-gray-900 dark:text-white truncate cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                            className="text-lg font-semibold text-gray-900 dark:text-white truncate cursor-pointer hover:text-accent-600 dark:hover:text-accent-400 transition-colors"
                             onClick={() => handleView(task)}
                           >
                             {task.title}
@@ -730,7 +744,7 @@ export const TasksPage: React.FC = () => {
                 <div key={task.id} className={`p-6 ${getTaskCardClass(task)}`}>
                   <div className="flex items-start justify-between mb-3">
                     <h3
-                      className="text-lg font-semibold text-gray-900 dark:text-white truncate pr-2 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                      className="text-lg font-semibold text-gray-900 dark:text-white truncate pr-2 cursor-pointer hover:text-accent-600 dark:hover:text-accent-400 transition-colors"
                       onClick={() => handleView(task)}
                     >
                       {task.title}
@@ -842,15 +856,9 @@ export const TasksPage: React.FC = () => {
         onRejectResponse={handleRejectResponse}
         onDeleteProof={handleDeleteProof}
         onDeleteSharedProof={handleDeleteSharedProof}
-        onVerificationComplete={async () => {
-          // Обновить selectedTask из свежих данных
-          const freshData = await refetch();
-          if (selectedTask && freshData.data?.data) {
-            const updated = freshData.data.data.find(t => t.id === selectedTask.id);
-            if (updated) {
-              setSelectedTask(updated);
-            }
-          }
+        onVerificationComplete={() => {
+          // Данные уже обновлены в onSuccess мутации
+          // Этот callback оставлен для совместимости с TaskDetailsModal
         }}
         isVerifying={approveResponseMutation.isPending || rejectResponseMutation.isPending}
       />
@@ -897,7 +905,7 @@ export const TasksPage: React.FC = () => {
               </div>
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                 <div
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  className="bg-accent-600 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>

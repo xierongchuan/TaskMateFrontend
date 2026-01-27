@@ -162,7 +162,7 @@ export const MultiFileUpload: React.FC<MultiFileUploadProps> = ({
         className={`
           relative border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors
           ${dragActive
-            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+            ? 'border-accent-500 bg-accent-50 dark:bg-gray-700'
             : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
           }
           ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
@@ -200,7 +200,7 @@ export const MultiFileUpload: React.FC<MultiFileUploadProps> = ({
         </svg>
 
         <div className="mt-4">
-          <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
+          <span className="text-sm font-medium text-accent-600 dark:text-accent-400">
             Нажмите для выбора
           </span>
           <span className="text-sm text-gray-500 dark:text-gray-400">
@@ -313,8 +313,8 @@ const FileIcon: React.FC<{ mimeType: string }> = ({ mimeType }) => {
 
   // Default document icon
   return (
-    <div className={`${baseClass} bg-blue-100 dark:bg-blue-900/30 rounded p-1.5`}>
-      <svg className="w-full h-full text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div className={`${baseClass} bg-accent-100 dark:bg-gray-700 rounded p-1.5`}>
+      <svg className="w-full h-full text-accent-600 dark:text-accent-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
       </svg>
     </div>

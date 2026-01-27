@@ -77,7 +77,7 @@ export const IssueDetailsModal: React.FC<IssueDetailsModalProps> = ({
   const getItemIcon = (type: string) => {
     switch (type) {
       case 'task':
-        return <ClipboardDocumentListIcon className="w-5 h-5 text-blue-500" />;
+        return <ClipboardDocumentListIcon className="w-5 h-5 text-accent-500" />;
       case 'shift':
         return <ClockIcon className="w-5 h-5 text-yellow-500" />;
       case 'user':

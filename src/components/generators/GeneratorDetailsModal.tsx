@@ -232,7 +232,7 @@ export const GeneratorDetailsModal: React.FC<GeneratorDetailsModalProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {generator.assignments.map((assignment) => (
                 <div key={assignment.id} className="flex items-center p-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700">
-                  <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400 text-xs font-semibold mr-3">
+                  <div className="h-8 w-8 rounded-full bg-accent-100 dark:bg-gray-700 flex items-center justify-center text-accent-600 dark:text-accent-400 text-xs font-semibold mr-3">
                     {assignment.user.full_name.charAt(0)}
                   </div>
                   <span className="text-sm text-gray-900 dark:text-white font-medium">{assignment.user.full_name}</span>

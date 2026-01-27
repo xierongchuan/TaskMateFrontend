@@ -16,10 +16,10 @@ const variantClasses: Record<BadgeVariant, string> = {
   success: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
   warning: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
   danger: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
-  info: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+  info: 'bg-accent-100 text-accent-800 dark:bg-accent-900/30 dark:text-accent-300',
   purple: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
   gray: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
-  blue: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+  blue: 'bg-accent-100 text-accent-800 dark:bg-accent-900/30 dark:text-accent-300',
   orange: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
 };
 
@@ -27,10 +27,10 @@ const borderClasses: Record<BadgeVariant, string> = {
   success: 'border-green-200 dark:border-green-700',
   warning: 'border-yellow-200 dark:border-yellow-700',
   danger: 'border-red-200 dark:border-red-700',
-  info: 'border-blue-200 dark:border-blue-700',
+  info: 'border-accent-200 dark:border-accent-700',
   purple: 'border-purple-200 dark:border-purple-700',
   gray: 'border-gray-200 dark:border-gray-600',
-  blue: 'border-blue-200 dark:border-blue-700',
+  blue: 'border-accent-200 dark:border-accent-700',
   orange: 'border-orange-200 dark:border-orange-700',
 };
 

@@ -390,7 +390,7 @@ export const TaskGeneratorsPage: React.FC = () => {
                             {generator.assignments.slice(0, 5).map((assignment) => (
                               <span
                                 key={assignment.id}
-                                className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                                className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-accent-100 text-accent-800 dark:bg-gray-700 dark:text-accent-300"
                               >
                                 <UserIcon className="w-3 h-3 mr-1" />
                                 {assignment.user?.full_name}
@@ -499,7 +499,7 @@ export const TaskGeneratorsPage: React.FC = () => {
                               e.stopPropagation();
                               handleEdit(generator);
                             }}
-                            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                            className="p-1.5 text-gray-400 hover:text-accent-600 hover:bg-accent-50 dark:hover:bg-accent-900/20 rounded-lg transition-colors"
                             title="Редактировать"
                           >
                             <PencilIcon className="w-5 h-5" />

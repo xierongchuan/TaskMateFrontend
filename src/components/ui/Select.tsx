@@ -60,7 +60,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({
 }, ref) => {
   const selectId = id || `select-${Math.random().toString(36).substr(2, 9)}`;
 
-  const baseClasses = 'block rounded-lg border shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed';
+  const baseClasses = 'block rounded-lg border shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500 disabled:opacity-50 disabled:cursor-not-allowed';
 
   const stateClasses = error
     ? 'border-red-300 dark:border-red-600 focus:ring-red-500 focus:border-red-500'

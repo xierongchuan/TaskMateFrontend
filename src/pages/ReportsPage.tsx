@@ -187,7 +187,7 @@ export const ReportsPage: React.FC = () => {
                     type="date"
                     value={dateRange.from}
                     onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
-                    className="w-full sm:w-auto px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full sm:w-auto px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-base focus:ring-2 focus:ring-accent-500 focus:border-accent-500 min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                   <span className="text-gray-500 dark:text-gray-400 text-center sm:text-left hidden sm:block">—</span>
                   <div className="text-center sm:hidden text-gray-500 dark:text-gray-400 text-sm mb-1">до</div>
@@ -195,7 +195,7 @@ export const ReportsPage: React.FC = () => {
                     type="date"
                     value={dateRange.to}
                     onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
-                    className="w-full sm:w-auto px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full sm:w-auto px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-base focus:ring-2 focus:ring-accent-500 focus:border-accent-500 min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
               </div>
@@ -218,8 +218,8 @@ export const ReportsPage: React.FC = () => {
             <Card>
               <Card.Body>
                 <div className="flex items-center">
-                  <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                    <DocumentTextIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                  <div className="p-3 bg-accent-100 dark:bg-gray-700 rounded-lg">
+                    <DocumentTextIcon className="w-6 h-6 text-accent-600 dark:text-accent-400" />
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Всего задач</p>

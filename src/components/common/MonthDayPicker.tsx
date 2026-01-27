@@ -80,7 +80,7 @@ export const MonthDayPicker: React.FC<MonthDayPickerProps> = ({
               ${value.includes(day)
                 ? isWarningDay(day)
                   ? 'bg-orange-500 text-white shadow-sm'
-                  : 'bg-blue-600 text-white shadow-sm'
+                  : 'bg-accent-600 text-white shadow-sm'
                 : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
               }
               ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}

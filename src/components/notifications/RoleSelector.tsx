@@ -10,11 +10,11 @@ const AVAILABLE_ROLES = [
   {
     value: 'employee',
     label: 'Сотрудники',
-    lightBg: 'bg-blue-100',
-    lightText: 'text-blue-800',
-    darkBg: 'dark:bg-blue-900/40',
-    darkText: 'dark:text-blue-300',
-    ring: 'ring-blue-500',
+    lightBg: 'bg-accent-100',
+    lightText: 'text-accent-800',
+    darkBg: 'dark:bg-gray-700',
+    darkText: 'dark:text-accent-300',
+    ring: 'ring-accent-500',
   },
   {
     value: 'manager',
@@ -75,7 +75,7 @@ export const RoleSelector: React.FC<RoleSelectorProps> = ({ value = [], onChange
             type="button"
             onClick={handleSelectAll}
             disabled={disabled || value.length === AVAILABLE_ROLES.length}
-            className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 disabled:text-gray-400 dark:disabled:text-gray-600 disabled:cursor-not-allowed transition-colors"
+            className="text-xs font-medium text-accent-600 dark:text-accent-400 hover:text-accent-800 dark:hover:text-accent-300 disabled:text-gray-400 dark:disabled:text-gray-600 disabled:cursor-not-allowed transition-colors"
           >
             Выбрать все
           </button>
@@ -84,7 +84,7 @@ export const RoleSelector: React.FC<RoleSelectorProps> = ({ value = [], onChange
             type="button"
             onClick={handleClearAll}
             disabled={disabled || value.length === 0}
-            className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 disabled:text-gray-400 dark:disabled:text-gray-600 disabled:cursor-not-allowed transition-colors"
+            className="text-xs font-medium text-accent-600 dark:text-accent-400 hover:text-accent-800 dark:hover:text-accent-300 disabled:text-gray-400 dark:disabled:text-gray-600 disabled:cursor-not-allowed transition-colors"
           >
             Сбросить
           </button>
@@ -104,7 +104,7 @@ export const RoleSelector: React.FC<RoleSelectorProps> = ({ value = [], onChange
                 px-3 py-1.5 rounded-full text-xs font-medium transition-all
                 ${isSelected
                   ? `${role.lightBg} ${role.lightText} ${role.darkBg} ${role.darkText} ring-2 ring-offset-2 dark:ring-offset-gray-800 ${role.ring}`
-                  : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-gray-50 dark:hover:bg-gray-600'
+                  : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:border-accent-400 dark:hover:border-accent-500 hover:bg-gray-50 dark:hover:bg-gray-600'
                 }
                 disabled:opacity-50 disabled:cursor-not-allowed
               `}

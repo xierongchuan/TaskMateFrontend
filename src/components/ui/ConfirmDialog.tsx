@@ -25,20 +25,20 @@ const variantConfig: Record<ConfirmDialogVariant, {
 }> = {
   danger: {
     icon: TrashIcon,
-    iconBg: 'bg-red-100 dark:bg-red-900/30',
+    iconBg: 'bg-red-100 dark:bg-gray-700',
     iconColor: 'text-red-600 dark:text-red-400',
     confirmVariant: 'danger',
   },
   warning: {
     icon: ExclamationTriangleIcon,
-    iconBg: 'bg-yellow-100 dark:bg-yellow-900/30',
+    iconBg: 'bg-yellow-100 dark:bg-gray-700',
     iconColor: 'text-yellow-600 dark:text-yellow-400',
     confirmVariant: 'primary',
   },
   info: {
     icon: QuestionMarkCircleIcon,
-    iconBg: 'bg-blue-100 dark:bg-blue-900/30',
-    iconColor: 'text-blue-600 dark:text-blue-400',
+    iconBg: 'bg-accent-100 dark:bg-gray-700',
+    iconColor: 'text-accent-600 dark:text-accent-400',
     confirmVariant: 'primary',
   },
 };

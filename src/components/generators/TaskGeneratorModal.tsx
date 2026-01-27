@@ -293,7 +293,7 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
                     required
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-accent-500 focus:ring-accent-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     placeholder="Название генератора"
                   />
                 </div>
@@ -305,7 +305,7 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
                     rows={3}
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-accent-500 focus:ring-accent-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     placeholder="Описание задачи"
                   />
                 </div>
@@ -317,7 +317,7 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
                     value={formData.dealership_id}
                     onChange={(id) => setFormData({ ...formData, dealership_id: id, assignments: [] })}
                     showAllOption={false}
-                    className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-accent-500 focus:ring-accent-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
 
@@ -328,7 +328,7 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
                     <select
                       value={formData.recurrence}
                       onChange={(e) => setFormData({ ...formData, recurrence: e.target.value as GeneratorRecurrence })}
-                      className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-accent-500 focus:ring-accent-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     >
                       <option value="daily">Ежедневно</option>
                       <option value="weekly">Еженедельно</option>
@@ -365,7 +365,7 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
                       type="time"
                       value={formData.recurrence_time}
                       onChange={(e) => setFormData({ ...formData, recurrence_time: e.target.value })}
-                      className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-accent-500 focus:ring-accent-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
                   </div>
                   <div>
@@ -374,7 +374,7 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
                       type="time"
                       value={formData.deadline_time}
                       onChange={(e) => setFormData({ ...formData, deadline_time: e.target.value })}
-                      className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-accent-500 focus:ring-accent-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
                   </div>
                 </div>
@@ -404,7 +404,7 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
                       required
                       value={formData.start_date}
                       onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                      className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-accent-500 focus:ring-accent-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
                   </div>
                   <div>
@@ -413,7 +413,7 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
                       type="date"
                       value={formData.end_date}
                       onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                      className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-accent-500 focus:ring-accent-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Оставьте пустым для бессрочного</p>
                   </div>
@@ -426,7 +426,7 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
                     <select
                       value={formData.task_type}
                       disabled
-                      className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white opacity-75 cursor-not-allowed"
+                      className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-accent-500 focus:ring-accent-500 sm:text-sm px-3 py-2 border bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white opacity-75 cursor-not-allowed"
                     >
                       <option value="individual">Индивидуальная</option>
                       <option value="group">Групповая</option>
@@ -438,7 +438,7 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
                     <select
                       value={formData.response_type}
                       onChange={(e) => setFormData({ ...formData, response_type: e.target.value as 'acknowledge' | 'complete' })}
-                      className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-accent-500 focus:ring-accent-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     >
                       <option value="acknowledge">Уведомление</option>
                       <option value="complete">Выполнение</option>
@@ -449,7 +449,7 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
                     <select
                       value={formData.priority}
                       onChange={(e) => setFormData({ ...formData, priority: e.target.value as 'low' | 'medium' | 'high' })}
-                      className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-accent-500 focus:ring-accent-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     >
                       <option value="low">Низкий</option>
                       <option value="medium">Средний</option>
@@ -465,7 +465,7 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
                     type="text"
                     value={formData.tags}
                     onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                    className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-accent-500 focus:ring-accent-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     placeholder="тег1, тег2, тег3"
                   />
                 </div>
@@ -503,7 +503,7 @@ export const TaskGeneratorModal: React.FC<TaskGeneratorModalProps> = ({
               <button
                 type="submit"
                 disabled={isPending || !formData.dealership_id || formData.assignments.length === 0}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                className="px-4 py-2 text-sm font-medium text-white bg-accent-600 border border-transparent rounded-lg hover:bg-accent-700 disabled:opacity-50"
               >
                 {isPending ? 'Сохранение...' : isEditing ? 'Сохранить' : 'Создать'}
               </button>

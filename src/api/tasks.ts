@@ -22,6 +22,11 @@ export interface MyHistoryFilters {
   page?: number;
 }
 
+export interface TaskApiResponse {
+  message: string;
+  data: Task;
+}
+
 export const tasksApi = {
   getTasks: async (filters?: TasksFilters): Promise<PaginatedResponse<Task>> => {
     const response = await apiClient.get<PaginatedResponse<Task>>('/tasks', {
@@ -98,24 +103,24 @@ export const tasksApi = {
   /**
    * Approve a task response (manager/owner only)
    */
-  approveTaskResponse: async (taskResponseId: number): Promise<Task> => {
-    const response = await apiClient.post<Task>(`/task-responses/${taskResponseId}/approve`);
+  approveTaskResponse: async (taskResponseId: number): Promise<TaskApiResponse> => {
+    const response = await apiClient.post<TaskApiResponse>(`/task-responses/${taskResponseId}/approve`);
     return response.data;
   },
 
   /**
    * Reject a task response with reason (manager/owner only)
    */
-  rejectTaskResponse: async (taskResponseId: number, reason: string): Promise<Task> => {
-    const response = await apiClient.post<Task>(`/task-responses/${taskResponseId}/reject`, { reason });
+  rejectTaskResponse: async (taskResponseId: number, reason: string): Promise<TaskApiResponse> => {
+    const response = await apiClient.post<TaskApiResponse>(`/task-responses/${taskResponseId}/reject`, { reason });
     return response.data;
   },
 
   /**
    * Reject all pending_review responses for a task at once (manager/owner only)
    */
-  rejectAllTaskResponses: async (taskId: number, reason: string): Promise<Task> => {
-    const response = await apiClient.post<Task>(`/tasks/${taskId}/reject-all-responses`, { reason });
+  rejectAllTaskResponses: async (taskId: number, reason: string): Promise<TaskApiResponse> => {
+    const response = await apiClient.post<TaskApiResponse>(`/tasks/${taskId}/reject-all-responses`, { reason });
     return response.data;
   },
 

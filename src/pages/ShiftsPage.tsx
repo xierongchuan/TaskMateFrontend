@@ -80,7 +80,7 @@ export const ShiftsPage: React.FC = () => {
     switch (type) {
       case 'regular':
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-accent-100 text-accent-800 dark:bg-gray-700 dark:text-accent-300">
             <BriefcaseIcon className="w-3 h-3 mr-1" />
             Обычная
           </span>
@@ -146,7 +146,7 @@ export const ShiftsPage: React.FC = () => {
             >
               <div className="p-4 flex items-center space-x-3">
                 <div className="flex-shrink-0">
-                  <div className="h-10 w-10 rounded-full bg-indigo-50 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                  <div className="h-10 w-10 rounded-full bg-accent-50 dark:bg-accent-900/50 flex items-center justify-center text-accent-600 dark:text-accent-400">
                     <BriefcaseIcon className="h-6 w-6" />
                   </div>
                 </div>
