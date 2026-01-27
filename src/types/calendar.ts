@@ -9,6 +9,7 @@ export interface CalendarDay {
 export interface YearCalendarResponse {
   year: number;
   dealership_id: number | null;
+  uses_global: boolean;
   months: Record<number, CalendarDay[]>; // { 1: [...], 2: [...], ... }
   holidays_count: number;
 }
@@ -16,6 +17,7 @@ export interface YearCalendarResponse {
 export interface HolidaysResponse {
   year: number;
   dealership_id: number | null;
+  uses_global: boolean;
   dates: string[];
   count: number;
 }
@@ -48,4 +50,11 @@ export interface BulkCalendarResponse {
   year: number;
   dealership_id: number | null;
   affected_count: number;
+  uses_global: boolean;
+}
+
+export interface ResetCalendarResponse {
+  year: number;
+  dealership_id: number;
+  deleted_count: number;
 }

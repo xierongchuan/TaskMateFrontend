@@ -6,7 +6,8 @@ import {
   ArrowPathIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline';
-import { useHolidays, useBulkCalendarUpdate } from '../../hooks/useCalendar';
+import { useHolidays, useBulkCalendarUpdate, useResetCalendarToGlobal } from '../../hooks/useCalendar';
+import { GlobeAltIcon, BuildingStorefrontIcon } from '@heroicons/react/24/outline';
 import { Button, ConfirmDialog } from '../ui';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import { getDaysInMonth, getFirstDayOfMonth } from '../../utils/dateTime';
@@ -158,6 +159,10 @@ export const YearCalendar = forwardRef<YearCalendarRef, YearCalendarProps>(({
   const { data: holidaysData, isLoading, refetch } = useHolidays(year, dealershipId);
 
   const bulkUpdateMutation = useBulkCalendarUpdate();
+  const resetMutation = useResetCalendarToGlobal();
+
+  // Получаем флаг uses_global из ответа API
+  const usesGlobal = holidaysData?.data?.uses_global ?? true;
 
   // Локальное состояние для несохранённых изменений
   const [pendingChanges, setPendingChanges] = useState<Map<string, 'holiday' | 'workday'>>(new Map());
@@ -317,7 +322,28 @@ export const YearCalendar = forwardRef<YearCalendarRef, YearCalendarProps>(({
     });
   };
 
-  const isMutating = bulkUpdateMutation.isPending;
+  const handleResetToGlobal = async () => {
+    if (!dealershipId) return;
+
+    const confirmed = await showConfirm({
+      title: 'Сбросить к глобальному календарю',
+      message: `Вы уверены? Все настройки выходных дней за ${year} год для этого автосалона будут удалены. Будет использоваться глобальный календарь.`,
+      confirmText: 'Сбросить',
+      cancelText: 'Отмена',
+      variant: 'danger',
+    });
+
+    if (confirmed) {
+      try {
+        await resetMutation.mutateAsync({ year, dealershipId });
+        setPendingChanges(new Map());
+      } catch {
+        // Ошибку обработает родительский компонент через onError
+      }
+    }
+  };
+
+  const isMutating = bulkUpdateMutation.isPending || resetMutation.isPending;
 
   return (
     <div className="space-y-6">
@@ -359,6 +385,53 @@ export const YearCalendar = forwardRef<YearCalendarRef, YearCalendarProps>(({
           </Button>
         </div>
       </div>
+
+      {/* Calendar type indicator - только для автосалона */}
+      {dealershipId && (
+        <div className={`flex items-center justify-between p-3 rounded-lg border ${
+          usesGlobal
+            ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+            : 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+        }`}>
+          <div className="flex items-center gap-2">
+            {usesGlobal ? (
+              <GlobeAltIcon className="w-5 h-5 text-blue-500" />
+            ) : (
+              <BuildingStorefrontIcon className="w-5 h-5 text-green-500" />
+            )}
+            <span className={`text-sm font-medium ${
+              usesGlobal
+                ? 'text-blue-700 dark:text-blue-300'
+                : 'text-green-700 dark:text-green-300'
+            }`}>
+              {usesGlobal ? 'Глобальный календарь' : 'Собственный календарь автосалона'}
+            </span>
+          </div>
+          {!usesGlobal && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleResetToGlobal}
+              disabled={isMutating}
+              className="text-red-600 hover:text-red-700 dark:text-red-400"
+            >
+              Сбросить к глобальному
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* Warning on first edit when using global calendar */}
+      {dealershipId && usesGlobal && hasPendingChanges && (
+        <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+          <p className="text-sm text-amber-700 dark:text-amber-300">
+            <strong>Внимание:</strong> При сохранении изменений будет создана копия глобального
+            календаря для этого автосалона. После этого изменения глобального календаря
+            не будут влиять на этот автосалон.
+          </p>
+        </div>
+      )}
 
       {/* Quick action buttons */}
       <div className="flex flex-wrap gap-2 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">

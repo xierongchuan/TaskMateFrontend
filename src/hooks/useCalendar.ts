@@ -113,3 +113,20 @@ export const useClearCalendarYear = () => {
     },
   });
 };
+
+/**
+ * Hook to reset dealership calendar to global
+ * Removes all dealership-specific records, returning to global calendar usage
+ */
+export const useResetCalendarToGlobal = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ year, dealershipId }: { year: number; dealershipId: number }) =>
+      calendarApi.resetToGlobal(year, dealershipId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['calendar'] });
+      queryClient.invalidateQueries({ queryKey: ['calendar-holidays'] });
+    },
+  });
+};

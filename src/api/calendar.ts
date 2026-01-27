@@ -7,6 +7,7 @@ import type {
   BulkCalendarRequest,
   BulkCalendarResponse,
   CalendarDay,
+  ResetCalendarResponse,
 } from '../types/calendar';
 
 interface ApiResponse<T> {
@@ -116,5 +117,18 @@ export const calendarApi = {
       year,
       dealership_id: dealershipId,
     });
+  },
+
+  /**
+   * Reset dealership calendar to global
+   * Deletes all dealership-specific records for the year,
+   * returning the dealership to using the global calendar.
+   */
+  resetToGlobal: async (year: number, dealershipId: number): Promise<ApiResponse<ResetCalendarResponse>> => {
+    const response = await apiClient.delete<ApiResponse<ResetCalendarResponse>>(
+      `/calendar/${year}/reset`,
+      { params: { dealership_id: dealershipId } }
+    );
+    return response.data;
   },
 };
