@@ -4,6 +4,7 @@ import type { User } from '../types/user';
 import { authApi } from '../api/auth';
 import { setAuthHelpers } from '../api/client';
 import { debugAuth } from '../utils/debug';
+import { useWorkspaceStore } from './workspaceStore';
 
 interface AuthState {
   user: User | null;
@@ -72,6 +73,8 @@ export const useAuthStore = create<AuthState>()(
             token: null,
             isAuthenticated: false,
           });
+          // Reset workspace state
+          useWorkspaceStore.getState().resetWorkspace();
           debugAuth.log('Auth state cleared, isAuthenticated:', false);
         }
       },

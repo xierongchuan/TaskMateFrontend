@@ -18,6 +18,7 @@ import {
   ClipboardDocumentCheckIcon,
 } from '@heroicons/react/24/outline';
 import { usePermissions } from '../hooks/usePermissions';
+import { useWorkspace } from '../hooks/useWorkspace';
 
 import type { Task } from '../types/task';
 
@@ -41,8 +42,8 @@ import { StatusBadge } from '../components/common';
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
   const permissions = usePermissions();
+  const { dealershipId: workspaceDealershipId } = useWorkspace();
   const navigate = useNavigate();
-  const [selectedDealership] = useState<number | undefined>(user?.dealership_id || undefined);
 
   // Modals state
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -50,8 +51,8 @@ export const DashboardPage: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const { data: dashboardData, isLoading, error, refetch } = useQuery({
-    queryKey: ['dashboard', selectedDealership],
-    queryFn: () => dashboardApi.getData(selectedDealership),
+    queryKey: ['dashboard', workspaceDealershipId],
+    queryFn: () => dashboardApi.getData(workspaceDealershipId ?? undefined),
     refetchInterval: 15000,
   });
 

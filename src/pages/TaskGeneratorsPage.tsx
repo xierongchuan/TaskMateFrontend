@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { taskGeneratorsApi } from '../api/taskGenerators';
 import { usePermissions } from '../hooks/usePermissions';
+import { useWorkspace } from '../hooks/useWorkspace';
 import { usePagination } from '../hooks/usePagination';
 import { useResponsiveViewMode } from '../hooks/useResponsiveViewMode';
 import { TaskGeneratorModal } from '../components/generators/TaskGeneratorModal';
 import { GeneratorDetailsModal } from '../components/generators/GeneratorDetailsModal';
-import { DealershipSelector } from '../components/common/DealershipSelector';
 import type { TaskGenerator, TaskGeneratorFilters } from '../types/taskGenerator';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -52,6 +52,7 @@ import {
 
 export const TaskGeneratorsPage: React.FC = () => {
   const permissions = usePermissions();
+  const { dealershipId: workspaceDealershipId } = useWorkspace();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
   const { limit } = usePagination();
@@ -67,17 +68,22 @@ export const TaskGeneratorsPage: React.FC = () => {
     search: '',
     is_active: undefined,
     recurrence: undefined,
-    dealership_id: undefined,
   });
 
   useEffect(() => {
     setPage(1);
-  }, [filters]);
+  }, [filters, workspaceDealershipId]);
 
   const { data: generatorsData, isLoading, error, refetch } = useQuery({
-    queryKey: ['task-generators', filters, page, limit],
+    queryKey: ['task-generators', filters, workspaceDealershipId, page, limit],
     queryFn: () => {
       const cleanedFilters: TaskGeneratorFilters = { page, per_page: limit };
+
+      // Добавляем фильтр по workspace
+      if (workspaceDealershipId) {
+        cleanedFilters.dealership_id = workspaceDealershipId;
+      }
+
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== '' && value !== null) {
           (cleanedFilters as Record<string, unknown>)[key] = value;
@@ -174,12 +180,11 @@ export const TaskGeneratorsPage: React.FC = () => {
       search: '',
       is_active: undefined,
       recurrence: undefined,
-      dealership_id: undefined,
     });
     setPage(1);
   };
 
-  const hasActiveFilters = filters.search || filters.is_active !== undefined || filters.recurrence || filters.dealership_id;
+  const hasActiveFilters = filters.search || filters.is_active !== undefined || filters.recurrence;
 
   const statusOptions = [
     { value: '', label: 'Все' },
@@ -297,16 +302,6 @@ export const TaskGeneratorsPage: React.FC = () => {
             onChange={(e) => setFilters(prev => ({ ...prev, recurrence: e.target.value as TaskGeneratorFilters['recurrence'] || undefined }))}
             options={recurrenceOptions}
           />
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Автосалон</label>
-            <DealershipSelector
-              value={filters.dealership_id || null}
-              onChange={(id) => setFilters(prev => ({ ...prev, dealership_id: id || undefined }))}
-              showAllOption
-              allOptionLabel="Все автосалоны"
-            />
-          </div>
         </FilterPanel.Grid>
       </FilterPanel>
 

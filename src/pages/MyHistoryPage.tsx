@@ -15,8 +15,8 @@ import {
 import type { Task, TaskResponse } from '../types/task';
 import { TaskDetailsModal } from '../components/tasks/TaskDetailsModal';
 import { ProofViewer } from '../components/tasks/ProofViewer';
-import { DealershipSelector } from '../components/common/DealershipSelector';
 import { usePermissions } from '../hooks/usePermissions';
+import { useWorkspace } from '../hooks/useWorkspace';
 
 import {
   Button,
@@ -76,17 +76,17 @@ const getResponseStatusInfo = (status?: string, rejectionReason?: string | null)
 
 export const MyHistoryPage: React.FC = () => {
   const permissions = usePermissions();
+  const { dealershipId: workspaceDealershipId } = useWorkspace();
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<string>('');
-  const [dealershipFilter, setDealershipFilter] = useState<number | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   const { data: historyData, isLoading, error, refetch } = useQuery({
-    queryKey: ['my-history', page, statusFilter, dealershipFilter],
+    queryKey: ['my-history', page, statusFilter, workspaceDealershipId],
     queryFn: () => tasksApi.getMyHistory({
       response_status: statusFilter || undefined,
-      dealership_id: dealershipFilter || undefined,
+      dealership_id: workspaceDealershipId || undefined,
       page,
       per_page: 15,
     }),
@@ -127,20 +127,6 @@ export const MyHistoryPage: React.FC = () => {
                   { value: 'pending_review', label: 'На проверке' },
                   { value: 'acknowledged', label: 'Подтверждено' },
                 ]}
-              />
-            </div>
-            <div className="w-full sm:w-64">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Автосалон
-              </label>
-              <DealershipSelector
-                value={dealershipFilter}
-                onChange={(id) => {
-                  setDealershipFilter(id);
-                  setPage(1);
-                }}
-                showAllOption
-                allOptionLabel="Все автосалоны"
               />
             </div>
             <div className="flex items-end">

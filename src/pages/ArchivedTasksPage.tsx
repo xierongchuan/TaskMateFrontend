@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { archivedTasksApi } from '../api/archivedTasks';
 import { usePermissions } from '../hooks/usePermissions';
+import { useWorkspace } from '../hooks/useWorkspace';
 import { useResponsiveViewMode } from '../hooks/useResponsiveViewMode';
 import { usePagination } from '../hooks/usePagination';
-import { DealershipSelector } from '../components/common/DealershipSelector';
 import type { ArchivedTask, ArchivedTaskFilters } from '../types/archivedTask';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -45,6 +45,7 @@ import {
 
 export const ArchivedTasksPage: React.FC = () => {
   const permissions = usePermissions();
+  const { dealershipId: workspaceDealershipId } = useWorkspace();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
   const { limit } = usePagination();
@@ -55,7 +56,6 @@ export const ArchivedTasksPage: React.FC = () => {
   const [filters, setFilters] = useState<ArchivedTaskFilters>({
     search: '',
     archive_reason: undefined,
-    dealership_id: undefined,
     date_from: '',
     date_to: '',
   });
@@ -65,9 +65,15 @@ export const ArchivedTasksPage: React.FC = () => {
   }, [filters]);
 
   const { data: tasksData, isLoading, error } = useQuery({
-    queryKey: ['archived-tasks', filters, page, limit],
+    queryKey: ['archived-tasks', filters, workspaceDealershipId, page, limit],
     queryFn: () => {
       const cleanedFilters: ArchivedTaskFilters = { page, per_page: limit };
+
+      // Добавляем фильтр по workspace
+      if (workspaceDealershipId) {
+        cleanedFilters.dealership_id = workspaceDealershipId;
+      }
+
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== '' && value !== null) {
           (cleanedFilters as Record<string, unknown>)[key] = value;
@@ -112,13 +118,12 @@ export const ArchivedTasksPage: React.FC = () => {
     setFilters({
       search: '',
       archive_reason: undefined,
-      dealership_id: undefined,
       date_from: '',
       date_to: '',
     });
   };
 
-  const hasActiveFilters = filters.search || filters.archive_reason || filters.dealership_id || filters.date_from || filters.date_to;
+  const hasActiveFilters = filters.search || filters.archive_reason || filters.date_from || filters.date_to;
 
   const reasonOptions = [
     { value: '', label: 'Все' },
@@ -184,7 +189,7 @@ export const ArchivedTasksPage: React.FC = () => {
         onClear={clearFilters}
         className="mb-6"
       >
-        <FilterPanel.Grid columns={5}>
+        <FilterPanel.Grid columns={4}>
           <Input
             label="Поиск"
             placeholder="Название..."
@@ -213,17 +218,6 @@ export const ArchivedTasksPage: React.FC = () => {
             value={filters.date_to || ''}
             onChange={(e) => setFilters({ ...filters, date_to: e.target.value })}
           />
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Автосалон</label>
-            <DealershipSelector
-              value={filters.dealership_id || null}
-              onChange={(dealershipId) => setFilters({ ...filters, dealership_id: dealershipId || undefined })}
-              showAllOption={true}
-              allOptionLabel="Все"
-              className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            />
-          </div>
         </FilterPanel.Grid>
       </FilterPanel>
 

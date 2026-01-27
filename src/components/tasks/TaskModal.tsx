@@ -6,6 +6,7 @@ import { tasksApi } from '../../api/tasks';
 import { usersApi } from '../../api/users';
 import { DealershipSelector } from '../common/DealershipSelector';
 import { UserCheckboxList } from '../common/UserCheckboxList';
+import { useWorkspace } from '../../hooks/useWorkspace';
 import { TaskNotificationSettings } from './TaskNotificationSettings';
 import { Alert } from '../ui';
 import {
@@ -27,6 +28,7 @@ interface TaskModalProps {
 export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) => {
   const queryClient = useQueryClient();
   const [serverError, setServerError] = useState<string | null>(null);
+  const { dealershipId: workspaceDealershipId } = useWorkspace();
 
   // Use React Hook Form
   const {
@@ -95,14 +97,14 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
         });
         setTagsInput(task.tags ? task.tags.join(', ') : '');
       } else {
-        // Create mode
+        // Create mode - предзаполняем dealership_id из workspace
         reset({
           title: '',
           description: '',
           comment: '',
           task_type: TASK_TYPES.INDIVIDUAL,
           response_type: RESPONSE_TYPES.NOTIFICATION,
-          dealership_id: undefined,
+          dealership_id: workspaceDealershipId || undefined,
           assignments: [],
           notification_settings: {},
           priority: TASK_PRIORITIES.MEDIUM,
@@ -114,7 +116,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
       }
       setServerError(null);
     }
-  }, [isOpen, task, reset]);
+  }, [isOpen, task, reset, workspaceDealershipId]);
 
   // Автоматическое определение типа задачи на основе количества исполнителей
   useEffect(() => {

@@ -18,7 +18,7 @@ import {
 import type { Task, TaskResponse } from '../types/task';
 import { TaskDetailsModal } from '../components/tasks/TaskDetailsModal';
 import { ProofViewer } from '../components/tasks/ProofViewer';
-import { DealershipSelector } from '../components/common/DealershipSelector';
+import { useWorkspace } from '../hooks/useWorkspace';
 
 import {
   Button,
@@ -38,10 +38,10 @@ import { StatusBadge, PriorityBadge } from '../components/common';
 
 export const PendingReviewPage: React.FC = () => {
   const permissions = usePermissions();
+  const { dealershipId: workspaceDealershipId } = useWorkspace();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
   const [page, setPage] = useState(1);
-  const [dealershipFilter, setDealershipFilter] = useState<number | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [rejectModal, setRejectModal] = useState<{
@@ -52,10 +52,10 @@ export const PendingReviewPage: React.FC = () => {
   const [rejectReason, setRejectReason] = useState('');
 
   const { data: tasksData, isLoading, error, refetch } = useQuery({
-    queryKey: ['tasks', 'pending_review', page, dealershipFilter],
+    queryKey: ['tasks', 'pending_review', page, workspaceDealershipId],
     queryFn: () => tasksApi.getTasks({
       status: 'pending_review',
-      dealership_id: dealershipFilter || undefined,
+      dealership_id: workspaceDealershipId || undefined,
       page,
       per_page: 15,
     }),
@@ -183,32 +183,12 @@ export const PendingReviewPage: React.FC = () => {
         description="Верификация выполненных задач с доказательствами"
       />
 
-      {/* Фильтры */}
-      <Card className="mb-6">
-        <Card.Body>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="w-full sm:w-64">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Автосалон
-              </label>
-              <DealershipSelector
-                value={dealershipFilter}
-                onChange={(id) => {
-                  setDealershipFilter(id);
-                  setPage(1);
-                }}
-                showAllOption
-                allOptionLabel="Все автосалоны"
-              />
-            </div>
-            <div className="flex items-end">
-              <span className="text-sm text-gray-500 dark:text-gray-400">
-                Найдено: {tasksData?.total || 0} задач
-              </span>
-            </div>
-          </div>
-        </Card.Body>
-      </Card>
+      {/* Информация о найденных задачах */}
+      <div className="mb-6">
+        <span className="text-sm text-gray-500 dark:text-gray-400">
+          Найдено: {tasksData?.total || 0} задач
+        </span>
+      </div>
 
       {/* Контент */}
       {isLoading ? (

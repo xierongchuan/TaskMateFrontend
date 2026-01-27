@@ -3,7 +3,9 @@ import React, { useState } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useMyCurrentShift } from '../../hooks/useShifts';
+import { useWorkspace } from '../../hooks/useWorkspace';
 import { Sidebar } from './Sidebar';
+import { WorkspaceSwitcher } from './WorkspaceSwitcher';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { ClockIcon, Bars3Icon } from '@heroicons/react/24/outline';
@@ -11,13 +13,14 @@ import { APP_NAME } from '../../constants/app';
 
 export const Layout: React.FC = () => {
   const { user } = useAuth();
+  const { dealershipId } = useWorkspace();
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     if (typeof window !== 'undefined') {
       return window.innerWidth >= 1024;
     }
     return true;
   });
-  const { data: currentShiftData } = useMyCurrentShift(user?.dealership_id ?? undefined);
+  const { data: currentShiftData } = useMyCurrentShift(dealershipId ?? undefined);
   const currentShift = currentShiftData?.data;
 
   return (
@@ -45,6 +48,14 @@ export const Layout: React.FC = () => {
             <Link to="/" className="text-lg font-bold text-indigo-600 dark:text-indigo-400">
               {APP_NAME}
             </Link>
+
+            {/* Разделитель */}
+            <div className="hidden sm:block w-px h-6 bg-gray-300 dark:bg-gray-600" />
+
+            {/* Переключатель автосалона */}
+            <div className="hidden sm:block">
+              <WorkspaceSwitcher />
+            </div>
           </div>
 
           {/* Right side: shift info + user */}

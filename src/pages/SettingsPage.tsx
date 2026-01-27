@@ -2,8 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useShiftConfig, useNotificationConfig, useArchiveConfig, useUpdateShiftConfig, useUpdateNotificationConfig, useUpdateArchiveConfig, useDealershipSettings, useTaskConfig, useUpdateTaskConfig, useSetting, useUpdateSetting } from '../hooks/useSettings';
 import { useTheme } from '../context/ThemeContext';
 import { usePermissions } from '../hooks/usePermissions';
-import { useAuth } from '../hooks/useAuth';
-import { DealershipSelector } from '../components/common/DealershipSelector';
+import { useWorkspace } from '../hooks/useWorkspace';
 import { YearCalendar, type YearCalendarRef } from '../components/settings/YearCalendar';
 import type { NotificationConfig, ArchiveConfig, ShiftConfig, TaskConfig } from '../types/setting';
 
@@ -43,10 +42,11 @@ import { ConfirmDialog } from '../components/ui';
 export const SettingsPage: React.FC = () => {
   const permissions = usePermissions();
   const { pendingTheme, setTheme, applyTheme, hasPendingChanges: themeHasPendingChanges } = useTheme();
-  const { user } = useAuth();
+  const { dealershipId: workspaceDealershipId } = useWorkspace();
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'general' | 'interface' | 'tasks' | 'calendar' | 'shifts' | 'notifications' | 'maintenance'>('general');
-  const [selectedDealershipId, setSelectedDealershipId] = useState<number | undefined>(user?.dealership_id || undefined);
+  // Конвертируем null (все автосалоны) в undefined (глобальные настройки)
+  const selectedDealershipId = workspaceDealershipId || undefined;
   const [showDetailedNotifications, setShowDetailedNotifications] = useState(false);
   const [selectedCalendarYear, setSelectedCalendarYear] = useState(new Date().getFullYear());
   const [calendarSaving, setCalendarSaving] = useState(false);
@@ -321,20 +321,7 @@ export const SettingsPage: React.FC = () => {
       <PageHeader
         title="Настройки"
         description="Управление параметрами системы, интерфейса и автоматизации"
-      >
-        {permissions.canManageDealershipSettings && (
-          <div className="w-full md:w-72 bg-white dark:bg-gray-800 p-1 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-            <DealershipSelector
-              value={selectedDealershipId}
-              onChange={(value) => setSelectedDealershipId(value || undefined)}
-              placeholder="Глобальные настройки"
-              showAllOption={permissions.canManageGlobalSettings}
-              allOptionLabel="Глобальные настройки"
-              className="w-full border-0 focus:ring-0 text-sm"
-            />
-          </div>
-        )}
-      </PageHeader>
+      />
 
       {isLoading ? (
         <Card>

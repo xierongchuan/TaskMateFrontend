@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { tasksApi } from '../api/tasks';
 import { usePermissions } from '../hooks/usePermissions';
+import { useWorkspace } from '../hooks/useWorkspace';
 import { useResponsiveViewMode } from '../hooks/useResponsiveViewMode';
 import { usePagination } from '../hooks/usePagination';
 import { TaskModal } from '../components/tasks/TaskModal';
 import { TaskDetailsModal } from '../components/tasks/TaskDetailsModal';
 import { TaskEmployeeActions } from '../components/tasks/TaskEmployeeActions';
-import { DealershipSelector } from '../components/common/DealershipSelector';
 import { UserSelector } from '../components/common/UserSelector';
 import { MultiFileUpload } from '../components/ui/MultiFileUpload';
 import type { Task } from '../types/task';
@@ -51,6 +51,7 @@ import { StatusBadge, PriorityBadge, ActionButtons } from '../components/common'
 
 export const TasksPage: React.FC = () => {
   const permissions = usePermissions();
+  const { dealershipId: workspaceDealershipId } = useWorkspace();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
   const [searchParams] = useSearchParams();
@@ -72,7 +73,6 @@ export const TasksPage: React.FC = () => {
     task_type: searchParams.get('task_type') || '',
     response_type: searchParams.get('response_type') || '',
     date_range: searchParams.get('date_range') || 'all',
-    dealership_id: searchParams.get('dealership_id') ? Number(searchParams.get('dealership_id')) : null,
     assigned_to: searchParams.get('assigned_to') ? Number(searchParams.get('assigned_to')) : null,
     tags: searchParams.getAll('tags') || [],
     priority: searchParams.get('priority') || '',
@@ -81,10 +81,10 @@ export const TasksPage: React.FC = () => {
 
   useEffect(() => {
     setPage(1);
-  }, [filters]);
+  }, [filters, workspaceDealershipId]);
 
   const { data: tasksData, isLoading, error, refetch } = useQuery({
-    queryKey: ['tasks', filters, page, limit],
+    queryKey: ['tasks', filters, workspaceDealershipId, page, limit],
     queryFn: () => {
       const cleanedFilters: {
         search?: string;
@@ -100,6 +100,11 @@ export const TasksPage: React.FC = () => {
         per_page?: number;
         page?: number;
       } = { page, per_page: limit };
+
+      // Добавляем фильтр по workspace (автосалону)
+      if (workspaceDealershipId) {
+        cleanedFilters.dealership_id = workspaceDealershipId;
+      }
 
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== null && value !== undefined && value !== '') {
@@ -393,7 +398,6 @@ export const TasksPage: React.FC = () => {
       task_type: '',
       response_type: '',
       date_range: 'all',
-      dealership_id: null,
       assigned_to: null,
       tags: [],
       priority: '',
@@ -497,7 +501,7 @@ export const TasksPage: React.FC = () => {
 
   const hasActiveFilters = filters.search || filters.status || filters.priority ||
     filters.task_type || filters.response_type || filters.from_generator ||
-    filters.date_range !== 'all' || filters.dealership_id || filters.assigned_to;
+    filters.date_range !== 'all' || filters.assigned_to;
 
   return (
     <PageContainer>
@@ -585,20 +589,9 @@ export const TasksPage: React.FC = () => {
           />
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Автосалон</label>
-            <DealershipSelector
-              value={filters.dealership_id}
-              onChange={(dealershipId) => setFilters({ ...filters, dealership_id: dealershipId, assigned_to: null })}
-              showAllOption={true}
-              allOptionLabel="Все автосалоны"
-              className="block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            />
-          </div>
-
-          <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Исполнитель</label>
             <UserSelector
-              dealershipId={filters.dealership_id}
+              dealershipId={workspaceDealershipId}
               value={filters.assigned_to}
               onChange={(userId) => setFilters({ ...filters, assigned_to: userId })}
               showAllOption={true}

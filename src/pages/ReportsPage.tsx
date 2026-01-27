@@ -13,7 +13,7 @@ import {
 import { reportsApi } from '../api/reports';
 import { UserStatsModal, type EmployeePerformance } from '../components/reports/UserStatsModal';
 import { IssueDetailsModal } from '../components/reports/IssueDetailsModal';
-import { DealershipSelector } from '../components/common/DealershipSelector';
+import { useWorkspace } from '../hooks/useWorkspace';
 
 // Унифицированные компоненты
 import {
@@ -29,10 +29,10 @@ import {
 } from '../components/ui';
 
 export const ReportsPage: React.FC = () => {
+  const { dealershipId: workspaceDealershipId } = useWorkspace();
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'custom'>('week');
   const [selectedEmployee, setSelectedEmployee] = useState<EmployeePerformance | null>(null);
   const [selectedIssue, setSelectedIssue] = useState<{ type: string; description: string } | null>(null);
-  const [dealershipId, setDealershipId] = useState<number | null>(null);
   const [dateRange, setDateRange] = useState({
     from: format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd'),
     to: format(endOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd'),
@@ -40,8 +40,8 @@ export const ReportsPage: React.FC = () => {
   const [reportFormat, setReportFormat] = useState<'json' | 'pdf'>('json');
 
   const { data: reportData, isLoading, refetch } = useQuery({
-    queryKey: ['reports', dateRange.from, dateRange.to, dealershipId],
-    queryFn: () => reportsApi.getReport(dateRange.from, dateRange.to, dealershipId),
+    queryKey: ['reports', dateRange.from, dateRange.to, workspaceDealershipId],
+    queryFn: () => reportsApi.getReport(dateRange.from, dateRange.to, workspaceDealershipId),
     enabled: !!dateRange.from && !!dateRange.to,
   });
 
@@ -211,17 +211,6 @@ export const ReportsPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Dealership Filter */}
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Автосалон:</label>
-              <DealershipSelector
-                value={dealershipId}
-                onChange={(id) => setDealershipId(id)}
-                showAllOption={true}
-                allOptionLabel="Все автосалоны"
-                className="w-full sm:w-auto px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              />
-            </div>
           </div>
         </Card.Body>
       </Card>
@@ -426,7 +415,7 @@ export const ReportsPage: React.FC = () => {
         issueDescription={selectedIssue?.description ?? ''}
         dateFrom={dateRange.from}
         dateTo={dateRange.to}
-        dealershipId={dealershipId}
+        dealershipId={workspaceDealershipId}
       />
     </PageContainer>
   );
