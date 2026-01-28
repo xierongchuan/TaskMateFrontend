@@ -122,6 +122,212 @@ code {
   animation: slideInUp 0.3s ease-out forwards;
 }
 
+/* ===== Login Page Styles ===== */
+
+/* Mesh gradient blob animations */
+@keyframes mesh-float-1 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+}
+
+@keyframes mesh-float-2 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-40px, 30px) scale(1.05);
+  }
+  66% {
+    transform: translate(50px, -30px) scale(0.95);
+  }
+}
+
+@keyframes mesh-float-3 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(20px, 40px) scale(1.15);
+  }
+}
+
+/* Mesh blob base styles */
+.mesh-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.5;
+  will-change: transform;
+}
+
+.mesh-blob-1 {
+  width: 500px;
+  height: 500px;
+  background: rgb(var(--accent-400) / 0.5);
+  top: -150px;
+  left: -150px;
+  animation: mesh-float-1 20s ease-in-out infinite;
+}
+
+.mesh-blob-2 {
+  width: 400px;
+  height: 400px;
+  background: rgb(var(--accent-300) / 0.4);
+  bottom: -100px;
+  right: -100px;
+  animation: mesh-float-2 25s ease-in-out infinite;
+}
+
+.mesh-blob-3 {
+  width: 350px;
+  height: 350px;
+  background: rgb(var(--accent-500) / 0.3);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: mesh-float-3 30s ease-in-out infinite;
+}
+
+/* Dark mode mesh adjustments */
+.dark .mesh-blob {
+  opacity: 0.25;
+}
+
+.dark .mesh-blob-1 {
+  background: rgb(var(--accent-500) / 0.4);
+}
+
+.dark .mesh-blob-2 {
+  background: rgb(var(--accent-400) / 0.35);
+}
+
+.dark .mesh-blob-3 {
+  background: rgb(var(--accent-600) / 0.3);
+}
+
+/* Glass card effect */
+.glass-card {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.dark .glass-card {
+  background: rgba(38, 38, 38, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.25),
+    0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Fallback for browsers without backdrop-filter */
+@supports not (backdrop-filter: blur(20px)) {
+  .glass-card {
+    background: rgba(255, 255, 255, 0.95);
+  }
+  .dark .glass-card {
+    background: rgba(38, 38, 38, 0.95);
+  }
+}
+
+/* Card entrance animation */
+@keyframes card-entrance {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-card-entrance {
+  animation: card-entrance 0.5s ease-out forwards;
+}
+
+/* Login input styling */
+.login-input {
+  transition: all 0.2s ease;
+}
+
+.login-input:focus {
+  box-shadow:
+    0 0 0 3px rgb(var(--accent-500) / 0.15),
+    0 2px 8px rgb(var(--accent-500) / 0.1);
+}
+
+/* Login button enhanced */
+.login-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.login-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.login-button:hover::before {
+  left: 100%;
+}
+
+.login-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgb(var(--accent-600) / 0.35);
+}
+
+.login-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .mesh-blob,
+  .mesh-blob-1,
+  .mesh-blob-2,
+  .mesh-blob-3 {
+    animation: none;
+  }
+
+  .animate-card-entrance {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .login-button::before {
+    display: none;
+  }
+
+  .login-button:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
 @media print {
   html,
   body,

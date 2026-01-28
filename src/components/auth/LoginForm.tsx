@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { UserIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../hooks/useAuth';
-import { APP_NAME } from '../../constants/app';
+import { Button } from '../ui/Button';
 
+/**
+ * Форма входа в систему.
+ */
 export const LoginForm: React.FC = () => {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
@@ -15,74 +19,86 @@ export const LoginForm: React.FC = () => {
     try {
       await loginAction(login, password);
       navigate('/dashboard');
-    } catch (error) {
+    } catch {
       // Ошибка уже обработана в store
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-            Вход в систему {APP_NAME}
-          </h2>
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Логин */}
+      <div className="relative">
+        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
+          <UserIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="login" className="sr-only">
-                Логин
-              </label>
-              <input
-                id="login"
-                name="login"
-                type="text"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Логин"
-                value={login}
-                onChange={(e) => setLogin(e.target.value)}
-                maxLength={64}
-                disabled={isLoading}
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Пароль
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Пароль"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoading}
-              />
-            </div>
-          </div>
-
-          {error && (
-            <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
-              <div className="text-sm text-red-700 dark:text-red-300">{error}</div>
-            </div>
-          )}
-
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-accent-600 hover:bg-accent-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? 'Вход...' : 'Войти'}
-            </button>
-          </div>
-        </form>
+        <label htmlFor="login" className="sr-only">
+          Логин
+        </label>
+        <input
+          id="login"
+          name="login"
+          type="text"
+          required
+          value={login}
+          onChange={(e) => setLogin(e.target.value)}
+          placeholder="Логин"
+          maxLength={64}
+          disabled={isLoading}
+          className="login-input w-full pl-11 pr-4 py-3 bg-white/50 dark:bg-gray-800/50
+                     border border-gray-200 dark:border-gray-700 rounded-xl
+                     text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500
+                     focus:outline-none focus:ring-2 focus:ring-accent-500/20 focus:border-accent-500
+                     disabled:opacity-50 disabled:cursor-not-allowed
+                     transition-all duration-200"
+        />
       </div>
-    </div>
-  );
 
+      {/* Пароль */}
+      <div className="relative">
+        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
+          <LockClosedIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+        </div>
+        <label htmlFor="password" className="sr-only">
+          Пароль
+        </label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Пароль"
+          disabled={isLoading}
+          className="login-input w-full pl-11 pr-4 py-3 bg-white/50 dark:bg-gray-800/50
+                     border border-gray-200 dark:border-gray-700 rounded-xl
+                     text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500
+                     focus:outline-none focus:ring-2 focus:ring-accent-500/20 focus:border-accent-500
+                     disabled:opacity-50 disabled:cursor-not-allowed
+                     transition-all duration-200"
+        />
+      </div>
+
+      {/* Ошибка */}
+      {error && (
+        <div className="rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 p-3 animate-slide-in-up">
+          <p className="text-sm text-red-600 dark:text-red-400 text-center">
+            {error}
+          </p>
+        </div>
+      )}
+
+      {/* Кнопка входа */}
+      <Button
+        type="submit"
+        variant="primary"
+        size="lg"
+        fullWidth
+        isLoading={isLoading}
+        className="login-button rounded-xl py-3"
+      >
+        {isLoading ? 'Выполняется вход...' : 'Войти'}
+      </Button>
+    </form>
+  );
 };
