@@ -26,12 +26,42 @@ import './index.css';
 
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './components/ui/Toast';
+import { RateLimitIndicator } from './components/ui/RateLimitIndicator';
+import { rateLimitManager } from './utils/rateLimitManager';
+import axios from 'axios';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
-      retry: 1,
+      retry: (failureCount, error) => {
+        if (axios.isAxiosError(error)) {
+          const status = error.response?.status;
+
+          // Для 429 — повторять до 3 раз
+          if (status === 429) {
+            return failureCount < 3;
+          }
+
+          // Для других 4xx — не повторять
+          if (status && status >= 400 && status < 500) {
+            return false;
+          }
+        }
+
+        // Для остальных ошибок — 1 повтор
+        return failureCount < 1;
+      },
+      retryDelay: (attemptIndex) => {
+        // Если есть Retry-After от rate limit manager — использовать его
+        const rateLimitDelay = rateLimitManager.getRetryDelay();
+        if (rateLimitDelay > 0) {
+          return rateLimitDelay;
+        }
+
+        // Иначе exponential backoff: 1s, 2s, 4s... max 30s
+        return Math.min(1000 * Math.pow(2, attemptIndex), 30000);
+      },
     },
   },
 });
@@ -71,6 +101,7 @@ function App() {
   return (
     <ThemeProvider>
       <ToastProvider>
+        <RateLimitIndicator />
         <QueryClientProvider client={queryClient}>
           <BrowserRouter>
             <Routes>

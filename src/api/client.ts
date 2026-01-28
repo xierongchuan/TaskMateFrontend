@@ -1,5 +1,6 @@
 import axios, { type AxiosInstance, type AxiosError } from 'axios';
 import { debugAuth } from '../utils/debug';
+import { rateLimitManager, parseRetryAfter } from '../utils/rateLimitManager';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8007/api/v1';
 
@@ -85,6 +86,23 @@ apiClient.interceptors.response.use(
 
     if (error.response?.status === 403) {
       console.error('Недостаточно прав:', error.response.data);
+    }
+
+    // Handle rate limiting (429)
+    if (error.response?.status === 429) {
+      const headers = error.response.headers as Record<string, string> | undefined;
+      const retryAfter = parseRetryAfter(headers);
+      const shouldShowToast = rateLimitManager.setRateLimited(retryAfter);
+
+      if (shouldShowToast) {
+        window.dispatchEvent(
+          new CustomEvent('rate-limit-error', {
+            detail: { retryAfter },
+          })
+        );
+      }
+
+      console.warn('Rate limited (429). Retry after:', retryAfter || 'not specified');
     }
 
     return Promise.reject(error);
