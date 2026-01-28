@@ -65,7 +65,7 @@ export const SidebarGroup: React.FC<SidebarGroupProps> = ({
           ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}
         `}
       >
-        <ul className="space-y-1">
+        <ul className="space-y-1 p-0.5">
           {items.map((item) => (
             <SidebarItem
               key={item.id}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useMyCurrentShift } from '../../hooks/useShifts';
@@ -13,9 +13,24 @@ import { APP_NAME } from '../../constants/app';
 export const Layout: React.FC = () => {
   const { user } = useAuth();
   const { dealershipId } = useWorkspace();
-  const { isOpen: sidebarOpen, toggleSidebar } = useSidebarStore();
+  const { isOpen: sidebarOpen, mode, toggleSidebar } = useSidebarStore();
   const { data: currentShiftData } = useMyCurrentShift(dealershipId ?? undefined);
   const currentShift = currentShiftData?.data;
+
+  // Отслеживаем размер экрана для корректного отображения логотипа
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Показывать логотип в хедере:
+  // - На мобильных когда сайдбар закрыт
+  // - На десктопе когда сайдбар в mini-mode
+  const showLogoInHeader = (isMobile && !sidebarOpen) || (!isMobile && mode === 'mini');
 
   return (
     <div className="h-screen bg-gray-100 dark:bg-gray-900 flex overflow-hidden transition-colors duration-200 print:h-auto print:overflow-visible">
@@ -28,32 +43,35 @@ export const Layout: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0 print:h-auto print:overflow-visible">
         {/* Top header */}
         <header className="bg-white dark:bg-gray-800 shadow-sm h-16 flex items-center justify-between px-4 lg:px-6 z-10 transition-colors duration-200 print:hidden">
-          {/* Menu toggle button - visible on all screen sizes */}
-          <div className="flex items-center space-x-3">
+          {/* Left side: mobile menu + logo + workspace */}
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+            {/* Bars3 только на мобильных */}
             <button
               onClick={toggleSidebar}
-              className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700"
+              className="lg:hidden p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 shrink-0"
               title={sidebarOpen ? 'Скрыть меню' : 'Показать меню'}
             >
               <Bars3Icon className="w-6 h-6" />
             </button>
 
-            {/* Logo */}
-            <Link to="/" className="text-lg font-bold text-accent-600 dark:text-accent-400">
-              {APP_NAME}
-            </Link>
+            {/* Логотип: мобильные (когда закрыт) ИЛИ десктоп (mini-mode) */}
+            {showLogoInHeader && (
+              <Link to="/" className="text-lg font-bold text-accent-600 dark:text-accent-400 shrink-0 hidden sm:block">
+                {APP_NAME}
+              </Link>
+            )}
 
             {/* Разделитель */}
-            <div className="hidden sm:block w-px h-6 bg-gray-300 dark:bg-gray-600" />
+            {showLogoInHeader && (
+              <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 shrink-0 hidden sm:block" />
+            )}
 
-            {/* Переключатель автосалона */}
-            <div className="hidden sm:block">
-              <WorkspaceSwitcher />
-            </div>
+            {/* Переключатель автосалона — всегда видим */}
+            <WorkspaceSwitcher />
           </div>
 
           {/* Right side: shift info + user */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4 shrink-0">
             {currentShift && (
               <div className="hidden sm:flex items-center space-x-2 px-3 py-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                 <ClockIcon className="w-4 h-4 text-green-600 dark:text-green-400" />

@@ -55,12 +55,12 @@ export const WorkspaceSwitcher: React.FC = () => {
       : currentDealership?.name || 'Выберите автосалон';
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative min-w-0" ref={dropdownRef}>
       <button
         onClick={() => canSwitchWorkspace && setIsOpen(!isOpen)}
         disabled={!canSwitchWorkspace || isLoading}
         className={`
-          flex items-center gap-2 px-3 py-2 rounded-lg transition-colors
+          flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 rounded-lg transition-colors min-w-0
           ${canSwitchWorkspace
             ? 'hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer'
             : 'cursor-default'
@@ -69,13 +69,13 @@ export const WorkspaceSwitcher: React.FC = () => {
         `}
         title={canSwitchWorkspace ? 'Переключить автосалон' : displayName}
       >
-        <BuildingOffice2Icon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-200 max-w-[180px] truncate">
+        <BuildingOffice2Icon className="w-5 h-5 text-gray-500 dark:text-gray-400 shrink-0" />
+        <span className="text-sm font-medium text-gray-700 dark:text-gray-200 max-w-[100px] sm:max-w-[180px] truncate">
           {displayName}
         </span>
         {canSwitchWorkspace && (
           <ChevronDownIcon
-            className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+            className={`w-4 h-4 text-gray-400 transition-transform shrink-0 ${isOpen ? 'rotate-180' : ''}`}
           />
         )}
       </button>

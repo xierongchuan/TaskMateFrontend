@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import {
   XMarkIcon,
   ChevronLeftIcon,
@@ -23,9 +24,9 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
   if (isMobile) {
     return (
       <div className="h-16 flex items-center justify-between px-4 border-b border-gray-100 dark:border-gray-800 shrink-0">
-        <span className="text-xl font-bold text-accent-600 dark:text-accent-400">
+        <Link to="/" className="text-xl font-bold text-accent-600 dark:text-accent-400 hover:opacity-80 transition-opacity">
           {APP_NAME}
-        </span>
+        </Link>
         <button
           onClick={onClose}
           className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -53,9 +54,9 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
 
   return (
     <div className="h-16 flex items-center justify-between px-4 border-b border-gray-100 dark:border-gray-800 shrink-0">
-      <span className="text-xl font-bold text-accent-600 dark:text-accent-400">
+      <Link to="/" className="text-xl font-bold text-accent-600 dark:text-accent-400 hover:opacity-80 transition-opacity">
         {APP_NAME}
-      </span>
+      </Link>
       <button
         onClick={onToggleMode}
         className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"

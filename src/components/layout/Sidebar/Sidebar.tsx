@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSidebarStore } from '../../../stores/sidebarStore';
@@ -20,8 +20,27 @@ export const Sidebar: React.FC = () => {
     setOpen,
   } = useSidebarStore();
 
-  // Определяем, мобильное ли устройство
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+  // Отслеживаем размер экрана реактивно
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' ? window.innerWidth < 1024 : false
+  );
+
+  // Слушаем изменения размера окна
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 1024;
+      const wasMobile = isMobile;
+      setIsMobile(mobile);
+
+      // При переходе с мобильного на десктоп — автоматически открываем сайдбар
+      if (wasMobile && !mobile && !isOpen) {
+        setOpen(true);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isMobile, isOpen, setOpen]);
 
   // Мемоизируем конфигурацию навигации
   const navigationConfig = useMemo(
