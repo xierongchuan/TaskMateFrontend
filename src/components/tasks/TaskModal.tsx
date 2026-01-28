@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm, Controller, type SubmitHandler } from 'react-hook-form';
 import { utcToDatetimeLocal, datetimeLocalToUtc } from '../../utils/dateTime';
@@ -7,6 +7,7 @@ import { usersApi } from '../../api/users';
 import { DealershipSelector } from '../common/DealershipSelector';
 import { UserCheckboxList } from '../common/UserCheckboxList';
 import { useWorkspace } from '../../hooks/useWorkspace';
+import { useAuth } from '../../hooks/useAuth';
 import { TaskNotificationSettings } from './TaskNotificationSettings';
 import { Alert } from '../ui';
 import {
@@ -29,6 +30,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
   const queryClient = useQueryClient();
   const [serverError, setServerError] = useState<string | null>(null);
   const { dealershipId: workspaceDealershipId } = useWorkspace();
+  const { user: currentUser } = useAuth();
 
   // Use React Hook Form
   const {
@@ -74,6 +76,15 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
     enabled: !!dealershipId,
     staleTime: 1000 * 60, // 1 minute cache
   });
+
+  // Фильтруем пользователей: только сотрудники (employees), исключая текущего пользователя
+  const assignableUsers = useMemo(() => {
+    if (!usersData?.data) return [];
+    return usersData.data.filter(user =>
+      user.id !== currentUser?.id &&
+      user.role === 'employee'
+    );
+  }, [usersData?.data, currentUser?.id]);
 
   // Reset form when task prop changes or modal opens
   useEffect(() => {
@@ -399,7 +410,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) =
 
                 {/* Assignments */}
                 <UserCheckboxList
-                  users={usersData?.data || []}
+                  users={assignableUsers}
                   selectedIds={assignments as number[]}
                   onToggle={handleUserToggle}
                   isLoading={isLoadingUsers}

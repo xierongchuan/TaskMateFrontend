@@ -16,6 +16,8 @@ export interface VerificationPanelProps {
   onApprove: (responseId: number) => Promise<void>;
   onReject: (responseId: number, reason: string) => Promise<void>;
   isLoading?: boolean;
+  /** Имя исполнителя (приоритет над response.user для индивидуальных задач) */
+  assigneeName?: string;
 }
 
 export const VerificationPanel: React.FC<VerificationPanelProps> = ({
@@ -23,6 +25,7 @@ export const VerificationPanel: React.FC<VerificationPanelProps> = ({
   onApprove,
   onReject,
   isLoading = false,
+  assigneeName,
 }) => {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
@@ -157,7 +160,7 @@ export const VerificationPanel: React.FC<VerificationPanelProps> = ({
                   Отклонить доказательство
                 </h4>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Исполнитель: {response.user?.full_name || 'Неизвестно'}
+                  Исполнитель: {assigneeName || response.user?.full_name || 'Неизвестно'}
                 </p>
               </div>
             </div>

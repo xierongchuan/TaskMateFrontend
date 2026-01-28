@@ -72,6 +72,9 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
 
   const isProofTask = task.response_type === 'completion_with_proof';
   const isCompleted = task.status === 'completed' || task.status === 'completed_late';
+  const hasAssignmentsOrResponses =
+    (task.assignments && task.assignments.length > 0) ||
+    (task.responses && task.responses.length > 0);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={task.title} size="2xl">
@@ -197,8 +200,8 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
           </div>
         )}
 
-        {/* Assignees with Status for Group Tasks */}
-        {task.assignments && task.assignments.length > 0 && (
+        {/* Assignees with Status / Responses for Individual Tasks */}
+        {hasAssignmentsOrResponses && (
           <div>
             <div className="flex items-center justify-between mb-2">
               <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center">
@@ -263,35 +266,114 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
               </div>
             )}
 
-            <div className="space-y-4">
-              {task.assignments.map((assignment) => {
-                const userResponse = task.responses?.find(r => r.user_id === assignment.user.id);
-                const statusLabel = getResponseStatusLabel(userResponse?.status);
-                const statusVariant = getResponseStatusVariant(userResponse?.status);
-                const canVerify = userResponse?.status === 'pending_review' &&
-                  permissions.canManageTasks &&
-                  onApproveResponse &&
-                  onRejectResponse;
+            {/* Для индивидуальных задач */}
+            {task.task_type === 'individual' && task.assignments && task.assignments.length > 0 && (() => {
+              // Для индивидуальных задач: статус берём из task.status (не из response, т.к. response может быть от менеджера)
+              const taskStatusLabel = getResponseStatusLabel(task.status as TaskResponseStatus);
+              const taskStatusVariant = getResponseStatusVariant(task.status as TaskResponseStatus);
 
-                const userProofs = userResponse?.proofs;
-                const hasProofs = userProofs && userProofs.length > 0;
+              // Response нужен только для ID при верификации
+              const pendingResponse = task.responses?.find(r => r.status === 'pending_review');
 
-                return (
-                  <div key={assignment.id} className="p-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700">
+              // Proofs исполнителя (если загружал сам, не через shared)
+              // Если uses_shared_proofs=true, файлы отображаются в секции "Файлы задачи"
+              const userProofs = pendingResponse?.uses_shared_proofs ? [] : pendingResponse?.proofs;
+              const hasUserProofs = userProofs && userProofs.length > 0;
+
+              // Кнопки верификации: показываем если задача на проверке И есть response для API
+              const canVerify = task.status === 'pending_review' &&
+                pendingResponse &&
+                permissions.canManageTasks &&
+                onApproveResponse &&
+                onRejectResponse;
+
+              return (
+                <div className="space-y-4">
+                  {task.assignments.map((assignment) => (
+                    <div key={assignment.id} className="p-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <div className="h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-600 flex items-center justify-center text-gray-500 dark:text-gray-300 text-xs font-semibold mr-3">
+                            {assignment.user.full_name.charAt(0)}
+                          </div>
+                          <span className="text-sm text-gray-900 dark:text-white font-medium">{assignment.user.full_name}</span>
+                        </div>
+                        <Badge variant={taskStatusVariant} size="sm">
+                          {taskStatusLabel}
+                        </Badge>
+                      </div>
+
+                      {/* Proofs исполнителя (если загружены им напрямую, не через shared) */}
+                      {hasUserProofs && (
+                        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-600">
+                          <ProofViewer
+                            proofs={userProofs}
+                            canDelete={permissions.canManageTasks && !!onDeleteProof && !isCompleted}
+                            onDelete={onDeleteProof}
+                          />
+                        </div>
+                      )}
+
+                      {/* Кнопки верификации */}
+                      {canVerify && (
+                        <div className={hasUserProofs ? "mt-3" : "mt-2 pt-2 border-t border-gray-100 dark:border-gray-600"}>
+                          <VerificationPanel
+                            response={pendingResponse}
+                            assigneeName={assignment.user.full_name}
+                            onApprove={async (id) => {
+                              await onApproveResponse(id);
+                              onVerificationComplete?.();
+                            }}
+                            onReject={async (id, reason) => {
+                              await onRejectResponse(id, reason);
+                              onVerificationComplete?.();
+                            }}
+                            isLoading={isVerifying}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+
+            {/* Для индивидуальных задач без assignments но с responses */}
+            {task.task_type === 'individual' && (!task.assignments || task.assignments.length === 0) && task.responses && task.responses.length > 0 && (() => {
+              const taskStatusLabel = getResponseStatusLabel(task.status as TaskResponseStatus);
+              const taskStatusVariant = getResponseStatusVariant(task.status as TaskResponseStatus);
+              const pendingResponse = task.responses.find(r => r.status === 'pending_review');
+              // Если uses_shared_proofs=true, файлы отображаются в секции "Файлы задачи"
+              const userProofs = pendingResponse?.uses_shared_proofs ? [] : pendingResponse?.proofs;
+              const hasUserProofs = userProofs && userProofs.length > 0;
+              const canVerify = task.status === 'pending_review' &&
+                pendingResponse &&
+                permissions.canManageTasks &&
+                onApproveResponse &&
+                onRejectResponse;
+
+              // Показываем пользователя из response (для случаев без assignments)
+              const displayUser = pendingResponse?.user || task.responses[0]?.user;
+
+              return (
+                <div className="space-y-4">
+                  <div className="p-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <div className="h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-600 flex items-center justify-center text-gray-500 dark:text-gray-300 text-xs font-semibold mr-3">
-                          {assignment.user.full_name.charAt(0)}
+                          {displayUser?.full_name?.charAt(0) || '?'}
                         </div>
-                        <span className="text-sm text-gray-900 dark:text-white font-medium">{assignment.user.full_name}</span>
+                        <span className="text-sm text-gray-900 dark:text-white font-medium">
+                          {displayUser?.full_name || 'Неизвестно'}
+                        </span>
                       </div>
-                      <Badge variant={statusVariant} size="sm">
-                        {statusLabel}
+                      <Badge variant={taskStatusVariant} size="sm">
+                        {taskStatusLabel}
                       </Badge>
                     </div>
 
-                    {/* Файлы доказательств исполнителя */}
-                    {hasProofs && (
+                    {/* Proofs исполнителя (если загружены им напрямую) */}
+                    {hasUserProofs && (
                       <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-600">
                         <ProofViewer
                           proofs={userProofs}
@@ -301,11 +383,12 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                       </div>
                     )}
 
-                    {/* Действия верификации для pending_review */}
-                    {canVerify && userResponse && (
-                      <div className={hasProofs ? "mt-3" : "mt-2 pt-2 border-t border-gray-100 dark:border-gray-600"}>
+                    {/* Кнопки верификации */}
+                    {canVerify && (
+                      <div className={hasUserProofs ? "mt-3" : "mt-2 pt-2 border-t border-gray-100 dark:border-gray-600"}>
                         <VerificationPanel
-                          response={userResponse}
+                          response={pendingResponse}
+                          assigneeName={displayUser?.full_name}
                           onApprove={async (id) => {
                             await onApproveResponse(id);
                             onVerificationComplete?.();
@@ -319,9 +402,74 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                       </div>
                     )}
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })()}
+
+            {/* Для групповых задач: показываем assignments с matched responses */}
+            {task.task_type === 'group' && task.assignments && task.assignments.length > 0 && (
+              <div className="space-y-4">
+                {task.assignments.map((assignment) => {
+                  const userResponse = task.responses?.find(r => r.user_id === assignment.user.id);
+                  const statusLabel = getResponseStatusLabel(userResponse?.status);
+                  const statusVariant = getResponseStatusVariant(userResponse?.status);
+                  const canVerify = userResponse?.status === 'pending_review' &&
+                    permissions.canManageTasks &&
+                    onApproveResponse &&
+                    onRejectResponse;
+
+                  // Если uses_shared_proofs=true, файлы отображаются в секции "Файлы задачи"
+                  const userProofs = userResponse?.uses_shared_proofs ? [] : userResponse?.proofs;
+                  const hasProofs = userProofs && userProofs.length > 0;
+
+                  return (
+                    <div key={assignment.id} className="p-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <div className="h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-600 flex items-center justify-center text-gray-500 dark:text-gray-300 text-xs font-semibold mr-3">
+                            {assignment.user.full_name.charAt(0)}
+                          </div>
+                          <span className="text-sm text-gray-900 dark:text-white font-medium">{assignment.user.full_name}</span>
+                        </div>
+                        <Badge variant={statusVariant} size="sm">
+                          {statusLabel}
+                        </Badge>
+                      </div>
+
+                      {/* Файлы доказательств исполнителя */}
+                      {hasProofs && (
+                        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-600">
+                          <ProofViewer
+                            proofs={userProofs}
+                            canDelete={permissions.canManageTasks && !!onDeleteProof && !isCompleted}
+                            onDelete={onDeleteProof}
+                          />
+                        </div>
+                      )}
+
+                      {/* Действия верификации для pending_review */}
+                      {canVerify && userResponse && (
+                        <div className={hasProofs ? "mt-3" : "mt-2 pt-2 border-t border-gray-100 dark:border-gray-600"}>
+                          <VerificationPanel
+                            response={userResponse}
+                            assigneeName={assignment.user.full_name}
+                            onApprove={async (id) => {
+                              await onApproveResponse(id);
+                              onVerificationComplete?.();
+                            }}
+                            onReject={async (id, reason) => {
+                              await onRejectResponse(id, reason);
+                              onVerificationComplete?.();
+                            }}
+                            isLoading={isVerifying}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </Modal.Body>

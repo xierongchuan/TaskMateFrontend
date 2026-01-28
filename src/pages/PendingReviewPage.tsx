@@ -164,6 +164,35 @@ export const PendingReviewPage: React.FC = () => {
     return task.responses?.filter(r => r.status === 'pending_review') || [];
   };
 
+  /**
+   * Получить имя исполнителя для задачи.
+   * Для индивидуальных задач берём имя из assignments (приоритет),
+   * т.к. response.user может быть менеджером при complete_for_all.
+   * Для групповых задач пытаемся сопоставить response с assignment по user_id.
+   */
+  const getAssigneeName = (task: Task, response?: TaskResponse): string => {
+    // Для индивидуальных задач - приоритет assignment
+    if (task.task_type === 'individual') {
+      const assignmentUser = task.assignments?.[0]?.user;
+      if (assignmentUser?.full_name) {
+        return assignmentUser.full_name;
+      }
+    }
+
+    // Для групповых задач - ищем assignment по user_id response
+    if (task.task_type === 'group' && response?.user?.id && task.assignments) {
+      const matchingAssignment = task.assignments.find(
+        a => a.user?.id === response.user?.id
+      );
+      if (matchingAssignment?.user?.full_name) {
+        return matchingAssignment.user.full_name;
+      }
+    }
+
+    // Fallback на response.user
+    return response?.user?.full_name || 'Неизвестно';
+  };
+
   if (!permissions.canManageTasks) {
     return (
       <PageContainer>
@@ -248,7 +277,7 @@ export const PendingReviewPage: React.FC = () => {
                           ) : (
                             <span className="flex items-center">
                               <UserIcon className="w-4 h-4 mr-1" />
-                              {firstResponse.user?.full_name || 'Неизвестно'}
+                              {getAssigneeName(task, firstResponse)}
                             </span>
                           )}
                           <span className="flex items-center">
@@ -420,7 +449,7 @@ export const PendingReviewPage: React.FC = () => {
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                       {rejectModal && rejectModal.responses.length > 1
                         ? `Будет отклонено для ${rejectModal.responses.length} исполнителей`
-                        : `Исполнитель: ${rejectModal?.responses[0]?.user?.full_name || 'Неизвестно'}`
+                        : `Исполнитель: ${rejectModal ? getAssigneeName(rejectModal.task, rejectModal.responses[0]) : 'Неизвестно'}`
                       }
                     </p>
                   </div>
@@ -431,7 +460,7 @@ export const PendingReviewPage: React.FC = () => {
                     <p className="font-medium mb-1">Исполнители:</p>
                     <ul className="list-disc list-inside space-y-0.5">
                       {rejectModal.responses.map(r => (
-                        <li key={r.id}>{r.user?.full_name || 'Неизвестно'}</li>
+                        <li key={r.id}>{getAssigneeName(rejectModal.task, r)}</li>
                       ))}
                     </ul>
                   </div>

@@ -374,10 +374,9 @@ export const TasksPage: React.FC = () => {
 
   const handleProofUploadSubmit = () => {
     if (proofUploadTask && proofFiles.length > 0) {
-      // Для групповых задач менеджер/владелец выполняет за всех
+      // Менеджер/владелец всегда использует complete_for_all (файлы в "Файлы задачи")
       const shouldCompleteForAll =
-        proofUploadTask.task_type === 'group' &&
-        (permissions.isManager || permissions.isOwner);
+        permissions.isManager || permissions.isOwner;
 
       proofUploadMutation.mutate({
         taskId: proofUploadTask.id,
