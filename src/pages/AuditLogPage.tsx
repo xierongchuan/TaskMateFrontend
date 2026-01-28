@@ -78,6 +78,32 @@ const ACTION_OPTIONS = [
   { value: 'deleted', label: 'Удаление' },
 ];
 
+/**
+ * Проверяет, является ли значение строкой даты.
+ * Поддерживает ISO 8601 с Z суффиксом и старый формат Y-m-d H:i:s.
+ */
+const isDateString = (value: unknown): boolean => {
+  if (typeof value !== 'string') return false;
+  // ISO 8601: 2026-01-27T10:00:00Z или старый формат: 2026-01-27 10:00:00
+  return /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(Z|$)/.test(value);
+};
+
+/**
+ * Форматирует значение для отображения в PayloadViewer.
+ * Даты конвертируются в локальное время пользователя.
+ */
+const formatPayloadValue = (value: unknown): string => {
+  if (value === null) return 'null';
+  if (value === undefined) return 'undefined';
+  if (isDateString(value)) {
+    // Для старого формата "Y-m-d H:i:s" добавляем Z для корректного парсинга как UTC
+    const isoString = (value as string).includes('T') ? value as string : (value as string).replace(' ', 'T') + 'Z';
+    return formatDateTime(isoString, 'dd.MM.yyyy HH:mm:ss');
+  }
+  if (typeof value === 'string') return value;
+  return JSON.stringify(value, null, 2);
+};
+
 const PayloadViewer: React.FC<{ payload: Record<string, unknown>; action: string }> = ({ payload, action }) => {
   if (action === 'updated' && payload.old && payload.new) {
     const oldData = payload.old as Record<string, unknown>;
@@ -94,14 +120,14 @@ const PayloadViewer: React.FC<{ payload: Record<string, unknown>; action: string
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <span className="text-xs text-red-600 dark:text-red-400 block mb-1">Было:</span>
-                  <code className="text-sm bg-red-50 dark:bg-red-900/20 px-2 py-1 rounded text-red-700 dark:text-red-300 block break-all">
-                    {JSON.stringify(oldData[field], null, 2)}
+                  <code className="text-sm bg-red-50 dark:bg-red-900/20 px-2 py-1 rounded text-red-700 dark:text-red-300 block break-all whitespace-pre-wrap">
+                    {formatPayloadValue(oldData[field])}
                   </code>
                 </div>
                 <div>
                   <span className="text-xs text-green-600 dark:text-green-400 block mb-1">Стало:</span>
-                  <code className="text-sm bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded text-green-700 dark:text-green-300 block break-all">
-                    {JSON.stringify(newData[field], null, 2)}
+                  <code className="text-sm bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded text-green-700 dark:text-green-300 block break-all whitespace-pre-wrap">
+                    {formatPayloadValue(newData[field])}
                   </code>
                 </div>
               </div>
@@ -112,9 +138,25 @@ const PayloadViewer: React.FC<{ payload: Record<string, unknown>; action: string
     );
   }
 
+  // Для created/deleted: рекурсивно форматируем все даты в объекте
+  const formatPayloadObject = (obj: Record<string, unknown>): Record<string, unknown> => {
+    const result: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (isDateString(value)) {
+        const isoString = (value as string).includes('T') ? value as string : (value as string).replace(' ', 'T') + 'Z';
+        result[key] = formatDateTime(isoString, 'dd.MM.yyyy HH:mm:ss');
+      } else if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+        result[key] = formatPayloadObject(value as Record<string, unknown>);
+      } else {
+        result[key] = value;
+      }
+    }
+    return result;
+  };
+
   return (
     <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-auto max-h-96 text-sm">
-      {JSON.stringify(payload, null, 2)}
+      {JSON.stringify(formatPayloadObject(payload), null, 2)}
     </pre>
   );
 };

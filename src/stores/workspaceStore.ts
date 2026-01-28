@@ -100,6 +100,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       name: 'workspace-storage',
       partialize: (state) => ({
         selectedDealershipId: state.selectedDealershipId,
+        hasInitialized: state.hasInitialized,
       }),
     }
   )
