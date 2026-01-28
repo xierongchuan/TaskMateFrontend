@@ -153,7 +153,11 @@ export const MyHistoryPage: React.FC = () => {
         <EmptyState
           icon={<ClockIcon />}
           title="История пуста"
-          description="Вы ещё не выполняли задачи"
+          description={
+            permissions.isOwner || permissions.isManager
+              ? "Эта страница показывает историю выполненных вами задач. Как руководитель, вы создаёте и проверяете задачи, а не выполняете их."
+              : "Вы ещё не выполняли задачи"
+          }
         />
       ) : (
         <>
