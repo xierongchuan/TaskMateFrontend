@@ -18,8 +18,10 @@ export const shiftsApi = {
   },
 
   // Get current open shifts
-  getCurrentShifts: async (): Promise<{ data: Shift[] }> => {
-    const response = await apiClient.get<{ data: Shift[] }>('/shifts/current');
+  getCurrentShifts: async (dealershipId?: number): Promise<{ data: Shift[] }> => {
+    const response = await apiClient.get<{ data: Shift[] }>('/shifts/current', {
+      params: dealershipId ? { dealership_id: dealershipId } : undefined,
+    });
     return response.data;
   },
 

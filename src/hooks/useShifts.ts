@@ -23,10 +23,10 @@ export const useShift = (id: number) => {
 };
 
 // Hook for getting current shifts
-export const useCurrentShifts = () => {
+export const useCurrentShifts = (dealershipId?: number) => {
   return useQuery({
-    queryKey: ['shifts', 'current'],
-    queryFn: () => shiftsApi.getCurrentShifts(),
+    queryKey: ['shifts', 'current', dealershipId],
+    queryFn: () => shiftsApi.getCurrentShifts(dealershipId),
     refetchInterval: 60000, // Refetch every 60 seconds (URLs are now stable)
     placeholderData: (prev) => prev,
   });
