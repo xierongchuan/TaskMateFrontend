@@ -90,7 +90,7 @@ export const Modal: React.FC<ModalProps> & {
     };
 
     const modalClasses = [
-      'inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:w-full',
+      'inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left shadow-xl transform transition-all sm:my-8 sm:align-middle sm:w-full',
       sizeClasses[size],
       className,
     ].filter(Boolean).join(' ');
@@ -151,7 +151,7 @@ const ModalFooter: React.FC<ModalFooterProps> = ({
   className = '',
 }) => {
   const footerClasses = [
-    'bg-gray-50 dark:bg-gray-700/50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse sm:gap-3',
+    'bg-gray-50 dark:bg-gray-700/50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse sm:gap-3 rounded-b-2xl',
     className,
   ].filter(Boolean).join(' ');
 

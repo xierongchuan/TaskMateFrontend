@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { UserIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
 
 /**
  * Форма входа в систему.
@@ -24,60 +25,39 @@ export const LoginForm: React.FC = () => {
     }
   };
 
+  // Glass-эффект для страницы логина
+  const glassInputClassName = 'bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700';
+
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      {/* Логин */}
-      <div className="relative">
-        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
-          <UserIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
-        </div>
-        <label htmlFor="login" className="sr-only">
-          Логин
-        </label>
-        <input
-          id="login"
-          name="login"
-          type="text"
-          required
-          value={login}
-          onChange={(e) => setLogin(e.target.value)}
-          placeholder="Логин"
-          maxLength={64}
-          disabled={isLoading}
-          className="login-input w-full pl-11 pr-4 py-3 bg-white/50 dark:bg-gray-800/50
-                     border border-gray-200 dark:border-gray-700 rounded-xl
-                     text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500
-                     focus:outline-none focus:ring-2 focus:ring-accent-500/20 focus:border-accent-500
-                     disabled:opacity-50 disabled:cursor-not-allowed
-                     transition-all duration-200"
-        />
-      </div>
+      <Input
+        id="login"
+        name="login"
+        type="text"
+        required
+        value={login}
+        onChange={(e) => setLogin(e.target.value)}
+        placeholder="Логин"
+        maxLength={64}
+        disabled={isLoading}
+        icon={<UserIcon />}
+        inputSize="lg"
+        className={glassInputClassName}
+      />
 
-      {/* Пароль */}
-      <div className="relative">
-        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
-          <LockClosedIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
-        </div>
-        <label htmlFor="password" className="sr-only">
-          Пароль
-        </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Пароль"
-          disabled={isLoading}
-          className="login-input w-full pl-11 pr-4 py-3 bg-white/50 dark:bg-gray-800/50
-                     border border-gray-200 dark:border-gray-700 rounded-xl
-                     text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500
-                     focus:outline-none focus:ring-2 focus:ring-accent-500/20 focus:border-accent-500
-                     disabled:opacity-50 disabled:cursor-not-allowed
-                     transition-all duration-200"
-        />
-      </div>
+      <Input
+        id="password"
+        name="password"
+        type="password"
+        required
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="Пароль"
+        disabled={isLoading}
+        icon={<LockClosedIcon />}
+        inputSize="lg"
+        className={glassInputClassName}
+      />
 
       {/* Ошибка */}
       {error && (

@@ -4,6 +4,7 @@ import { usersApi } from '../../api/users';
 import { DealershipSelector } from '../common/DealershipSelector';
 import { DealershipCheckboxList } from '../common/DealershipCheckboxList';
 import { useDealerships } from '../../hooks/useDealerships';
+import { Input, Select, Button, Alert } from '../ui';
 import type { User, CreateUserRequest, UpdateUserRequest, Role, ApiErrorResponse } from '../../types/user';
 
 interface UserModalProps {
@@ -11,6 +12,17 @@ interface UserModalProps {
   onClose: () => void;
   user?: User | null;
 }
+
+const ROLE_OPTIONS = [
+  { value: 'employee', label: 'Сотрудник' },
+  { value: 'observer', label: 'Наблюдатель' },
+  { value: 'manager', label: 'Управляющий' },
+];
+
+const ROLE_OPTIONS_WITH_OWNER = [
+  ...ROLE_OPTIONS,
+  { value: 'owner', label: 'Владелец' },
+];
 
 export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) => {
   const queryClient = useQueryClient();
@@ -101,97 +113,89 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
 
   if (!isOpen) return null;
 
+  const roleOptions = user?.role === 'owner' ? ROLE_OPTIONS_WITH_OWNER : ROLE_OPTIONS;
+
   return (
     <div className="fixed inset-0 z-10 overflow-y-auto">
       <div className="flex min-h-full items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm dark:bg-gray-900/80" onClick={onClose}></div>
 
-        <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full w-full">
+        <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full w-full">
           <form onSubmit={handleSubmit}>
-            <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4 max-h-[70vh] overflow-y-auto">
+            <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4 rounded-t-2xl">
               <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
                 {user ? 'Редактировать пользователя' : 'Создать пользователя'}
               </h3>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Логин *</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.login}
-                    onChange={(e) => setFormData({ ...formData, login: e.target.value })}
-                    title="Только латинские буквы, цифры, одна точка и одно подчеркивание"
-                    maxLength={64}
-                    pattern="^(?!.*\..*\.)(?!.*_.*_)[a-zA-Z0-9._]+$"
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              <div className="space-y-4 max-h-[60vh] overflow-y-auto px-2 -mx-2">
+                {serverError && (
+                  <Alert
+                    variant="error"
+                    title="Ошибка"
+                    message={serverError}
+                    onClose={() => setServerError(null)}
                   />
-                </div>
+                )}
+
+                <Input
+                  label="Логин *"
+                  type="text"
+                  required
+                  value={formData.login}
+                  onChange={(e) => setFormData({ ...formData, login: e.target.value })}
+                  title="Только латинские буквы, цифры, одна точка и одно подчеркивание"
+                  maxLength={64}
+                  pattern="^(?!.*\..*\.)(?!.*_.*_)[a-zA-Z0-9._]+$"
+                  inputSize="lg"
+                />
 
                 {!user && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Пароль *</label>
-                    <input
-                      type="password"
-                      required
-                      value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    />
-                  </div>
+                  <Input
+                    label="Пароль *"
+                    type="password"
+                    required
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    inputSize="lg"
+                  />
                 )}
 
                 {user && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Новый пароль (оставьте пустым, чтобы не менять)</label>
-                    <input
-                      type="password"
-                      value={formData.password || ''}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    />
-                  </div>
+                  <Input
+                    label="Новый пароль (оставьте пустым, чтобы не менять)"
+                    type="password"
+                    value={formData.password || ''}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    inputSize="lg"
+                  />
                 )}
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Полное имя *</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.full_name}
-                    onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  />
-                </div>
+                <Input
+                  label="Полное имя *"
+                  type="text"
+                  required
+                  value={formData.full_name}
+                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                  inputSize="lg"
+                />
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Телефон *</label>
-                  <input
-                    type="tel"
-                    required
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="+7 XXX XXX XX XX"
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  />
-                </div>
+                <Input
+                  label="Телефон *"
+                  type="tel"
+                  required
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  placeholder="+7 XXX XXX XX XX"
+                  inputSize="lg"
+                />
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Роль *</label>
-                  <select
-                    value={formData.role}
-                    onChange={(e) => setFormData({ ...formData, role: e.target.value as Role })}
-                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 py-3 border min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  >
-                    <option value="employee">Сотрудник</option>
-                    <option value="observer">Наблюдатель</option>
-                    <option value="manager">Управляющий</option>
-                    {/* Only Owner can create/assign Owner role */}
-                    {user?.role === 'owner' ? (
-                      <option value="owner">Владелец</option>
-                    ) : null}
-                  </select>
-                </div>
+                <Select
+                  label="Роль *"
+                  value={formData.role}
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value as Role })}
+                  options={roleOptions}
+                  selectSize="lg"
+                />
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Автосалон</label>
@@ -207,7 +211,6 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
                         } else {
                           newIds = [...currentIds, dealershipId];
                         }
-                        // Also update primary dealership_id to the first selected one if not set
                         const newPrimaryId = newIds.length > 0 ? newIds[0] : undefined;
                         setFormData({
                           ...formData,
@@ -222,51 +225,29 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
                       value={formData.dealership_id}
                       onChange={(dealershipId) => setFormData({ ...formData, dealership_id: dealershipId || undefined })}
                       placeholder="Выберите автосалон"
-                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                      className="unified-input rounded-xl"
                     />
                   )}
                 </div>
-
-
               </div>
             </div>
 
-            <div className="bg-gray-50 dark:bg-gray-700/50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-              <button
+            <div className="bg-gray-50 dark:bg-gray-700/50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 sm:gap-3 rounded-b-2xl">
+              <Button
                 type="submit"
+                variant="primary"
                 disabled={createMutation.isPending || updateMutation.isPending}
-                className="inline-flex w-full justify-center rounded-md border border-transparent bg-accent-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-accent-700 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
               >
                 {user ? 'Сохранить' : 'Создать'}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant="outline"
                 onClick={onClose}
-                className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-base font-medium text-gray-700 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
               >
                 Отмена
-              </button>
+              </Button>
             </div>
-
-            {serverError && (
-              <div className="px-4 pb-4">
-                <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
-                  <div className="text-sm text-red-700 dark:text-red-400">
-                    <p className="font-medium">{serverError}</p>
-                    {/* Display validation errors details if available */}
-                    {((createMutation.error as any)?.response?.data?.errors || (updateMutation.error as any)?.response?.data?.errors) && (
-                      <ul className="list-disc pl-5 mt-2 space-y-1">
-                        {Object.entries((createMutation.error as any)?.response?.data?.errors || (updateMutation.error as any)?.response?.data?.errors || {}).map(([field, messages]: [string, any]) => (
-                          <li key={field}>
-                            {Array.isArray(messages) ? messages.join(', ') : messages}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
           </form>
         </div>
       </div>

@@ -187,7 +187,7 @@ export const ReportsPage: React.FC = () => {
                     type="date"
                     value={dateRange.from}
                     onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
-                    className="w-full sm:w-auto px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-base focus:ring-2 focus:ring-accent-500 focus:border-accent-500 min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="unified-input w-full sm:w-auto px-3 py-3 border border-gray-200 dark:border-gray-600 rounded-xl text-base focus:outline-none focus:border-accent-500 min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
                   />
                   <span className="text-gray-500 dark:text-gray-400 text-center sm:text-left hidden sm:block">—</span>
                   <div className="text-center sm:hidden text-gray-500 dark:text-gray-400 text-sm mb-1">до</div>
@@ -195,7 +195,7 @@ export const ReportsPage: React.FC = () => {
                     type="date"
                     value={dateRange.to}
                     onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
-                    className="w-full sm:w-auto px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-base focus:ring-2 focus:ring-accent-500 focus:border-accent-500 min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="unified-input w-full sm:w-auto px-3 py-3 border border-gray-200 dark:border-gray-600 rounded-xl text-base focus:outline-none focus:border-accent-500 min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
                   />
                 </div>
               </div>

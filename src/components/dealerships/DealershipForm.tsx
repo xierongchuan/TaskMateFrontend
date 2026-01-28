@@ -4,6 +4,7 @@ import type { Dealership } from '../../types/dealership';
 import { TIMEZONES } from '../../types/dealership';
 import { BuildingOfficeIcon, PhoneIcon, MapPinIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
 import { sanitizePhoneNumber } from '../../utils/phoneFormatter';
+import { Input, Select, Button } from '../ui';
 
 interface DealershipFormProps {
   dealership?: Dealership;
@@ -110,89 +111,55 @@ export const DealershipForm: React.FC<DealershipFormProps> = ({
     }
   };
 
+  const timezoneOptions = TIMEZONES.map((tz) => ({
+    value: tz.value,
+    label: tz.label,
+  }));
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {errors.general && (
-        <div className="rounded-lg bg-red-50 border border-red-200 p-4">
-          <p className="text-sm text-red-800">{errors.general}</p>
+        <div className="rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4">
+          <p className="text-sm text-red-800 dark:text-red-200">{errors.general}</p>
         </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
         {/* Name Field */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Название автосалона <span className="text-red-500">*</span>
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <BuildingOfficeIcon className="h-5 w-5 text-gray-400" />
-            </div>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
-              required
-              minLength={2}
-              placeholder="Например: Автомир Premium"
-              className={`block w-full rounded-lg border ${errors.name ? 'border-red-300' : 'border-gray-300 dark:border-gray-600'
-                } shadow-sm focus:border-accent-500 focus:ring-accent-500 sm:text-sm pl-10 pr-3 py-2 ${errors.name ? 'focus:border-red-500 focus:ring-red-500' : ''
-                } bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
-            />
-          </div>
-          {errors.name && (
-            <p className="mt-2 text-sm text-red-600">{errors.name}</p>
-          )}
-        </div>
+        <Input
+          label="Название автосалона *"
+          type="text"
+          value={formData.name}
+          onChange={(e) => handleInputChange('name', e.target.value)}
+          required
+          minLength={2}
+          placeholder="Например: Автомир Premium"
+          icon={<BuildingOfficeIcon />}
+          error={errors.name}
+        />
 
         {/* Address Field */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Адрес
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <MapPinIcon className="h-5 w-5 text-gray-400" />
-            </div>
-            <input
-              type="text"
-              value={formData.address}
-              onChange={(e) => handleInputChange('address', e.target.value)}
-              placeholder="Например: г. Москва, ул. Ленинградская, д. 15"
-              className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm focus:border-accent-500 focus:ring-accent-500 sm:text-sm pl-10 pr-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            />
-          </div>
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-            Необязательно для заполнения
-          </p>
-        </div>
+        <Input
+          label="Адрес"
+          type="text"
+          value={formData.address}
+          onChange={(e) => handleInputChange('address', e.target.value)}
+          placeholder="Например: г. Москва, ул. Ленинградская, д. 15"
+          icon={<MapPinIcon />}
+          hint="Необязательно для заполнения"
+        />
 
         {/* Phone Field */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Телефон
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <PhoneIcon className="h-5 w-5 text-gray-400" />
-            </div>
-            <input
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => handleInputChange('phone', e.target.value)}
-              placeholder="+998 99 495 85 14"
-              className={`block w-full rounded-lg border ${errors.phone ? 'border-red-300' : 'border-gray-300 dark:border-gray-600'
-                } shadow-sm focus:border-accent-500 focus:ring-accent-500 sm:text-sm pl-10 pr-3 py-2 ${errors.phone ? 'focus:border-red-500 focus:ring-red-500' : ''
-                } bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
-            />
-          </div>
-          {errors.phone && (
-            <p className="mt-2 text-sm text-red-600">{errors.phone}</p>
-          )}
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-            Необязательно для заполнения
-          </p>
-        </div>
+        <Input
+          label="Телефон"
+          type="tel"
+          value={formData.phone}
+          onChange={(e) => handleInputChange('phone', e.target.value)}
+          placeholder="+998 99 495 85 14"
+          icon={<PhoneIcon />}
+          error={errors.phone}
+          hint={!errors.phone ? "Необязательно для заполнения" : undefined}
+        />
 
         {/* Timezone Field */}
         <div>
@@ -200,20 +167,15 @@ export const DealershipForm: React.FC<DealershipFormProps> = ({
             Часовой пояс <span className="text-red-500">*</span>
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
               <GlobeAltIcon className="h-5 w-5 text-gray-400" />
             </div>
-            <select
+            <Select
               value={formData.timezone}
               onChange={(e) => handleInputChange('timezone', e.target.value)}
-              className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm focus:border-accent-500 focus:ring-accent-500 sm:text-sm pl-10 pr-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            >
-              {TIMEZONES.map((tz) => (
-                <option key={tz.value} value={tz.value}>
-                  {tz.label}
-                </option>
-              ))}
-            </select>
+              options={timezoneOptions}
+              className="pl-10"
+            />
           </div>
           <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
             Используется для определения выходных дней в календаре
@@ -222,34 +184,23 @@ export const DealershipForm: React.FC<DealershipFormProps> = ({
       </div>
 
       {/* Form Actions */}
-      <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200">
-        <button
+      <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+        <Button
           type="submit"
+          variant="primary"
           disabled={createDealership.isPending || updateDealership.isPending}
-          className="inline-flex items-center justify-center px-6 py-3 bg-accent-600 text-white text-sm font-medium rounded-lg hover:bg-accent-700 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          isLoading={createDealership.isPending || updateDealership.isPending}
         >
-          {createDealership.isPending || updateDealership.isPending ? (
-            <>
-              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Сохранение...
-            </>
-          ) : (
-            <>
-              {dealership ? 'Сохранить изменения' : 'Создать автосалон'}
-            </>
-          )}
-        </button>
+          {dealership ? 'Сохранить изменения' : 'Создать автосалон'}
+        </Button>
         {onCancel && (
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={onCancel}
-            className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-lg text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2 transition-colors"
           >
             Отмена
-          </button>
+          </Button>
         )}
       </div>
     </form>

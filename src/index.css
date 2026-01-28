@@ -257,15 +257,22 @@ code {
   animation: card-entrance 0.5s ease-out forwards;
 }
 
-/* Login input styling */
-.login-input {
+/* Unified input styling */
+.unified-input {
   transition: all 0.2s ease;
 }
 
-.login-input:focus {
+.unified-input:focus {
   box-shadow:
     0 0 0 3px rgb(var(--accent-500) / 0.15),
     0 2px 8px rgb(var(--accent-500) / 0.1);
+}
+
+/* Error state for unified input */
+.unified-input-error:focus {
+  box-shadow:
+    0 0 0 3px rgb(239 68 68 / 0.15),
+    0 2px 8px rgb(239 68 68 / 0.1);
 }
 
 /* Login button enhanced */

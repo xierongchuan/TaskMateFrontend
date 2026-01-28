@@ -227,7 +227,7 @@ export const ShiftsPage: React.FC = () => {
             <select
               value={filters.status}
               onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-              className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="unified-input block w-full rounded-xl border-gray-200 dark:border-gray-600 shadow-sm focus:outline-none focus:border-accent-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
             >
               <option value="">Все</option>
               <option value="open">Открыта</option>
@@ -240,7 +240,7 @@ export const ShiftsPage: React.FC = () => {
             <select
               value={filters.shift_type || ''}
               onChange={(e) => setFilters({ ...filters, shift_type: e.target.value || undefined })}
-              className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="unified-input block w-full rounded-xl border-gray-200 dark:border-gray-600 shadow-sm focus:outline-none focus:border-accent-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
             >
               <option value="">Все</option>
               <option value="regular">Обычная</option>
@@ -260,7 +260,7 @@ export const ShiftsPage: React.FC = () => {
                   is_late: e.target.value === '' ? undefined : e.target.value === 'true',
                 })
               }
-              className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="unified-input block w-full rounded-xl border-gray-200 dark:border-gray-600 shadow-sm focus:outline-none focus:border-accent-500 sm:text-sm px-3 py-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
             >
               <option value="">Все</option>
               <option value="true">Только опоздания</option>

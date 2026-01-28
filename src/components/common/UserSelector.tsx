@@ -93,7 +93,7 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
       value={value || ""}
       onChange={handleChange}
       disabled={disabled || isLoading}
-      className={`block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border disabled:bg-gray-100 disabled:cursor-not-allowed bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors ${className}`}
+      className={`unified-input block w-full rounded-xl border-gray-200 dark:border-gray-600 shadow-sm focus:outline-none focus:border-accent-500 sm:text-sm px-3 py-2 border disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200 ${className}`}
     >
       {isLoading ? (
         <option value="">Загрузка...</option>

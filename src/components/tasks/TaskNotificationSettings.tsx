@@ -177,7 +177,7 @@ export const TaskNotificationSettings: React.FC<TaskNotificationSettingsProps> =
                             id={`notify-${channel.key}`}
                             checked={isEnabled}
                             onChange={(e) => handleChannelToggle(channel.key, e.target.checked)}
-                            className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-accent-600 focus:ring-accent-500 bg-white dark:bg-gray-700"
+                            className="h-4 w-4 rounded border-gray-200 dark:border-gray-600 text-accent-600 focus:ring-accent-500 focus:ring-offset-0 bg-white dark:bg-gray-700 transition-colors"
                           />
                           <label htmlFor={`notify-${channel.key}`} className="text-sm font-medium text-gray-900 dark:text-gray-200">
                             {channel.label}
@@ -195,7 +195,7 @@ export const TaskNotificationSettings: React.FC<TaskNotificationSettingsProps> =
                               max="1440"
                               value={offset}
                               onChange={(e) => handleOffsetChange(channel.key, parseInt(e.target.value) || 30)}
-                              className="w-20 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                              className="unified-input w-20 px-2 py-1 text-sm border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:border-accent-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
                             />
                             <span className="text-xs text-gray-500 dark:text-gray-400">минут</span>
                           </div>
