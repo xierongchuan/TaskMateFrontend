@@ -90,25 +90,20 @@ export const Modal: React.FC<ModalProps> & {
     };
 
     const modalClasses = [
-      'inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left shadow-xl transform transition-all sm:my-8 sm:align-middle sm:w-full',
+      'w-full bg-white dark:bg-gray-800 rounded-2xl text-left shadow-xl transform transition-all',
       sizeClasses[size],
       className,
     ].filter(Boolean).join(' ');
 
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto">
-        <div className="flex min-h-screen items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div className="flex min-h-full items-center justify-center p-4">
           {/* Overlay */}
           <div
             className="fixed inset-0 bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75 transition-opacity"
             onClick={handleOverlayClick}
             aria-hidden="true"
           />
-
-          {/* Centering trick */}
-          <span className="hidden sm:inline-block sm:h-screen sm:align-middle" aria-hidden="true">
-            &#8203;
-          </span>
 
           {/* Modal */}
           <div className={modalClasses} onClick={(e) => e.stopPropagation()}>

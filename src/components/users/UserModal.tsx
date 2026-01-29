@@ -117,10 +117,10 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user }) =
 
   return (
     <div className="fixed inset-0 z-10 overflow-y-auto">
-      <div className="flex min-h-full items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <div className="flex min-h-full items-center justify-center p-4">
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm dark:bg-gray-900/80" onClick={onClose}></div>
 
-        <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full w-full">
+        <div className="w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl text-left shadow-xl transform transition-all">
           <form onSubmit={handleSubmit}>
             <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4 rounded-t-2xl">
               <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
