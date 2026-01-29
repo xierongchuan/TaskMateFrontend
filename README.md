@@ -82,7 +82,7 @@ docker run -p 80:80 taskmate-frontend
 
 Приложение будет доступно по адресу `http://localhost`
 
-### Docker Compose
+### podman compose
 
 Добавьте в `docker-compose.yml`:
 
