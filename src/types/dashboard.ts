@@ -22,6 +22,10 @@ export interface DashboardData {
       id: number;
       full_name: string;
     };
+    dealership?: {
+      id: number;
+      name: string;
+    };
     replacement?: {
       id: number;
       full_name: string;
@@ -33,6 +37,12 @@ export interface DashboardData {
     scheduled_end: string | null;
     is_late: boolean;
     late_minutes: number | null;
+  }>;
+  dealership_shift_stats?: Array<{
+    dealership_id: number;
+    dealership_name: string;
+    total_employees: number;
+    on_shift_count: number;
   }>;
   recent_tasks: Array<{
     id: number;

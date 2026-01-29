@@ -55,12 +55,6 @@ export const DashboardPage: React.FC = () => {
     refetchInterval: 15000,
   });
 
-  const getShiftStatusBadge = (status: string, isLate: boolean) => {
-    if (isLate) return <Badge variant="danger">На смене (Опоздание)</Badge>;
-    if (status === 'open') return <Badge variant="success">На смене</Badge>;
-    return <Badge variant="gray">Закрыта</Badge>;
-  };
-
   const handleOpenTask = (task: Task) => {
     setSelectedTask(task);
     setIsDetailsOpen(true);
@@ -205,41 +199,86 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Live Tablo - Active Shifts */}
+        {/* Live Tablo - Active Shifts grouped by dealership */}
         <Section
           title="Live-табло: активные смены"
           icon={<UserIcon />}
           subtitle="Обновляется автоматически"
           className="xl:col-span-2"
         >
-          {dashboardData?.active_shifts && dashboardData.active_shifts.length > 0 ? (
-            <div className="space-y-3 sm:space-y-4">
-              {dashboardData.active_shifts.map((shift) => (
-                <div key={shift.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-3 h-3 rounded-full flex-shrink-0 ${shift.status === 'open' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium text-gray-900 dark:text-white truncate">{shift.user?.full_name}</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Открыта: {formatTime(shift.opened_at)}
-                        {shift.replacement && (
-                          <span className="ml-2 text-orange-600 dark:text-orange-400 block sm:inline">
-                            Заменяет: {shift.replacement.full_name}
-                          </span>
+          {dashboardData?.dealership_shift_stats && dashboardData.dealership_shift_stats.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {dashboardData.dealership_shift_stats.map((ds) => {
+                const shiftsForDealership = (dashboardData.active_shifts || []).filter(
+                  (s) => s.dealership?.id === ds.dealership_id
+                );
+                const ratio = ds.total_employees > 0 ? ds.on_shift_count / ds.total_employees : 0;
+                const circumference = 2 * Math.PI * 18;
+                const filled = circumference * ratio;
+                const empty = circumference - filled;
+
+                return (
+                  <div
+                    key={ds.dealership_id}
+                    className="bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600 p-4"
+                  >
+                    {/* Заголовок автосалона + donut */}
+                    <div className="flex items-center gap-3 mb-3">
+                      <svg width="48" height="48" viewBox="0 0 48 48" className="flex-shrink-0">
+                        <circle cx="24" cy="24" r="18" fill="none" stroke="currentColor" className="text-gray-200 dark:text-gray-600" strokeWidth="5" />
+                        {ds.total_employees > 0 && (
+                          <circle
+                            cx="24" cy="24" r="18" fill="none"
+                            stroke="currentColor"
+                            className={ds.on_shift_count > 0 ? 'text-green-500' : 'text-gray-300 dark:text-gray-600'}
+                            strokeWidth="5"
+                            strokeDasharray={`${filled} ${empty}`}
+                            strokeDashoffset={circumference / 4}
+                            strokeLinecap="round"
+                            transform="rotate(-90 24 24)"
+                          />
                         )}
-                      </p>
+                        <text x="24" y="24" textAnchor="middle" dominantBaseline="central" className="fill-gray-900 dark:fill-white" fontSize="11" fontWeight="600">
+                          {ds.on_shift_count}/{ds.total_employees}
+                        </text>
+                      </svg>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-gray-900 dark:text-white text-sm truncate">{ds.dealership_name}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {ds.on_shift_count} из {ds.total_employees} сотрудников на смене
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                    {shift.is_late && (
-                      <Badge variant="danger" size="sm">
-                        Опоздание {shift.late_minutes} мин
-                      </Badge>
+
+                    {/* Список сотрудников на смене */}
+                    {shiftsForDealership.length > 0 ? (
+                      <div className={`space-y-2 ${shiftsForDealership.length > 3 ? 'max-h-[156px] overflow-y-auto pr-1' : ''}`}>
+                        {shiftsForDealership.map((shift) => (
+                          <div key={shift.id} className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg bg-white dark:bg-gray-800/50">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="relative flex h-2 w-2 flex-shrink-0">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                              </span>
+                              <span className="text-sm font-medium text-gray-900 dark:text-white truncate">{shift.user?.full_name}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 flex-shrink-0">
+                              <span className="text-xs text-gray-500 dark:text-gray-400">{formatTime(shift.opened_at)}</span>
+                              {shift.is_late && (
+                                <Badge variant="danger" size="sm">
+                                  +{shift.late_minutes} мин
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-2">Нет сотрудников на смене</p>
                     )}
-                    {getShiftStatusBadge(shift.status, shift.is_late)}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <EmptyState
