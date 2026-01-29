@@ -361,8 +361,8 @@ export const DashboardPage: React.FC = () => {
           }
         >
           {dashboardData?.recent_tasks && dashboardData.recent_tasks.length > 0 ? (
-            <div className="space-y-3">
-              {dashboardData.recent_tasks.slice(0, 5).map((task) => (
+            <div className="space-y-3 max-h-[340px] sm:max-h-[400px] overflow-y-auto pr-1">
+              {dashboardData.recent_tasks.map((task) => (
                 <div
                   key={task.id}
                   onClick={() => handleOpenTaskById(task.id)}
@@ -389,7 +389,7 @@ export const DashboardPage: React.FC = () => {
         {/* Issues Alert */}
         <Section title="Требует внимания" icon={<ExclamationTriangleIcon />}>
           {((dashboardData?.overdue_tasks || 0) > 0 || (dashboardData?.late_shifts_today || 0) > 0) ? (
-            <div className="space-y-3">
+            <div className="space-y-3 max-h-[340px] sm:max-h-[400px] overflow-y-auto pr-1">
               {dashboardData?.overdue_tasks_list && dashboardData.overdue_tasks_list.length > 0 ? (
                 <div className="space-y-3">
                   {dashboardData.overdue_tasks_list.map(task => (
@@ -474,7 +474,7 @@ export const DashboardPage: React.FC = () => {
           className="mt-6"
         >
           {dashboardData?.pending_review_tasks && dashboardData.pending_review_tasks.length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-3 max-h-[340px] sm:max-h-[400px] overflow-y-auto pr-1">
               {dashboardData.pending_review_tasks.map((task) => (
                 <Card
                   key={task.id}
